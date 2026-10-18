@@ -1,0 +1,627 @@
+# UraiFlow SaaS — Independent Deep Review of Claude V006
+
+**Review timestamp:** 09/08/2026 21:33 Europe/London  
+**Artifact reviewed:** `UraiFlow-SaaS_Claude_V006_20260809_1642.zip`  
+**External attestation reviewed:** `UraiFlow-SaaS_Claude_V006_20260809_1642_ATTESTATION.md`  
+**Received ZIP SHA-256:** `8df8bdbc1838c9154df1355fb027d92505bca265f83842f3df54461811b01b39`  
+**Independent verdict:** **REJECT V006 AS A RELEASE/ACCEPTANCE BASELINE**  
+**Permitted use:** **V007 corrective input only**
+
+---
+
+## 1. Executive decision
+
+V006 is materially improved and its physical package is clean, but it does **not** close the V005 review safely enough to become the accepted UraiFlow baseline.
+
+Five release-blocking defects were independently reproduced against the code extracted from the received ZIP:
+
+1. An unresolved `UncertainCommit` can be converted from `COMPENSATION_FAILED` to **false `ROLLED_BACK`** by `RecoveryService.retry_rollback`, while the external effect remains.
+2. An adapter may perform the external side effect and then raise a timeout/exception; V006 records no uncertainty and again reports **false `ROLLED_BACK`**.
+3. Duplicate display names—explicitly allowed by ADR-0010—can overwrite each other in rollback-capability preflight, allowing a non-rollback-capable adapter to commit before a later failure.
+4. Content already confirmed by the human remains mutable and can be changed after confirmation but before commit; the altered, unapproved value is committed successfully.
+5. The final shipped ZIP cannot reproduce its own G10 PASS. `validate_docs_consistency.py` fails on a clean extraction, even though the manifest-protected shipped evidence says G10 PASS.
+
+V006 also has high-priority immutability, audit, version-consistency, evidence-hygiene and documentation-navigation defects. These are detailed below.
+
+**Release decision:** do not accept, freeze, deploy, or build persistence/provider work on V006. Correct these defects in **V007**, without feature expansion.
+
+---
+
+## 2. What was independently reviewed
+
+The review did not rely on Claude's narrative. The received ZIP itself was hashed, inventoried, safely extracted, parsed, tested, and adversarially exercised.
+
+### Complete artifact coverage
+
+| Area | Independent work performed |
+|---|---|
+| ZIP structure | Inspected all 240 entries, path safety, duplicate names, symlink status, one-root layout and sizes |
+| Root integrity | Independently recomputed all 239 manifest-managed file hashes and byte counts |
+| Preserved baseline | Independently verified all 110 files governed by the baseline's internal manifest |
+| Source | Read all 34 source modules; inspected all protected boundaries, state transitions, compensation, recovery, lineage and adapter contracts |
+| Tests | Read all 19 test/fixture files and ran the complete shipped suite |
+| Scripts | Read all 9 release/gate/manifest/mutation/document-validation scripts and ran applicable checks |
+| Architecture/governance | Read current control, boundary, architecture, ADR, engineering, testing, quality, RTM, backlog, AI handoff and governance documents |
+| Evidence | Inspected every shipped evidence file and compared reported facts with the extracted artifact |
+| Preserved historical material | Inventory- and integrity-checked the full `10-baseline/` subtree; reviewed it as historical input rather than current authority |
+| Adversarial verification | Executed independent probes for uncertain commits, exception-after-effect, duplicate-name preflight, descriptor mutation, lineage mutation and confirmation tampering |
+
+### Machine readability
+
+All files selected as text decoded as UTF-8. All **62 Python files** parsed successfully with Python's AST parser. All **9 JSON files** parsed successfully. No unsafe ZIP path, duplicate ZIP member, or symlink was found.
+
+---
+
+## 3. Independent results that genuinely pass
+
+| Check | Independent result |
+|---|---|
+| Received SHA-256 vs attestation | **MATCH** — `8df8bdbc…1b01b39` |
+| ZIP inventory | **PASS** — 240 files under one top-level root |
+| Path traversal / duplicate members / symlinks | **PASS** — none found |
+| Root manifest | **PASS** — 239 payload entries, exact path/hash/byte equality, plus manifest itself |
+| Preserved baseline manifest | **PASS** — 110/110 files, exact hashes and byte counts |
+| Full pytest suite | **PASS** — 290/290 |
+| Independent line + branch coverage | **PASS** — 803 statements, 160 branches, 100% line and branch |
+| Starter validator | **PASS** |
+| RTM validator | **PASS under its implemented scope** — 43 rows |
+| Python/JSON syntax | **PASS** |
+
+The physical artifact and ordinary regression suite are therefore strong. The rejection is caused by **missing invariants and false release evidence**, not by a corrupt ZIP or a generally broken build.
+
+### Verification limitation
+
+`ruff`, `mypy`, and `mutmut` were not installed in the independent review runtime, so their shipped evidence was inspected but those three tools were not independently re-executed. The shipped evidence reports ruff and mypy PASS and mutation accounting of `372 killed + 50 accepted + 0 logic survivors = 422`. The behavioural probes in this review demonstrate why those green reports cannot substitute for adversarial invariant tests.
+
+---
+
+# 4. Release-blocking findings
+
+## P0-1 — Recovery converts an unresolved uncertain commit into false `ROLLED_BACK`
+
+### Contract that V006 claims
+
+ADR-0017 states that an uncertain external commit must block `ROLLED_BACK`, and that `ROLLED_BACK` means no committed external effect remains unaccounted for:
+
+- `02-architecture/adr/ADR-0017-uncertain-external-commit.md:27-41`
+- `BUILD-REPORT-V006.md:20-24`
+- `06-traceability/RTM-V006.md:66,72`
+
+### Defective implementation
+
+`RecoveryService.retry_rollback` iterates only over `proposal.unrecovered_receipts`. When that tuple is empty, it clears the same tuple and advances directly to `ROLLED_BACK`. It never checks `proposal.uncertain_commits`:
+
+- `src/uraiflow/recovery/service.py:62-76`
+- `src/uraiflow/recovery/service.py:98-117`
+
+The state transition itself also has no aggregate invariant preventing `ROLLED_BACK` while uncertainty remains:
+
+- `src/uraiflow/proposal/model.py:35-68`
+- `src/uraiflow/proposal/model.py:167-172`
+
+### Independent reproduction
+
+1. Adapter performs a real external side effect.
+2. Adapter returns an invalid receipt.
+3. V006 correctly enters `COMPENSATION_FAILED` with one `UncertainCommit` and zero `unrecovered_receipts`.
+4. An authorised operator calls `retry_rollback`.
+5. V006 performs zero rollbacks, changes the status to `ROLLED_BACK`, and leaves both the external effect and the uncertain record present.
+
+Observed result:
+
+```text
+Before retry:
+  status=COMPENSATION_FAILED
+  external effects=1
+  unrecovered receipts=0
+  uncertain commits=1
+
+After retry:
+  status=ROLLED_BACK
+  external effects=1
+  retry compensated=0
+  uncertain commits=1
+```
+
+### Impact
+
+This directly reopens the exact class of defect ADR-0017 was created to close. A false terminal recovery state can tell operators and downstream systems that no external effect remains when one actually does.
+
+### Required V007 correction
+
+- Make the aggregate enforce the invariant structurally: no path may enter `ROLLED_BACK` while either `unrecovered_receipts` **or** `uncertain_commits` is non-empty.
+- Replace generic public `advance(ROLLED_BACK)` with a guarded aggregate command such as `mark_rolled_back()` that verifies both collections are empty.
+- `retry_rollback` must remain `COMPENSATION_FAILED` when uncertain commits exist, even when all trusted receipts have been rolled back.
+- Uncertain commits require a separate reconciliation operation, or evidence-backed manual resolution; `retry_rollback` cannot silently clear or ignore them.
+
+Required regression:
+
+```text
+test_retry_rollback_cannot_clear_or_ignore_uncertain_commits
+```
+
+---
+
+## P0-2 — Exception after external side effect also produces false `ROLLED_BACK`
+
+### Defective implementation
+
+V006 creates an `UncertainCommit` only when `adapter.commit()` returns and receipt validation fails:
+
+- `src/uraiflow/pipeline/orchestrator.py:208-243`
+
+When `adapter.commit()` raises, V006 records only a failure string and breaks:
+
+- `src/uraiflow/pipeline/orchestrator.py:201-207`
+
+Because the failing operation is absent from both `committed` and `uncertain`, V006 advances to `ROLLED_BACK` when earlier trusted rollbacks have no failures:
+
+- `src/uraiflow/pipeline/orchestrator.py:259-295`
+
+### Independent reproduction
+
+The test adapter performs the external write and then raises:
+
+```python
+self.effects.append(record.record_id)
+raise TimeoutError("response lost after remote commit")
+```
+
+Observed V006 result:
+
+```text
+status=ROLLED_BACK
+external effects=1
+uncertain commits=0
+recovery report uncertain commits=0
+failure="raises: TimeoutError: response lost after remote commit"
+```
+
+### Impact
+
+A timeout, connection reset, lost response, process interruption, or provider exception after dispatch does not prove that the remote system did nothing. Treating such failures as definitely uncommitted creates false rollback claims in normal distributed-system failure modes.
+
+### Required V007 correction
+
+The adapter contract must distinguish **definite non-commit** from **unknown outcome**:
+
+- Default any exception after invoking the external commit boundary to `UNKNOWN/UNCERTAIN`.
+- Permit a narrowly typed exact exception, for example `DefinitelyNotCommitted`, only when the adapter can prove no side effect occurred.
+- Add idempotency-key status lookup/reconciliation to the production adapter contract, or an explicit `reconcile_uncertain_commit` operation.
+- Record trusted request-side identity for exception-based uncertainty exactly as for invalid receipts.
+- Ensure the aggregate cannot reach `ROLLED_BACK` until every unknown result has been reconciled.
+
+Required regression:
+
+```text
+test_exception_after_remote_side_effect_is_recorded_as_uncertain
+```
+
+---
+
+## P0-3 — Duplicate display names bypass rollback-capability preflight
+
+### Governing contract
+
+ADR-0010 is explicit:
+
+- display names are presentation-only;
+- duplicate display names are permitted;
+- display names must never affect routing or rollback.
+
+See `02-architecture/adr/ADR-0010-adapter-machine-identity-and-receipt-trust.md:13-23`.
+
+### Defective implementation
+
+Rollback preflight builds a dictionary keyed by the display name:
+
+- `src/uraiflow/pipeline/orchestrator.py:303-322`
+
+```python
+registered_by_name[registered.descriptor.name] = (
+    registered.descriptor.supports_rollback
+)
+```
+
+When two different adapters share a display name, the later adapter overwrites the earlier adapter's capability.
+
+### Independent reproduction
+
+- Adapter A: ID `adp.nonrollback`, display name `same-display`, rollback unsupported.
+- Adapter B: ID `adp.second`, display name `same-display`, rollback supported; commit then fails.
+- Both names are valid under ADR-0010.
+- Adapter B overwrites Adapter A in the preflight dictionary.
+- Preflight does not block.
+- Adapter A commits a real effect.
+- Adapter B fails.
+- Adapter A cannot be rolled back.
+
+Observed result:
+
+```text
+preflight_blocked=False
+status=COMPENSATION_FAILED
+nonrollback_external_commits=1
+```
+
+### Impact
+
+The atomic multi-record guarantee can be defeated by a display-name collision that the architecture explicitly allows.
+
+### Required V007 correction
+
+- Key preflight by `descriptor.adapter_id`, never `descriptor.name`.
+- Prefer iterating immutable registration records without lossy dictionary aggregation.
+- Use name only as additional human-readable evidence.
+- Add a regression with duplicate display names and different rollback capabilities.
+
+Required regression:
+
+```text
+test_duplicate_display_name_cannot_mask_nonrollback_adapter
+```
+
+---
+
+## P0-4 — Human-confirmed content is mutable and different content can be committed
+
+### Claimed boundary
+
+The product boundary says UraiFlow proposes records, a human confirms them, and only the confirmed proposal is committed. `Proposal` documentation states that content mutation occurs through governed aggregate commands:
+
+- `00-control/PROJECT-START.md:12-18`
+- `src/uraiflow/proposal/model.py:115-122`
+- `src/uraiflow/confirmation/service.py:1-15`
+
+### Defective implementation
+
+`Proposal.items` is a mutable list. Each `ProposalItem` is mutable, and its `fields` value is a mutable dictionary:
+
+- `src/uraiflow/proposal/model.py:83-112`
+- `src/uraiflow/proposal/model.py:124-139`
+
+The commit path trusts current mutable `status`, `decision`, record type and fields; it does not compare them with an immutable confirmed snapshot/version:
+
+- `src/uraiflow/pipeline/orchestrator.py:178-200`
+
+### Independent reproduction
+
+1. Ingest proposal containing title `approved`.
+2. Call the governed `confirm_all()` command.
+3. Change `proposal.items[0].fields["title"]` directly to `NOT_APPROVED`.
+4. Call commit.
+5. V006 commits `NOT_APPROVED` successfully.
+
+Observed result:
+
+```text
+confirmed_value="approved"
+committed_value="NOT_APPROVED"
+status=COMMITTED
+failure=None
+```
+
+A second probe also demonstrated that direct writes to `item.decision` and `proposal.status` can bypass the confirmation service entirely and still commit.
+
+### Impact
+
+The system cannot prove that the external record is what the human approved. This breaks the central human-in-the-loop safety boundary and creates an audit falsehood.
+
+### Required V007 correction
+
+- On confirmation, create a **deeply immutable confirmed snapshot** containing record IDs, types, field values, confidence/source references and a canonical content hash/version.
+- Commit only that confirmed snapshot—not the live mutable proposal list.
+- Make `status`, decisions, items and recovery fields private aggregate state with read-only views.
+- Any content change after confirmation must invalidate the confirmed snapshot and return the proposal to revalidation and reconfirmation.
+- Include the confirmed snapshot/version/hash in lineage and receipt-binding evidence.
+- Make internal state transitions non-public implementation details; application code should use governed commands only.
+
+Required regressions:
+
+```text
+test_post_confirmation_content_change_cannot_be_committed
+test_direct_status_and_decision_writes_cannot_bypass_confirmation
+test_commit_uses_exact_confirmed_snapshot_version
+```
+
+---
+
+## P0-5 — The final ZIP's G10 fails although shipped evidence says PASS
+
+### Shipped claim
+
+The manifest-protected file `evidence/G10-docs-consistency.txt` inside the received ZIP states:
+
+```text
+G10 docs-consistency PASS: ... build-report facts regenerate identically from machine evidence
+```
+
+### Why the shipped artifact fails
+
+`gen_build_report.py` derives the manifest row from `evidence/G01-manifest-check.txt`:
+
+- `scripts/gen_build_report.py:22-40`
+- `scripts/gen_build_report.py:60-62`
+
+The packager deliberately removes that file from the payload:
+
+- `scripts/package_release.py:49-59`
+
+The clean-extraction smoke runs only pytest, starter validation and manifest check. It does **not** run G09 or G10:
+
+- `scripts/package_release.py:145-176`
+
+Therefore the build report contains `Manifest contract | PASS`, but on the final ZIP the evidence file used to generate that word is absent. `gen_build_report.py --check` regenerates `see evidence`, detects drift, and G10 fails.
+
+### Independent clean-extraction result
+
+```text
+manifest check: PASS (239 files, full contract)
+G10 build-report drift: machine facts do not match evidence
+G10 docs-consistency FAIL:
+ - build report drift: machine facts do not regenerate identically from evidence
+```
+
+### Impact
+
+The final artifact contains a false PASS result for a mandatory release gate. The attestation is still valid for the three smoke steps it actually ran, but it does not prove G10 on the final artifact. V006 cannot be accepted under its own release policy.
+
+### Required V007 correction
+
+- Make G10 reproducible on the **final clean-extracted ZIP**, not only in the source/build tree.
+- Stop generating build-report manifest status from an evidence file that packaging removes. Derive it from the actual manifest/check, or represent it explicitly as external-attestation evidence.
+- Add non-mutating `--check` modes to G09/G10 where needed.
+- Extend exact-final-ZIP smoke to run at least G09 and G10, and fail packaging if either fails.
+- The attestation must record those final-ZIP results.
+- Add a clean-extraction regression that constructs the governed payload with excluded self-referential evidence and proves G10 still passes.
+
+Required regression:
+
+```text
+test_final_packaged_zip_reproduces_g09_and_g10
+```
+
+---
+
+# 5. High-priority findings
+
+## P1-1 — The pinned adapter descriptor is not deeply immutable
+
+`AdapterDescriptor` is a frozen dataclass, but `required_fields` is converted to a normal mutable dictionary:
+
+- `src/uraiflow/adapters/contract.py:25-72`
+
+`RegisteredAdapter` stores that same descriptor object and calls it immutable:
+
+- `src/uraiflow/routing/registry.py:23-35`
+- `src/uraiflow/routing/registry.py:44-63`
+
+Independent probe:
+
+```python
+pinned.required_fields["task"] = ()
+```
+
+Observed behaviour:
+
+```text
+before mutation: missing title is invalid
+post mutation:  missing title is valid
+same pinned descriptor object: True
+```
+
+This does not require private-state access or `object.__setattr__`; it is ordinary dictionary mutation.
+
+**Required correction:** registry must construct and own a deep canonical contract snapshot. Use recursively immutable values (`MappingProxyType` over a defensive copy, tuples, or another stdlib immutable representation), validate `supports_rollback` as exact `bool`, and expose only immutable views.
+
+Required regression:
+
+```text
+test_registered_descriptor_is_deeply_immutable
+```
+
+---
+
+## P1-2 — Lineage/audit events are not immutable
+
+`LineageEvent` is frozen only at the top level. Its `payload` is stored by reference as an arbitrary mapping, and `LineageStore` stores and returns the same event object:
+
+- `src/uraiflow/lineage/model.py:21-42`
+- `src/uraiflow/lineage/store.py:13-33`
+
+Independent probe appended manual-resolution evidence and then modified the original payload dictionary. The already-stored audit event changed to:
+
+```text
+operator_id="forged"
+evidence="rewritten"
+```
+
+This contradicts the module's “immutable lineage/audit events” and “append-only” claims.
+
+**Required correction:** validate payload schema, make a recursive defensive immutable copy at event construction/storage, and return immutable snapshots. Also require timezone-aware timestamps and decide whether all times are normalized to UTC.
+
+Required regression:
+
+```text
+test_lineage_payload_cannot_change_after_append_or_read
+```
+
+---
+
+## P1-3 — Runtime package version is stale and G10 does not check it
+
+Current version sources disagree:
+
+| Location | Value |
+|---|---|
+| `pyproject.toml:7` | `0.12.0.dev0` |
+| `scripts/gen_manifest.py:26` | `0.12.0.dev0` |
+| Root manifest | `0.12.0.dev0` |
+| `src/uraiflow/__init__.py:5` | **`0.9.0-dev`** |
+
+The shipped G10 PASS claims versions are consistent, but `validate_docs_consistency.py` checks only pyproject, manifest generator and root manifest; it ignores the runtime `uraiflow.__version__`.
+
+**Required correction:** establish one version source, generate/import runtime metadata from it, and extend G10 to verify all published version surfaces.
+
+Required regression:
+
+```text
+test_runtime_version_matches_pyproject_and_manifest
+```
+
+---
+
+## P1-4 — Current evidence contains stale, contradictory machine outputs
+
+Examples shipped inside the current manifest-protected evidence directory:
+
+- `evidence/G01-manifest-regen.txt` says `manifest written: 220 files`, while V006 contains 239 manifest-managed files.
+- `evidence/G03-G04-tests-coverage.txt` is an older run over 598 statements, while current `G04-coverage.txt` covers 803 statements.
+- `evidence/G10-docs-consistency.txt` says PASS although the final ZIP's G10 fails.
+
+Historical red-state evidence is valuable, but unversioned stale files with current gate-style names are ambiguous and can be mistaken for current authority.
+
+**Required correction:** place release evidence under a versioned run directory or generate a strict current-evidence allowlist. Remove/rename stale generic gate files, and make the docs gate reject contradictory current-looking evidence.
+
+---
+
+## P1-5 — Mutation “0 logic survivors” covers only a subset of source modules
+
+`setup.cfg` and `run_mutation_gate.py` target 9 critical source files, not all 34 source modules. Notably, `lineage/store.py`, the reference adapter, capture, transcription and extraction modules are outside mutation scope. The mutable audit payload defect therefore sits in a non-mutated store path.
+
+The reported `0 logic survivors` is correct for the configured target set, but it must not be interpreted as whole-code mutation assurance.
+
+**Required correction:** document the exact mutation scope in the machine summary and expand it to every module carrying security, audit, state or trust-boundary behaviour. Add an explicit scope-denominator check so new critical modules cannot silently remain outside G07.
+
+---
+
+# 6. Documentation and governance findings
+
+## P2-1 — The official reading map directs builders to an obsolete starter RTM
+
+`00-control/READING-MAP.md:9` points to `06-traceability/RTM.md`. That file is a starter table containing `TBD` and `DECLARED` rows. The enforced current RTM is `RTM-V006.md`.
+
+**Correction:** update the reading map to `RTM-V006.md`, or make `RTM.md` a generated current pointer/alias rather than a stale parallel authority.
+
+## P2-2 — The current audit trail claims retained files that are absent
+
+- `RTM-V006.md:3` says RTM-V005 is retained as history, but RTM-V005 is not in the ZIP.
+- `RTM-V006.md:20` and `FIRST-BUILD-BACKLOG.md:58` reference `BUILD-REPORT-V004.md`, which is absent.
+- The packager's allowlist includes V004/V005 build reports, but the artifact contains only V002, V003 and V006.
+
+**Correction:** either ship the claimed historical artifacts or remove/replace the references. Extend G09/G10 to validate all current-document file references, not only test/evidence/ADR references.
+
+## P2-3 — Reproducibility terminology should be made precise
+
+The packager proves two ZIP writes from the **same frozen payload** are byte-identical. It does not prove that running the stated packaging command later reproduces the same hash, because the archive root name and manifest `created` value use the current clock.
+
+This is valid same-run determinism, but not a cross-run reproducible build. Either label it precisely or add a fixed release epoch/build timestamp input (`SOURCE_DATE_EPOCH` or an explicit release timestamp) so a reviewer can regenerate the identical artifact from source.
+
+---
+
+# 7. Disposition of V006's advertised fixes
+
+| V006 advertised closure | Independent disposition |
+|---|---|
+| P0-1 uncertain external commit | **FAILED / PARTIAL.** Initial invalid-receipt path records uncertainty, but recovery can erase the safety meaning, and commit exceptions are not treated as uncertain. |
+| P0-2 pinned descriptor | **PARTIAL.** Identity is no longer re-read, but the pinned contract is not deeply immutable. |
+| P0-3 immutable tenant ownership | **NARROW FIX HOLDS.** Direct tenant-id reassignment is blocked. The wider aggregate and confirmation state remains publicly mutable. |
+| P1-1 canonical lineage identity | **PARTIAL.** Identity fields are canonical; payload/audit content is still mutable after append. |
+| P1-2 gate/manifest sequencing | **FAILED AT FINAL ARTIFACT.** Root manifest passes, but G10 cannot reproduce on the packaged ZIP. |
+| P1-3 AST mutation classification | **No contradiction found in inspected implementation/evidence.** Mutation execution itself was not independently rerun due unavailable tool. |
+
+---
+
+# 8. Required V007 scope and acceptance conditions
+
+V007 must be a **correction-only hardening release**. Do not add persistence, real providers, NEEDS_CLARIFICATION workflow, role models, or feature expansion until these defects close.
+
+## Required architecture corrections
+
+1. **Structural recovery invariant:** `ROLLED_BACK` is impossible while trusted unrecovered receipts or uncertain commits remain.
+2. **Explicit commit outcome model:** definite rejection vs unknown/uncertain external result; timeouts and post-dispatch exceptions default to uncertain.
+3. **Machine-identity-only preflight:** rollback capability aggregated by `adapter_id`, never display name.
+4. **Immutable confirmation snapshot:** commit uses the exact content/version approved by the human; any mutation invalidates confirmation.
+5. **Deep immutable registration contract:** registry owns a canonical immutable copy of descriptor fields and capabilities.
+6. **Deep immutable audit event:** lineage payload is defensively copied/frozen and cannot be rewritten through caller or returned references.
+7. **Final-artifact gate reproducibility:** G09/G10 pass inside the exact final clean-extracted ZIP and are recorded in the attestation.
+8. **Single version source and clean evidence namespace:** runtime, project, manifest and docs agree; stale generic evidence is removed/versioned.
+9. **Current-document reference validation:** reading map, RTM history and build-report references all resolve.
+
+## Required red-state proof
+
+Before fixing, V007 evidence must execute the independent probe shapes against pristine V006 and show each defect:
+
+- uncertain retry → false `ROLLED_BACK`;
+- exception after side effect → false `ROLLED_BACK`;
+- duplicate display name → preflight bypass;
+- confirmed content mutation → changed value committed;
+- descriptor mapping mutation → validation changes;
+- lineage payload mutation → stored audit changes;
+- clean final ZIP → G10 failure;
+- runtime version mismatch.
+
+## Required green regressions
+
+At minimum:
+
+```text
+test_retry_rollback_cannot_clear_or_ignore_uncertain_commits
+test_exception_after_remote_side_effect_is_recorded_as_uncertain
+test_duplicate_display_name_cannot_mask_nonrollback_adapter
+test_post_confirmation_content_change_cannot_be_committed
+test_direct_status_and_decision_writes_cannot_bypass_confirmation
+test_commit_uses_exact_confirmed_snapshot_version
+test_registered_descriptor_is_deeply_immutable
+test_lineage_payload_cannot_change_after_append_or_read
+test_final_packaged_zip_reproduces_g09_and_g10
+test_runtime_version_matches_pyproject_and_manifest
+test_current_document_references_exist
+```
+
+## Required release output
+
+```text
+UraiFlow-SaaS_Claude_V007_YYYYMMDD_HHMM.zip
+UraiFlow-SaaS_Claude_V007_YYYYMMDD_HHMM_ATTESTATION.md
+```
+
+The external attestation must identify the exact final ZIP hash and show clean-extraction execution of pytest, coverage or equivalent coverage evidence verification, starter validator, manifest, G09 and G10. Claude must not self-declare V007 accepted; it returns to independent review.
+
+---
+
+# 9. Copy-paste review comment for Claude
+
+> **V006 independent review result: REJECT AS RELEASE/ACCEPTANCE BASELINE. Use only as V007 corrective input.** I independently reviewed the received ZIP with SHA-256 `8df8bdbc1838c9154df1355fb027d92505bca265f83842f3df54461811b01b39`, all 240 files, root and baseline manifests, source, tests, scripts, ADRs, RTM, evidence and documentation. ZIP integrity, 290 tests and 100% line/branch coverage are genuine, but the release is blocked by independently reproduced defects.
+>
+> **P0-1:** `RecoveryService.retry_rollback` ignores `proposal.uncertain_commits`; with zero unrecovered receipts it changes `COMPENSATION_FAILED` to `ROLLED_BACK` while the external effect and uncertain commit still exist. Enforce the invariant in the aggregate, not only the service: `ROLLED_BACK` is impossible while either unrecovered receipts or uncertain commits remain.
+>
+> **P0-2:** if `adapter.commit()` performs the remote write and then raises a timeout/exception, V006 records no `UncertainCommit` and reports `ROLLED_BACK`. Introduce explicit definite-failure vs unknown-outcome semantics; post-dispatch exceptions default to uncertain unless an exact typed contract proves no side effect.
+>
+> **P0-3:** rollback preflight is keyed by `descriptor.name`, although ADR-0010 permits duplicate display names and forbids names influencing routing/rollback. A rollback-capable same-name adapter overwrites a non-capable adapter. Key exclusively by `adapter_id` and pin the duplicate-name regression.
+>
+> **P0-4:** confirmed proposal content remains mutable. After `confirm_all()`, changing `proposal.items[0].fields` commits the changed, unapproved value successfully. Commit an immutable confirmed snapshot/version/hash; make state/items/decisions read-only outside governed commands; any edit requires revalidation and reconfirmation.
+>
+> **P0-5:** the exact final ZIP fails G10 although its shipped evidence says PASS. `gen_build_report.py` needs `evidence/G01-manifest-check.txt`, but packaging removes it; final-ZIP smoke does not run G10. Redesign this dependency and require G09/G10 to pass on the exact clean-extracted final ZIP, recorded in the attestation.
+>
+> **P1:** the pinned descriptor is not deeply immutable (`required_fields` is a normal dict); lineage payloads can be changed after append; runtime `uraiflow.__version__` is still `0.9.0-dev` while package/manifest are `0.12.0.dev0`; current evidence contains stale generic files (`G01-manifest-regen` says 220 files, old combined coverage has 598 statements); G07's 0-survivor claim covers only its configured 9 source files; the reading map points to stale `RTM.md`, and current docs reference absent RTM/build-report history.
+>
+> Build **V007 correction-only**. First capture executable red-state evidence for every probe against pristine V006. Then implement structural fixes, add the named regressions from the review, run the full gate chain, package deterministically, and run pytest/starter/manifest/G09/G10 against the exact final extracted ZIP. Deliver `UraiFlow-SaaS_Claude_V007_YYYYMMDD_HHMM.zip` plus matching external attestation. Do not add persistence/providers/features and do not self-declare acceptance.
+
+---
+
+## 10. Final standing
+
+**V006 physical package:** strong and intact.  
+**V006 ordinary regression quality:** strong.  
+**V006 recovery truthfulness:** failed.  
+**V006 confirmation integrity:** failed.  
+**V006 atomicity preflight:** failed.  
+**V006 audit immutability:** failed.  
+**V006 final-artifact release-gate reproducibility:** failed.  
+
+### Final verdict
+
+# 🔴 REJECT V006 AS RELEASE BASELINE
+
+**Proceed only to `UraiFlow-SaaS_Claude_V007_...` as a tightly scoped corrective hardening iteration.**

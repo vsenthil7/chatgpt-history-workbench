@@ -1,0 +1,516 @@
+# Business Requirements Document (BRD)
+## TalkProof — Certified Communications & Verification SaaS
+
+| Field | Value |
+|---|---|
+| **Document ID** | BRD-001 |
+| **Version** | 1.0.1 |
+| **Date** | 2026-06-16 |
+| **Status** | Approved for Development |
+| **Owner** | WET (Women Empowerment Team) — Platform Operator |
+| **Related Documents** | PRD-001, FRD-001, NFRD-001 |
+
+**Revision history**
+
+| Version | Date | Change |
+|---|---|---|
+| 1.0.0 | 2025-01-31 | Initial draft |
+| 1.0.1 | 2026-06-16 | Corrected BR-09 and related sections to reflect actual client stack: Flutter/Dart (`talkproof-app`) for mobile + desktop + web; React 19/Vite/Tailwind/shadcn (`talkproof-admin`) for admin portal; FastAPI (`talkproof-backend`) for API. |
+
+---
+
+## Table of Contents
+
+1. [Executive Summary](#1-executive-summary)
+2. [Business Context & Operator Model](#2-business-context--operator-model)
+3. [Problem Statement](#3-problem-statement)
+4. [Business Objectives & Success Metrics](#4-business-objectives--success-metrics)
+5. [Stakeholders](#5-stakeholders)
+6. [Business Requirements (BR-01 – BR-10)](#6-business-requirements-br-01--br-10)
+7. [Market Opportunity](#7-market-opportunity)
+8. [Pricing & Business Model](#8-pricing--business-model)
+9. [Assumptions](#9-assumptions)
+10. [Constraints](#10-constraints)
+11. [Risks](#11-risks)
+12. [Out of Scope](#12-out-of-scope)
+
+---
+
+## 1. Executive Summary
+
+TalkProof is a certified communications and verification SaaS platform operated by WET (Women Empowerment Team), a social enterprise whose mission is the economic empowerment of women through skilled, dignified remote work. TalkProof addresses a structurally under-served gap in the compliance and contact-centre market: the ability to prove, beyond reasonable doubt, exactly what a human agent said to a client during a regulated call — and to deliver that proof, as a tamper-proof certified document, to the client themselves.
+
+The platform combines three product pillars:
+
+1. **Certified Voice Campaigns** — campaign management, agent call workflow, multi-model AI consensus verification, and blockchain-anchored certified PDF output, gated by Human-in-the-Loop reviewer approval.
+2. **Real-Time Communications (RTC) Suite** — WhatsApp-style PSTN calling + chat/messaging, and Zoom/Teams-style audio/video meetings with recording, transcription, and AI summaries.
+3. **Enterprise SaaS Platform** — multi-tenant architecture with three isolation tiers (shared pool / dedicated schema / single-tenant), role-based access control, per-IP forensic audit trail, BYO API keys, KMS encryption, Stripe billing, and white-label reseller capabilities.
+
+WET sells and operates TalkProof as the platform super-admin, onboarding client organisations as tenants. This pairs a defensible, market-leading technology product with a social impact workforce model: WET's women agents are the human callers, and TalkProof's AI verifies those humans — the opposite of AI voice agent vendors who seek to replace human labour.
+
+A 97-competitor analysis has confirmed five structural market gaps that TalkProof uniquely closes. No single existing product offers multi-model consensus verification, outward-facing certified PDF proof-of-delivery, TCPA call-verification (as opposed to document-consent), and a multi-tenant BPO-resellable SaaS in one integrated platform.
+
+---
+
+## 2. Business Context & Operator Model
+
+### 2.1 About WET
+
+WET (Women Empowerment Team) is an impact-sourcing social enterprise. It employs and upskills women as call agents, providing dignified, skilled remote employment. WET operates TalkProof as the platform owner and super-admin, generating SaaS revenue that sustains and scales its social mission.
+
+### 2.2 Operator Architecture
+
+| Role | Description |
+|---|---|
+| **WET — SaaS operator / super-admin** | Owns the platform. Runs the super-admin console. Sets plans, quotas, and rate-cards. Onboards and bills client tenants. White-labels the product per reseller client. |
+| **Client — tenant** | Each client organisation is a tenant with its own users, roles, branding, data, and BYO API keys. Clients run certified campaigns and use the RTC suite. |
+| **Generic-client tenant** | WET operates one shared "generic client" tenant for its own campaigns and for walk-in or not-yet-onboarded clients. Work starts immediately and can graduate into a dedicated tenant later. |
+| **Impact-sourcing workforce** | WET's women agents are the human callers. TalkProof's AI verifies what the human said — it does not replace the human. This is precisely what regulated industries require and what differentiates TalkProof from AI voice agent vendors. |
+
+### 2.3 Isolation Tiers
+
+| Tier | Name | Description | Target Clients | Key Property |
+|---|---|---|---|---|
+| **A** | Shared Pool (row-level isolation) | All tenants share one database; every row carries `tenant_id` and is force-scoped by row-level security (RLS). | Freemium / Starter / most Professional clients | Logical (RLS) isolation only; cheapest, instant provisioning |
+| **B** | Dedicated Schema | Each client gets its own database schema within the platform DB; physically separated tables, shared infrastructure. | Professional+ clients with data-separation needs | Per-tenant schema provisioning; stronger separation |
+| **C** | Single-Tenant Deployment | Client gets an isolated deployment (own DB + app instance, optional VPC/on-prem); maximum isolation + custom compliance. | Enterprise / regulated (healthcare, finance, gov) | Hard isolation, data residency, BYO blockchain/keys; highest cost |
+
+### 2.4 Social Enterprise Alignment
+
+The operator model is structurally aligned with WET's mission: every certified call that TalkProof verifies is a call made by a WET woman agent. Revenue growth directly funds expansion of the agent workforce. The "AI verifies the human" narrative is both a regulatory requirement (regulated industries keep humans legally accountable) and a compelling social impact story.
+
+---
+
+## 3. Problem Statement
+
+### 3.1 The Core Problem
+
+Regulated industries — insurance, healthcare, financial services, utilities, government — conduct millions of outbound calls daily in which agents must deliver exact verbal disclosures. When disputes arise (customer claims "I was never told X", agent's employer claims "the agent delivered the exact disclosure"), there is currently no independent, tamper-proof record of what was actually said that flows from the operator to the client as a deliverable. The result:
+
+- **Regulatory and legal exposure**: TCPA violations alone generate $300M+/year in US legal liability.
+- **Trust deficit**: Clients have no independent verification; they must take the operator's word for it.
+- **Operational inefficiency**: Manual QA reviews cover at most 5–10% of calls; AI-powered tools verify 100% but rely on a single model that can be challenged.
+
+### 3.2 Secondary Problem: Fragmented Communications
+
+BPO operators and compliance teams currently run disparate tools — a contact-centre platform (for calls), a messaging app (for team collaboration), a video meeting tool, and a compliance recorder — each generating its own silo of data, logs, and billing. There is no single unified platform that combines certified call compliance with a full communications suite.
+
+### 3.3 The WET Platform Problem
+
+WET, as an impact-sourcing social enterprise operating call agents, requires a platform it can operate, brand, and resell — not merely use as a single tenant. Existing compliance recording platforms (Global Relay, Verint, Red Box) are:
+- Enterprise-only, priced $50K–$1M/year;
+- Single-tenant, finance-focused;
+- Not designed for multi-tenant BPO resale;
+- Not accessible to boutique or mid-market BPOs.
+
+### 3.4 Problem Summary Table
+
+| # | Problem | Impact | Affected Party |
+|---|---|---|---|
+| P-1 | No outward-facing tamper-proof proof-of-delivery for regulated calls | Legal/regulatory liability | BPOs, regulated operators, end clients |
+| P-2 | Single-model AI verification is legally challengeable | Evidential weakness | Compliance teams, regulated clients |
+| P-3 | TCPA consent documentation is document-focused, not call-verification focused | $300M+/yr liability exposure | Outbound call operators (US) |
+| P-4 | Fragmented tooling (CCaaS + chat + video + recorder) | Operational overhead, data silos | BPO operators |
+| P-5 | Compliance SaaS inaccessible to mid-market / BPO resellers | Market gap for WET | WET, boutique BPOs |
+
+---
+
+## 4. Business Objectives & Success Metrics
+
+### 4.1 Business Objectives
+
+| ID | Objective | Priority |
+|---|---|---|
+| BO-01 | Establish WET as the operator and commercial owner of TalkProof, generating recurring SaaS revenue. | Must Have |
+| BO-02 | Enable clients to run certified outbound voice campaigns with legally defensible, court-ready proof. | Must Have |
+| BO-03 | Replace 4+ fragmented tools (CCaaS, chat, video, recorder) with one unified platform. | Must Have |
+| BO-04 | Achieve SOC2 Type II, GDPR, and TCPA compliance to serve regulated verticals. | Must Have |
+| BO-05 | Capture the mid-market BPO segment (10–100 agents) currently underserved by enterprise compliance tools. | Should Have |
+| BO-06 | Create a sustainable revenue model (freemium → professional → enterprise) funding WET's impact-sourcing workforce. | Must Have |
+| BO-07 | White-label and resell TalkProof to other BPO operators, creating a reseller channel. | Should Have |
+| BO-08 | Demonstrate competitive superiority against 97 analysed competitors across 5 market gaps. | Should Have |
+
+### 4.2 Key Performance Indicators (KPIs)
+
+#### Revenue & Growth
+
+| KPI | Target (Month 6) | Target (Month 12) | Target (Month 24) |
+|---|---|---|---|
+| Monthly Recurring Revenue (MRR) | $15,000 | $60,000 | $250,000 |
+| Active paying tenants | 10 | 40 | 150 |
+| Certified minutes/month (platform-wide) | 50,000 | 250,000 | 1,000,000 |
+| Gross margin | > 55% | > 65% | > 72% |
+
+#### Product & Quality
+
+| KPI | Target |
+|---|---|
+| Platform uptime (SLA) | ≥ 99.9% |
+| Certification pipeline end-to-end latency | ≤ 5 minutes from call end to certified PDF available |
+| Multi-model consensus accuracy (vs. ground truth transcripts) | ≥ 97% |
+| HiL reviewer SLA (certificate approval) | ≤ 4 business hours |
+| WCAG AA compliance | 100% of core user journeys |
+
+#### Social Impact
+
+| KPI | Target (Month 12) |
+|---|---|
+| WET women agents active on platform | ≥ 50 |
+| Agent upskilling hours logged | ≥ 2,000 |
+| Agent median earnings vs. national median | ≥ 1.2× |
+
+---
+
+## 5. Stakeholders
+
+| Stakeholder | Role | Interest | Influence |
+|---|---|---|---|
+| **WET Leadership** | Platform owner, operator, payer | ROI, social mission, brand reputation | High |
+| **WET Super-Admin Team** | Day-to-day platform operations | Tooling quality, operational efficiency | High |
+| **WET Women Agents** | Human callers on certified campaigns | Ergonomics, call tools, agent workflow | Medium |
+| **Client Tenant Owners** | Purchasing decision-makers | Business outcomes, compliance, cost | High |
+| **Client Tenant Admins** | IT/ops management within a tenant | Configuration, SSO, security, onboarding | High |
+| **End Clients / Call Recipients** | Receive certified PDF proof | Trust in the document, privacy | Medium |
+| **Compliance Officers** | Review and rely on certified outputs | Legal defensibility, audit trail | High |
+| **Regulators** | TCPA, GDPR, HIPAA, FCA, SOC2 auditors | Evidence quality, data handling | High |
+| **Development Team** | Build and maintain the platform | Architecture clarity, requirements | High |
+| **Investors / Funders** | WET impact investors | MRR growth, social impact metrics | Medium |
+
+---
+
+## 6. Business Requirements (BR-01 – BR-10)
+
+### BR-01 — Multi-Tenant SaaS Operation by WET
+
+**Statement**: WET shall operate TalkProof as a multi-tenant SaaS platform and shall be able to onboard, manage, suspend, and offboard client tenants independently.
+
+**Rationale**: WET's business model depends on selling and operating the platform for multiple client organisations simultaneously. Without multi-tenancy and a robust super-admin console, WET cannot serve more than one client or scale revenue.
+
+**Priority (MoSCoW)**: Must Have
+
+**Modules**: M01, M09
+
+**Acceptance Criteria**:
+- AC-01.1: WET super-admin can create a new tenant with plan, quota, and rate-card configuration within 5 minutes.
+- AC-01.2: WET super-admin can suspend a tenant, causing all tenant user logins to fail immediately.
+- AC-01.3: WET super-admin can export all tenant data (GDPR-compliant) prior to offboarding.
+- AC-01.4: Platform metrics dashboard (MRR, active tenants, seats, API spend, SLA) are visible to WET super-admin in real time.
+- AC-01.5: Audited impersonation allows WET super-admin to login-as a tenant user with mandatory reason and time-box.
+
+---
+
+### BR-02 — Certified Outbound Voice Campaigns
+
+**Statement**: Clients shall be able to run outbound voice campaigns in which each call is recorded, transcribed, verified by a multi-model AI consensus engine, and produces a tamper-proof, blockchain-anchored certified PDF report that is gated by Human-in-the-Loop reviewer approval before issuance.
+
+**Rationale**: This is TalkProof's primary differentiating product. The certified PDF flows outward to the client (the call recipient's organisation) as proof that a disclosure was delivered — the first such product in the market. The multi-model consensus (three independent AI models) creates a "three independent witnesses" standard that is court-defensible.
+
+**Priority (MoSCoW)**: Must Have
+
+**Modules**: M11, M06, M07
+
+**Acceptance Criteria**:
+- AC-02.1: A campaign manager can create a campaign, assign contacts and agents, and launch within the web UI.
+- AC-02.2: Agent receives call assignment, dials using the in-app dialer (PSTN), and records the call automatically.
+- AC-02.3: After call completion, transcription and three-model consensus verification complete within 3 minutes.
+- AC-02.4: The consensus result (scored verdict, confidence, evidence citations) is presented to a reviewer for approval.
+- AC-02.5: A reviewer approves the certificate; the system issues a brand-typeset certified PDF with embedded hash, RFC3161 timestamp, and blockchain anchor reference.
+- AC-02.6: The certified PDF is verifiable offline (hash + timestamp verify without platform access).
+- AC-02.7: TCPA disclosure proof-of-delivery is captured: the exact disclosure text delivered verbatim is recorded immutably.
+
+---
+
+### BR-03 — Real-Time Communications Suite
+
+**Statement**: Users on the platform shall be able to communicate in real time via PSTN calls (WhatsApp-style, to any phone number), chat and messaging (1:1 and group, with voice notes and media), and audio/video meetings (Zoom/Teams-style, with screen share, recording, and AI summaries).
+
+**Rationale**: BPO operators currently use 3–4 separate tools for communications. Consolidating into one platform with unified presence, a single audit trail, and metered billing reduces operational overhead and increases platform stickiness.
+
+**Priority (MoSCoW)**: Must Have
+
+**Modules**: M12, M13, M14, M15
+
+**Acceptance Criteria**:
+- AC-03.1: An agent can place and receive a PSTN call to/from any phone number using the in-app dialer on web, desktop, and mobile.
+- AC-03.2: Chat messages deliver in real time (< 500ms P95 latency) with presence, typing indicators, and read receipts.
+- AC-03.3: An audio/video meeting with up to 50 participants can be started from within the app (LiveKit SFU).
+- AC-03.4: Meeting recordings (composite and per-track) are stored in S3 and accessible post-meeting.
+- AC-03.5: Live transcription and post-meeting AI summary are available (governed AI — advisory, not auto-executing).
+- AC-03.6: All recordings feed into the tamper-evident audit and certification pipeline.
+- AC-03.7: Unified presence state is visible across chat, call, and meeting surfaces.
+
+---
+
+### BR-04 — Human-in-the-Loop Gating for Consequential Actions
+
+**Statement**: All consequential actions — most critically, the issuance of certified call certificates — shall be gated by a Human-in-the-Loop (HiL) approval workflow. AI outputs shall be advisory with confidence and evidence; they shall never auto-execute consequential actions.
+
+**Rationale**: Regulated industries, and the legal defensibility of certified outputs, require that a human reviewer explicitly approves before a certificate is issued. This also provides Separation of Duties (SoD): the proposer cannot be their own approver. The HiL design aligns with WET's mission of augmenting human workers rather than replacing them.
+
+**Priority (MoSCoW)**: Must Have
+
+**Modules**: M06, M07
+
+**Acceptance Criteria**:
+- AC-04.1: Certificate issuance is routed to a reviewer queue; a certificate cannot be issued without explicit approval by a user in the Reviewer role or above.
+- AC-04.2: Self-approval is refused by the system; the proposer cannot approve their own proposal.
+- AC-04.3: Dual-control (maker-checker) is enforced for any action configured with a threshold > 1 approver.
+- AC-04.4: Reviewer queue shows SLA timers; escalation fires if SLA expires without action.
+- AC-04.5: Every approval decision records who approved, when, why (mandatory reason field), and the approver's IP address.
+- AC-04.6: A rollback token is issued on approval-executed actions, enabling reversal within a defined window.
+
+---
+
+### BR-05 — Forensic Audit Trail with Per-IP Source Logging
+
+**Statement**: Every access event, data mutation, and authentication event on the platform shall be logged to a forensic, append-only, hash-chained audit trail that captures the source IP address, user identity, tenant, role, route, method, and timestamp. The trail shall be tamper-detectable via a chain-verification function.
+
+**Rationale**: Regulated industries require audit evidence for SOC2, GDPR, HIPAA, and legal discovery. The per-IP trail is specifically required to prove that a particular user accessed data from a particular location — critical when certificates or consent records are challenged. WORM retention and SIEM export are required for enterprise clients.
+
+**Priority (MoSCoW)**: Must Have
+
+**Modules**: M04
+
+**Acceptance Criteria**:
+- AC-05.1: Every HTTP request writes an `access_trail` row containing: user_id, tenant_id, role, route, method, source IP (X-Forwarded-For resolved), geo, user-agent, session_id, referrer, latency, and response status.
+- AC-05.2: Every mutation writes an `audit_log` row with prev_hash + row_hash (SHA-256), making tampering detectable.
+- AC-05.3: `verify_chain()` function confirms chain integrity; any broken link is surfaced as a tamper alert.
+- AC-05.4: Auth events (login, MFA challenge, SSO, impersonation, logout) are logged with IP and device fingerprint.
+- AC-05.5: Admin dashboard allows filtering by user, tenant, IP, route, and date range.
+- AC-05.6: Signed-webhook SIEM export to Splunk / Microsoft Sentinel is available to enterprise tenants.
+- AC-05.7: WORM (Write-Once Read-Many) retention option ensures audit records cannot be deleted.
+
+---
+
+### BR-06 — Client-Selectable Data-Isolation Tier
+
+**Statement**: Clients shall be able to choose their data-isolation tier — shared pool (Tier A), dedicated schema (Tier B), or single-tenant deployment (Tier C) — based on their compliance and cost requirements, with WET provisioning the appropriate tier.
+
+**Rationale**: A one-size-fits-all isolation model either over-charges starter clients (if everything is single-tenant) or under-protects enterprise/regulated clients (if everything is shared). The tiered model allows WET to serve the full market — from freemium BPOs to HIPAA-regulated healthcare operators — at appropriate price points.
+
+**Priority (MoSCoW)**: Must Have
+
+**Modules**: M01
+
+**Acceptance Criteria**:
+- AC-06.1: A Tier A tenant cannot read, write, or enumerate any data belonging to a different tenant (RLS enforced at the database layer).
+- AC-06.2: A Tier B tenant's data resides in a dedicated database schema; a cross-schema query from another tenant's ORM session is blocked.
+- AC-06.3: A Tier C tenant receives a standalone deployment (own DB, own app instance); WET can deploy from a parameterised IaC manifest in < 2 hours.
+- AC-06.4: WET can migrate a tenant from Tier A → B or B → C without data loss or service interruption > 30 minutes.
+
+---
+
+### BR-07 — Bring-Your-Own Provider API Keys
+
+**Statement**: Tenants shall be able to supply their own API keys for LLM providers (OpenAI, Anthropic, Gemini), telephony carriers (Twilio, Telnyx, Vonage), speech-to-text services, and video infrastructure (LiveKit), with the platform routing to their keys and metering usage against their accounts.
+
+**Rationale**: Enterprise clients require that their data is processed under their own provider contracts and DPAs, not the platform operator's. BYO keys also allow large clients to negotiate their own volume pricing and to satisfy data residency requirements. Platform-key fallback (metered) ensures that tenants without BYO keys can still use the platform.
+
+**Priority (MoSCoW)**: Should Have
+
+**Modules**: M05
+
+**Acceptance Criteria**:
+- AC-07.1: Tenant admin can add an API key for each supported provider; the key is encrypted at rest (KMS/Fernet) and is never returned in plaintext after storage.
+- AC-07.2: A "test connection" action verifies the key is valid before saving.
+- AC-07.3: All API calls for that tenant route through the tenant's key; metered usage and cost are tracked per key.
+- AC-07.4: Spend caps can be configured per key; an alert fires when 80% of the cap is reached and requests are blocked at 100%.
+- AC-07.5: Platform-key fallback is used and metered when the tenant has no BYO key configured for a given provider.
+
+---
+
+### BR-08 — Enterprise-Grade Security, Compliance, and Billing
+
+**Statement**: The platform shall implement enterprise-grade authentication (SSO/MFA/passkeys), authorisation (RBAC), encryption (KMS envelope encryption + per-tenant keys), compliance readiness (SOC2/GDPR/TCPA/HIPAA), and a fully automated billing system (Stripe — freemium/premium/enterprise tiers with usage metering, invoicing, and dunning).
+
+**Rationale**: Without this requirement, TalkProof cannot serve regulated enterprise clients, cannot achieve SOC2 Type II, and cannot be sold to clients who require GDPR data processing agreements or HIPAA BAAs. Billing automation is required for WET to operate at scale without manual invoice generation.
+
+**Priority (MoSCoW)**: Must Have
+
+**Modules**: M02, M03, M08, M10, M19, M20
+
+**Acceptance Criteria**:
+- AC-08.1: Users can authenticate via email+password (Argon2), TOTP MFA, WebAuthn passkey, OIDC SSO (Entra/Okta/Google), or SAML SSO.
+- AC-08.2: SCIM provisioning automatically creates/disables users when an enterprise directory changes.
+- AC-08.3: Role hierarchy (SuperAdmin > TenantOwner > TenantAdmin > Manager > Reviewer > Agent > Member > Auditor) is enforced server-side on every API call.
+- AC-08.4: All data at rest is KMS envelope-encrypted with per-tenant keys; key rotation is supported.
+- AC-08.5: Stripe integration handles plan checkout, subscription lifecycle, usage-based metering, invoice generation, and dunning without manual intervention.
+- AC-08.6: GDPR data-subject export and erasure complete within 72 hours of request.
+- AC-08.7: TCPA outbound consent is enforced — a call to a number without recorded consent is blocked.
+- AC-08.8: SOC2 control mapping evidence is maintained in a continuously updated evidence store.
+
+---
+
+### BR-09 — Web, Desktop, and Mobile from Shared Code
+
+**Statement**: The TalkProof product shall be available on web, desktop (Windows/macOS/Linux), and iOS/Android mobile from a single Flutter/Dart codebase (`talkproof-app`), sharing ≥ 60% of logic and a unified design system. The WET operator and tenant-admin console (`talkproof-admin`) is delivered as a React 19/Vite/Tailwind/shadcn SPA.
+
+**Rationale**: Agents and reviewers work across devices; presence and notifications must be cross-surface. A single Flutter codebase compiling to all targets reduces duplication, ensures UI consistency, and accelerates feature velocity. The Flutter desktop target provides native OS integration (system tray, notifications) via platform channels without the memory overhead of Electron.
+
+**Priority (MoSCoW)**: Must Have
+
+**Modules**: M00, M16, M17, M18
+
+**Acceptance Criteria**:
+- AC-09.1: All core features (campaigns, chat, calls, meetings, HiL queue, settings) are accessible from the web app at feature parity.
+- AC-09.2: The Flutter Web build is installable as a PWA (service worker, manifest) and works with an offline shell.
+- AC-09.3: The Flutter desktop build runs on Windows/macOS/Linux and includes system tray + native notifications + global shortcuts via Flutter platform channels.
+- AC-09.4: The Flutter mobile build (iOS/Android) passes App Store and Play Store review with PSTN calling, chat, meetings, and push notifications.
+- AC-09.5: Shared Dart packages in `talkproof-app` account for ≥ 60% of logic reuse across all Flutter targets.
+
+---
+
+### BR-10 — White-Label Resale and Competitive Positioning
+
+**Statement**: WET shall be able to white-label TalkProof with per-tenant custom branding (logo, colours, domain, email sender), and shall have pricing and feature positioning that is demonstrably superior to key competitors across the five market gaps identified in the 97-competitor analysis.
+
+**Rationale**: WET's revenue growth depends on reselling TalkProof to other BPO operators under their own brand. Competitive pricing and positioning — especially the multi-model consensus + blockchain-certified PDF combination at mid-market price points — are WET's primary sales arguments.
+
+**Priority (MoSCoW)**: Should Have
+
+**Modules**: M09, M08, M21
+
+**Acceptance Criteria**:
+- AC-10.1: Per-tenant branding (logo, colour tokens, subdomain, email sender domain) can be configured by WET super-admin.
+- AC-10.2: A client tenant's end users see only the client's branding; TalkProof branding is not visible unless the client chooses to expose it.
+- AC-10.3: A public marketing/pricing page compares TalkProof against named competitors on the five market gaps.
+- AC-10.4: An in-app ROI calculator demonstrates cost savings vs. current tooling.
+- AC-10.5: The Professional tier (multi-model + blockchain PDF) is priced at ≤ $499/month — below equivalent point-solution alternatives.
+
+---
+
+## 7. Market Opportunity
+
+### 7.1 Competitor Landscape Summary
+
+A structured analysis of 97 competitors across the contact-centre intelligence, compliance recording, CCaaS, AI voice, and BPO tooling markets has identified the following five structural market gaps that TalkProof uniquely occupies.
+
+### 7.2 Five Market Gaps
+
+| # | Gap | Why It Is a Gap | TalkProof's Answer |
+|---|---|---|---|
+| **MG-1** | Multi-model consensus verification | Every CI vendor (Gong, Observe.AI, CallMiner, Cresta, Enthu.AI, Scorebuddy) uses a **single** AI model. None require multiple models to reach independent consensus. | TalkProof's 3-model consensus = "three independent witnesses" — court-defensible standard no competitor matches. |
+| **MG-2** | Client-deliverable tamper-proof certified record | Tamper-proof recording exists (Global Relay, Verint, Red Box) but is inward-facing (regulator archive), finance-only, and never flows as a deliverable to the call recipient. | TalkProof issues a client-deliverable certified PDF that the call recipient holds — proof flows **outward**. |
+| **MG-3** | TCPA / consent proof-of-delivery | TCPA is a $300M+/yr US liability category. Existing consent tools (LeadCompliant, AgentMint) are document-focused, not call-verification focused. No tool proves "this agent delivered this exact disclosure on this call" immutably. | TalkProof owns this: call recording + verbatim comparison + blockchain anchor = immutable TCPA proof. |
+| **MG-4** | Human-in-the-Loop + AI verification | Market is split: CCaaS tools use humans without AI verification of call content; AI voice agents (Bland AI, Retell, Vapi) have no tamper-proof outcomes. Regulated industries keep humans (legal liability). | TalkProof's AI **verifies** the human — opposite of AI replacement vendors. HiL approval before certificate issuance. |
+| **MG-5** | Multi-tenant white-label reseller SaaS | Compliance recorders ($50K–$1M/yr) are enterprise-only, single-tenant, finance-only. No multi-tenant, BPO-resellable, self-serve certified-call SaaS exists. | WET's white-label / multi-tenant / freemium-to-enterprise GTM is a structural gap with no incumbent. |
+
+### 7.3 Total Addressable Market Indicators
+
+| Segment | Indicator |
+|---|---|
+| TCPA litigation exposure (US) | $300M+/year in settlements and penalties |
+| Global CCaaS market | $10B+ (2024), growing ~20% CAGR |
+| Compliance recording market | $2.3B (2024) |
+| BPO services market | $280B global (2024) |
+| Impact-sourcing segment | ~$4B, growing with ESG demand |
+
+### 7.4 Competitive Pricing Benchmarks
+
+| Competitor | Pricing | TalkProof Advantage |
+|---|---|---|
+| Retell AI | $0.07/min | TalkProof Starter: free up to 500 min/month |
+| Vapi | $0.05/min | TalkProof adds certified PDF and HiL — no comparison |
+| Bland AI Scale | $499/month | TalkProof Professional includes blockchain + multi-model at same price |
+| Scorebuddy | £269/month | TalkProof adds PSTN + chat + meetings + certification |
+| Enthu.AI | $500/month | TalkProof adds tamper-proof PDF, client portal, HiL |
+| Global Relay | $15–35/user/month at scale | TalkProof Enterprise is purpose-built for BPOs, not just finance |
+| NICE CXone | $110–249/agent/month | TalkProof Professional at $299–499/month flat (unlimited agents within seat limit) |
+| Cresta | $60K–150K/year | TalkProof Enterprise floor $2,500/month with far stronger certification |
+
+---
+
+## 8. Pricing & Business Model
+
+### 8.1 Tier Structure
+
+| Tier | Target | Pricing Model | Key Inclusions |
+|---|---|---|---|
+| **Starter / Freemium** | Boutique BPOs, compliance teams validating the use case | Free up to 500 certified minutes/month; then $0.10–$0.15/verified minute | Single-model AI verification, standard certified PDF, 90-day tamper-evident storage, web + PWA, 1 tenant workspace, core chat + 1:1 calls |
+| **Professional** | Mid-size BPOs & outbound operators (10–100 agents) | $299–$499/month; 5,000 certified minutes included; $0.08–$0.12/min overage; unlimited campaigns | Multi-model consensus, blockchain-anchored tamper-proof PDF, client report portal, SOC2 + GDPR, TCPA disclosure verification, 2-year immutable retention, 5 client workspaces, full RTC suite, desktop + mobile apps |
+| **Enterprise** | Large BPOs, regulated operators (insurance/healthcare/finance/utilities/gov) | Custom pricing, floor ~$2,500/month; volume $0.04–$0.06/verified minute at 50K+ min/month | Unlimited client workspaces (white-label), BYO LLM keys, BYO blockchain network, Tier-C single-tenant / VPC / on-prem, custom compliance (HIPAA BAA, TCPA, FCA), SLA + dedicated CSM, SSO/SCIM, SIEM export, WORM |
+
+### 8.2 Revenue Streams
+
+| Stream | Mechanism |
+|---|---|
+| Subscription MRR | Monthly/annual plan fees (Starter/Professional/Enterprise) |
+| Usage overage | Per-verified-minute and per-seat charges above plan limits |
+| Platform-key metering | Margin on AI/telephony calls using WET's platform keys (when tenant has no BYO key) |
+| White-label reseller fee | Per-tenant branding + dedicated subdomain configuration fee |
+| Professional services | Tier-C deployment, custom compliance configuration, CSM |
+
+### 8.3 Unit Economics Target
+
+| Metric | Target |
+|---|---|
+| Gross margin (Starter/Professional) | > 65% |
+| Gross margin (Enterprise) | > 55% (higher infra cost) |
+| Customer Acquisition Cost (CAC) payback | < 9 months |
+| Net Revenue Retention (NRR) | > 115% (expansion from usage growth) |
+
+---
+
+## 9. Assumptions
+
+| ID | Assumption |
+|---|---|
+| A-01 | WET will provide the initial agent workforce for the generic-client tenant and certified campaign operations at launch. |
+| A-02 | Third-party provider APIs (Twilio, Telnyx, Vonage, OpenAI, Anthropic, Gemini, LiveKit) remain available under commercially reasonable terms. |
+| A-03 | Blockchain anchoring (Hedera/Ethereum/private) provides sufficient legal admissibility in target jurisdictions; WET will seek legal opinion before launching in each regulated market. |
+| A-04 | RFC3161 timestamp authorities are available and their timestamps are admissible as evidence in target jurisdictions. |
+| A-05 | The multi-tenant shared-pool (Tier A) architecture using PostgreSQL row-level security is legally sufficient for GDPR purposes without physical database separation, for non-regulated tenants. |
+| A-06 | Stripe is available in WET's operating jurisdiction and can process the required payment methods. |
+| A-07 | The Flutter mobile build (`talkproof-app`) can be approved by Apple App Store and Google Play Store without architectural changes to the call/media features. |
+| A-08 | The 97-competitor analysis findings remain valid for 12 months from this document's date; a refresh is required thereafter. |
+
+---
+
+## 10. Constraints
+
+| ID | Constraint | Category |
+|---|---|---|
+| C-01 | SOC2 Type II audit requires at minimum 6 months of evidence collection before certification. | Compliance |
+| C-02 | HIPAA BAA cannot be offered until legal review and Tier-C single-tenant deployment is available. | Compliance |
+| C-03 | Blockchain transaction costs (Ethereum gas) may be volatile; Hedera or a private network is preferred for cost predictability. | Technical |
+| C-04 | PSTN calling requires number provisioning via a licensed CPaaS provider (Twilio/Telnyx/Vonage); local number availability varies by country. | Technical |
+| C-05 | The Flutter desktop build requires code signing certificates for Windows (EV certificate or trusted cert) and macOS (Apple Developer ID) for distribution without OS security warnings. | Technical |
+| C-06 | LiveKit SFU cloud must be deployed in a region compliant with tenant data-residency requirements for Tier-B/C clients. | Compliance |
+| C-07 | SCIM provisioning integration is limited to IdPs that support SCIM 2.0 (Okta, Azure AD/Entra, OneLogin, JumpCloud). | Technical |
+| C-08 | Development must maintain backward API compatibility (versioned REST endpoints) once any client tenant is live. | Technical |
+
+---
+
+## 11. Risks
+
+| ID | Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|---|
+| R-01 | Multi-model consensus is challenged in court as insufficiently independent (models share training data). | Medium | High | Document model independence; use models from ≥ 2 distinct vendors; commission legal opinion. |
+| R-02 | A key third-party provider (e.g., Twilio, OpenAI) raises prices, changes terms, or goes offline. | Medium | High | BYO keys model reduces dependency; provider abstraction layer (M05) supports multi-provider routing and fallback. |
+| R-03 | TCPA regulatory interpretation changes, reducing the value of call-level proof. | Low | High | Monitor TCPA guidance; platform captures maximum evidence regardless; consult legal counsel in each launch market. |
+| R-04 | Data breach or tenant cross-contamination in Tier A (shared pool). | Low | Critical | PostgreSQL RLS + forced tenant-scoping dependency (M01); regular pen testing; security scanning (M20). |
+| R-05 | WET agent workforce cannot scale fast enough to meet certified campaign demand. | Medium | Medium | Graduated hiring plan; generic-client tenant enables flexible staffing. |
+| R-06 | Enterprise clients reject shared-pool (Tier A) for GDPR compliance, slowing Professional tier adoption. | Medium | Medium | Tier B (dedicated schema) is available at Professional+; migrate existing clients on request. |
+| R-07 | Mobile app rejected by Apple App Store due to PSTN calling or recording features. | Low | High | Review App Store guidelines pre-submission; provide web fallback for affected features; legal review of recording disclosure requirements. |
+| R-08 | Competitor replicates multi-model consensus feature within 12 months. | Medium | Medium | Maintain 18-month technology lead; file patents where applicable; embed into regulated-client long-term contracts. |
+
+---
+
+## 12. Out of Scope
+
+The following are explicitly out of scope for TalkProof v1.0 (this document's release):
+
+| ID | Out of Scope Item | Reason |
+|---|---|---|
+| OOS-01 | Outbound AI voice agents (fully automated AI calls without a human agent) | Contradicts the WET model; regulatory risk in certified-disclosure context; explicitly out of scope |
+| OOS-02 | Native WhatsApp Business API integration | Third-party dependency; scope risk; deferred to v1.1 |
+| OOS-03 | In-house speech recognition engine (own STT model) | BYO STT (M05) covers this; building own model is a separate multi-year workstream |
+| OOS-04 | Legal advice or legal representation services | TalkProof provides evidence; legal interpretation is the client's responsibility |
+| OOS-05 | Consumer-facing app (B2C, individual users) | WET's GTM is B2B (BPO operators and regulated organisations) |
+| OOS-06 | Real-time translation of calls | Deferred to v1.2 |
+| OOS-07 | Custom blockchain network for Tier-A tenants | Custom blockchain only available at Enterprise (Tier C); shared chain used for lower tiers |
+| OOS-08 | HIPAA Business Associate Agreements before Tier-C deployment is production-ready | Cannot be offered before single-tenant deployment and legal review are complete |
+
+---
+
+*End of BRD-001 v1.0.0*

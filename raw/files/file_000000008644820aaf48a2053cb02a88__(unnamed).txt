@@ -1,0 +1,17 @@
+09/08/2026 — Build AUMNITY CGWO SaaS Claude V012 as a CLOSURE-ONLY release from the attached V011 ZIP and the ChatGPT V011 deep-review findings F48-F53. Do not begin the service-layer vertical slice and do not redesign accepted domain architecture.
+
+First, independently reproduce every finding against the packaged V011 before changing code, and retain exact red evidence:
+
+F48 P1 BLOCKER — release manifest exclusions remain attacker-selectable. Reproduce PASS for unmanifested .evil/PACKAGE-MANIFEST.json, .evil/.coverage, .evil/.DS_Store, .git/hooks/post-checkout, and tampering of the shipped 10-baseline/.../PACKAGE-MANIFEST.json. In release mode, dev/cache/VCS artifacts must be forbidden rather than silently ignored; exclude only the exact root manifest path, and bind/validate the baseline manifest.
+
+F49 P1 BLOCKER — file kind and ZIP envelope are unverified. Reproduce replacing src/cgwo_core/__init__.py with a symlink to an identical excluded payload while consistency still passes, and reproduce an extra sibling ZIP entry outside the canonical root while the extracted-root validator passes. Add non-following regular-file validation and a shipped verify_release_zip.py enforcing one root, safe paths, no links/devices/FIFOs, no duplicate/casefold/Unicode collisions, no siblings, and exact archive/manifest reconciliation. Wire it into final release evidence.
+
+F50 P1 BLOCKER — AuthorizationPort decision is fail-open. Reproduce non-callable is_entitled raw TypeError, truthy non-bool authorization success, falsey non-bool coercion, hostile __bool__, raising descriptor and raising call. Enforce type(decision) is bool and fail closed with stable controlled error identity; this validates the declared port contract without claiming provider genuineness.
+
+F51 P2 — strict manifest schema is missing. Reproduce false schema/project/generated and unknown top-level/per-entry fields passing. Validate exact keys/types/constants/path/hash/bytes/timestamp/unknown-key policy, or narrow all claims precisely.
+
+F52 P2 — repair current governance drift: READING-MAP ADR range and V012 links; RTM title/current-cycle identity; backlog cycles V008-V012; V011 handoff's false explicit-cast statement; add machine regressions for these current-doc facts.
+
+F53 P2 — resolve wire-int leading-zero inconsistency. Either support leading zeros safely by checking significant digits/value, or narrow grammar to canonical no-leading-zero form and return the correct error. Add int/string equivalence tests.
+
+Preserve 10-baseline content except only the governance/integrity treatment necessary to bind its manifest. Preserve all existing tests and accepted ADR semantics. Add finding-by-finding regressions and mutation-kill them with an empty acceptance list. Rerun from the FINAL tree: starter + consistency, strict manifest/ZIP verifier, ruff check+format, mypy strict, full pytest at 100% line+branch, strict complete mutation run, final manifest regeneration, actual ZIP creation, clean-extract rerun, and final attack reruns against the shipped ZIP. Update RELEASE-IDENTITY to V012, core version appropriately, RELEASE-NOTES-V012, GATE-STATUS-V012, CLAUDE-V012-HANDOFF, RTM, backlog and any amended ADRs. Return the final ZIP SHA-256 and exact machine-generated counts. Do not claim baseline freeze unless every F48-F53 final-package attack is green/fail-closed as required.

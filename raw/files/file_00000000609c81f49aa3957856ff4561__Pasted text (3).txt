@@ -1,0 +1,849 @@
+# 04/10/2026 19:35 — Add CLM + Cost Intelligence
+
+Yes — **this is missing from the prompt**, and it materially changes the architecture.
+
+The problem is broader than RAG. If every deterministic/static company question or every agent decision climbs directly to a frontier LLM, we create an unnecessarily expensive system. Your proposed hierarchy should become a first-class architectural requirement:
+
+**Deterministic/cache → Company RAG → Company Language Model (CLM) → external LLM**, with routing based on confidence, risk, freshness, complexity and cost.
+
+And **every layer—including our self-awareness/self-correction machinery—needs its own measurable cost model and configurable spending controls.**
+
+### About the “partner” wording
+
+Nothing changed because V2 was frozen or because I interpreted you as a business client bringing change requests. **I already had context that you prefer “partner,” and I used it more frequently than necessary.** There's no hidden workflow/state behind it.
+
+More importantly, I agree with your underlying point: **“freeze” must not mean “stop learning.”**
+
+For this project I would change the concept to:
+
+> **Immutable history + versioned living requirements.**
+
+A released baseline is frozen **as historical evidence**, while the active product baseline continues evolving. We don't repeatedly reopen and rewrite history, but we also don't prevent new understanding from entering the product.
+
+Replace/extend the previous prompt with the following. This is substantial enough that I would send the **whole section**, not merely tell Claude “add CLM.”
+
+## ADDITIONAL MANDATORY ARCHITECTURE — COMPANY INTELLIGENCE, CLM & COST CONTROL
+
+The previous prompt is incomplete unless the following is incorporated throughout Parts D–W.
+
+A major risk of agentic production software is that ordinary/static/repetitive work is unnecessarily sent to expensive frontier LLMs.
+
+TalkProof must NOT be designed on the assumption:
+
+`Agent needs intelligence → call external LLM`
+
+That architecture becomes economically dangerous as the number of agents, tenants, calls, monitoring events, self-diagnosis events and maintenance loops increases.
+
+Treat **intelligence cost as an architectural constraint**, alongside security, latency, reliability and compliance.
+
+---
+
+# PART X — COMPANY INTELLIGENCE HIERARCHY
+
+Research and design a layered Company Intelligence Architecture.
+
+The initial hypothesis is:
+
+```text
+REQUEST / AGENT QUESTION / SYSTEM EVENT
+                  │
+                  ▼
+        0. DETERMINISTIC ENGINE
+                  │
+        rules / SQL / graph / cache
+        policy-as-code / calculations
+                  │
+             unresolved?
+                  ▼
+           1. COMPANY RAG
+                (CRAG)
+                  │
+       company knowledge retrieval
+                  │
+          confidence sufficient?
+             YES ─────► ANSWER
+                  │ NO
+                  ▼
+      2. COMPANY LANGUAGE MODEL
+                (CLM)
+                  │
+       company/domain-specialised
+       smaller/cheaper intelligence
+                  │
+          confidence sufficient?
+             YES ─────► ANSWER
+                  │ NO
+                  ▼
+       3. FRONTIER / EXTERNAL LLM
+                  │
+         Claude/OpenAI/Gemini/etc.
+                  │
+                  ▼
+          VERIFIED RESPONSE
+```
+
+Do not assume this exact hierarchy is optimal.
+
+Research current approaches including:
+
+- small language models
+- domain-specific models
+- fine-tuning
+- distillation
+- model routing
+- cascaded inference
+- semantic caching
+- prompt caching
+- deterministic routing
+- confidence-based escalation
+- cost-aware routing
+- latency-aware routing
+- mixture-of-experts concepts
+- local/on-prem inference
+- tenant-specific RAG
+- enterprise knowledge graphs
+- GraphRAG
+- hybrid retrieval
+- model gateways.
+
+Recommend the architecture from evidence.
+
+---
+
+# PART Y — CRAG: COMPANY RAG
+
+Define **Company RAG (CRAG)** as TalkProof's governed retrieval layer.
+
+Potential knowledge includes:
+
+- requirements
+- PRD/FRD/NFRD
+- architecture
+- ADRs
+- policies
+- company procedures
+- customer configuration
+- provider documentation
+- regulatory material
+- support knowledge
+- incidents
+- RCA
+- previous fixes
+- deployment history
+- evidence rules
+- product documentation
+- operational lessons.
+
+But do NOT turn everything into embeddings.
+
+Determine which information belongs in:
+
+```text
+SQL
+Event store
+Metrics/time-series
+Knowledge graph
+Document store
+Vector store
+Cache
+Object store
+CLM
+External LLM
+```
+
+Use deterministic sources whenever exact truth exists.
+
+CRAG must have:
+
+- provenance
+- source/version
+- timestamps
+- tenant isolation
+- permissions
+- freshness
+- confidence
+- citations
+- retrieval audit
+- data-retention rules.
+
+---
+
+# PART Z — COMPANY LANGUAGE MODEL (CLM)
+
+Evaluate a **Company Language Model (CLM)**.
+
+The CLM is NOT simply another generic LLM.
+
+Investigate whether TalkProof can maintain a smaller, cheaper company/domain model specialised for recurring TalkProof/company reasoning.
+
+Potential CLM knowledge/capability:
+
+- TalkProof terminology
+- product structure
+- provider behaviour
+- evidence terminology
+- common incidents
+- support patterns
+- policy interpretation
+- routing decisions
+- known troubleshooting patterns
+- common requirement questions
+- operational classifications.
+
+Research alternatives:
+
+1. fine-tuned SLM
+2. distilled model
+3. open-weight local model
+4. hosted small model
+5. adapters/LoRA
+6. specialised classifier models
+7. multiple task-specific small models
+8. CRAG + generic small model
+9. knowledge graph + small model
+10. frontier model only when escalation is required.
+
+Determine whether one CLM is sensible or whether a **Company Model Portfolio** is superior.
+
+Do NOT recommend training a model merely because the name CLM sounds attractive.
+
+Calculate:
+
+training cost
++
+fine-tuning cost
++
+inference cost
++
+hosting cost
++
+GPU/CPU cost
++
+evaluation cost
++
+refresh cost
++
+operations cost
+
+versus expected frontier-LLM savings.
+
+---
+
+# PART AA — INTELLIGENCE ROUTER
+
+Design a governed **Intelligence Router**.
+
+Every request should be classified on dimensions such as:
+
+- deterministic solvability
+- knowledge freshness
+- complexity
+- uncertainty
+- risk
+- tenant
+- privacy
+- latency requirement
+- accuracy requirement
+- cost budget
+- model capability
+- regulatory sensitivity.
+
+Possible route:
+
+```text
+Can deterministic system answer?
+        │
+       YES → answer
+        │
+       NO
+        ▼
+Can cache answer safely?
+        │
+       YES → answer
+        │
+       NO
+        ▼
+Can CRAG provide sufficient grounded answer?
+        │
+       YES → answer
+        │
+       NO
+        ▼
+Can CLM answer within confidence/risk threshold?
+        │
+       YES → verify → answer
+        │
+       NO
+        ▼
+Use frontier LLM
+        │
+        ▼
+Verify
+        │
+        ▼
+Should the result improve CRAG/CLM?
+```
+
+High-risk decisions must not be routed solely on cheapest cost.
+
+---
+
+# PART AB — LEARNING / PROMOTION LOOP
+
+A critical question is:
+
+> When we repeatedly pay a frontier LLM for the same class of reasoning, why are we still paying for it?
+
+Design a governed learning loop.
+
+```text
+External LLM escalation
+        ↓
+Verified successful answer
+        ↓
+Classify reusable knowledge
+        ↓
+Can deterministic rule handle it?
+   YES → rule/policy candidate
+
+Else:
+Can CRAG handle it next time?
+   YES → knowledge candidate
+
+Else:
+Is this repeated domain reasoning?
+   YES → CLM training/evaluation candidate
+```
+
+Nothing automatically becomes company truth.
+
+Require:
+
+- verification
+- provenance
+- approval where appropriate
+- versioning
+- regression tests
+- expiry/revalidation.
+
+The objective is:
+
+> **Expensive intelligence should progressively teach the cheaper layers, where safe.**
+
+---
+
+# PART AC — INTELLIGENCE COST LEDGER
+
+Create a first-class **Intelligence Cost Ledger**.
+
+Every AI/retrieval/agent operation should record where appropriate:
+
+- tenant
+- capability
+- workflow
+- agent
+- request class
+- routing layer
+- provider
+- model
+- model version
+- input tokens
+- output tokens
+- cached tokens
+- retrieval cost
+- embedding cost
+- reranking cost
+- CLM inference cost
+- frontier LLM cost
+- tool/API cost
+- compute cost
+- latency
+- retries
+- success/failure
+- confidence
+- human-review cost where measurable.
+
+We must be able to answer:
+
+> Why did this workflow cost £X?
+
+and:
+
+> Which intelligence layer caused the cost?
+
+---
+
+# PART AD — FULL PRODUCT COST MODEL
+
+Do not restrict cost calculation to LLM tokens.
+
+Build a configurable TalkProof cost model covering:
+
+### AI
+- LLM
+- CLM
+- embeddings
+- reranking
+- RAG
+- evaluations
+- agent reasoning.
+
+### Communications
+- telephony
+- numbers
+- SIP
+- SMS
+- WhatsApp
+- email
+- video/media.
+
+### Data
+- storage
+- database
+- vector database
+- graph database
+- backups
+- bandwidth.
+
+### Trust
+- RFC3161 TSA
+- blockchain anchoring
+- certificates
+- verification.
+
+### Infrastructure
+- compute
+- containers/serverless
+- queues
+- monitoring
+- logging
+- tracing.
+
+### Engineering automation
+- coding agents
+- test agents
+- security agents
+- self-awareness agents
+- self-correction agents
+- CI/CD.
+
+### Human
+Where relevant:
+- HiL
+- support
+- security approval
+- compliance approval
+- engineering intervention.
+
+Calculate at least:
+
+```text
+Cost per interaction
+Cost per call
+Cost per certified proof
+Cost per tenant
+Cost per workflow
+Cost per provider
+Cost per AI agent
+Cost per capability
+Cost per month
+Cost per active user
+Cost per correction
+Cost per incident
+```
+
+---
+
+# PART AE — COST-AWARE SELF-AWARENESS
+
+The Product State Model must understand its own economics.
+
+Add:
+
+```text
+Expected cost
+      │
+      ▼
+Observed cost
+      │
+      ▼
+Cost deviation detector
+      │
+ ┌────┴───────────┐
+ ▼                ▼
+Waste          Necessary increase
+ │
+ ▼
+Root cause
+ │
+ ▼
+Optimisation proposal
+```
+
+Examples:
+
+- repeated frontier LLM calls that CRAG could answer;
+- CLM more expensive than expected;
+- excessive agent loops;
+- retrieval retrieving too many documents;
+- expensive model used for classification;
+- provider price increase;
+- retries causing cost spikes;
+- logs/traces costing more than workload;
+- duplicated AI verification;
+- unnecessary embeddings.
+
+---
+
+# PART AF — COST-AWARE AGENTS
+
+Every production agent must have configurable budgets.
+
+Consider:
+
+- maximum cost/run
+- maximum tokens
+- maximum external LLM calls
+- maximum tool calls
+- maximum retries
+- maximum execution time
+- allowed models
+- preferred models
+- escalation threshold
+- tenant budget
+- daily/monthly budget.
+
+An agent must not be allowed to enter an uncontrolled reasoning/tool loop.
+
+Budget exhaustion must produce a governed fallback rather than uncontrolled spending.
+
+---
+
+# PART AG — VALUE-AWARE ROUTING
+
+Cheapest is NOT always best.
+
+Optimise:
+
+```text
+VALUE
+────────────
+COST × RISK
+```
+
+or establish a better evidence-based decision model.
+
+For example:
+
+Low-risk classification
+→ deterministic/small model.
+
+Routine company question
+→ CRAG/CLM.
+
+Complex support diagnosis
+→ CLM then frontier escalation.
+
+Security incident
+→ strongest appropriate model + independent verification.
+
+Certificate/evidence decision
+→ deterministic verification + governed AI assistance, never uncontrolled cheapest-model routing.
+
+---
+
+# PART AH — TENANT CONFIGURABLE ECONOMICS
+
+Determine which controls tenants should be able to configure:
+
+- preferred AI provider
+- permitted models
+- quality/cost mode
+- fallback provider
+- maximum AI spend
+- call/provider budget
+- storage policy
+- transcription provider
+- verification depth.
+
+Examples:
+
+ECONOMY
+BALANCED
+QUALITY
+REGULATED/HIGH-ASSURANCE
+
+But TalkProof must retain mandatory minimum assurance for certified evidence.
+
+A tenant must not be able to configure away an integrity/security requirement merely to reduce cost.
+
+---
+
+# PART AI — SELF-CORRECTION COST MODEL
+
+The self-awareness/self-correction platform itself can become expensive.
+
+Measure separately:
+
+```text
+Cost of observing
+Cost of detecting
+Cost of diagnosing
+Cost of generating correction
+Cost of testing
+Cost of security verification
+Cost of simulation
+Cost of canary
+Cost of rollback
+Cost of learning
+```
+
+Before autonomous remediation ask:
+
+> Is the expected value/risk reduction of this correction greater than its execution cost?
+
+Do not spend £20 diagnosing a harmless £0.02 anomaly unless risk justifies it.
+
+---
+
+# PART AJ — ECONOMIC DIGITAL TWIN
+
+Extend the proposed Product State Model/digital twin to include economics.
+
+For a proposed change, estimate BEFORE execution:
+
+```text
+Current:
+Provider A
+Model X
+Architecture Y
+      ↓
+Current quality / latency / reliability / cost
+
+Proposed:
+Provider B
+Model Z
+Architecture Y
+      ↓
+Predicted quality / latency / reliability / cost
+```
+
+Use this for:
+
+- provider switching
+- model switching
+- CRAG vs CLM vs LLM
+- infrastructure scaling
+- storage tiering
+- observability levels
+- self-healing actions.
+
+---
+
+# PART AK — COST AS A PRODUCT FEATURE
+
+Research whether TalkProof can expose safe economics to customers.
+
+Possible dashboard:
+
+```text
+TalkProof Cost Intelligence
+
+Telephony        £...
+STT              £...
+AI               £...
+Evidence         £...
+Storage          £...
+Infrastructure   £...
+────────────────────
+Total            £...
+
+Avoided frontier-LLM calls: ...
+CRAG hit rate: ...
+CLM resolution rate: ...
+External LLM escalation: ...
+Estimated savings: £...
+```
+
+If valid, this becomes differentiation:
+
+> TalkProof doesn't merely use AI. It knows when NOT to use expensive AI.
+
+---
+
+# PART AL — CLM/CRAG SUCCESS METRICS
+
+Define measurable metrics:
+
+- deterministic resolution %
+- cache hit %
+- CRAG resolution %
+- CRAG grounded accuracy
+- CLM resolution %
+- CLM accuracy
+- frontier escalation %
+- cost/request
+- cost/capability
+- cost/tenant
+- latency
+- hallucination/error rate
+- human escalation %
+- knowledge freshness
+- repeated expensive-query rate.
+
+Key strategic metric:
+
+> **Frontier LLM Dependency Ratio**
+
+Track how much routine company intelligence still requires external frontier models.
+
+Over time, for stable knowledge/workflows, this ratio should fall without reducing quality.
+
+---
+
+# PART AM — MARKET RESEARCH ADDITION
+
+Research whether competitors/platforms are moving toward:
+
+- cascaded models
+- small-model routing
+- semantic caching
+- enterprise/domain models
+- local models
+- model gateways
+- cost-aware AI routing
+- AI FinOps
+- inference optimisation
+- autonomous cost optimisation.
+
+Identify where TalkProof could go beyond existing approaches.
+
+Do not claim CLM itself is novel without evidence.
+
+Our potential differentiation may instead be the integration of:
+
+Company State
++
+CRAG
++
+CLM/model portfolio
++
+frontier escalation
++
+cost ledger
++
+self-awareness
++
+continuous assurance
++
+self-correction
++
+evidence provenance.
+
+---
+
+# PART AN — UPDATE THE THREE TARGET DIAGRAMS
+
+The Frontier TalkProof diagram must now include:
+
+```text
+                     TALKPROOF
+                         │
+                PRODUCT STATE MODEL
+                         │
+          ┌──────────────┼──────────────┐
+          ▼              ▼              ▼
+      Structured      Company         Historical
+        State           RAG            Memory
+          │              │              │
+          └──────────────┼──────────────┘
+                         ▼
+                 INTELLIGENCE ROUTER
+                         │
+       ┌─────────────────┼─────────────────┐
+       ▼                 ▼                 ▼
+ Deterministic          CLM          Frontier LLM
+       │                 │                 │
+       └─────────────────┼─────────────────┘
+                         ▼
+                 VERIFICATION LAYER
+                         │
+                         ▼
+              AGENT / PRODUCT ACTION
+                         │
+                         ▼
+                 OBSERVE OUTCOME
+                         │
+              ┌──────────┴──────────┐
+              ▼                     ▼
+          LEARNING               COST LEDGER
+              │                     │
+              └──────────┬──────────┘
+                         ▼
+                  PRODUCT STATE
+```
+
+Overlay:
+
+SECURITY CONTROL PLANE
++
+COMPLIANCE CONTROL PLANE
++
+EVIDENCE/TRUST CONTROL PLANE
++
+ECONOMIC CONTROL PLANE.
+
+---
+
+# PART AO — UPDATE V2, DO NOT CREATE ANOTHER DISCONNECTED BASELINE
+
+Append these findings/requirements to the same living V2.
+
+Preserve historical Parts 1–7.
+
+Use the principle:
+
+> **IMMUTABLE HISTORY + VERSIONED LIVING REQUIREMENTS**
+
+A baseline records what was known/decided at a particular point.
+
+It does NOT prohibit subsequent requirements from entering the active product baseline.
+
+Every new addition must carry:
+
+- date
+- origin
+- status
+- rationale
+- requirement/proposal/research classification
+- supersedes/depends-on relationship where applicable.
+
+Avoid repeated full recovery exercises merely because the product evolves.
+
+---
+
+# FINAL ARCHITECTURAL QUESTION
+
+The final review must answer:
+
+> Can TalkProof progressively reduce its dependence on expensive general-purpose frontier intelligence while simultaneously increasing its company-specific intelligence, reliability, evidence quality and operational autonomy?
+
+And:
+
+> Does every additional autonomous capability produce measurable economic value greater than its intelligence/compute/operational cost?
+
+If not, reject or redesign it.
+
+The objective is NOT maximum AI usage.
+
+The objective is:
+
+> **Minimum necessary expensive intelligence + maximum verified outcome.**
+
+And ultimately:
+
+> **TalkProof should become progressively more knowledgeable about itself, progressively cheaper to operate intelligently, progressively safer to change, and progressively harder to reproduce.**
+
+That is the missing economic layer. **CLM isn't merely another model feature; it potentially becomes part of the mechanism by which TalkProof learns to stop repeatedly purchasing the same intelligence from frontier models.**
+
+One caution I deliberately put into the prompt: don't assume `CRAG → CLM → LLM` for every request. Sometimes **deterministic code → answer** should finish the request before any RAG/model is touched. That is cheaper *and* more reliable.

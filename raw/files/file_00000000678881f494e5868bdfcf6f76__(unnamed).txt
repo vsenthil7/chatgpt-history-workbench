@@ -1,0 +1,146 @@
+from __future__ import annotations
+
+from datetime import UTC, datetime
+
+from aumnity_contracts import (
+    OrganisationId,
+    PrincipalId,
+    SequenceIdGenerator,
+    TenantContext,
+    TickingClock,
+)
+from aumnity_kernel import AuditLog, CriticalWorkEvidencePolicy
+from aumnity_kernel.adapters.memory import InMemoryPlatformStores, InMemoryUnitOfWork
+from aumnity_kernel.identity import PrincipalKind
+from aumnity_kernel.organisation import Organisation, OrganisationDirectory, PlatformProvisioning
+from aumnity_kernel.workobject.model import Priority, RiskLevel
+from aumnity_kernel.workobject.service import WorkObjectRegistry
+from aumnity_kernel.workobject.state import WorkObjectState
+
+
+def build_rig():
+    stores = InMemoryPlatformStores()
+    clock = TickingClock()
+    ids = SequenceIdGenerator()
+    provisioning = PlatformProvisioning(stores.tenant_provisioner(), clock, ids)
+    directory = OrganisationDirectory(
+        stores.organisations,
+        stores.principals,
+        stores.identity_unit_of_work(),
+        clock,
+        ids,
+    )
+    audit = AuditLog(stores.audit_sink, directory, stores.audit_unit_of_work())
+    registry = WorkObjectRegistry(
+        stores.work_objects,
+        stores.evidence,
+        audit,
+        CriticalWorkEvidencePolicy(),
+        directory,
+        stores.unit_of_work(),
+        clock,
+        ids,
+    )
+    org, founder = provisioning.create_organisation("Probe Org", "Founder", PrincipalKind.HUMAN)
+    context = TenantContext(org.organisation_id, founder.principal_id)
+    return stores, registry, context
+
+
+# P1: V013 READ frame can still mutate through the public restore() transaction-plumbing method.
+stores = InMemoryPlatformStores()
+uow = InMemoryUnitOfWork(stores.organisations)
+restored = Organisation(
+    organisation_id=OrganisationId("org-restored-inside-read"),
+    name="Restored Inside Read",
+    created_at=datetime(2026, 1, 1, tzinfo=UTC),
+)
+uow.run(
+    lambda: uow.read(
+        lambda: stores.organisations.restore({restored.organisation_id: restored})
+    )
+)
+print("P1_JOINED_READ_RESTORE_MUTATION_PERSISTED", stores.organisations.get(restored.organisation_id) == restored)
+
+# Also prove a top-level READ can write using the same public method.
+stores2 = InMemoryPlatformStores()
+uow2 = InMemoryUnitOfWork(stores2.organisations)
+restored2 = Organisation(
+    organisation_id=OrganisationId("org-restored-top-level-read"),
+    name="Restored Top-level Read",
+    created_at=datetime(2026, 1, 1, tzinfo=UTC),
+)
+uow2.read(lambda: stores2.organisations.restore({restored2.organisation_id: restored2}))
+print("P1_TOP_LEVEL_READ_RESTORE_MUTATION_PERSISTED", stores2.organisations.get(restored2.organisation_id) == restored2)
+
+# P2: block() is split across get()/read and _transition()/write. Insert a valid commit in that gap.
+stores3, registry3, context3 = build_rig()
+wo = registry3.create(
+    context3,
+    title="TOCTOU",
+    purpose="Probe split public operation",
+    work_type="TEST",
+    priority=Priority.NORMAL,
+    risk_level=RiskLevel.LOW,
+    owner_id=context3.principal_id,
+)
+registry3.mark_ready(context3, wo.work_object_id)
+original_get = registry3.get
+injected = False
+
+def interleaving_get(context: TenantContext, work_object_id):
+    global injected
+    stale = original_get(context, work_object_id)
+    if not injected:
+        injected = True
+        registry3.mark_assignable(context, work_object_id)
+    return stale
+
+registry3.get = interleaving_get  # type: ignore[method-assign]
+blocked = registry3.block(context3, wo.work_object_id)
+print("P2_STATE_AT_WRITE_WAS_ASSIGNABLE", blocked.state is WorkObjectState.BLOCKED)
+print("P2_STALE_BLOCKED_FROM", blocked.blocked_from.value if blocked.blocked_from else None)
+print("P2_EXPECTED_BLOCKED_FROM", WorkObjectState.ASSIGNABLE.value)
+
+# P3: a raw string 'CRITICAL' bypasses the policy because runtime enum type is not validated.
+stores4, registry4, context4 = build_rig()
+wo4 = registry4.create(
+    context4,
+    title="Critical type bypass",
+    purpose="Complete without evidence",
+    work_type="TEST",
+    priority=Priority.NORMAL,
+    risk_level="CRITICAL",  # type: ignore[arg-type]
+    owner_id=context4.principal_id,
+)
+registry4.mark_ready(context4, wo4.work_object_id)
+registry4.mark_assignable(context4, wo4.work_object_id)
+registry4.assign(context4, wo4.work_object_id, context4.principal_id)
+registry4.start_work(context4, wo4.work_object_id)
+registry4.submit_output(context4, wo4.work_object_id)
+registry4.request_review(context4, wo4.work_object_id)
+registry4.approve(context4, wo4.work_object_id)
+completed4 = registry4.complete(context4, wo4.work_object_id)
+print("P3_RAW_CRITICAL_TYPE", type(completed4.risk_level).__name__, repr(completed4.risk_level))
+print("P3_CRITICAL_COMPLETED_WITHOUT_EVIDENCE", completed4.state is WorkObjectState.COMPLETED and not completed4.evidence_ids)
+
+# P4: rollback catches Exception, not BaseException; a raised abort leaves the write behind.
+class AbortTransaction(BaseException):
+    pass
+
+stores5 = InMemoryPlatformStores()
+uow5 = InMemoryUnitOfWork(stores5.organisations)
+org5 = Organisation(
+    organisation_id=OrganisationId("org-baseexception"),
+    name="BaseException Leak",
+    created_at=datetime(2026, 1, 1, tzinfo=UTC),
+)
+
+def aborting_operation() -> None:
+    stores5.organisations.add(org5)
+    raise AbortTransaction("abort")
+
+try:
+    uow5.run(aborting_operation)
+except AbortTransaction:
+    pass
+print("P4_BASEEXCEPTION_WRITE_PERSISTED", stores5.organisations.get(org5.organisation_id) == org5)

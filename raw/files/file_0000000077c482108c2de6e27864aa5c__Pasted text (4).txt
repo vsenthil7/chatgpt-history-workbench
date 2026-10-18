@@ -1,0 +1,831 @@
+# 04/10/2026 19:40 — Intelligence Decision Ledger
+
+On the **“partner” twice**: you read a real tonal change, but it wasn't frustration or emotion toward you. I used it once to acknowledge your correction and again while shifting into the recommendation. It was an unnecessary conversational emphasis—more like **“yes, I’m with you on this”**—not a signal that I was annoyed, worried, or trying to manage you. You noticed the repetition correctly.
+
+Now your technical correction is more important: **yes, what you just described is substantially better than the simple CRAG → CLM → LLM cascade I wrote.**
+
+The architecture needs to remember **every intelligence decision**, including decisions that *didn't* escalate.
+
+## The missing component: Intelligence Decision Ledger
+
+Every decision/request should create an immutable-ish record:
+
+```text
+REQUEST
+  │
+  ├─ What was being decided?
+  ├─ Tenant / workflow / agent
+  ├─ Risk classification
+  └─ Required quality level
+           │
+           ▼
+     ROUTING DECISION
+           │
+   ┌───────┼────────┬─────────┐
+   ▼       ▼        ▼         ▼
+ RULE    RAG       CLM       LLM
+   │       │        │         │
+   └───────┴────────┴─────────┘
+           │
+           ▼
+        RESULT
+           │
+           ▼
+    OUTCOME / TRUTH
+```
+
+For **every stage**, record things such as:
+
+| Record | Examples |
+|---|---|
+| Decision ID | globally traceable ID |
+| Input fingerprint | normalized/hash representation |
+| Tenant | who owns decision |
+| Capability | support/security/call/etc. |
+| Route attempted | Rule → RAG → CLM → LLM |
+| Why routed | confidence/risk/missing knowledge |
+| RAG sources | exact chunks/doc versions |
+| RAG score | retrieval/answer confidence |
+| CLM | model + version |
+| LLM | provider/model/version |
+| Input tokens | 3,842 |
+| Output tokens | 611 |
+| Cache tokens | if applicable |
+| Retrieval cost | £... |
+| CLM cost | £... |
+| LLM API cost | £... |
+| Latency | each stage + total |
+| Answer/decision | what happened |
+| Confidence | calibrated value |
+| Human intervention | yes/no |
+| Actual outcome | correct/wrong/unknown |
+| Missed issue | yes/no |
+| Correction | what should have happened |
+| Reusable? | rule/RAG/CLM candidate |
+
+So we don't merely have an **AI Cost Ledger**.
+
+We need an **Intelligence Decision Ledger**.
+
+Cost is one dimension of that ledger.
+
+---
+
+# Your RAG-only customer example is especially important
+
+Suppose Customer A says:
+
+> **“For this workflow I'm happy with RAG. Don't spend money on CLM/LLM.”**
+
+Fine.
+
+But TalkProof must measure the consequence.
+
+```text
+Customer policy
+   │
+   ▼
+RAG ONLY
+   │
+   ├── Decision A → correct
+   ├── Decision B → correct
+   ├── Decision C → WRONG
+   ├── Decision D → missed issue
+   └── Decision E → uncertain
+```
+
+Dashboard:
+
+| RAG-only tenant | Result |
+|---|---:|
+| Decisions | 100,000 |
+| Correct/validated | 97,850 |
+| Wrong | 730 |
+| Missed | 410 |
+| Unknown/unverified | 1,010 |
+| Human escalations | 620 |
+| Estimated saving vs LLM | £4,280 |
+| Estimated quality loss | 1.14% |
+| High-risk errors | 7 |
+
+Then the customer isn't merely selecting **cheap AI**.
+
+They're making a measurable **cost/quality/risk trade-off**.
+
+Same thing for CLM-only.
+
+---
+
+# And your most important idea: LLM should teach the cheaper layers
+
+Exactly.
+
+If this happens:
+
+```text
+RAG
+ ↓ insufficient
+
+CLM
+ ↓ insufficient
+
+Frontier LLM
+ ↓
+£0.08 + 4.2 sec
+ ↓
+verified good answer
+```
+
+and tomorrow we receive essentially the same request, it is stupid to blindly spend another £0.08.
+
+But I wouldn't immediately shove the LLM answer into RAG.
+
+Instead:
+
+```text
+LLM ESCALATION
+      │
+      ▼
+DECISION LEDGER
+      │
+      ▼
+VERIFIED OUTCOME
+      │
+      ▼
+LEARNING QUEUE
+      │
+      ▼
+NIGHTLY / PERIODIC CONSOLIDATION
+      │
+      ├──────────────┬──────────────┐
+      ▼              ▼              ▼
+  RULE candidate   RAG candidate   CLM candidate
+      │              │              │
+      ▼              ▼              ▼
+ Validation       Validation      Evaluation
+      │              │              │
+      └──────────────┼──────────────┘
+                     ▼
+                PROMOTION GATE
+                     │
+                     ▼
+              CHEAPER KNOWLEDGE
+```
+
+That's much safer.
+
+## Why batch processing is clever
+
+During production, don't let every successful LLM answer mutate company knowledge immediately.
+
+At night—or at configurable intervals—the **Knowledge Consolidation Pipeline** can examine:
+
+- repeated LLM escalations;
+- semantically similar requests;
+- expensive request classes;
+- RAG misses;
+- CLM failures;
+- corrected answers;
+- human-approved answers;
+- wrong RAG answers;
+- wrong CLM answers;
+- high-latency decisions.
+
+Then classify them.
+
+**Stable fact?** → structured store/RAG.
+
+**Deterministic decision?** → rule/policy-as-code candidate.
+
+**Frequently repeated semantic reasoning?** → CLM training/evaluation candidate.
+
+**Temporary/current information?** → RAG with expiry/freshness.
+
+**Rare complicated problem?** → leave with frontier LLM.
+
+**Dangerous/high-risk judgement?** → continue frontier/human verification regardless of cost.
+
+So the system learns **where intelligence should live**.
+
+---
+
+# This creates a powerful economic loop
+
+Today:
+
+```text
+100,000 requests
+
+Rules       20%
+RAG         35%
+CLM         25%
+LLM         20%
+```
+
+After learning:
+
+```text
+100,000 requests
+
+Rules       30% ↑
+RAG         43% ↑
+CLM         22%
+LLM          5% ↓
+```
+
+while measuring whether accuracy fell.
+
+That's the critical part.
+
+We should never celebrate:
+
+> “LLM usage dropped 75%!”
+
+unless simultaneously:
+
+```text
+Accuracy          ≥ previous
+High-risk misses  ≤ previous
+Latency           improved
+Cost              reduced
+```
+
+---
+
+# Therefore the dashboard needs **four dimensions**
+
+Not merely cost.
+
+```text
+             INTELLIGENCE CONTROL CENTRE
+
+QUALITY          COST           SPEED          RISK
+───────          ────           ─────          ────
+accuracy         £/decision     latency        misses
+wrong            £/tenant       P95/P99        severe errors
+missed           £/agent        escalation     compliance
+corrected        £/route        retries        security
+unknown          savings                       evidence risk
+```
+
+And below it:
+
+```text
+ROUTING DISTRIBUTION
+
+Deterministic   █████████████ 31%
+Cache           ███████       17%
+RAG             ████████████  29%
+CLM             ██████        15%
+Frontier LLM    ███            8%
+```
+
+Then:
+
+```text
+FRONTIER LLM ESCALATION
+
+This month             8.0%
+Last month            13.4%
+Avoidable escalations  2.1%
+Necessary escalations  5.9%
+
+Cost avoided through learning: £____
+Quality regression:             _____
+```
+
+**That becomes one of the most important operational KPIs.**
+
+---
+
+## Add this to the Claude prompt
+
+# MANDATORY CORRECTION — INTELLIGENCE DECISION LEDGER, QUALITY FEEDBACK & KNOWLEDGE CONSOLIDATION
+
+Extend the previously specified Company Intelligence / CRAG / CLM / LLM architecture.
+
+The architecture must NOT merely optimise which model answers a request.
+
+It must learn from every intelligence decision and progressively reduce unnecessary dependence on expensive frontier models WITHOUT hiding the resulting quality/risk trade-off.
+
+## 1. INTELLIGENCE DECISION LEDGER
+
+Create a first-class `Intelligence Decision Ledger`.
+
+Every meaningful automated decision must have a traceable Decision ID.
+
+Capture, where applicable:
+
+- tenant
+- workflow
+- capability
+- agent
+- timestamp
+- input/request fingerprint
+- risk class
+- routing policy/version
+- tenant intelligence policy
+- deterministic rule attempted
+- cache attempted
+- RAG attempted
+- retrieved sources and versions
+- retrieval scores
+- RAG confidence
+- CLM attempted
+- CLM model/version
+- CLM confidence
+- frontier LLM attempted
+- provider
+- model/version
+- prompt/version
+- input tokens
+- output tokens
+- cached tokens
+- retrieval/embedding/reranking cost
+- CLM inference cost
+- frontier API cost
+- tool/API cost
+- latency per stage
+- total latency
+- retries
+- resulting decision
+- confidence
+- verification method
+- human intervention
+- eventual outcome
+- correct/wrong/unknown
+- missed condition
+- severity
+- correction
+- reusable-learning classification.
+
+This ledger must support full reconstruction:
+
+> Why did TalkProof make this decision, what information/model did it use, how much did it cost, how long did it take, and was it ultimately correct?
+
+---
+
+# 2. TENANT INTELLIGENCE POLICY
+
+A tenant may deliberately choose different intelligence levels.
+
+Examples:
+
+### DETERMINISTIC ONLY
+
+### RAG MAX
+
+Do not escalate beyond RAG.
+
+### CLM MAX
+
+RAG → CLM, no frontier LLM.
+
+### BALANCED
+
+Use cost/quality routing.
+
+### HIGH ASSURANCE
+
+Permit frontier LLM and independent verification.
+
+### CUSTOM
+
+Per-capability routing policy.
+
+But configuration must be bounded by mandatory TalkProof security/evidence/compliance requirements.
+
+A customer cannot configure away a mandatory integrity requirement.
+
+---
+
+# 3. MEASURE THE CONSEQUENCE OF CUSTOMER COST CHOICES
+
+If a tenant selects RAG-only or CLM-only, TalkProof must not merely report savings.
+
+Measure:
+
+- decisions made
+- validated correct
+- wrong decisions
+- missed decisions
+- uncertain decisions
+- unknown/unverifiable outcomes
+- human corrections
+- severity
+- high-risk errors
+- latency
+- cost
+- estimated avoided escalation cost.
+
+Dashboard must make visible:
+
+> Cost saved versus measurable quality/risk difference.
+
+Never claim an answer was correct unless an outcome or verification mechanism establishes it.
+
+Maintain an UNKNOWN category.
+
+---
+
+# 4. FRONTIER ESCALATION RECORD
+
+Whenever CRAG/CLM cannot answer and the request escalates to a frontier LLM, retain the escalation as a potential learning event.
+
+Store:
+
+RAG retrieval context
++
+RAG failure/reason
++
+CLM response
++
+CLM failure/reason
++
+LLM input
++
+LLM output
++
+cost
++
+latency
++
+verification
++
+eventual outcome.
+
+This becomes training/knowledge-improvement evidence.
+
+---
+
+# 5. DO NOT IMMEDIATELY LEARN FROM LLM OUTPUT
+
+An LLM answer is NOT company truth merely because it produced an answer.
+
+Never automatically insert raw frontier output into authoritative CRAG/CLM knowledge.
+
+Instead create:
+
+`KnowledgeLearningCandidate`.
+
+Only verified outcomes may be promoted.
+
+---
+
+# 6. KNOWLEDGE CONSOLIDATION PIPELINE
+
+Design configurable batch/continuous consolidation.
+
+For example nightly:
+
+```text
+Decision Ledger
+      ↓
+LLM escalations
+RAG misses
+CLM misses
+Wrong decisions
+Human corrections
+Repeated requests
+Expensive request classes
+      ↓
+Cluster / classify
+      ↓
+Knowledge candidates
+      ↓
+┌────────┬────────┬────────┬───────────┐
+▼        ▼        ▼        ▼           ▼
+RULE    CACHE     RAG      CLM       KEEP LLM
+```
+
+Determine appropriate scheduling rather than assuming nightly is always optimal.
+
+Some safety/security knowledge may require immediate review.
+
+Other knowledge can wait for batch consolidation.
+
+---
+
+# 7. KNOWLEDGE PROMOTION RULE
+
+For every candidate ask:
+
+### Can deterministic logic answer this?
+
+If yes:
+→ propose rule/policy implementation.
+
+### Is this stable factual/company knowledge?
+
+If yes:
+→ structured store / CRAG candidate.
+
+### Is it repeated semantic/domain reasoning?
+
+If yes:
+→ CLM dataset/evaluation candidate.
+
+### Is it temporary/current information?
+
+If yes:
+→ time-bounded RAG/cache with freshness controls.
+
+### Is it rare/high-complexity reasoning?
+
+If yes:
+→ retain frontier escalation.
+
+### Is it high-risk?
+
+If yes:
+→ retain appropriate high-assurance model/human verification regardless of cost.
+
+---
+
+# 8. PROMOTION MUST BE VERIFIED
+
+Before promotion require appropriate:
+
+- provenance
+- source authority
+- human approval where required
+- regression tests
+- evaluation dataset
+- confidence threshold
+- security check
+- tenant isolation check
+- expiry/freshness policy
+- rollback/versioning.
+
+Maintain lineage:
+
+`Decision → Learning Candidate → Verification → Promotion → Knowledge Version`.
+
+---
+
+# 9. DUPLICATE EXPENSIVE-REQUEST DETECTION
+
+Before invoking a frontier model, determine whether the same or materially equivalent verified problem has already been solved.
+
+Check, as appropriate:
+
+1. deterministic knowledge
+2. exact cache
+3. semantic cache
+4. structured state
+5. company RAG
+6. verified historical decisions
+7. CLM
+8. frontier LLM.
+
+Do NOT reuse previous answers blindly when:
+
+- underlying data changed;
+- requirement/policy changed;
+- provider version changed;
+- regulation changed;
+- security context changed;
+- tenant differs;
+- knowledge expired.
+
+---
+
+# 10. INTELLIGENCE QUALITY LEDGER
+
+Alongside cost, maintain quality outcomes.
+
+Track:
+
+- correct
+- incorrect
+- partially correct
+- missed
+- false positive
+- false negative
+- unknown
+- human overridden
+- later corrected.
+
+Break down by:
+
+- deterministic
+- cache
+- RAG
+- CLM
+- frontier model
+- provider/model/version
+- agent
+- tenant
+- capability
+- risk class.
+
+---
+
+# 11. INTELLIGENCE CONTROL CENTRE
+
+Design an operational dashboard covering four dimensions:
+
+## QUALITY
+
+Accuracy
+Wrong
+Missed
+Unknown
+Human corrections
+High-severity errors.
+
+## COST
+
+Cost/decision
+Cost/tenant
+Cost/agent
+Cost/capability
+Cost by RAG/CLM/LLM
+Savings from cheaper routing.
+
+## PERFORMANCE
+
+Latency
+P50/P95/P99
+Retries
+Escalation latency.
+
+## RISK
+
+Security errors
+Compliance errors
+Evidence-integrity errors
+High-risk misses
+Policy violations.
+
+---
+
+# 12. ROUTING DISTRIBUTION
+
+Display current intelligence distribution:
+
+- deterministic
+- cache
+- CRAG
+- CLM
+- frontier LLM
+- human.
+
+Track change over time.
+
+A strategic KPI is:
+
+`Frontier LLM Dependency Ratio`.
+
+But reducing this KPI is NOT itself success.
+
+It is successful only if:
+
+- quality does not fall below policy;
+- high-risk errors do not increase;
+- latency remains acceptable;
+- cost materially improves.
+
+---
+
+# 13. LEARNING ECONOMICS
+
+Calculate:
+
+`Cost of learning candidate processing`
+
+versus
+
+`Expected future avoided intelligence cost`.
+
+Do not spend £100 converting an obscure request into CLM/RAG knowledge if expected lifetime savings are £2 unless risk/value justifies it.
+
+Rank learning candidates by something similar to:
+
+`Expected reuse × avoided cost × value/risk importance ÷ promotion cost`.
+
+Research and propose the proper formula.
+
+---
+
+# 14. COMPANY INTELLIGENCE FLYWHEEL
+
+Evaluate this as a possible compounding TalkProof advantage:
+
+```text
+More operation
+      ↓
+More verified decisions
+      ↓
+More company knowledge
+      ↓
+Better deterministic/RAG/CLM coverage
+      ↓
+Fewer unnecessary frontier calls
+      ↓
+Lower cost + lower latency
+      ↓
+More operational evidence
+      ↓
+Better routing/evaluation
+      ↓
+More operation
+```
+
+Determine what portions are genuinely defensible versus easily reproducible.
+
+---
+
+# 15. PRODUCT STATE MODEL INTEGRATION
+
+The Intelligence Decision Ledger cannot become another isolated database.
+
+Link:
+
+Requirement
+→ Policy
+→ Capability
+→ Tenant configuration
+→ Decision
+→ Knowledge used
+→ Model/provider
+→ Cost
+→ Outcome
+→ Incident
+→ Correction
+→ Learning candidate
+→ Promoted knowledge.
+
+This is part of TalkProof's Product State Model/provenance graph.
+
+---
+
+# 16. REQUIRED FINAL DIAGRAM
+
+Add a diagram:
+
+```text
+                       REQUEST
+                          │
+                          ▼
+                   POLICY / RISK
+                          │
+                          ▼
+               INTELLIGENCE ROUTER
+                          │
+     ┌─────────┬──────────┼──────────┬──────────┐
+     ▼         ▼          ▼          ▼          ▼
+  RULES      CACHE       CRAG       CLM      FRONTIER
+     │         │          │          │          LLM
+     └─────────┴──────────┴──────────┴──────────┘
+                          │
+                          ▼
+                     DECISION
+                          │
+                ┌─────────┴─────────┐
+                ▼                   ▼
+          DECISION LEDGER       ACTION/ANSWER
+                │                   │
+                └─────────┬─────────┘
+                          ▼
+                       OUTCOME
+                          │
+                          ▼
+                    QUALITY LEDGER
+                          │
+                          ▼
+                   LEARNING QUEUE
+                          │
+                          ▼
+               KNOWLEDGE CONSOLIDATION
+                          │
+             ┌────────────┼────────────┐
+             ▼            ▼            ▼
+           RULE          CRAG          CLM
+             │            │            │
+             └────────────┼────────────┘
+                          ▼
+               CHEAPER FUTURE DECISION
+```
+
+Cost, latency, provenance, quality and risk must be measurable throughout the entire path.
+
+---
+
+# 17. CORE PRINCIPLE
+
+Add the following architectural principle to the active TalkProof baseline:
+
+> **Every expensive intelligence call must either be justified by risk/value or create a verified learning opportunity that can reduce the need for equivalent expensive calls in the future.**
+
+And:
+
+> **A cheaper decision is only an improvement if its measurable quality and risk remain within the policy accepted for that capability and tenant.**
+
+The objective is not simply to minimise LLM calls.
+
+The objective is:
+
+> **minimum necessary intelligence cost for the required verified outcome.**
+
+This is becoming more interesting than a simple **CLM**. The asset is potentially the accumulated **decision → outcome → correction → learning** history. A competitor can copy code and even reproduce a RAG architecture; they cannot instantly reproduce years of verified operational decisions and their outcomes. That is the part I would deliberately try to make compound.

@@ -1,0 +1,85 @@
+00005-CGWO-Review — V012 reproduction evidence
+Review timestamp: 11/08/2026 03:40 Europe/London
+Artifact: AUMNITY-CGWO-SaaS_Claude_V012_20260809_2223(2).zip
+Internal root: AUMNITY-CGWO-SaaS_Claude_V012_20260809_2223
+SHA-256: 5d8bafb09d0cac352df5ea5f9bb22dd31c08f8dfffe1c9029c08c117334fad30
+Size: 258531 bytes
+Archive: 162 entries; 135 files; 27 directories; 690472 uncompressed bytes; 220001 compressed bytes
+
+A. CLEAN PACKAGE CHECKS
+-----------------------
+verify_release_zip.py original ZIP: RELEASE ZIP: PASS
+validate_starter.py clean extract: starter package contract: PASS
+validate_consistency.py clean extract: CONSISTENCY: PASS
+Independent runtime: Python 3.13.5, pytest 9.0.2, coverage 7.13.3
+Independent result: 488 passed; 523/523 statements; 108/108 branches; 100% line and branch
+Packaged runtime result: Python 3.12.3; 488 passed; same 523 statements and 108 branches at 100%
+
+B. F54 CANONICAL ALIAS OVERWRITE
+--------------------------------
+Proof archive: /mnt/data/cgwo_v012_alias_bypass.zip
+Proof SHA-256: 4c6d0c5d7c92945a1aee55ba4fa27349559777f3b584cfbbcab1cda852e9cc34
+Added raw member:
+  AUMNITY-CGWO-SaaS_Claude_V012_20260809_2223/./src/cgwo_core/authz.py
+Payload:
+  # MALICIOUS ALIAS OVERWRITE
+  raise RuntimeError('archive alias executed')
+Verifier result: RELEASE ZIP: PASS
+Python extractall resulting authz.py SHA-256:
+  ed0cb5385f2df6ddf69ff8b07a1494f2ac58b51a832a6f41d22a81821d2b9536
+unzip -oq resulting authz.py SHA-256:
+  ed0cb5385f2df6ddf69ff8b07a1494f2ac58b51a832a6f41d22a81821d2b9536
+Resulting file content is the alias payload, proving overwrite after PASS.
+
+C. F55 STALE MUTATION EVIDENCE
+------------------------------
+Repro tree: /mnt/data/cgwo_stale_mutation_repro/AUMNITY-CGWO-SaaS_Claude_V012_20260809_2223
+Change: removed exact-bool decision guard and removed its behavioral regressions; restored 100% coverage with tests that do not assert the security contract.
+Repro test summary:
+  476 tests passed
+  521 statements, 100% covered
+  106 branches, 100% covered
+Repro consistency result: CONSISTENCY: PASS
+Original mutation-summary SHA-256:
+  e44421b344d00abc7b4b44bf1d0a7ab6342ab3b90b04c6b2405f2050f011cd51
+Regressed-tree mutation-summary SHA-256:
+  e44421b344d00abc7b4b44bf1d0a7ab6342ab3b90b04c6b2405f2050f011cd51
+Old summary still states 897 killed, gate_ok=true.
+Direct authorization probe:
+  FAIL-OPEN REPRO: truthy non-bool decision authorized tenant-red
+
+D. F56 RAW AUTHORIZATION EXCEPTIONS
+-----------------------------------
+Untouched V012 results:
+  raising __class__ during Protocol isinstance => RuntimeError, code=None, protocol conformance exploded
+  non-port hostile type name                  => RuntimeError, code=None, name boom
+  non-bool hostile decision type name         => RuntimeError, code=None, name boom
+
+E. F57 RELEASE TREE OBJECT GAPS
+------------------------------
+Fresh copy + empty .git/ directory:
+  CONSISTENCY: PASS
+Fresh copy + FIFO named UNMANAGED_PIPE:
+  CONSISTENCY: PASS
+Stored outputs:
+  /mnt/data/cgwo_gate_repros4/emptygit.out
+  /mnt/data/cgwo_gate_repros4/fifo.out
+
+F. F58 MALFORMED MANIFEST ACCEPTANCE
+------------------------------------
+Proof archive: /mnt/data/cgwo_v012_malformed_manifest_pass.zip
+Proof SHA-256: 97628b788276d2fd6e3f82ec0df3b65849359d80d11eb05b92fb9ca75fded021
+Manifest deviations: FAKE-SCHEMA; NOT-CGWO project; not-a-date; file_count 999; duplicate src/mod.py; unknown injected_assertion.
+Verifier result: RELEASE ZIP: PASS
+
+G. F60 RTM DUPLICATE
+--------------------
+Parsed rows: 50
+Unique IDs: 49
+Duplicate:
+  line 42 SEC-004 — AuthorizationPort exact-bool return contract
+  line 44 SEC-004 — user-visible authorization error wording
+
+H. INDEPENDENT TOOL LIMITATION
+------------------------------
+ruff, mypy and mutmut executables were not installed in the independent environment. Their packaged outputs were read and are internally plausible. Pytest, coverage, both shipped validators, ZIP verifier probes, filesystem probes and authorization probes were run independently.

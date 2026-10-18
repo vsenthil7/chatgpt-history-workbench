@@ -1,0 +1,245 @@
+# AI Career Target Decision & Git Architecture
+
+**Decision date:** 08/10/2026 15:06\
+**Status:** DECIDED for preparation through 15 November 2026\
+**Decision owner:** Senthil\
+**Inputs:** independent proposals from ChatGPT, Claude and Perplexity;
+current UK role evidence reviewed by ChatGPT.
+
+## 1. Decision
+
+### Primary target
+
+**Senior AI Engineer --- Agentic & Generative AI Systems**
+
+Use these as equivalent/search titles rather than separate career
+tracks: - Senior AI Engineer --- Agentic AI - AI Engineer --- LLM &
+Agentic Systems - Applied AI Engineer --- Agentic/LLM Systems - AI/ML
+Engineer --- Agentic AI & LLMs - GenAI / Agentic AI Engineer
+
+### Secondary/stretch target
+
+**Applied ML / ML Engineer --- LLM, Search & Agents**
+
+This is a stretch lane, not the preparation anchor. It becomes a primary
+lane only if the November evidence shows sufficient depth in statistics,
+classical ML, model evaluation/training and MLOps.
+
+### Explicitly excluded as destination
+
+-   Data Engineer
+-   Analytics Engineer
+-   BI / DWH Engineer
+-   SQL / ETL roles presented as an AI transition
+
+The existing data-engineering background is supporting evidence, not the
+target identity.
+
+## 2. Why this role
+
+All three AI proposals converge on the same broad centre: applied AI
+systems built with Python, LLMs, RAG/retrieval, agents/tool use,
+evaluation, reliability and deployment. The main disagreement is how
+much classical ML should be included and how quickly job applications
+should start.
+
+The selected target preserves the user's requirement for a future-facing
+AI/ML/agentic role while using existing strengths instead of resetting
+the career around traditional model-training work.
+
+Current UK vacancies reviewed on 08/10/2026 reinforce this choice: roles
+labelled Senior AI Engineer, Agentic AI Engineer, AI/ML Engineer ---
+Agentic AI & LLMs, and Applied AI Engineer repeatedly ask for production
+Python, RAG, tool calling/orchestration, evaluation, guardrails,
+observability, security and cloud deployment.
+
+## 3. Compare / contrast of the three teachers
+
+### ChatGPT
+
+**Direction:** Senior AI / Agentic Systems Engineer with strong
+engineering foundations.\
+**Strength:** production hardening --- RAG, agents, auth/OIDC, tenancy,
+observability, evaluation, Azure, CI/CD, no-AI defence.\
+**Risk:** can over-structure the curriculum and prematurely make the
+three teachers converge.
+
+### Claude
+
+**Direction:** AI Engineer (LLM and agentic systems); Applied ML
+Engineer second.\
+**Strength:** strong insistence that the learner types/understands code
+and can work independently.\
+**Risk:** its initial attempt also tried to synchronise all three
+teachers into one syllabus; that is explicitly rejected.
+
+### Perplexity
+
+**Direction:** applied AI / AI systems / agentic application
+engineering, with ML foundations; ML engineering secondary pending a
+readiness check.\
+**Strength:** 130-hour dated preparation, evidence states, measured
+evaluation, and an explicit classical-ML block rather than pretending
+LLM application work equals ML engineering.\
+**Risk:** four weekday hours may be heavier than necessary, and its role
+recommendation was still provisional before the three-way comparison.
+
+### Decision from comparison
+
+Do **not** merge the teaching methods. Each AI remains an independent
+teacher/mentor. They may choose different sequences, exercises,
+explanations and even challenge the role decision.
+
+The shared constraint is the employment destination and evidence
+standard, not a shared syllabus.
+
+## 4. Learning operating model
+
+The learner is allowed to be a pure student in each teaching stream.
+
+Each teacher may: - choose what to teach; - choose the order; - choose
+exercises; - test differently; - revise its own plan; - disagree with
+another teacher.
+
+The workbench records what happened. It must not force artificial
+consensus.
+
+Periodically, the learner asks for cross-review. At that point
+disagreements are compared against evidence, tests, market requirements
+and actual learner performance.
+
+## 5. Two-repository architecture
+
+### Repo A --- `ai-engineering-portfolio`
+
+**Audience:** external/recruiters/interviewers/public.\
+**Purpose:** clean, sanitised, defensible proof of AI engineering
+capability.
+
+Suggested structure:
+
+``` text
+ai-engineering-portfolio/
+├── README.md
+├── case-studies/
+├── projects/
+│   ├── rag-retrieval/
+│   ├── agentic-systems/
+│   ├── ai-evaluation/
+│   └── production-ai/
+├── architecture/
+├── demos/
+├── tests/
+└── docs/
+```
+
+Rules: - no private chat dumps; - no confidential employer/client
+material; - no inflated claims; - clearly distinguish live / tested /
+prototype / planned; - publish only evidence that can be defended in an
+interview.
+
+### Repo B --- `ai-engineering-workbench`
+
+**Audience:** Senthil + ChatGPT + Claude + Perplexity.\
+**Purpose:** canonical private learning/collaboration/evidence/context
+system and seed for a future product.
+
+Suggested structure:
+
+``` text
+ai-engineering-workbench/
+├── README.md
+├── CURRENT_STATE.md
+├── ROADMAP.md
+├── decisions/
+│   └── DEC-0001-ai-career-target.md
+├── career/
+│   ├── role-target/
+│   ├── market-evidence/
+│   ├── gap-assessments/
+│   └── application-readiness/
+├── learning/
+│   ├── chatgpt/
+│   ├── claude/
+│   ├── perplexity/
+│   └── independent-tests/
+├── labs/
+├── reference-system/
+├── evidence/
+│   ├── tests/
+│   ├── evaluations/
+│   ├── traces/
+│   └── demos/
+├── sessions/
+│   ├── chatgpt/
+│   ├── claude/
+│   └── perplexity/
+├── handovers/
+├── context/
+│   ├── canonical/
+│   ├── summaries/
+│   └── indexes/
+├── retrieval/
+│   ├── ingestion/
+│   ├── search/
+│   ├── rag/
+│   └── evaluations/
+├── product-seed/
+│   ├── requirements/
+│   ├── experiments/
+│   └── architecture/
+└── scripts/
+```
+
+## 6. Normal Git-turn protocol
+
+Every AI session that changes the workbench follows the same visible
+protocol:
+
+1.  **START** --- timestamp, branch, `git status`, current objective.
+2.  **PLAN** --- scoped work for this turn; assumptions; files expected
+    to change.
+3.  **WORK** --- learning/build/review performed.
+4.  **VERIFY** --- commands/tests/evaluations and actual outputs.
+5.  **DECISIONS** --- accepted/rejected/deferred decisions with reasons.
+6.  **FILES** --- exact files changed/created.
+7.  **COMMIT** --- scoped commit with meaningful message.
+8.  **END** --- final `git status`, unresolved failures/blockers, next
+    action.
+9.  **SESSION LOG / HANDOVER** --- enough context for another AI to
+    continue without relying on chat memory.
+
+Never hide failures. Never mark proposed work as tested. Never mark
+tested work as production. Never rely on an AI's confidence as evidence.
+
+## 7. Workbench as future product seed
+
+The workbench should initially solve the user's own context problem
+rather than become a separate product-development distraction.
+
+Evolution path:
+
+**V0 Git truth** → session logs + decisions + evidence + artifacts\
+**V1 Search** → metadata/full-text retrieval\
+**V2 RAG** → semantic retrieval with citations/provenance\
+**V3 Context graph** → link sessions, decisions, commits, claims, tests
+and artifacts\
+**V4 Tool/API layer** → allow AI clients/CLI/desktop/agents to retrieve
+approved context\
+**V5 Dashboard** → visualise learning, AI sessions, decisions, evidence,
+disagreements and progress\
+**V6 Model experiments** → evaluate whether SLM/PLM/fine-tuning adds
+measurable value
+
+Do not choose RAG vs SLM vs fine-tuning by fashion. Add each only when
+an evaluation shows what problem it solves.
+
+## 8. November gate
+
+By 15 November, decide from evidence whether the learner is ready to
+apply for the primary target. The decision is not based on finishing a
+course. It is based on being able to build, debug, explain and defend
+the core responsibilities without silently outsourcing understanding to
+an AI.
+
+The three AI teachers remain independent throughout.

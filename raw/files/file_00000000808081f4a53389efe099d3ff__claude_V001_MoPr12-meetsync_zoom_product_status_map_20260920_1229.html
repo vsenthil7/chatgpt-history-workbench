@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MeetSync Product Status Map</title>
+<style>
+  :root{
+    --bg:#ffffff; --fg:#14161a; --muted:#5b6472; --rule:#d9dee6; --panel:#f6f8fb;
+    --done:#1a7f4b; --done-bg:#e6f4ec;
+    --code:#a86a00; --code-bg:#fdf1de;
+    --none:#b3261e; --none-bg:#fbe9e7;
+    --held:#5b4ea8; --held-bg:#eeecf9;
+    --accent:#1c4fd8;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#111317; --fg:#e8eaee; --muted:#9aa4b2; --rule:#2b3038; --panel:#181b21;
+      --done:#4ec98a; --done-bg:#12301f;
+      --code:#e0a13a; --code-bg:#33270f;
+      --none:#f28b82; --none-bg:#38191a;
+      --held:#b0a4f0; --held-bg:#221d3a;
+      --accent:#7aa2ff;
+    }
+  }
+  :root[data-theme="dark"]{
+      --bg:#111317; --fg:#e8eaee; --muted:#9aa4b2; --rule:#2b3038; --panel:#181b21;
+      --done:#4ec98a; --done-bg:#12301f;
+      --code:#e0a13a; --code-bg:#33270f;
+      --none:#f28b82; --none-bg:#38191a;
+      --held:#b0a4f0; --held-bg:#221d3a;
+      --accent:#7aa2ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+    font:16px/1.6 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 16px 80px}
+  header.cover{padding:44px 0 28px;border-bottom:3px solid var(--fg);margin-bottom:28px}
+  .eyebrow{font:600 12px/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.12;margin:10px 0 6px;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:18px;margin:0 0 20px;max-width:62ch}
+  h2{font-size:22px;margin:44px 0 6px;letter-spacing:-.01em;padding-top:14px;border-top:1px solid var(--rule)}
+  h3{font-size:16px;margin:26px 0 8px}
+  p{max-width:78ch}
+  .lede{max-width:78ch}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--rule);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel);font-weight:600}
+  caption{caption-side:top;text-align:left;color:var(--muted);font-size:13px;padding-bottom:6px}
+  code,.mono{font-family:var(--mono);font-size:.92em}
+  figure{margin:22px 0 10px;padding:18px;border:1px solid var(--rule);border-radius:10px;background:var(--panel)}
+  figure svg{display:block;width:100%;max-width:100%;height:auto}
+  figcaption{margin-top:12px;color:var(--muted);font-size:14px;max-width:80ch}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin:14px 0 6px;font-size:13.5px}
+  .key{display:inline-flex;align-items:center;gap:7px}
+  .sw{width:14px;height:14px;border-radius:3px;border:1.5px solid}
+  .sw.d{background:var(--done-bg);border-color:var(--done)}
+  .sw.c{background:var(--code-bg);border-color:var(--code)}
+  .sw.n{background:var(--none-bg);border-color:var(--none)}
+  .sw.h{background:var(--held-bg);border-color:var(--held);border-style:dashed}
+  .pill{display:inline-block;padding:1px 8px;border-radius:999px;font:600 11.5px/1.7 var(--mono);border:1.5px solid}
+  .p-d{color:var(--done);border-color:var(--done);background:var(--done-bg)}
+  .p-c{color:var(--code);border-color:var(--code);background:var(--code-bg)}
+  .p-n{color:var(--none);border-color:var(--none);background:var(--none-bg)}
+  .p-h{color:var(--held);border-color:var(--held);background:var(--held-bg);border-style:dashed}
+  .note{border-left:3px solid var(--accent);background:var(--panel);padding:12px 16px;margin:18px 0;border-radius:0 8px 8px 0}
+  .note p{margin:0}
+  footer{margin-top:52px;padding-top:16px;border-top:1px solid var(--rule);color:var(--muted);font-size:13px}
+  @media print{
+    body{background:#fff;color:#000}
+    figure{break-inside:avoid;page-break-inside:avoid}
+    h2{break-after:avoid}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="cover">
+  <div class="eyebrow">003-MoPr12 · MeetSync (Zoom App Marketplace)</div>
+  <h1>Product Status Map</h1>
+  <p class="sub">What MeetSync is, what is finished, what is not, and the specific reason each unfinished thing is unfinished — drawn rather than described.</p>
+  <table>
+    <caption>Document control</caption>
+    <tr><th style="width:22%">Document</th><td class="mono">claude_V001_MoPr12-meetsync_zoom_product_status_map</td></tr>
+    <tr><th>Version</th><td>V001 · first issue</td></tr>
+    <tr><th>Date / time</th><td>20 Sep 2026, 12:42 BST</td></tr>
+    <tr><th>Author</th><td>Claude for Senthil/KP</td></tr>
+    <tr><th>Describes</th><td>MeetSync code <strong>v0.45.0</strong>; tracker <strong>v040</strong>; external review <strong>Perplexity Review V001</strong> (16 Sep 2026)</td></tr>
+    <tr><th>Status</th><td>Released</td></tr>
+    <tr><th>Classification</th><td>Internal — build and gate evidence</td></tr>
+    <tr><th>Companion</th><td class="mono">claude_V001_MoPr12-meetsync_zoom_versiondetail_manualtest_20260920_*.xlsx</td></tr>
+  </table>
+</header>
+
+<h2>1 · Context</h2>
+<p class="lede">MeetSync is a Zoom Marketplace app for sales teams. A meeting ends; Zoom produces a transcript; MeetSync reads it, pulls out the commitments and the risk signals, and writes agreed fields into the CRM the customer already uses — under per-field rules the customer sets, with a review step, a queue that survives a crash and an audit row for every write.</p>
+<p>The engineering has been unusually disciplined and the product has never been installed by a stranger. Both are true at once, and this document exists so the gap between them is visible at a glance. On 16 September an external reviewer read the code and then checked the claims made <em>around</em> it, raising fourteen findings — three of them critical. Code v0.45.0 is the response. The colouring below is the honest state after that response.</p>
+
+<h2>2 · How to read these figures</h2>
+<div class="legend">
+  <span class="key"><span class="sw d"></span> <strong>Built &amp; reachable</strong> — shipped, customer can invoke it, pinned by a named regression test</span>
+  <span class="key"><span class="sw c"></span> <strong>Built, unverified live</strong> — code complete and tested; never run against the real Zoom or a real CRM</span>
+  <span class="key"><span class="sw n"></span> <strong>Not built</strong> — no code exists</span>
+  <span class="key"><span class="sw h"></span> <strong>Held by a decision</strong> — deliberately not built until Senthil rules</span>
+</div>
+<p>Solid arrows are paths that work today. Dashed red arrows are paths that did not exist before v0.45.0. Every arrow is labelled with what actually moves along it. Each figure makes one claim, stated in its caption.</p>
+
+<h2>3 · Figure 1 — The system, coloured by what is actually finished</h2>
+<figure>
+<svg viewBox="0 0 1000 640" role="img" aria-label="MeetSync system map: Zoom platform and the CRM at the edges, the MeetSync server in the middle with its front door, identity, tenancy, feature and storage layers, and the React panel above. Most of the platform is built and reachable; the intelligence layer and live CRM OAuth are not built.">
+  <defs>
+    <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+    <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b3261e"/>
+    </marker>
+  </defs>
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="12.5" fill="currentColor">
+
+    <!-- Zoom platform -->
+    <rect x="18" y="86" width="150" height="196" rx="9" fill="var(--done-bg)" stroke="var(--done)" stroke-width="1.8"/>
+    <text x="93" y="110" text-anchor="middle" font-weight="700" font-size="13.5">Zoom platform</text>
+    <text x="93" y="136" text-anchor="middle" font-size="11.5">OAuth + /users/me</text>
+    <text x="93" y="156" text-anchor="middle" font-size="11.5">Webhooks (HMAC)</text>
+    <text x="93" y="176" text-anchor="middle" font-size="11.5">Transcript download</text>
+    <text x="93" y="196" text-anchor="middle" font-size="11.5">In-client panel host</text>
+    <text x="93" y="228" text-anchor="middle" font-size="11" fill="var(--muted)">Never yet contacted</text>
+    <text x="93" y="245" text-anchor="middle" font-size="11" fill="var(--muted)">by a live install</text>
+    <rect x="30" y="256" width="126" height="16" rx="8" fill="var(--code-bg)" stroke="var(--code)" stroke-width="1.3"/>
+    <text x="93" y="268" text-anchor="middle" font-size="10" font-weight="700" fill="var(--code)">0 INSTALLS</text>
+
+    <!-- MeetSync server frame -->
+    <rect x="228" y="38" width="512" height="574" rx="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="5 4" opacity=".55"/>
+    <text x="484" y="60" text-anchor="middle" font-weight="700" font-size="13.5">MeetSync server — TypeScript / Node / Express</text>
+
+    <!-- front door -->
+    <rect x="246" y="76" width="220" height="86" rx="8" fill="var(--done-bg)" stroke="var(--done)" stroke-width="1.8"/>
+    <text x="356" y="96" text-anchor="middle" font-weight="700">Front door</text>
+    <text x="356" y="115" text-anchor="middle" font-size="11.5">CSP · CORS · body limit</text>
+    <text x="356" y="132" text-anchor="middle" font-size="11.5">rate limits per IP / account</text>
+    <text x="356" y="150" text-anchor="middle" font-size="11" fill="var(--muted)">ST-104 · new in v045</text>
+
+    <rect x="482" y="76" width="240" height="86" rx="8" fill="var(--done-bg)" stroke="var(--done)" stroke-width="1.8"/>
+    <text x="602" y="96" text-anchor="middle" font-weight="700">Identity &amp; sessions</text>
+    <text x="602" y="115" text-anchor="middle" font-size="11.5">tenant = Zoom /users/me</text>
+    <text x="602" y="132" text-anchor="middle" font-size="11.5">60-min revocable session</text>
+    <text x="602" y="150" text-anchor="middle" font-size="11" fill="var(--muted)">ST-101/102/103 · new in v045</text>
+
+    <!-- tenancy -->
+    <rect x="246" y="180" width="476" height="52" rx="8" fill="var(--done-bg)" stroke="var(--done)" stroke-width="1.8"/>
+    <text x="484" y="200" text-anchor="middle" font-weight="700">Per-account tenancy · RBAC matrix · append-only audit log</text>
+    <text x="484" y="219" text-anchor="middle" font-size="11.5">one object graph and one row-space per workspace; LRU cache over durable state</text>
+
+    <!-- features -->
+    <text x="246" y="264" font-weight="700" font-size="12.5">Features</text>
+    <rect x="246" y="272" width="90" height="72" rx="7" fill="var(--done-bg)" stroke="var(--done)" stroke-width="1.8"/>
+    <text x="291" y="292" text-anchor="middle" font-weight="700" font-size="12">F1 Notes</text>
+    <text x="291" y="309" text-anchor="middle" font-size="10">human-typed</text>
+    <text x="291" y="325" text-anchor="middle" font-size="10">durable v045</text>
+
+    <rect x="344" y="272" width="90" height="72" rx="7" fill="var(--code-bg)" stroke="var(--code)" stroke-width="1.8"/>
+    <text x="389" y="292" text-anchor="middle" font-weight="700" font-size="12">F2 Actions</text>
+    <text x="389" y="309" text-anchor="middle" font-size="10">5-phrase rules</text>
+    <text x="389" y="325" text-anchor="middle" font-size="10">no model</text>
+
+    <rect x="442" y="272" width="90" height="72" rx="7" fill="var(--done-bg)" stroke="var(--done)" stroke-width="1.8"/>
+    <text x="487" y="292" text-anchor="middle" font-weight="700" font-size="12">F3 CRM</text>
+    <text x="487" y="309" text-anchor="middle" font-size="10">mapping rules</text>
+    <text x="487" y="325" text-anchor="middle" font-size="10">queue · audit</text>
+
+    <rect x="540" y="272" width="90" height="72" rx="7" fill="var(--held-bg)" stroke="var(--held)" stroke-width="1.8" stroke-dasharray="4 3"/>
+    <text x="585" y="292" text-anchor="middle" font-weight="700" font-size="12">F4 Risk</text>
+    <text x="585" y="309" text-anchor="middle" font-size="10">13 EN words</text>
+    <text x="585" y="325" text-anchor="middle" font-size="10">held · PD-04</text>
+
+    <rect x="638" y="272" width="84" height="72" rx="7" fill="var(--none-bg)" stroke="var(--none)" stroke-width="1.8"/>
+    <text x="680" y="292" text-anchor="middle" font-weight="700" font-size="12">F5 Indic</text>
+    <text x="680" y="309" text-anchor="middle" font-size="10">WER ruler,</text>
+    <text x="680" y="325" text-anchor="middle" font-size="10">no ASR</text>
+
+    <!-- intelligence gap -->
+    <rect x="246" y="360" width="476" height="46" rx="8" fill="var(--none-bg)" stroke="var(--none)" stroke-width="2" stroke-dasharray="7 4"/>
+    <text x="484" y="379" text-anchor="middle" font-weight="700" fill="var(--none)">Intelligence layer — DOES NOT EXIST</text>
+    <text x="484" y="397" text-anchor="middle" font-size="11.5">no LLM · no ASR · no embeddings · no summariser — S15/S16, held by decision PD-02</text>
+
+    <!-- platform services -->
+    <rect x="246" y="424" width="232" height="70" rx="8" fill="var(--done-bg)" stroke="var(--done)" stroke-width="1.8"/>
+    <text x="362" y="444" text-anchor="middle" font-weight="700">Platform services</text>
+    <text x="362" y="462" text-anchor="middle" font-size="11">retention sweep · restore drill</text>
+    <text x="362" y="479" text-anchor="middle" font-size="11">p95 latency · ops digest · alerts</text>
+
+    <rect x="490" y="424" width="232" height="70" rx="8" fill="var(--code-bg)" stroke="var(--code)" stroke-width="1.8"/>
+    <text x="606" y="444" text-anchor="middle" font-weight="700">Billing</text>
+    <text x="606" y="462" text-anchor="middle" font-size="11">trial · plans · proration · dunning</text>
+    <text x="606" y="479" text-anchor="middle" font-size="11" fill="var(--none)">no payment processor</text>
+
+    <!-- stores -->
+    <rect x="246" y="512" width="476" height="80" rx="8" fill="var(--done-bg)" stroke="var(--done)" stroke-width="1.8"/>
+    <text x="484" y="532" text-anchor="middle" font-weight="700">PostgreSQL — 9 stores, every one behind a two-implementation contract suite</text>
+    <text x="484" y="551" text-anchor="middle" font-size="11">accounts · subscriptions · audit · feature state · CRM queue · webhook dedupe</text>
+    <text x="484" y="568" text-anchor="middle" font-size="11">sessions · notes · meeting insights <tspan font-size="10.5" fill="var(--muted)">(last three new in v045)</tspan></text>
+    <text x="484" y="585" text-anchor="middle" font-size="10.5" fill="var(--muted)">tokens AES-256-GCM at rest · real DELETE on purge, never a tombstone</text>
+
+    <!-- Web panel -->
+    <rect x="782" y="76" width="196" height="156" rx="9" fill="var(--done-bg)" stroke="var(--done)" stroke-width="1.8"/>
+    <text x="880" y="96" text-anchor="middle" font-weight="700" font-size="13.5">React panel</text>
+    <text x="880" y="116" text-anchor="middle" font-size="11.5">6 tabs · typed API client</text>
+    <text x="880" y="134" text-anchor="middle" font-size="11.5">48 methods, all routes</text>
+    <text x="880" y="152" text-anchor="middle" font-size="11.5">optimistic + rollback</text>
+    <text x="880" y="176" text-anchor="middle" font-size="11" fill="var(--muted)">was a mock until v045</text>
+    <rect x="800" y="188" width="160" height="16" rx="8" fill="var(--code-bg)" stroke="var(--code)" stroke-width="1.3"/>
+    <text x="880" y="200" text-anchor="middle" font-size="10" font-weight="700" fill="var(--code)">NEVER RENDERED IN ZOOM</text>
+    <text x="880" y="222" text-anchor="middle" font-size="10.5" fill="var(--muted)">jsdom only · ST-150 owed</text>
+
+    <!-- CRM -->
+    <rect x="782" y="272" width="196" height="134" rx="9" fill="var(--none-bg)" stroke="var(--none)" stroke-width="1.8"/>
+    <text x="880" y="292" text-anchor="middle" font-weight="700" font-size="13.5">Customer CRM</text>
+    <text x="880" y="312" text-anchor="middle" font-size="11.5">HubSpot · Salesforce · Zoho</text>
+    <text x="880" y="338" text-anchor="middle" font-size="11.5" fill="var(--none)" font-weight="700">No live OAuth</text>
+    <text x="880" y="356" text-anchor="middle" font-size="11">sandbox adapters only</text>
+    <text x="880" y="376" text-anchor="middle" font-size="11">ST-129 · needs credentials</text>
+    <text x="880" y="396" text-anchor="middle" font-size="10.5" fill="var(--muted)">0 live writes, ever</text>
+
+    <!-- Operator -->
+    <rect x="782" y="446" width="196" height="146" rx="9" fill="var(--done-bg)" stroke="var(--done)" stroke-width="1.8"/>
+    <text x="880" y="466" text-anchor="middle" font-weight="700" font-size="13.5">Operator surface</text>
+    <text x="880" y="486" text-anchor="middle" font-size="11.5">own router · own budget</text>
+    <text x="880" y="504" text-anchor="middle" font-size="11.5">rotatable credential</text>
+    <text x="880" y="522" text-anchor="middle" font-size="11.5">funnel · revenue · ops</text>
+    <text x="880" y="540" text-anchor="middle" font-size="11.5">retention · restore drill</text>
+    <text x="880" y="566" text-anchor="middle" font-size="11" fill="var(--muted)">no customer session is</text>
+    <text x="880" y="582" text-anchor="middle" font-size="11" fill="var(--muted)">ever accepted here</text>
+
+    <!-- arrows -->
+    <g stroke="currentColor" stroke-width="1.7" fill="none" marker-end="url(#a1)">
+      <line x1="168" y1="118" x2="244" y2="118"/>
+      <line x1="168" y1="168" x2="244" y2="168"/>
+      <line x1="356" y1="164" x2="356" y2="178"/>
+      <line x1="602" y1="164" x2="602" y2="178"/>
+      <line x1="484" y1="234" x2="484" y2="268"/>
+      <line x1="484" y1="408" x2="484" y2="422"/>
+      <line x1="362" y1="496" x2="362" y2="510"/>
+      <line x1="606" y1="496" x2="606" y2="510"/>
+      <line x1="780" y1="126" x2="726" y2="126"/>
+      <line x1="724" y1="500" x2="780" y2="500"/>
+    </g>
+    <text x="206" y="112" text-anchor="middle" font-size="10.5" fill="var(--muted)">install</text>
+    <text x="206" y="162" text-anchor="middle" font-size="10.5" fill="var(--muted)">events</text>
+    <text x="754" y="120" text-anchor="middle" font-size="10.5" fill="var(--muted)">HTTPS</text>
+
+    <!-- CRM writeback arrow: dashed red = new path -->
+    <g stroke="#b3261e" stroke-width="2" fill="none" stroke-dasharray="6 4" marker-end="url(#a2)">
+      <path d="M 724 552 L 756 552 L 756 344 L 780 344"/>
+    </g>
+    <text x="756" y="424" text-anchor="middle" font-size="10.5" fill="#b3261e" font-weight="700" transform="rotate(-90 756 424)">approved writes (v045)</text>
+  </g>
+</svg>
+<figcaption><strong>Figure 1.</strong> The platform underneath MeetSync is finished and proven; the two things a customer would pay for — real intelligence and a live CRM connection — are the two boxes that are empty. The red dashed path is the writeback route that only began to exist in v0.45.0.</figcaption>
+</figure>
+
+<h2>4 · Figure 2 — The install flow: how a stranger could take your workspace, and what stops it now</h2>
+<figure>
+<svg viewBox="0 0 1000 390" role="img" aria-label="Before and after comparison of the OAuth install flow. Before v045 the workspace identifier came from the attacker's query string, so completing OAuth with any Zoom account installed tokens onto the victim's workspace and minted an owner session for it. After v045 the workspace comes from Zoom's users/me endpoint and a disagreeing hint is refused with a 403.">
+  <defs>
+    <marker id="b1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b3261e"/>
+    </marker>
+    <marker id="b2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="12" fill="currentColor">
+
+    <!-- BEFORE -->
+    <rect x="14" y="30" width="472" height="336" rx="10" fill="var(--none-bg)" stroke="var(--none)" stroke-width="1.8"/>
+    <text x="34" y="56" font-weight="700" font-size="14" fill="var(--none)">BEFORE — v0.44.0 and every version before it</text>
+    <text x="34" y="76" font-size="11.5" fill="var(--muted)">PR-01 · CRITICAL · four review passes walked past it</text>
+
+    <rect x="34" y="94" width="126" height="46" rx="7" fill="var(--bg)" stroke="currentColor" stroke-width="1.5"/>
+    <text x="97" y="113" text-anchor="middle" font-weight="700" font-size="12">Attacker</text>
+    <text x="97" y="130" text-anchor="middle" font-size="10.5">own Zoom login</text>
+
+    <rect x="192" y="94" width="150" height="46" rx="7" fill="var(--bg)" stroke="currentColor" stroke-width="1.5"/>
+    <text x="267" y="112" text-anchor="middle" font-size="11" class="mono">/oauth/start</text>
+    <text x="267" y="130" text-anchor="middle" font-size="10.5">?account_id=victim</text>
+
+    <rect x="374" y="94" width="94" height="46" rx="7" fill="var(--bg)" stroke="currentColor" stroke-width="1.5"/>
+    <text x="421" y="113" text-anchor="middle" font-size="11">Zoom</text>
+    <text x="421" y="130" text-anchor="middle" font-size="10.5">authorize</text>
+
+    <rect x="192" y="176" width="150" height="56" rx="7" fill="var(--bg)" stroke="var(--none)" stroke-width="1.8"/>
+    <text x="267" y="195" text-anchor="middle" font-size="11" class="mono">/oauth/callback</text>
+    <text x="267" y="212" text-anchor="middle" font-size="10.5">state signature valid</text>
+    <text x="267" y="226" text-anchor="middle" font-size="10" fill="var(--none)">…proves the wrong thing</text>
+
+    <rect x="34" y="262" width="434" height="84" rx="7" fill="var(--bg)" stroke="var(--none)" stroke-width="2"/>
+    <text x="251" y="282" text-anchor="middle" font-weight="700" font-size="12.5" fill="var(--none)">Attacker holds an OWNER session for the victim workspace</text>
+    <text x="251" y="301" text-anchor="middle" font-size="11">full data export · delete-my-data · CRM queue · meeting insights</text>
+    <text x="251" y="318" text-anchor="middle" font-size="11">victim's Zoom integration silently repointed at the attacker's grant</text>
+    <text x="251" y="337" text-anchor="middle" font-size="10.5" fill="var(--muted)">every test asserted this behaviour as correct</text>
+
+    <g stroke="#b3261e" stroke-width="1.8" fill="none" marker-end="url(#b1)">
+      <line x1="160" y1="117" x2="190" y2="117"/>
+      <line x1="342" y1="117" x2="372" y2="117"/>
+      <path d="M 421 142 L 421 160 L 267 160 L 267 174"/>
+      <line x1="267" y1="234" x2="267" y2="260"/>
+    </g>
+    <text x="345" y="155" text-anchor="middle" font-size="10" fill="#b3261e">code</text>
+    <text x="286" y="252" text-anchor="start" font-size="10" fill="#b3261e">installs attacker tokens onto "victim"</text>
+
+    <!-- AFTER -->
+    <rect x="514" y="30" width="472" height="336" rx="10" fill="var(--done-bg)" stroke="var(--done)" stroke-width="1.8"/>
+    <text x="534" y="56" font-weight="700" font-size="14" fill="var(--done)">AFTER — v0.45.0 (ST-101)</text>
+    <text x="534" y="76" font-size="11.5" fill="var(--muted)">tenant identity always comes from the platform, never from the caller</text>
+
+    <rect x="534" y="94" width="126" height="46" rx="7" fill="var(--bg)" stroke="currentColor" stroke-width="1.5"/>
+    <text x="597" y="113" text-anchor="middle" font-weight="700" font-size="12">Any caller</text>
+    <text x="597" y="130" text-anchor="middle" font-size="10.5">hint is optional</text>
+
+    <rect x="692" y="94" width="150" height="46" rx="7" fill="var(--bg)" stroke="currentColor" stroke-width="1.5"/>
+    <text x="767" y="112" text-anchor="middle" font-size="11" class="mono">/oauth/callback</text>
+    <text x="767" y="130" text-anchor="middle" font-size="10.5">exchanges the code</text>
+
+    <rect x="874" y="94" width="94" height="46" rx="7" fill="var(--bg)" stroke="var(--done)" stroke-width="1.8"/>
+    <text x="921" y="112" text-anchor="middle" font-size="11" class="mono">/users/me</text>
+    <text x="921" y="130" text-anchor="middle" font-size="10.5">Zoom answers</text>
+
+    <rect x="646" y="176" width="242" height="56" rx="7" fill="var(--bg)" stroke="var(--done)" stroke-width="1.8"/>
+    <text x="767" y="196" text-anchor="middle" font-size="11.5" font-weight="700">workspace = Zoom's account_id</text>
+    <text x="767" y="214" text-anchor="middle" font-size="10.5">the hint is compared, never trusted</text>
+    <text x="767" y="228" text-anchor="middle" font-size="10" fill="var(--muted)">installAccount re-checks it at the store</text>
+
+    <rect x="534" y="262" width="204" height="84" rx="7" fill="var(--bg)" stroke="var(--none)" stroke-width="1.8"/>
+    <text x="636" y="282" text-anchor="middle" font-weight="700" font-size="12" fill="var(--none)">Hint disagrees → 403</text>
+    <text x="636" y="301" text-anchor="middle" font-size="10.5">no account row written</text>
+    <text x="636" y="317" text-anchor="middle" font-size="10.5">no session minted</text>
+    <text x="636" y="335" text-anchor="middle" font-size="10.5">audit row names the real user</text>
+
+    <rect x="758" y="262" width="210" height="84" rx="7" fill="var(--bg)" stroke="var(--done)" stroke-width="1.8"/>
+    <text x="863" y="282" text-anchor="middle" font-weight="700" font-size="12" fill="var(--done)">Hint agrees or is absent</text>
+    <text x="863" y="301" text-anchor="middle" font-size="10.5">install proceeds</text>
+    <text x="863" y="317" text-anchor="middle" font-size="10.5">session names the real Zoom user</text>
+    <text x="863" y="335" text-anchor="middle" font-size="10.5">60 min · revocable · HttpOnly</text>
+
+    <g stroke="currentColor" stroke-width="1.8" fill="none" marker-end="url(#b2)">
+      <line x1="660" y1="117" x2="690" y2="117"/>
+      <line x1="842" y1="117" x2="872" y2="117"/>
+      <path d="M 921 142 L 921 160 L 767 160 L 767 174"/>
+      <path d="M 700 234 L 700 248 L 636 248 L 636 260"/>
+      <path d="M 834 234 L 834 248 L 863 248 L 863 260"/>
+    </g>
+    <text x="845" y="155" text-anchor="middle" font-size="10" fill="var(--muted)">fresh access token</text>
+  </g>
+</svg>
+<figcaption><strong>Figure 2.</strong> The signature on <code>state</code> was never wrong — it proved the server issued that state. It could not prove the caller owned the account, and nothing else asked. One call to <code>/users/me</code> is the whole difference between the left panel and the right.</figcaption>
+</figure>
+
+<h2>5 · Figure 3 — The product loop, and the two hops that were missing</h2>
+<figure>
+<svg viewBox="0 0 1000 340" role="img" aria-label="The meeting to CRM loop. Zoom transcript arrives by webhook, MeetSync extracts actions and risk signals, derives CRM fields, stages them for human review, and on approval enqueues exactly one writeback job. Two hops were missing before v045: the panel never called the API, and the derived insight never reached the CRM queue.">
+  <defs>
+    <marker id="c1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+    <marker id="c2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b3261e"/>
+    </marker>
+  </defs>
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="11.5" fill="currentColor">
+    <g>
+      <rect x="16" y="92" width="120" height="62" rx="8" fill="var(--done-bg)" stroke="var(--done)" stroke-width="1.7"/>
+      <text x="76" y="116" text-anchor="middle" font-weight="700" font-size="12.5">Meeting ends</text>
+      <text x="76" y="134" text-anchor="middle" font-size="10.5">Zoom makes a</text>
+      <text x="76" y="148" text-anchor="middle" font-size="10.5">transcript</text>
+
+      <rect x="168" y="92" width="126" height="62" rx="8" fill="var(--done-bg)" stroke="var(--done)" stroke-width="1.7"/>
+      <text x="231" y="112" text-anchor="middle" font-weight="700" font-size="12.5">Webhook in</text>
+      <text x="231" y="130" text-anchor="middle" font-size="10.5">HMAC · replay guard</text>
+      <text x="231" y="146" text-anchor="middle" font-size="10.5">cross-instance dedupe</text>
+
+      <rect x="326" y="92" width="126" height="62" rx="8" fill="var(--code-bg)" stroke="var(--code)" stroke-width="1.7"/>
+      <text x="389" y="112" text-anchor="middle" font-weight="700" font-size="12.5">Extract</text>
+      <text x="389" y="130" text-anchor="middle" font-size="10.5">5-phrase rules</text>
+      <text x="389" y="146" text-anchor="middle" font-size="10.5" fill="var(--none)">no model (PD-02)</text>
+
+      <rect x="484" y="92" width="126" height="62" rx="8" fill="var(--done-bg)" stroke="var(--done)" stroke-width="1.7"/>
+      <text x="547" y="112" text-anchor="middle" font-weight="700" font-size="12.5">Derive fields</text>
+      <text x="547" y="130" text-anchor="middle" font-size="10.5">9 named sources</text>
+      <text x="547" y="146" text-anchor="middle" font-size="10.5">mapped per field</text>
+
+      <rect x="642" y="92" width="126" height="62" rx="8" fill="var(--done-bg)" stroke="var(--done)" stroke-width="2.2"/>
+      <text x="705" y="112" text-anchor="middle" font-weight="700" font-size="12.5">Human review</text>
+      <text x="705" y="130" text-anchor="middle" font-size="10.5">on by default</text>
+      <text x="705" y="146" text-anchor="middle" font-size="10.5">approve / reject</text>
+
+      <rect x="800" y="92" width="120" height="62" rx="8" fill="var(--done-bg)" stroke="var(--done)" stroke-width="1.7"/>
+      <text x="860" y="112" text-anchor="middle" font-weight="700" font-size="12.5">Queue</text>
+      <text x="860" y="130" text-anchor="middle" font-size="10.5">durable · retrying</text>
+      <text x="860" y="146" text-anchor="middle" font-size="10.5">one job per meeting</text>
+
+      <rect x="800" y="226" width="120" height="62" rx="8" fill="var(--none-bg)" stroke="var(--none)" stroke-width="1.7"/>
+      <text x="860" y="248" text-anchor="middle" font-weight="700" font-size="12.5" fill="var(--none)">Real CRM</text>
+      <text x="860" y="266" text-anchor="middle" font-size="10.5">sandbox adapters</text>
+      <text x="860" y="281" text-anchor="middle" font-size="10.5">only · ST-129</text>
+
+      <rect x="560" y="226" width="180" height="62" rx="8" fill="var(--done-bg)" stroke="var(--done)" stroke-width="1.7"/>
+      <text x="650" y="246" text-anchor="middle" font-weight="700" font-size="12.5">Review screen (panel)</text>
+      <text x="650" y="264" text-anchor="middle" font-size="10.5">shows the exact fields,</text>
+      <text x="650" y="279" text-anchor="middle" font-size="10.5">which are mapped, and the notes</text>
+    </g>
+
+    <g stroke="currentColor" stroke-width="1.7" fill="none" marker-end="url(#c1)">
+      <line x1="138" y1="123" x2="166" y2="123"/>
+      <line x1="296" y1="123" x2="324" y2="123"/>
+      <line x1="454" y1="123" x2="482" y2="123"/>
+    </g>
+
+    <!-- the two hops that did not exist -->
+    <g stroke="#b3261e" stroke-width="2.2" fill="none" stroke-dasharray="6 4" marker-end="url(#c2)">
+      <line x1="612" y1="123" x2="640" y2="123"/>
+      <line x1="770" y1="123" x2="798" y2="123"/>
+      <path d="M 705 156 L 705 200 L 650 200 L 650 224"/>
+      <line x1="860" y1="156" x2="860" y2="224"/>
+    </g>
+    <text x="641" y="82" text-anchor="middle" font-size="10.5" fill="#b3261e" font-weight="700">PR-04: this hop did not exist</text>
+    <text x="874" y="196" text-anchor="start" font-size="10.5" fill="var(--muted)">drain</text>
+    <text x="556" y="196" text-anchor="middle" font-size="10.5" fill="#b3261e" font-weight="700">PR-03: the panel called nothing</text>
+
+    <text x="500" y="318" text-anchor="middle" font-size="11.5" fill="var(--muted)">Before v0.45.0 the loop stopped at "derive fields" and a human had to type them into an API call by hand.</text>
+  </g>
+</svg>
+<figcaption><strong>Figure 3.</strong> Every box on the top row already existed in v0.44.0; of the seven arrows, only the three solid ones did. The product's headline promise — a meeting becomes CRM fields — needed a person to make an API call with fields they had typed themselves.</figcaption>
+</figure>
+
+<h2>6 · Figure 4 — Twenty sprints: what is finished, and what each unfinished one is waiting on</h2>
+<figure>
+<svg viewBox="0 0 1000 470" role="img" aria-label="Sprint status from S1 to S20. S1 to S8 and S13 and S14 are complete in code. S9 to S12 are partly complete and wait on a live Zoom install. S15 to S18 wait on pricing and intelligence decisions. S19 and S20 wait on those and on launch.">
+  <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="12" fill="currentColor">
+    <text x="16" y="24" font-weight="700" font-size="13">Sprint</text>
+    <text x="118" y="24" font-weight="700" font-size="13">Points complete</text>
+    <text x="512" y="24" text-anchor="end" font-weight="700" font-size="13">Points</text>
+    <text x="532" y="24" font-weight="700" font-size="13">Status</text>
+    <text x="704" y="24" font-weight="700" font-size="13">What it is waiting on</text>
+    <line x1="16" y1="32" x2="984" y2="32" stroke="currentColor" stroke-width="1.3" opacity=".6"/>
+
+    <!-- rows: y, label, pct, done-colour, status, blocker -->
+    <g>
+      <!-- S1-S8 group -->
+      <text x="16" y="56" font-weight="600">S1–S8</text>
+      <rect x="118" y="44" width="330" height="15" rx="4" fill="var(--panel)" stroke="var(--rule)" stroke-width="1"/>
+      <rect x="118" y="44" width="291" height="15" rx="4" fill="var(--done)"/>
+      <text x="512" y="56" text-anchor="end" font-size="11" fill="var(--muted)">248 / 281</text>
+      <text x="532" y="56" font-size="11.5">Built &amp; tested</text>
+      <text x="704" y="56" font-size="11.5">Nothing — but never run live</text>
+
+      <text x="16" y="86" font-weight="600">S9</text>
+      <rect x="118" y="74" width="330" height="15" rx="4" fill="var(--panel)" stroke="var(--rule)" stroke-width="1"/>
+      <rect x="118" y="74" width="55" height="15" rx="4" fill="var(--code)"/>
+      <text x="512" y="86" text-anchor="end" font-size="11" fill="var(--muted)">5 / 30</text>
+      <text x="532" y="86" font-size="11.5">Marketplace prep</text>
+      <text x="704" y="86" font-size="11.5">Zoom dev app · Handover #2</text>
+
+      <text x="16" y="116" font-weight="600">S10</text>
+      <rect x="118" y="104" width="330" height="15" rx="4" fill="var(--panel)" stroke="var(--rule)" stroke-width="1"/>
+      <rect x="118" y="104" width="96" height="15" rx="4" fill="var(--code)"/>
+      <text x="512" y="116" text-anchor="end" font-size="11" fill="var(--muted)">7 / 24</text>
+      <text x="532" y="116" font-size="11.5">Docs &amp; remediation</text>
+      <text x="704" y="116" font-size="11.5">Marketplace approval</text>
+
+      <text x="16" y="146" font-weight="600">S11–S12</text>
+      <rect x="118" y="134" width="330" height="15" rx="4" fill="var(--panel)" stroke="var(--rule)" stroke-width="1"/>
+      <rect x="118" y="134" width="66" height="15" rx="4" fill="var(--code)"/>
+      <text x="512" y="146" text-anchor="end" font-size="11" fill="var(--muted)">6 / 10</text>
+      <text x="532" y="146" font-size="11.5">Launch &amp; iterate</text>
+      <text x="704" y="146" font-size="11.5">Real installs · real users</text>
+
+      <line x1="16" y1="166" x2="984" y2="166" stroke="currentColor" stroke-width="1" opacity=".3" stroke-dasharray="4 4"/>
+      <text x="16" y="186" font-size="11" fill="var(--muted)" font-style="italic">Below: the plan the 16 Sep external review set — S13 to S20</text>
+
+      <text x="16" y="216" font-weight="600">S13</text>
+      <rect x="118" y="204" width="330" height="15" rx="4" fill="var(--panel)" stroke="var(--rule)" stroke-width="1"/>
+      <rect x="118" y="204" width="330" height="15" rx="4" fill="var(--done)"/>
+      <text x="512" y="216" text-anchor="end" font-size="11" fill="var(--muted)">34 / 34</text>
+      <text x="532" y="216" font-size="11.5" font-weight="600" fill="var(--done)">CLOSED in v045</text>
+      <text x="704" y="216" font-size="11.5">Nothing — it was the blocker</text>
+
+      <text x="16" y="246" font-weight="600">S14</text>
+      <rect x="118" y="234" width="330" height="15" rx="4" fill="var(--panel)" stroke="var(--rule)" stroke-width="1"/>
+      <rect x="118" y="234" width="330" height="15" rx="4" fill="var(--done)"/>
+      <text x="512" y="246" text-anchor="end" font-size="11" fill="var(--muted)">34 / 34</text>
+      <text x="532" y="246" font-size="11.5" font-weight="600" fill="var(--done)">CLOSED in code</text>
+      <text x="704" y="246" font-size="11.5">Live webhook verification</text>
+
+      <text x="16" y="276" font-weight="600">S15</text>
+      <rect x="118" y="264" width="330" height="15" rx="4" fill="var(--panel)" stroke="var(--rule)" stroke-width="1"/>
+      <rect x="118" y="264" width="330" height="15" rx="4" fill="var(--held-bg)" stroke="var(--held)" stroke-dasharray="5 3"/>
+      <text x="512" y="276" text-anchor="end" font-size="11" fill="var(--muted)">0 / 42</text>
+      <text x="532" y="276" font-size="11.5">Intelligence + eval</text>
+      <text x="704" y="276" font-size="11.5" font-weight="600" fill="var(--held)">PD-02 — build it, or reposition</text>
+
+      <text x="16" y="306" font-weight="600">S16</text>
+      <rect x="118" y="294" width="330" height="15" rx="4" fill="var(--panel)" stroke="var(--rule)" stroke-width="1"/>
+      <rect x="118" y="294" width="330" height="15" rx="4" fill="var(--held-bg)" stroke="var(--held)" stroke-dasharray="5 3"/>
+      <text x="512" y="306" text-anchor="end" font-size="11" fill="var(--muted)">0 / 29</text>
+      <text x="532" y="306" font-size="11.5">Indic wedge, proven</text>
+      <text x="704" y="306" font-size="11.5" font-weight="600" fill="var(--held)">PD-02 + a consented call corpus</text>
+
+      <text x="16" y="336" font-weight="600">S17</text>
+      <rect x="118" y="324" width="330" height="15" rx="4" fill="var(--panel)" stroke="var(--rule)" stroke-width="1"/>
+      <rect x="118" y="324" width="330" height="15" rx="4" fill="var(--none-bg)" stroke="var(--none)"/>
+      <text x="512" y="336" text-anchor="end" font-size="11" fill="var(--muted)">0 / 39</text>
+      <text x="532" y="336" font-size="11.5">Live CRM depth</text>
+      <text x="704" y="336" font-size="11.5" font-weight="600" fill="var(--none)">CRM sandbox credentials</text>
+
+      <text x="16" y="366" font-weight="600">S18</text>
+      <rect x="118" y="354" width="330" height="15" rx="4" fill="var(--panel)" stroke="var(--rule)" stroke-width="1"/>
+      <rect x="118" y="354" width="25" height="15" rx="4" fill="var(--done)"/>
+      <text x="512" y="366" text-anchor="end" font-size="11" fill="var(--muted)">2 / 26</text>
+      <text x="532" y="366" font-size="11.5">Commercial engine</text>
+      <text x="704" y="366" font-size="11.5" font-weight="600" fill="var(--held)">PD-01 — the price, and the model</text>
+
+      <text x="16" y="396" font-weight="600">S19</text>
+      <rect x="118" y="384" width="330" height="15" rx="4" fill="var(--panel)" stroke="var(--rule)" stroke-width="1"/>
+      <rect x="118" y="384" width="330" height="15" rx="4" fill="var(--none-bg)" stroke="var(--none)"/>
+      <text x="512" y="396" text-anchor="end" font-size="11" fill="var(--muted)">0 / 32</text>
+      <text x="532" y="396" font-size="11.5">Enterprise readiness</text>
+      <text x="704" y="396" font-size="11.5" font-weight="600" fill="var(--held)">PD-03 — SMB or enterprise first</text>
+
+      <text x="16" y="426" font-weight="600">S20</text>
+      <rect x="118" y="414" width="330" height="15" rx="4" fill="var(--panel)" stroke="var(--rule)" stroke-width="1"/>
+      <rect x="118" y="414" width="330" height="15" rx="4" fill="var(--none-bg)" stroke="var(--none)"/>
+      <text x="512" y="426" text-anchor="end" font-size="11" fill="var(--muted)">0 / 12</text>
+      <text x="532" y="426" font-size="11.5">Launch &amp; proof</text>
+      <text x="704" y="426" font-size="11.5" font-weight="600" fill="var(--none)">Everything above, then strangers</text>
+    </g>
+
+    <line x1="16" y1="444" x2="984" y2="444" stroke="currentColor" stroke-width="1.3" opacity=".6"/>
+    <text x="16" y="462" font-size="11.5" fill="var(--muted)">151 stories · 647 points · 377 complete (58%) — and the 42% that remains is mostly waiting on four decisions, not on engineering time.</text>
+  </g>
+</svg>
+<figcaption><strong>Figure 4.</strong> The shape of the remaining work is unusual: four of the six incomplete sprints are blocked on a decision rather than on effort. S13 — the one the reviewer said blocked everything else — is closed.</figcaption>
+</figure>
+
+<h2>7 · What is complete, and what is not — with the reason</h2>
+
+<table>
+  <caption>Capability status at code v0.45.0. "Reachable" means a customer can invoke it through a route the typed client calls; it is machine-enforced by two standing gates.</caption>
+  <thead><tr><th style="width:20%">Capability</th><th style="width:13%">Status</th><th>Why it is where it is</th></tr></thead>
+  <tbody>
+    <tr><td>Install &amp; tenancy</td><td><span class="pill p-d">Complete</span></td><td>Workspace identity comes from Zoom, not the caller; a disagreeing hint is refused with an audit row. The takeover path found on 16 September is closed and pinned by two named regression tests.</td></tr>
+    <tr><td>Sessions &amp; access control</td><td><span class="pill p-d">Complete</span></td><td>Real Zoom user and role, sixty-minute life, revocable individually or per workspace, delivered in an HttpOnly cookie. Owner/admin/member matrix with every decision — including denials — audit-logged.</td></tr>
+    <tr><td>HTTP hardening</td><td><span class="pill p-d">Complete</span></td><td>CSP that admits the Zoom iframe, explicit CORS allowlist, 256&nbsp;KB body cap, token-bucket limits per IP, per account and for the operator surface. Written without dependencies so it cannot drift with a transitive upgrade.</td></tr>
+    <tr><td>Durability</td><td><span class="pill p-d">Complete</span></td><td>Nine PostgreSQL stores, each run through one contract suite twice — once in memory, once against a live database that CI refuses to skip. Tokens encrypted at rest; a purge is a real <code>DELETE</code>.</td></tr>
+    <tr><td>F1 Live notes</td><td><span class="pill p-d">Complete</span></td><td>Durable since v0.45.0. It was the least durable thing in the product and the only thing a human typed by hand — a deploy during business hours used to discard every in-flight session.</td></tr>
+    <tr><td>F3 CRM writeback engine</td><td><span class="pill p-d">Complete</span></td><td>Field mapping with per-field overwrite policy, a queue that survives a crash, retry with jitter, an audit row per write, and a human review step before anything is sent. This is the defensible part of the product.</td></tr>
+    <tr><td>Web panel</td><td><span class="pill p-c">Built, unverified</span></td><td>Every panel now reads and writes through the API — it was a mock until v0.45.0. It has still never rendered inside the Zoom client; jsdom cannot judge colour contrast or screen-reader behaviour in a webview. <em>Needs a live install.</em></td></tr>
+    <tr><td>F2 Action extraction</td><td><span class="pill p-c">Built, thin</span></td><td>A five-phrase substring matcher. It works, it is honest, and it is worse than the free summariser Zoom now bundles. Whether it becomes a model or stays a rules engine is <strong>decision PD-02</strong>.</td></tr>
+    <tr><td>Billing</td><td><span class="pill p-c">Built, no money</span></td><td>Trials, plans, proration, seat prompts, cancellation and entitlement enforcement all work. No payment processor exists, so no money has ever moved. <em>Needs PD-01 then ST-137.</em></td></tr>
+    <tr><td>F4 Deal risk</td><td><span class="pill p-h">Held</span></td><td>Thirteen hardcoded English keywords with no confidence score, unable to fire on the Hindi and Tamil calls the product is positioned for. Shipping it badly is worse than not shipping it — <strong>decision PD-04</strong>: rebuild inside real extraction, or cut it from the product and the pricing table.</td></tr>
+    <tr><td>F5 Indic pack</td><td><span class="pill p-n">Not built</span></td><td>There is a word-error-rate ruler and nothing to measure with it: no speech recognition exists anywhere in the codebase. This is simultaneously the most defensible claim MeetSync could make and the least built thing in it. <strong>PD-02</strong>, then a consented corpus of real calls.</td></tr>
+    <tr><td>Intelligence (LLM/ASR)</td><td><span class="pill p-n">Not built</span></td><td>No model, no inference, no embeddings — the review searched fifty-nine files and found the word "speech" inside one comment. The listing copy promising transcription is held behind a banner that the build gate enforces, so it cannot be submitted over code that does not back it.</td></tr>
+    <tr><td>Live CRM connection</td><td><span class="pill p-n">Not built</span></td><td>Three sandbox adapters, zero live OAuth, zero real writes. <em>Needs HubSpot / Salesforce / Zoho sandbox credentials</em> — the one item here blocked purely on access rather than on a decision.</td></tr>
+    <tr><td>Data residency</td><td><span class="pill p-n">Not enforced</span></td><td>The region setting is a label that is validated at boot and then only echoed. Rather than leave the claim standing, v0.45.0 removed it: <code>/trust</code> now reports <code>regionEnforced: false</code> and the page lists residency under "Not yet".</td></tr>
+    <tr><td>SSO · SOC 2 · pen test</td><td><span class="pill p-n">Not built</span></td><td>An enterprise security questionnaire stops at question one. SOC 2 Type II is a funded programme — roughly $35K–$120K over six to eighteen months — not a sprint. Whether it starts now is <strong>decision PD-03</strong>.</td></tr>
+    <tr><td>Demand evidence</td><td><span class="pill p-n">None</span></td><td><strong>Zero installs. Zero paying customers. Zero users outside the build.</strong> 712 passing tests say the code does what it claims; they say nothing about whether anyone wants it. Three falsifiable demand tests are specified and unrun — <strong>PD-06</strong>.</td></tr>
+  </tbody>
+</table>
+
+<div class="note">
+<p><strong>The one-sentence version.</strong> MeetSync has a platform most funded startups would envy wrapped around a feature set that is mostly keyword matching, and it has never met a customer. Everything an engineer can fix alone has been fixed; what remains needs four decisions, one set of credentials, and ten strangers willing to pay.</p>
+</div>
+
+<h2>8 · Evidence behind the colouring</h2>
+<table>
+  <thead><tr><th style="width:34%">Claim</th><th>How it is enforced</th></tr></thead>
+  <tbody>
+    <tr><td>"Built and tested"</td><td>712 tests across 40 suites; 100% statements, branches, functions and lines; zero coverage pragmas; TypeScript strict. CI fails below any of these.</td></tr>
+    <tr><td>"Customer-reachable"</td><td>Two standing gates. Capability→caller fails the build when a capability has no caller; route→client fails it when a server route has no client method and no reasoned exemption.</td></tr>
+    <tr><td>"The trust page is true"</td><td>Document→code gate: every machine-checkable claim on the trust page is asserted against the running configuration, and a list of unbacked terms fails the build if they appear.</td></tr>
+    <tr><td>"Durable"</td><td>One contract suite per store, executed twice — in memory and against a live PostgreSQL 16 that CI provisions and refuses to skip.</td></tr>
+    <tr><td>"Never verified live"</td><td>Stated, not hidden: no Zoom account has ever installed this app, no CRM has ever received a write, no load test has run, no human has used the panel.</td></tr>
+  </tbody>
+</table>
+
+<footer>
+  <p>MeetSync · 003-MoPr12 · Product Status Map V001 · 20 September 2026 · Claude for Senthil/KP<br>
+  Sources: code v0.45.0 (<code>src/</code>, <code>web/</code>, <code>test/</code>, <code>docs/</code>), sprint tracker v040, Perplexity Review V001 of 16 September 2026.<br>
+  Companion workbook: version detail, pending versions, step-by-step execution and manual test cases.</p>
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,967 @@
+Pushing the documentation commits to the remote repository.
+Pushing the documentation commits to the remote repository.
+Starting with the Git inspection, then the three first-attempt commits. One note before pushing: master is already 19 commits ahead (the accepted historical migration), so a normal push carries those too.
+
+Run command
+test_impersonate.py holds only the WP-01 _decode hunks (import + helper), nothing from WP-02, so no hunk splitting is needed. Writing the three commit messages and committing in order.
+
+Used 2 integrations
+Function name Git shadowed the executable (recursion) — nothing was committed. Renaming and rerunning.
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"$p='C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\snap3.ps1'; $t=[IO.File]::ReadAllText($p); $t=$t.Replace('function Git {','function Invoke-Git {').Replace('& git @args','& git.exe @args'); $t=[regex]::Replace($t,'(?m)^Git ','Invoke-Git ').Replace('(Git rev-parse','(Invoke-Git rev-parse').Replace('((Git diff-tree','((Invoke-Git diff-tree'); [IO.File]::WriteAllText($p,$t,(New-Object Text.UTF8Encoding($false))); cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; 'staged now: ' + ((git diff --cached --name-only) -join ','); git log --oneline -1\""
+}
+Response
+
+staged now: 
+637683b docs(planning): artifact migration manifest
+Request
+
+{
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\snap3.ps1\""
+}
+Response
+
+ExecaError: Command failed with exit code 1: "powershell -NoProfile -ExecutionPolicy Bypass -File ""C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\snap3.ps1"""
+
+git.exe : warning: in the working copy of 'services/api/app/core/db.py', LF will be replaced by CRLF the next time Git \r
+touches it\r
+At C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\snap3.ps1:8 char:28\r
++ function Invoke-Git { $o = & git.exe @args 2>&1 | ForEach-Object { "$ ...\r
++                            ~~~~~~~~~~~~~~~~~~~~\r
+    + CategoryInfo          : NotSpecified: (warning: in the... Git touches it:String) [], RemoteException\r
+    + FullyQualifiedErrorId : NativeCommandError\r
+ 
+Diagnosing why the script throws on a git command.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; 'staged: ' + ((git diff --cached --name-only) -join ','); git log --oneline -1; $p='C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\snap3.ps1'; $t=[IO.File]::ReadAllText($p); $t=$t.Replace('function Invoke-Git { $o = & git.exe @args 2>&1', 'function Invoke-Git { $ErrorActionPreference = ''Continue''; $o = & git.exe @args 2>&1'); [IO.File]::WriteAllText($p,$t,(New-Object Text.UTF8Encoding($false))); 'patched'\""
+}
+Response
+
+staged: services/api/app/core/db.py,services/api/app/core/middleware.py,services/api/app/core/tenancy.py
+637683b docs(planning): artifact migration manifest
+patched
+The WP-13 files were staged (add ran), no commit yet — state is exactly as intended. Rerunning; git add is idempotent so the staging is unaffected.
+
+Request
+
+{
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\snap3.ps1\""
+}
+Response
+
+WP-13 42865e9  services/api/app/core/db.py, services/api/app/core/middleware.py, services/api/app/core/tenancy.py
+warning: in the working copy of 'services/api/app/core/auth.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'services/api/app/core/config.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'services/api/tests/integration/test_impersonate.py', LF will be replaced by CRLF the next time Git touches it
+WP-01 ebed893  services/api/app/core/auth.py, services/api/app/core/config.py, services/api/tests/integration/test_impersonate.py
+warning: in the working copy of 'services/api/app/schemas/superadmin.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'services/api/app/services/auth_service.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'services/api/app/services/superadmin_service.py', LF will be replaced by CRLF the next time Git touches it
+WP-02 f1757e1  services/api/app/schemas/superadmin.py, services/api/app/services/auth_service.py, services/api/app/services/superadmin_service.py
+--- remaining uncommitted (should be the 7 WP-22 test files only):
+ M services/api/tests/integration/test_s34c_whatsapp_webhook.py
+ M services/api/tests/integration/test_s34d_whatsapp_outbound.py
+ M services/api/tests/unit/test_i02_orchestrator_pstn.py
+ M services/api/tests/unit/test_m12_telephony.py
+ M services/api/tests/unit/test_m23_drive_driver.py
+ M services/api/tests/unit/test_m23_s3_driver.py
+ M services/api/tests/unit/test_orchestrator_service.py
+Three snapshots created, each with only its own files. Pushing master normally (no amend/squash/force) — this carries the 19 accepted migration commits plus these three.
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git push origin master 2>&1 | % { \\\"$_\\\" }; '--- after push'; git status -sb | Select -First 1; 'origin/master: ' + (git rev-parse --short origin/master); git log --oneline -4\""
+}
+Response
+
+To https://github.com/vsenthil7/talkproof-backend.git
+   94867f5..f1757e1  master -> master
+--- after push
+## master...origin/master
+origin/master: f1757e1
+f1757e1 audit(WP-02): initial AI implementation — unverified
+ebed893 audit(WP-01): initial AI implementation — unverified
+42865e9 audit(WP-13): initial AI implementation — unverified
+637683b docs(planning): artifact migration manifest
+Pushed: 94867f5..f1757e1. Now the WP-22 snapshot (section 4) before any testing, since it's still uncommitted.
+
+Request
+
+{
+  "content": "$utf8 = New-Object System.Text.UTF8Encoding($false)\n$EM = [string][char]0x2014\n$S = 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis'\nSet-Location 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'\n[IO.File]::WriteAllText(\"$S\\_m22.txt\", ((@(\n \"audit(WP-22): AI coverage test implementation $EM verification pending\",\n \"\",\n \"Behavioural tests for 21 of the 23 uncovered lines recorded in E-01 (S24 policy,\",\n \"fail_under=100 unchanged, no pragma, no production code):\",\n \"- s3.py: exists() propagates non-404 errors; boto3 client built once from config and reused\",\n \"- drive.py: Drive service authorised once from the service-account file and reused\",\n \"- telephony_service.py: claiming an outbound call -> 409 not_an_inbound_call, no reassignment\",\n \"- whatsapp_service.py / routes/whatsapp.py / schemas/whatsapp.py: schedule validation\",\n \"  (unapproved template, missing body), dispatch under spend cap -> failed, list-messages\",\n \"  route, blank to_number -> 422\",\n \"- routes/webhooks.py: inbound WhatsApp message without sender -> 422 MISSING_FIELDS, nothing stored\",\n \"- orchestrator_service.py: campaign download via carrier URL; PSTN tenant isolation;\",\n \"  PSTN missing recording_key -> ValueError\",\n \"\",\n \"Narrow runs: 106 passed (project Python 3.11 image); 158 passed (fresh Python 3.12).\",\n \"Pending: Protocol '...' stub lines (campaign_carrier/base.py:51, transcription/base.py:63)\",\n \"await decision; full regression and 100% gate NOT RUN; Python 3.11 image coverage\",\n \"stops tracing after await in async routes (environmental, under investigation).\",\n \"\",\n \"AI implementation snapshot preserved as evidence (PO instruction 2026-10-05 00:11).\") -join \"`n\") + \"`n\"), $utf8)\ngit add -- services/api/tests/unit/test_m23_s3_driver.py services/api/tests/unit/test_m23_drive_driver.py services/api/tests/unit/test_m12_telephony.py services/api/tests/integration/test_s34d_whatsapp_outbound.py services/api/tests/integration/test_s34c_whatsapp_webhook.py services/api/tests/unit/test_orchestrator_service.py services/api/tests/unit/test_i02_orchestrator_pstn.py 2>$null\ngit commit -q -F \"$S\\_m22.txt\" 2>$null\n\"WP-22 \" + (git rev-parse --short HEAD) + \"  files: \" + (@(git diff-tree --no-commit-id --name-only -r HEAD).Count)\ngit push origin master 2>&1 | ForEach-Object { \"$_\" }\ngit status -sb | Select-Object -First 1\ngit status --porcelain\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\snap22.ps1"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\snap22.ps1
+Request
+
+{
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\snap22.ps1\""
+}
+Response
+
+WP-22 8abbed1  files: 7
+To https://github.com/vsenthil7/talkproof-backend.git
+   f1757e1..8abbed1  master -> master
+## master...origin/master
+Running authentication and JWT security tests for defects.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; '--- tests with direct JWT secret/alg assumptions'; Get-ChildItem services\\api\\tests -Recurse -Filter *.py | Select-String -Pattern 'jwt_secret_key|jwt_algorithm|HS256|jwt\\.encode|jwt\\.decode' | % { $_.Path.Substring((Get-Location).Path.Length+1) + ':' + $_.LineNumber + ': ' + $_.Line.Trim() }; '--- tracked env templates / docs mentioning JWT_ALGORITHM'; git grep -n 'JWT_ALGORITHM\\|JWT_SECRET_KEY' -- ':!docs/92_planning' | % { $_ }\""
+}
+Response
+
+--- tests with direct JWT secret/alg assumptions
+services\api\tests\integration\test_impersonate.py:20: from app.core.auth import JWT_ALGORITHM, _jwt_keys
+services\api\tests\integration\test_impersonate.py:34: return jwt.decode(token, public_pem, algorithms=[JWT_ALGORITHM])
+services\api\tests\unit\test_auth.py:141: token = jwt.encode(
+services\api\tests\unit\test_auth.py:142: payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm
+services\api\tests\unit\test_config.py:34: def test_jwt_secret_key_present(self):
+services\api\tests\unit\test_config.py:35: """JWT_SECRET_KEY is set and non-empty."""
+services\api\tests\unit\test_config.py:37: assert s.jwt_secret_key
+services\api\tests\unit\test_config.py:38: assert len(s.jwt_secret_key) > 8
+services\api\tests\unit\test_config.py:40: def test_jwt_algorithm_is_hs256(self):
+services\api\tests\unit\test_config.py:41: """JWT algorithm defaults to HS256."""
+services\api\tests\unit\test_config.py:43: assert s.jwt_algorithm == "HS256"
+services\api\tests\unit\test_coverage_gaps.py:79: token = jwt.encode(
+services\api\tests\unit\test_coverage_gaps.py:80: payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm
+services\api\tests\unit\test_coverage_gaps.py:101: token = jwt.encode(
+services\api\tests\unit\test_coverage_gaps.py:102: payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm
+services\api\tests\unit\test_coverage_gaps.py:123: token = jwt.encode(
+services\api\tests\unit\test_coverage_gaps.py:124: payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm
+--- tracked env templates / docs mentioning JWT_ALGORITHM
+.github/workflows/ci.yml:47:      JWT_SECRET_KEY: ci-test-secret-not-for-production
+.github/workflows/ci.yml:48:      JWT_ALGORITHM: HS256
+deploy/staging.env:19:JWT_SECRET_KEY=CHANGE_ME_openssl_rand_hex_32
+deploy/staging.env:20:JWT_ALGORITHM=HS256
+docker-compose.prod.yml:16:#   cp deploy/staging.env services/api/.env     # then edit JWT_SECRET_KEY + any AI keys
+docs/15_deployment/DEPLOYMENT.md:307:JWT_SECRET_KEY=<output of: openssl rand -hex 32>
+docs/15_deployment/DEPLOYMENT.md:308:JWT_ALGORITHM=HS256
+docs/15_deployment/DEPLOYMENT.md:417:# Edit .env: set DATABASE_URL, JWT_SECRET_KEY, etc.
+docs/15_deployment/DEPLOYMENT.md:475:          JWT_SECRET_KEY: test-secret-not-real
+docs/15_deployment/DEPLOYMENT.md:480:          JWT_SECRET_KEY: test-secret-not-real
+docs/15_deployment/DEPLOYMENT.md:550:| `JWT_SECRET_KEY` | HMAC-SHA256 signing key for JWT | `openssl rand -hex 32` |
+docs/15_deployment/DEPLOYMENT.md:586:JWT_SECRET_KEY=GENERATE_WITH_openssl_rand_hex_32
+docs/15_deployment/DEPLOYMENT.md:587:JWT_ALGORITHM=HS256
+docs/15_deployment/DEPLOYMENT.md:974:sed -i "s/JWT_SECRET_KEY=.*/JWT_SECRET_KEY=${NEW_SECRET}/" /srv/talkproof/.env
+services/api/.env.example:19:JWT_SECRET_KEY=changeme-use-openssl-rand-hex-32
+services/api/.env.example:20:JWT_ALGORITHM=HS256
+services/api/app/core/auth.py:34:JWT_ALGORITHM = "RS256"
+services/api/app/core/auth.py:51:    if settings.jwt_algorithm != JWT_ALGORITHM:
+services/api/app/core/auth.py:53:            f"jwt_algorithm must be {JWT_ALGORITHM} (FR-012 / NFR-014); "
+services/api/app/core/auth.py:220:        algorithm=JWT_ALGORITHM,
+services/api/app/core/auth.py:244:            algorithms=[JWT_ALGORITHM],
+services/api/tests/integration/test_impersonate.py:20:from app.core.auth import JWT_ALGORITHM, _jwt_keys
+services/api/tests/integration/test_impersonate.py:34:    return jwt.decode(token, public_pem, algorithms=[JWT_ALGORITHM])
+services/api/tests/unit/test_config.py:35:        """JWT_SECRET_KEY is set and non-empty."""
+Auditing environment and deployment configuration for inconsistencies.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh -c 'cd /app && COVERAGE_FILE=/tmp/.c python -m pytest -p no:cacheprovider -q -o addopts= tests/unit/test_auth.py tests/unit/test_config.py tests/unit/test_coverage_gaps.py tests/integration/test_m02_auth.py tests/integration/test_auth_login.py 2>&1 | grep -E \\\"^(FAILED|ERROR)|passed|failed\\\" | sed -E \\\"s/ - .*//\\\" | sort | uniq -c | sort -rn | head -n 25'\""
+}
+Response
+
+ExecaError: Command failed with exit code 255: "powershell -NoProfile -Command ""docker exec talkproof_api sh -c 'cd /app && COVERAGE_FILE=/tmp/.c python -m pytest -p no:cacheprovider -q -o addopts= tests/unit/test_auth.py tests/unit/test_config.py tests/unit/test_coverage_gaps.py tests/integration/test_m02_auth.py tests/integration/test_auth_login.py 2>&1 | grep -E \""^(FAILED|ERROR)|passed|failed\"" | sed -E \""s/ - .*//\"" | sort | uniq -c | sort -rn | head -n 25'"""
+
+'ERROR)' is not recognized as an internal or external command,\r
+operable program or batch file.
+Request
+
+{
+  "content": "#!/bin/sh\n# usage: run.sh \"<pytest args>\"   (env overrides via docker exec -e)\ncd /app\nCOVERAGE_FILE=/tmp/.c python -m pytest -p no:cacheprovider -q -o addopts= --tb=line $1 2>&1 | grep -E '^(FAILED|ERROR|E  |/app/)|passed|failed|error' | sed -E 's/ - .*//' | head -n 40\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\run.sh"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\run.sh
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"$s='C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\run.sh'; (Get-Content $s -Raw).Replace(\\\"`r`n\\\",\\\"`n\\\") | Set-Content -NoNewline -Encoding ascii $s; docker cp $s talkproof_api:/tmp/run.sh; docker exec talkproof_api sh /tmp/run.sh 'tests/unit/test_auth.py tests/unit/test_config.py tests/unit/test_coverage_gaps.py tests/integration/test_m02_auth.py tests/integration/test_auth_login.py'\""
+}
+Response
+
+/app/app/core/auth.py:52: app.core.auth.JWTConfigurationError: jwt_algorithm must be RS256 (FR-012 / NFR-014); got 'HS256'
+/app/app/core/auth.py:52: app.core.auth.JWTConfigurationError: jwt_algorithm must be RS256 (FR-012 / NFR-014); got 'HS256'
+/app/app/core/auth.py:52: app.core.auth.JWTConfigurationError: jwt_algorithm must be RS256 (FR-012 / NFR-014); got 'HS256'
+/app/app/core/auth.py:52: app.core.auth.JWTConfigurationError: jwt_algorithm must be RS256 (FR-012 / NFR-014); got 'HS256'
+/app/app/core/auth.py:52: app.core.auth.JWTConfigurationError: jwt_algorithm must be RS256 (FR-012 / NFR-014); got 'HS256'
+/app/app/core/auth.py:52: app.core.auth.JWTConfigurationError: jwt_algorithm must be RS256 (FR-012 / NFR-014); got 'HS256'
+/app/app/core/auth.py:52: app.core.auth.JWTConfigurationError: jwt_algorithm must be RS256 (FR-012 / NFR-014); got 'HS256'
+/app/app/core/auth.py:52: app.core.auth.JWTConfigurationError: jwt_algorithm must be RS256 (FR-012 / NFR-014); got 'HS256'
+/app/app/core/auth.py:52: app.core.auth.JWTConfigurationError: jwt_algorithm must be RS256 (FR-012 / NFR-014); got 'HS256'
+/app/app/core/auth.py:52: app.core.auth.JWTConfigurationError: jwt_algorithm must be RS256 (FR-012 / NFR-014); got 'HS256'
+/app/app/core/auth.py:52: app.core.auth.JWTConfigurationError: jwt_algorithm must be RS256 (FR-012 / NFR-014); got 'HS256'
+/app/app/core/auth.py:52: app.core.auth.JWTConfigurationError: jwt_algorithm must be RS256 (FR-012 / NFR-014); got 'HS256'
+/app/tests/integration/test_m02_auth.py:65: assert 500 == 200
+/app/tests/integration/test_m02_auth.py:97: KeyError: 'refresh_token'
+/app/tests/integration/test_m02_auth.py:113: KeyError: 'refresh_token'
+/app/app/core/auth.py:52: app.core.auth.JWTConfigurationError: jwt_algorithm must be RS256 (FR-012 / NFR-014); got 'HS256'
+/app/app/core/auth.py:52: app.core.auth.JWTConfigurationError: jwt_algorithm must be RS256 (FR-012 / NFR-014); got 'HS256'
+/app/app/core/auth.py:52: app.core.auth.JWTConfigurationError: jwt_algorithm must be RS256 (FR-012 / NFR-014); got 'HS256'
+/app/app/core/auth.py:52: app.core.auth.JWTConfigurationError: jwt_algorithm must be RS256 (FR-012 / NFR-014); got 'HS256'
+/app/app/core/auth.py:52: app.core.auth.JWTConfigurationError: jwt_algorithm must be RS256 (FR-012 / NFR-014); got 'HS256'
+/app/tests/integration/test_m02_auth.py:300: assert 500 == 200
+/app/tests/integration/test_m02_auth.py:360: assert 500 == 201
+/app/tests/integration/test_m02_auth.py:369: assert 500 == 401
+/app/tests/integration/test_m02_auth.py:382: KeyError: 'id'
+/app/tests/integration/test_m02_auth.py:398: KeyError: 'id'
+/app/tests/integration/test_m02_auth.py:405: assert 500 == 404
+/app/tests/integration/test_auth_login.py:57: assert 500 == 200
+/app/tests/integration/test_auth_login.py:68: AssertionError: assert 'access_token' in {'details': None, 'error_code': 'INTERNAL_SERVER_ERROR', 'message': 'An unexpected error occurred'}
+/app/tests/integration/test_auth_login.py:79: KeyError: 'token_type'
+/app/tests/integration/test_auth_login.py:89: KeyError: 'expires_in'
+/app/tests/integration/test_auth_login.py:99: KeyError: 'access_token'
+/app/tests/integration/test_auth_login.py:112: KeyError: 'access_token'
+/app/tests/integration/test_auth_login.py:125: AssertionError: assert 'x-request-id' in Headers({'content-length': '94', 'content-type': 'application/json'})
+  /usr/local/lib/python3.11/site-packages/pydantic/_internal/_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
+FAILED tests/unit/test_auth.py::TestCreateAccessToken::test_create_token_returns_token_response
+FAILED tests/unit/test_auth.py::TestCreateAccessToken::test_token_is_decodable
+FAILED tests/unit/test_auth.py::TestCreateAccessToken::test_super_admin_null_tenant_id
+FAILED tests/unit/test_auth.py::TestCreateAccessToken::test_expires_in_matches_access_token_constant
+FAILED tests/unit/test_auth.py::TestDecodeAccessToken::test_decode_valid_token
+FAILED tests/unit/test_auth.py::TestDecodeAccessToken::test_decode_tampered_token_returns_none
+Debugging a failing authentication test in the middleware.
+Logging JWT algorithm mismatches before applying environment fixes
+Setting up environment configuration for staging deployment.
+Checking main.py startup hooks before fixing key-loading defect
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; Select-String app\\main.py -Pattern 'lifespan|on_event|startup|def create_app|app = FastAPI|get_settings' | % { $_.LineNumber.ToString() + ': ' + $_.Line.Trim() }; '--- startup block'; $n=(Select-String app\\main.py -Pattern 'startup' | Select -First 1).LineNumber; if($n){ $l=Get-Content app\\main.py; for($i=$n-3;$i -lt $n+14;$i++){ '{0,4}: {1}' -f ($i+1),$l[$i] } }\""
+}
+Response
+
+44: from app.core.config import get_settings
+50: settings = get_settings()
+56: async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+59: logger.error("startup_db_connection_failed")
+60: raise RuntimeError("Cannot connect to database on startup")
+66: app = FastAPI(
+72: lifespan=lifespan,
+--- startup block
+  57:     logger.info("talkproof_starting", env=settings.app_env)
+  58:     if not check_db_connection():
+  59:         logger.error("startup_db_connection_failed")
+  60:         raise RuntimeError("Cannot connect to database on startup")
+  61:     logger.info("talkproof_started", env=settings.app_env)
+  62:     yield
+  63:     logger.info("talkproof_shutdown")
+  64: 
+  65: 
+  66: app = FastAPI(
+  67:     title="TalkProof",
+  68:     description="Multi-tenant SaaS platform for certified outbound voice campaigns.",
+  69:     version="0.1.0",
+  70:     docs_url="/api/docs" if settings.app_env != "production" else None,
+  71:     redoc_url="/api/redoc" if settings.app_env != "production" else None,
+  72:     lifespan=lifespan,
+  73: )
+Request
+
+{
+  "edits": [
+    {
+      "newText": "    logger.info(\"talkproof_starting\", env=settings.app_env)\n    if not check_db_connection():\n        logger.error(\"startup_db_connection_failed\")\n        raise RuntimeError(\"Cannot connect to database on startup\")\n    # WP-01 / FR-012, NFR-014: refuse to start on a non-RS256 or key-less JWT\n    # configuration instead of failing every request at verify time.\n    verify_jwt_configuration()\n    logger.info(\"talkproof_started\", env=settings.app_env)\n",
+      "oldText": "    logger.info(\"talkproof_starting\", env=settings.app_env)\n    if not check_db_connection():\n        logger.error(\"startup_db_connection_failed\")\n        raise RuntimeError(\"Cannot connect to database on startup\")\n    logger.info(\"talkproof_started\", env=settings.app_env)\n"
+    },
+    {
+      "newText": "from app.core.config import get_settings\n",
+      "oldText": "from app.core.config import get_settings\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\app\\main.py"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\main.py
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\main.py	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\main.py	modified
+@@ -57,8 +57,11 @@
+     logger.info("talkproof_starting", env=settings.app_env)
+     if not check_db_connection():
+         logger.error("startup_db_connection_failed")
+         raise RuntimeError("Cannot connect to database on startup")
++    # WP-01 / FR-012, NFR-014: refuse to start on a non-RS256 or key-less JWT
++    # configuration instead of failing every request at verify time.
++    verify_jwt_configuration()
+     logger.info("talkproof_started", env=settings.app_env)
+     yield
+     logger.info("talkproof_shutdown")
+ 
+```
+
+Now the import in main.py, the verify_jwt_configuration function and key-path support in auth.py/config.py.
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; $l=Get-Content app\\main.py; for($i=40;$i -lt 52;$i++){ '{0,4}: {1}' -f ($i+1),$l[$i] }\""
+}
+Response
+
+  41: from app.api.v1.routes.webhooks import router as webhooks_router
+  42: from app.api.v1.routes.whatsapp import router as whatsapp_router
+  43: from app.api.v1.routes.whitelabel import router as whitelabel_router
+  44: from app.core.config import get_settings
+  45: from app.core.db import check_db_connection, engine
+  46: from app.core.logging import get_logger, setup_logging
+  47: from app.core.middleware import AccessTrailMiddleware, TenantMiddleware
+  48: from app.core.security_middleware import SecurityHeadersMiddleware
+  49: 
+  50: settings = get_settings()
+  51: setup_logging(settings.app_log_level)
+  52: logger = get_logger("api")
+Request
+
+{
+  "edits": [
+    {
+      "newText": "from app.core.auth import verify_jwt_configuration\nfrom app.core.config import get_settings\nfrom app.core.db import check_db_connection, engine\n",
+      "oldText": "from app.core.config import get_settings\nfrom app.core.db import check_db_connection, engine\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\app\\main.py"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\main.py
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\main.py	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\main.py	modified
+@@ -40,8 +40,9 @@
+ from app.api.v1.routes.contacts import router as contacts_router
+ from app.api.v1.routes.webhooks import router as webhooks_router
+ from app.api.v1.routes.whatsapp import router as whatsapp_router
+ from app.api.v1.routes.whitelabel import router as whitelabel_router
++from app.core.auth import verify_jwt_configuration
+ from app.core.config import get_settings
+ from app.core.db import check_db_connection, engine
+ from app.core.logging import get_logger, setup_logging
+ from app.core.middleware import AccessTrailMiddleware, TenantMiddleware
+```
+
+Request
+
+{
+  "edits": [
+    {
+      "newText": "    jwt_secret_key: str\n    jwt_algorithm: str = \"RS256\"\n    jwt_private_key: Optional[str] = None\n    jwt_public_key: Optional[str] = None\n    # File alternatives for deployments whose env_file cannot carry multi-line PEM.\n    jwt_private_key_path: Optional[str] = None\n    jwt_public_key_path: Optional[str] = None\n    jwt_access_token_expire_minutes: int = 480\n",
+      "oldText": "    jwt_secret_key: str\n    jwt_algorithm: str = \"RS256\"\n    jwt_private_key: Optional[str] = None\n    jwt_public_key: Optional[str] = None\n    jwt_access_token_expire_minutes: int = 480\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\app\\core\\config.py"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\core\config.py
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\core\config.py	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\core\config.py	modified
+@@ -38,8 +38,11 @@
+     jwt_secret_key: str
+     jwt_algorithm: str = "RS256"
+     jwt_private_key: Optional[str] = None
+     jwt_public_key: Optional[str] = None
++    # File alternatives for deployments whose env_file cannot carry multi-line PEM.
++    jwt_private_key_path: Optional[str] = None
++    jwt_public_key_path: Optional[str] = None
+     jwt_access_token_expire_minutes: int = 480
+ 
+     # --- Encryption (M05 BYO key vault) ---
+     # urlsafe-base64 32-byte Fernet key. When unset, a key is derived
+```
+
+Request
+
+{
+  "edits": [
+    {
+      "newText": "def _configured_keys() -> Optional[tuple[str, str]]:\n    \"\"\"Return the (private, public) PEM pair from settings, inline or by path.\"\"\"\n    private_pem = settings.jwt_private_key\n    public_pem = settings.jwt_public_key\n    if not private_pem and settings.jwt_private_key_path:\n        private_pem = Path(settings.jwt_private_key_path).read_text()\n    if not public_pem and settings.jwt_public_key_path:\n        public_pem = Path(settings.jwt_public_key_path).read_text()\n    if private_pem and public_pem:\n        return private_pem, public_pem\n    if private_pem or public_pem:\n        raise JWTConfigurationError(\n            \"JWT_PRIVATE_KEY and JWT_PUBLIC_KEY must both be configured\"\n        )\n    return None\n\n\ndef _jwt_keys() -> tuple[str, str]:\n    \"\"\"Return (private_pem, public_pem) for RS256 signing/verification.\n\n    Rejects any configured algorithm other than RS256. Keys come from settings\n    (JWT_PRIVATE_KEY / JWT_PUBLIC_KEY, PEM, or *_PATH files). In\n    development/test with no keys configured, one RSA-2048 key pair is\n    generated per process so the stack runs without committing a key\n    (NFR-025); production must supply keys.\n    \"\"\"\n    global _ephemeral_keys\n    if settings.jwt_algorithm != JWT_ALGORITHM:\n        raise JWTConfigurationError(\n            f\"jwt_algorithm must be {JWT_ALGORITHM} (FR-012 / NFR-014); \"\n            f\"got {settings.jwt_algorithm!r}\"\n        )\n    configured = _configured_keys()\n    if configured is not None:\n        return configured\n",
+      "oldText": "def _jwt_keys() -> tuple[str, str]:\n    \"\"\"Return (private_pem, public_pem) for RS256 signing/verification.\n\n    Rejects any configured algorithm other than RS256. Keys come from settings\n    (JWT_PRIVATE_KEY / JWT_PUBLIC_KEY, PEM). In development/test with no keys\n    configured, one RSA-2048 key pair is generated per process so the stack\n    runs without committing a key (NFR-025); production must supply keys.\n    \"\"\"\n    global _ephemeral_keys\n    if settings.jwt_algorithm != JWT_ALGORITHM:\n        raise JWTConfigurationError(\n            f\"jwt_algorithm must be {JWT_ALGORITHM} (FR-012 / NFR-014); \"\n            f\"got {settings.jwt_algorithm!r}\"\n        )\n    if settings.jwt_private_key and settings.jwt_public_key:\n        return settings.jwt_private_key, settings.jwt_public_key\n"
+    },
+    {
+      "newText": "    return _ephemeral_keys\n\n\ndef verify_jwt_configuration() -> None:\n    \"\"\"Startup gate: raise JWTConfigurationError unless RS256 keys are usable.\n\n    Called from the application lifespan so a misconfigured algorithm or\n    missing/unreadable key pair refuses to start rather than failing every\n    request at verify time. The key pair itself is validated by a sign/verify\n    round trip.\n    \"\"\"\n    private_pem, public_pem = _jwt_keys()\n    try:\n        probe = jwt.encode({\"probe\": True}, private_pem, algorithm=JWT_ALGORITHM)\n        jwt.decode(probe, public_pem, algorithms=[JWT_ALGORITHM])\n    except Exception as exc:  # jose raises JWKError/JWTError/ValueError variants\n        raise JWTConfigurationError(f\"JWT key pair is not usable: {exc}\") from exc\n",
+      "oldText": "    return _ephemeral_keys\n"
+    },
+    {
+      "newText": "import hashlib\nimport secrets\nfrom datetime import datetime, timedelta, timezone\nfrom pathlib import Path\nfrom typing import Optional\n",
+      "oldText": "import hashlib\nimport secrets\nfrom datetime import datetime, timedelta, timezone\nfrom typing import Optional\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\app\\core\\auth.py"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\core\auth.py
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\core\auth.py	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\core\auth.py	modified
+@@ -7,8 +7,9 @@
+ 
+ import hashlib
+ import secrets
+ from datetime import datetime, timedelta, timezone
++from pathlib import Path
+ from typing import Optional
+ from uuid import UUID
+ 
+ from jose import JWTError, jwt
+@@ -38,24 +39,43 @@
+ class JWTConfigurationError(RuntimeError):
+     """Raised when the JWT algorithm/keys are not an acceptable RS256 setup."""
+ 
+ 
++def _configured_keys() -> Optional[tuple[str, str]]:
++    """Return the (private, public) PEM pair from settings, inline or by path."""
++    private_pem = settings.jwt_private_key
++    public_pem = settings.jwt_public_key
++    if not private_pem and settings.jwt_private_key_path:
++        private_pem = Path(settings.jwt_private_key_path).read_text()
++    if not public_pem and settings.jwt_public_key_path:
++        public_pem = Path(settings.jwt_public_key_path).read_text()
++    if private_pem and public_pem:
++        return private_pem, public_pem
++    if private_pem or public_pem:
++        raise JWTConfigurationError(
++            "JWT_PRIVATE_KEY and JWT_PUBLIC_KEY must both be configured"
++        )
++    return None
++
++
+ def _jwt_keys() -> tuple[str, str]:
+     """Return (private_pem, public_pem) for RS256 signing/verification.
+ 
+     Rejects any configured algorithm other than RS256. Keys come from settings
+-    (JWT_PRIVATE_KEY / JWT_PUBLIC_KEY, PEM). In development/test with no keys
+-    configured, one RSA-2048 key pair is generated per process so the stack
+-    runs without committing a key (NFR-025); production must supply keys.
++    (JWT_PRIVATE_KEY / JWT_PUBLIC_KEY, PEM, or *_PATH files). In
++    development/test with no keys configured, one RSA-2048 key pair is
++    generated per process so the stack runs without committing a key
++    (NFR-025); production must supply keys.
+     """
+     global _ephemeral_keys
+     if settings.jwt_algorithm != JWT_ALGORITHM:
+         raise JWTConfigurationError(
+             f"jwt_algorithm must be {JWT_ALGORITHM} (FR-012 / NFR-014); "
+             f"got {settings.jwt_algorithm!r}"
+         )
+-    if settings.jwt_private_key and settings.jwt_public_key:
+-        return settings.jwt_private_key, settings.jwt_public_key
++    configured = _configured_keys()
++    if configured is not None:
++        return configured
+     if settings.app_env not in ("development", "test"):
+         raise JWTConfigurationError(
+             "JWT_PRIVATE_KEY and JWT_PUBLIC_KEY (PEM) are required outside "
+             "development/test"
+@@ -86,8 +106,24 @@
+         )
+     return _ephemeral_keys
+ 
+ 
++def verify_jwt_configuration() -> None:
++    """Startup gate: raise JWTConfigurationError unless RS256 keys are usable.
++
++    Called from the application lifespan so a misconfigured algorithm or
++    missing/unreadable key pair refuses to start rather than failing every
++    request at verify time. The key pair itself is validated by a sign/verify
++    round trip.
++    """
++    private_pem, public_pem = _jwt_keys()
++    try:
++        probe = jwt.encode({"probe": True}, private_pem, algorithm=JWT_ALGORITHM)
++        jwt.decode(probe, public_pem, algorithms=[JWT_ALGORITHM])
++    except Exception as exc:  # jose raises JWKError/JWTError/ValueError variants
++        raise JWTConfigurationError(f"JWT key pair is not usable: {exc}") from exc
++
++
+ # --- Token schemas ---
+ class TokenData(BaseModel):
+     """Decoded JWT payload.
+ 
+```
+
+Writing regression tests for RS256 token verification.
+Request
+
+{
+  "content": "\"\"\"WP-01 / FR-012, NFR-014 -- RS256-only access tokens.\n\nCovers: tokens are RS256-signed and verified with the public key; HS256 tokens\nare rejected; a non-RS256 algorithm or a missing/incomplete/unusable key pair\nis refused at startup (verify_jwt_configuration) rather than per request;\nkeys may be supplied inline or via *_PATH files; dev/test fall back to one\nephemeral per-process key pair.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport uuid\n\nimport pytest\nfrom jose import jwt\n\nfrom app.core import auth\n\n\ndef _rsa_pem_pair() -> tuple[str, str]:\n    from cryptography.hazmat.primitives import serialization\n    from cryptography.hazmat.primitives.asymmetric import rsa\n\n    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)\n    private_pem = key.private_bytes(\n        serialization.Encoding.PEM,\n        serialization.PrivateFormat.PKCS8,\n        serialization.NoEncryption(),\n    ).decode()\n    public_pem = (\n        key.public_key()\n        .public_bytes(\n            serialization.Encoding.PEM,\n            serialization.PublicFormat.SubjectPublicKeyInfo,\n        )\n        .decode()\n    )\n    return private_pem, public_pem\n\n\n@pytest.fixture\ndef rs256_settings(monkeypatch):\n    \"\"\"Clean RS256 dev configuration with no inline/path keys and no cache.\"\"\"\n    monkeypatch.setattr(auth.settings, \"jwt_algorithm\", \"RS256\")\n    monkeypatch.setattr(auth.settings, \"app_env\", \"test\")\n    monkeypatch.setattr(auth.settings, \"jwt_private_key\", None)\n    monkeypatch.setattr(auth.settings, \"jwt_public_key\", None)\n    monkeypatch.setattr(auth.settings, \"jwt_private_key_path\", None)\n    monkeypatch.setattr(auth.settings, \"jwt_public_key_path\", None)\n    monkeypatch.setattr(auth, \"_ephemeral_keys\", None)\n    return auth.settings\n\n\ndef _mint() -> str:\n    return auth.create_access_token(\n        user_id=uuid.uuid4(),\n        tenant_id=uuid.uuid4(),\n        role=\"tenant_admin\",\n        email=\"rs@example.com\",\n    ).access_token\n\n\nclass TestRS256Tokens:\n    def test_access_token_is_rs256_and_verifies_with_public_key(self, rs256_settings):\n        token = _mint()\n        assert jwt.get_unverified_header(token)[\"alg\"] == \"RS256\"\n        _, public_pem = auth._jwt_keys()\n        claims = jwt.decode(token, public_pem, algorithms=[\"RS256\"])\n        assert claims[\"email\"] == \"rs@example.com\"\n        assert auth.decode_access_token(token) is not None\n\n    def test_hs256_token_signed_with_shared_secret_is_rejected(self, rs256_settings):\n        forged = jwt.encode(\n            {\n                \"sub\": str(uuid.uuid4()),\n                \"tenant_id\": str(uuid.uuid4()),\n                \"role\": \"we_super_admin\",\n                \"email\": \"forged@example.com\",\n            },\n            rs256_settings.jwt_secret_key,\n            algorithm=\"HS256\",\n        )\n        assert auth.decode_access_token(forged) is None\n\n    def test_ephemeral_dev_keypair_generated_once(self, rs256_settings):\n        first = auth._jwt_keys()\n        second = auth._jwt_keys()\n        assert first == second\n        assert \"BEGIN PRIVATE KEY\" in first[0]\n        assert \"BEGIN PUBLIC KEY\" in first[1]\n\n\nclass TestConfigurationGate:\n    def test_non_rs256_algorithm_refused(self, rs256_settings, monkeypatch):\n        monkeypatch.setattr(rs256_settings, \"jwt_algorithm\", \"HS256\")\n        with pytest.raises(auth.JWTConfigurationError, match=\"must be RS256\"):\n            auth.verify_jwt_configuration()\n        with pytest.raises(auth.JWTConfigurationError):\n            _mint()\n\n    def test_production_without_keys_refused(self, rs256_settings, monkeypatch):\n        monkeypatch.setattr(rs256_settings, \"app_env\", \"production\")\n        with pytest.raises(auth.JWTConfigurationError, match=\"required outside\"):\n            auth.verify_jwt_configuration()\n\n    def test_half_configured_pair_refused(self, rs256_settings, monkeypatch):\n        private_pem, _ = _rsa_pem_pair()\n        monkeypatch.setattr(rs256_settings, \"jwt_private_key\", private_pem)\n        with pytest.raises(auth.JWTConfigurationError, match=\"both\"):\n            auth.verify_jwt_configuration()\n\n    def test_mismatched_pair_refused(self, rs256_settings, monkeypatch):\n        private_pem, _ = _rsa_pem_pair()\n        _, other_public = _rsa_pem_pair()\n        monkeypatch.setattr(rs256_settings, \"jwt_private_key\", private_pem)\n        monkeypatch.setattr(rs256_settings, \"jwt_public_key\", other_public)\n        with pytest.raises(auth.JWTConfigurationError, match=\"not usable\"):\n            auth.verify_jwt_configuration()\n\n    def test_keys_from_path_files_are_used(self, rs256_settings, monkeypatch, tmp_path):\n        private_pem, public_pem = _rsa_pem_pair()\n        priv = tmp_path / \"jwt.key\"\n        pub = tmp_path / \"jwt.pub\"\n        priv.write_text(private_pem)\n        pub.write_text(public_pem)\n        monkeypatch.setattr(rs256_settings, \"app_env\", \"production\")\n        monkeypatch.setattr(rs256_settings, \"jwt_private_key_path\", str(priv))\n        monkeypatch.setattr(rs256_settings, \"jwt_public_key_path\", str(pub))\n        auth.verify_jwt_configuration()  # does not raise\n        token = _mint()\n        assert jwt.decode(token, public_pem, algorithms=[\"RS256\"])[\"role\"] == \"tenant_admin\"\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\tests\\unit\\test_wp01_rs256.py"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\unit\test_wp01_rs256.py
+Testing JWT configuration with an algorithm override.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec -e JWT_ALGORITHM=RS256 talkproof_api sh /tmp/run.sh 'tests/unit/test_wp01_rs256.py tests/integration/test_auth_login.py'; docker exec talkproof_api sh -c 'cd /app && black --check -q tests/unit/test_wp01_rs256.py app/core/auth.py app/core/config.py app/main.py && echo BLACK_OK; flake8 tests/unit/test_wp01_rs256.py app/core/auth.py app/core/config.py app/main.py && echo FLAKE8_OK'\""
+}
+Response
+
+  /usr/local/lib/python3.11/site-packages/pydantic/_internal/_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
+23 passed, 3 warnings in 5.33s
+FLAKE8_OK
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh -c 'cd /app && black --check tests/unit/test_wp01_rs256.py app/core/auth.py app/core/config.py app/main.py 2>&1 | grep -v Oh; black --diff -q tests/unit/test_wp01_rs256.py app/core/auth.py 2>/dev/null | grep -E \\\"^[-+][^-+]\\\" | head -n 20'\""
+}
+Response
+
+would reformat tests/unit/test_wp01_rs256.py
+
+1 file would be reformatted, 3 files would be left unchanged.
+--- tests/unit/test_wp01_rs256.py	2026-10-04 23:16:43.030251+00:00
++++ tests/unit/test_wp01_rs256.py	2026-10-04 23:17:02.723430+00:00
+Only my new test file; applying black to it alone (no other file touched).
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh -c 'cd /app && black -q tests/unit/test_wp01_rs256.py && black --check -q tests/unit/test_wp01_rs256.py && echo BLACK_OK'; docker exec -e JWT_ALGORITHM=RS256 talkproof_api sh /tmp/run.sh 'tests/unit/test_wp01_rs256.py' | Select -Last 1; cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git status --porcelain\""
+}
+Response
+
+BLACK_OK
+8 passed, 2 warnings in 2.56s
+ M services/api/app/core/auth.py
+ M services/api/app/core/config.py
+ M services/api/app/main.py
+?? services/api/tests/unit/test_wp01_rs256.py
+Committing fix A (fail-fast + key-path support + regression tests) and pushing.
+Request
+
+{
+  "content": "$utf8 = New-Object System.Text.UTF8Encoding($false)\n$EM = [string][char]0x2014\n$S = 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis'\nSet-Location 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'\n$msg = $args[0]; $files = $args[1..($args.Count-1)]\n[IO.File]::WriteAllText(\"$S\\_msg_fix.txt\", ($msg -replace '\\{EM\\}', $EM), $utf8)\ngit add -- $files 2>$null\ngit commit -q -F \"$S\\_msg_fix.txt\" 2>$null\n(git rev-parse --short HEAD) + \"  \" + ((git diff-tree --no-commit-id --name-only -r HEAD) -join ', ')\ngit push -q origin master 2>&1 | ForEach-Object { \"$_\" }\ngit status -sb | Select-Object -First 1\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\fixcommit.ps1"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\fixcommit.ps1
+Request
+
+{
+  "content": "fix(WP-01): refuse to start on bad JWT config; key files via *_PATH\n\nDEFECT: with WP-01 a non-RS256 jwt_algorithm (or missing keys) surfaced as\nHTTP 500 on every request from TenantMiddleware (X-Request-ID missing) instead\nof refusing to start.\n\n- app/main.py lifespan calls verify_jwt_configuration(): RS256 check, key pair\n  present (inline or JWT_PRIVATE_KEY_PATH / JWT_PUBLIC_KEY_PATH files), and a\n  sign/verify round trip; JWTConfigurationError aborts startup\n- half-configured pair (only one of private/public) is refused\n- *_PATH options added because docker compose env_file cannot carry multi-line PEM\n\nRegression tests: tests/unit/test_wp01_rs256.py (8): RS256 header + public-key\nverification; HS256 token signed with the shared secret rejected; ephemeral\ndev pair generated once; non-RS256 / production-without-keys / half pair /\nmismatched pair refused; keys loaded from path files.\n\nNarrow: test_wp01_rs256.py + test_auth_login.py 23 passed (JWT_ALGORITHM=RS256\nprocess override; local .env still HS256 -> separate environment fix).\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\_msgA.txt"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\_msgA.txt
+Request
+
+{
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\fixcommit.ps1\" \"$(Get-Content 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\_msgA.txt' -Raw)\" services/api/app/core/auth.py services/api/app/core/config.py services/api/app/main.py services/api/tests/unit/test_wp01_rs256.py"
+}
+Response
+
+4910841  services/api/app/core/auth.py, services/api/app/core/config.py, services/api/app/main.py, services/api/tests/unit/test_wp01_rs256.py
+## master...origin/master
+Switching environment configs to RS256 with key path variables.
+Request
+
+{
+  "edits": [
+    {
+      "newText": "# --- Auth ---\n# Generate a strong secret: openssl rand -hex 32  (still used to derive the\n# dev/test BYO vault key; no longer signs JWTs)\nJWT_SECRET_KEY=changeme-use-openssl-rand-hex-32\n# WP-01 / FR-012, NFR-014: access tokens are RS256-signed. In development/test\n# an ephemeral RSA key pair is generated per process when no keys are set.\n# Staging/production MUST supply a PEM key pair, inline or via *_PATH files:\n#   openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out jwt.key\n#   openssl pkey -in jwt.key -pubout -out jwt.pub\nJWT_ALGORITHM=RS256\n# JWT_PRIVATE_KEY_PATH=/run/secrets/jwt.key\n# JWT_PUBLIC_KEY_PATH=/run/secrets/jwt.pub\nJWT_ACCESS_TOKEN_EXPIRE_MINUTES=480\n",
+      "oldText": "# --- Auth ---\n# Generate a strong secret: openssl rand -hex 32\nJWT_SECRET_KEY=changeme-use-openssl-rand-hex-32\nJWT_ALGORITHM=HS256\nJWT_ACCESS_TOKEN_EXPIRE_MINUTES=480\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\.env.example"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\.env.example
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\.env.example	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\.env.example	modified
+@@ -14,11 +14,19 @@
+ # --- Redis ---
+ REDIS_URL=redis://redis:6379/0
+ 
+ # --- Auth ---
+-# Generate a strong secret: openssl rand -hex 32
++# Generate a strong secret: openssl rand -hex 32  (still used to derive the
++# dev/test BYO vault key; no longer signs JWTs)
+ JWT_SECRET_KEY=changeme-use-openssl-rand-hex-32
+-JWT_ALGORITHM=HS256
++# WP-01 / FR-012, NFR-014: access tokens are RS256-signed. In development/test
++# an ephemeral RSA key pair is generated per process when no keys are set.
++# Staging/production MUST supply a PEM key pair, inline or via *_PATH files:
++#   openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out jwt.key
++#   openssl pkey -in jwt.key -pubout -out jwt.pub
++JWT_ALGORITHM=RS256
++# JWT_PRIVATE_KEY_PATH=/run/secrets/jwt.key
++# JWT_PUBLIC_KEY_PATH=/run/secrets/jwt.pub
+ JWT_ACCESS_TOKEN_EXPIRE_MINUTES=480
+ 
+ # --- Telephony (BYO carrier; Exotel reference integration) ---
+ EXOTEL_API_KEY=
+```
+
+Request
+
+{
+  "edits": [
+    {
+      "newText": "# --- Auth ---\n# Generate a real secret:  openssl rand -hex 32\nJWT_SECRET_KEY=CHANGE_ME_openssl_rand_hex_32\n# WP-01 / FR-012, NFR-014: RS256 only. APP_ENV=staging REQUIRES a key pair\n# (the service refuses to start without one). Generate on the host and mount:\n#   openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out jwt.key\n#   openssl pkey -in jwt.key -pubout -out jwt.pub\nJWT_ALGORITHM=RS256\nJWT_PRIVATE_KEY_PATH=/run/secrets/jwt.key\nJWT_PUBLIC_KEY_PATH=/run/secrets/jwt.pub\nJWT_ACCESS_TOKEN_EXPIRE_MINUTES=60\n",
+      "oldText": "# --- Auth ---\n# Generate a real secret:  openssl rand -hex 32\nJWT_SECRET_KEY=CHANGE_ME_openssl_rand_hex_32\nJWT_ALGORITHM=HS256\nJWT_ACCESS_TOKEN_EXPIRE_MINUTES=60\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\deploy\\staging.env"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\deploy\staging.env
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\deploy\staging.env	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\deploy\staging.env	modified
+@@ -16,9 +16,15 @@
+ 
+ # --- Auth ---
+ # Generate a real secret:  openssl rand -hex 32
+ JWT_SECRET_KEY=CHANGE_ME_openssl_rand_hex_32
+-JWT_ALGORITHM=HS256
++# WP-01 / FR-012, NFR-014: RS256 only. APP_ENV=staging REQUIRES a key pair
++# (the service refuses to start without one). Generate on the host and mount:
++#   openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out jwt.key
++#   openssl pkey -in jwt.key -pubout -out jwt.pub
++JWT_ALGORITHM=RS256
++JWT_PRIVATE_KEY_PATH=/run/secrets/jwt.key
++JWT_PUBLIC_KEY_PATH=/run/secrets/jwt.pub
+ JWT_ACCESS_TOKEN_EXPIRE_MINUTES=60
+ 
+ # --- App ---
+ APP_ENV=staging
+```
+
+Request
+
+{
+  "edits": [
+    {
+      "newText": "      JWT_SECRET_KEY: ci-test-secret-not-for-production\n      # WP-01: RS256 only; APP_ENV=development -> ephemeral per-process key pair\n      JWT_ALGORITHM: RS256\n",
+      "oldText": "      JWT_SECRET_KEY: ci-test-secret-not-for-production\n      JWT_ALGORITHM: HS256\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\.github\\workflows\\ci.yml"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\.github\workflows\ci.yml
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\.github\workflows\ci.yml	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\.github\workflows\ci.yml	modified
+@@ -44,9 +44,10 @@
+       DATABASE_URL: [REDACTED:credentialed-url:sha256-6fc832e8ec69]localhost:5432/talkproof_dev
+       DATABASE_TEST_URL: [REDACTED:credentialed-url:sha256-6fc832e8ec69]localhost:5432/talkproof_test
+       REDIS_URL: redis://localhost:6379/0
+       JWT_SECRET_KEY: ci-test-secret-not-for-production
+-      JWT_ALGORITHM: HS256
++      # WP-01: RS256 only; APP_ENV=development -> ephemeral per-process key pair
++      JWT_ALGORITHM: RS256
+       APP_ENV: development
+       APP_LOG_LEVEL: INFO
+       # Write logs to a CI-writable path instead of the container default /app/logs.
+       LOG_DIR: ${{ github.workspace }}/ci-logs
+```
+
+Request
+
+{
+  "edits": [
+    {
+      "newText": "# --- Auth ---\nJWT_SECRET_KEY=<output of: openssl rand -hex 32>\nJWT_ALGORITHM=RS256\nJWT_PRIVATE_KEY_PATH=/run/secrets/jwt.key\nJWT_PUBLIC_KEY_PATH=/run/secrets/jwt.pub\nJWT_ACCESS_TOKEN_EXPIRE_MINUTES=480\n",
+      "oldText": "# --- Auth ---\nJWT_SECRET_KEY=<output of: openssl rand -hex 32>\nJWT_ALGORITHM=HS256\nJWT_ACCESS_TOKEN_EXPIRE_MINUTES=480\n"
+    },
+    {
+      "newText": "| `JWT_SECRET_KEY` | Derives the dev/test BYO vault key (no longer signs JWTs) | `openssl rand -hex 32` |\n| `JWT_PRIVATE_KEY_PATH` / `JWT_PUBLIC_KEY_PATH` | RS256 JWT signing key pair (PEM); required when `APP_ENV` is not development/test (FR-012, NFR-014) | `openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out jwt.key && openssl pkey -in jwt.key -pubout -out jwt.pub` |\n",
+      "oldText": "| `JWT_SECRET_KEY` | HMAC-SHA256 signing key for JWT | `openssl rand -hex 32` |\n"
+    },
+    {
+      "newText": "JWT_SECRET_KEY=GENERATE_WITH_openssl_rand_hex_32\nJWT_ALGORITHM=RS256\nJWT_PRIVATE_KEY_PATH=/run/secrets/jwt.key\nJWT_PUBLIC_KEY_PATH=/run/secrets/jwt.pub\nJWT_ACCESS_TOKEN_EXPIRE_MINUTES=480\n",
+      "oldText": "JWT_SECRET_KEY=GENERATE_WITH_openssl_rand_hex_32\nJWT_ALGORITHM=HS256\nJWT_ACCESS_TOKEN_EXPIRE_MINUTES=480\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\docs\\15_deployment\\DEPLOYMENT.md"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\docs\15_deployment\DEPLOYMENT.md
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\docs\15_deployment\DEPLOYMENT.md	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\docs\15_deployment\DEPLOYMENT.md	modified
+@@ -304,9 +304,11 @@
+ REDIS_URL=redis://redis:6379/0
+ 
+ # --- Auth ---
+ JWT_SECRET_KEY=<output of: openssl rand -hex 32>
+-JWT_ALGORITHM=HS256
++JWT_ALGORITHM=RS256
++JWT_PRIVATE_KEY_PATH=/run/secrets/jwt.key
++JWT_PUBLIC_KEY_PATH=/run/secrets/jwt.pub
+ JWT_ACCESS_TOKEN_EXPIRE_MINUTES=480
+ 
+ # --- CORS ---
+ CORS_ORIGINS=http://45.77.52.54:8097
+@@ -546,9 +548,10 @@
+ ### 8.1 Required Variables
+ 
+ | Variable | Description | Generate with |
+ |---|---|---|
+-| `JWT_SECRET_KEY` | HMAC-SHA256 signing key for JWT | `openssl rand -hex 32` |
++| `JWT_SECRET_KEY` | Derives the dev/test BYO vault key (no longer signs JWTs) | `openssl rand -hex 32` |
++| `JWT_PRIVATE_KEY_PATH` / `JWT_PUBLIC_KEY_PATH` | RS256 JWT signing key pair (PEM); required when `APP_ENV` is not development/test (FR-012, NFR-014) | `openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out jwt.key && openssl pkey -in jwt.key -pubout -out jwt.pub` |
+ | `POSTGRES_PASSWORD` | Database password | `openssl rand -base64 32` |
+ | `EXOTEL_WEBHOOK_SECRET` | HMAC validation for Exotel webhooks | Provided by Exotel |
+ | `OPENAI_API_KEY` | GPT-4o + Whisper | OpenAI dashboard |
+ | `ANTHROPIC_API_KEY` | Claude | Anthropic console |
+@@ -583,9 +586,11 @@
+ 
+ REDIS_URL=redis://redis:6379/0
+ 
+ JWT_SECRET_KEY=GENERATE_WITH_openssl_rand_hex_32
+-JWT_ALGORITHM=HS256
++JWT_ALGORITHM=RS256
++JWT_PRIVATE_KEY_PATH=/run/secrets/jwt.key
++JWT_PUBLIC_KEY_PATH=/run/secrets/jwt.pub
+ JWT_ACCESS_TOKEN_EXPIRE_MINUTES=480
+ 
+ CORS_ORIGINS=http://45.77.52.54:8097
+ 
+```
+
+Now the local .env (untracked, dev only: just the algorithm line) and a check that the running container picks it up — then verify the auth tests without any env override.
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"$f='C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\.env'; $t=[IO.File]::ReadAllText($f); if($t -notmatch '(?m)^JWT_ALGORITHM=HS256\\s*$'){ throw 'unexpected .env state' }; $t=[regex]::Replace($t,'(?m)^JWT_ALGORITHM=HS256(\\r?)$','JWT_ALGORITHM=RS256$1'); [IO.File]::WriteAllText($f,$t,(New-Object Text.UTF8Encoding($false))); 'local .env: ' + (Select-String $f -Pattern '^JWT_ALGORITHM=').Line; docker compose -f 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\docker-compose.yml' up -d api 2>&1 | Select -Last 1; Start-Sleep 8; docker exec talkproof_api sh -c 'echo container JWT_ALGORITHM=$JWT_ALGORITHM'; docker exec talkproof_api sh /tmp/run.sh 'tests/unit/test_wp01_rs256.py tests/integration/test_auth_login.py tests/integration/test_impersonate.py' | Select -Last 1\""
+}
+Response
+
+ExecaError: Command failed with exit code 1: "powershell -NoProfile -Command ""$f='C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\.env'; $t=[IO.File]::ReadAllText($f); if($t -notmatch '(?m)^JWT_ALGORITHM=HS256\s*$'){ throw 'unexpected .env state' }; $t=[regex]::Replace($t,'(?m)^JWT_ALGORITHM=HS256(\r?)$','JWT_ALGORITHM=RS256$1'); [IO.File]::WriteAllText($f,$t,(New-Object Text.UTF8Encoding($false))); 'local .env: ' + (Select-String $f -Pattern '^JWT_ALGORITHM=').Line; docker compose -f 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\docker-compose.yml' up -d api 2>&1 | Select -Last 1; Start-Sleep 8; docker exec talkproof_api sh -c 'echo container JWT_ALGORITHM=$JWT_ALGORITHM'; docker exec talkproof_api sh /tmp/run.sh 'tests/unit/test_wp01_rs256.py tests/integration/test_auth_login.py tests/integration/test_impersonate.py' | Select -Last 1"""
+
+ Container talkproof_api Started \r
+sh: 0: cannot open /tmp/run.sh: No such file
+
+local .env: JWT_ALGORITHM=RS256\r
+container JWT_ALGORITHM=RS256
+Container was recreated with JWT_ALGORITHM=RS256 (so /tmp helpers were lost). Re-copying helpers and running the auth tests with no override.
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"$a='C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis'; foreach($s in 'run.sh','quick.sh'){ docker cp \\\"$a\\$s\\\" talkproof_api:/tmp/$s }; docker ps --format '{{.Names}} {{.Status}}' | Select-String talkproof; docker exec talkproof_api sh /tmp/run.sh 'tests/unit/test_wp01_rs256.py tests/integration/test_auth_login.py tests/integration/test_impersonate.py tests/integration/test_m02_auth.py' | Select -Last 3\""
+}
+Response
+
+
+talkproof_api Up 14 seconds
+talkproof_postgres Up 33 minutes (healthy)
+talkproof_redis Up 33 minutes (healthy)
+  /usr/local/lib/python3.11/site-packages/pydantic/_internal/_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
+55 passed, 3 warnings in 10.88s
+
+Environment fixed: 55 passed with no override. Committing fix B (tracked templates/CI/doc; local .env is untracked and noted in the body).
+
+Request
+
+{
+  "content": "fix(WP-01): environment — RS256 in env templates, CI and deployment doc\n\nENVIRONMENT: every tracked environment definition still set JWT_ALGORITHM=HS256,\nwhich the WP-01 service now refuses (all auth tests failed with\nJWTConfigurationError: got 'HS256').\n\n- services/api/.env.example: JWT_ALGORITHM=RS256; key generation commands;\n  JWT_PRIVATE_KEY_PATH / JWT_PUBLIC_KEY_PATH documented (dev/test may rely on\n  the ephemeral pair)\n- deploy/staging.env: RS256 + key-path variables (APP_ENV=staging requires a\n  real key pair; the service refuses to start without one)\n- .github/workflows/ci.yml: JWT_ALGORITHM=RS256 (APP_ENV=development ->\n  ephemeral pair; no key in CI)\n- docs/15_deployment/DEPLOYMENT.md: env examples and required-variables table\n  updated; JWT_SECRET_KEY now only derives the dev/test BYO vault key\n\nLocal untracked services/api/.env changed to RS256 by hand; api container\nrecreated. Narrow, no env override: test_wp01_rs256 + test_auth_login +\ntest_impersonate + test_m02_auth: 55 passed.\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\_msgB.txt"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\_msgB.txt
+Request
+
+{
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\fixcommit.ps1\" \"$(Get-Content 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\_msgB.txt' -Raw)\" services/api/.env.example deploy/staging.env .github/workflows/ci.yml docs/15_deployment/DEPLOYMENT.md"
+}
+Response
+
+d90fbe9  .github/workflows/ci.yml, deploy/staging.env, docs/15_deployment/DEPLOYMENT.md, services/api/.env.example
+## master...origin/master
+Now fix C — the obsolete HS256 test assumptions. Reading the three spots.
+Diagnosing why the missing-claim tests no longer run.
+Fixing vacuous auth tests and outdated config default
+Request
+
+{
+  "content": "$utf8 = New-Object System.Text.UTF8Encoding($false)\n$api = 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'\nforeach ($rel in 'tests\\unit\\test_auth.py', 'tests\\unit\\test_coverage_gaps.py') {\n  $p = Join-Path $api $rel; $t = [IO.File]::ReadAllText($p)\n  $enc = \"token = jwt.encode(`n            payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm`n        )\"\n  $n1 = ([regex]::Matches($t, [regex]::Escape($enc))).Count\n  $t = $t.Replace($enc, \"token = jwt.encode(payload, _jwt_keys()[0], algorithm=JWT_ALGORITHM)\")\n  $imp = \"from app.core.config import get_settings`n`n        settings = get_settings()`n\"\n  $n2 = ([regex]::Matches($t, [regex]::Escape($imp))).Count\n  $t = $t.Replace($imp, \"from app.core.auth import JWT_ALGORITHM, _jwt_keys`n\")\n  [IO.File]::WriteAllText($p, $t, $utf8)\n  \"$rel : encode replaced=$n1, settings-import replaced=$n2\"\n}\n$p = Join-Path $api 'tests\\unit\\test_config.py'; $t = [IO.File]::ReadAllText($p)\n$old = \"    def test_jwt_algorithm_is_hs256(self):`n        `\"`\"`\"JWT algorithm defaults to HS256.`\"`\"`\"`n        s = get_settings()`n        assert s.jwt_algorithm == `\"HS256`\"`n\"\n$new = \"    def test_jwt_algorithm_is_rs256(self):`n        `\"`\"`\"JWT algorithm is RS256 (WP-01 / FR-012, NFR-014).`\"`\"`\"`n        s = get_settings()`n        assert s.jwt_algorithm == `\"RS256`\"`n\"\n\"test_config: \" + $t.Contains($old)\n[IO.File]::WriteAllText($p, $t.Replace($old, $new), $utf8)\nSelect-String $p -Pattern 'rs256|hs256' | ForEach-Object { $_.Line.Trim() }\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\fixC.ps1"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\fixC.ps1
+Request
+
+{
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\fixC.ps1\"; docker exec talkproof_api sh /tmp/run.sh 'tests/unit/test_auth.py tests/unit/test_coverage_gaps.py tests/unit/test_config.py' | Select-Object -Last 2; docker exec talkproof_api sh -c 'cd /app && flake8 tests/unit/test_auth.py tests/unit/test_coverage_gaps.py tests/unit/test_config.py && echo FLAKE8_OK; black --check -q tests/unit/test_auth.py tests/unit/test_coverage_gaps.py tests/unit/test_config.py && echo BLACK_OK'"
+}
+Response
+
+ExecaError: Command failed with exit code 255: "powershell -NoProfile -ExecutionPolicy Bypass -File ""C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\fixC.ps1""; docker exec talkproof_api sh /tmp/run.sh 'tests/unit/test_auth.py tests/unit/test_coverage_gaps.py tests/unit/test_config.py' | Select-Object -Last 2; docker exec talkproof_api sh -c 'cd /app && flake8 tests/unit/test_auth.py tests/unit/test_coverage_gaps.py tests/unit/test_config.py && echo FLAKE8_OK; black --check -q tests/unit/test_auth.py tests/unit/test_coverage_gaps.py tests/unit/test_config.py && echo BLACK_OK'"
+
+'Select-Object' is not recognized as an internal or external command,\r
+operable program or batch file.
+Request
+
+{
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\fixC.ps1\""
+}
+Response
+
+tests\unit\test_auth.py : encode replaced=0, settings-import replaced=0
+tests\unit\test_coverage_gaps.py : encode replaced=0, settings-import replaced=0
+test_config: False
+def test_jwt_algorithm_is_hs256(self):
+"""JWT algorithm defaults to HS256."""
+assert s.jwt_algorithm == "HS256"
+Debugging a line-ending mismatch in file matching.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"$p='C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\fixC.ps1'; $t=[IO.File]::ReadAllText($p); $t=$t.Replace('$t = [IO.File]::ReadAllText($p)', '$t = [IO.File]::ReadAllText($p); $NL = if ($t.Contains(\\\"`r`n\\\")) { \\\"`r`n\\\" } else { \\\"`n\\\" }'); $t=$t.Replace('`n', '$NL'); [IO.File]::WriteAllText($p,$t,(New-Object Text.UTF8Encoding($false))); (Get-Content $p | Select-String 'NL').Count\""
+}
+Response
+
+7
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"Get-Content 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\fixC.ps1' | Select-String 'NL ='\""
+}
+Response
+
+
+  $p = Join-Path $api $rel; $t = [IO.File]::ReadAllText($p); $NL = if ($t.Contains("`r$NL")) { "`r$NL" } else { "$NL" }
+$p = Join-Path $api 'tests\unit\test_config.py'; $t = [IO.File]::ReadAllText($p); $NL = if ($t.Contains("`r$NL")) { 
+"`r$NL" } else { "$NL" }
+
+Self-clobbered that line; rewriting the script cleanly.
+Request
+
+{
+  "content": "$utf8 = New-Object System.Text.UTF8Encoding($false)\n$api = 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'\n$CR = [string][char]13; $LF = [string][char]10\nfunction Fix($rel, $pairs) {\n  $p = Join-Path $api $rel; $t = [IO.File]::ReadAllText($p)\n  $NL = if ($t.Contains($CR + $LF)) { $CR + $LF } else { $LF }\n  foreach ($pair in $pairs) {\n    $old = $pair[0].Replace(\"~\", $NL); $new = $pair[1].Replace(\"~\", $NL)\n    $n = ([regex]::Matches($t, [regex]::Escape($old))).Count\n    $t = $t.Replace($old, $new)\n    \"$rel : '$($pair[0].Substring(0,[Math]::Min(40,$pair[0].Length)))' replaced=$n\"\n  }\n  [IO.File]::WriteAllText($p, $t, $utf8)\n}\n$encPair = @(\"token = jwt.encode(~            payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm~        )\", \"token = jwt.encode(payload, _jwt_keys()[0], algorithm=JWT_ALGORITHM)\")\n$impPair = @(\"from app.core.config import get_settings~~        settings = get_settings()~\", \"from app.core.auth import JWT_ALGORITHM, _jwt_keys~\")\nFix 'tests\\unit\\test_auth.py' @($encPair, $impPair)\nFix 'tests\\unit\\test_coverage_gaps.py' @($encPair, $impPair)\nFix 'tests\\unit\\test_config.py' @(,@(\"    def test_jwt_algorithm_is_hs256(self):~        `\"`\"`\"JWT algorithm defaults to HS256.`\"`\"`\"~        s = get_settings()~        assert s.jwt_algorithm == `\"HS256`\"\", \"    def test_jwt_algorithm_is_rs256(self):~        `\"`\"`\"JWT algorithm is RS256 (WP-01 / FR-012, NFR-014).`\"`\"`\"~        s = get_settings()~        assert s.jwt_algorithm == `\"RS256`\"\"))\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\fixC.ps1"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\fixC.ps1
+Request
+
+{
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\fixC.ps1\""
+}
+Response
+
+tests\unit\test_auth.py : 'token = jwt.encode(~            payload,' replaced=1
+tests\unit\test_auth.py : 'from app.core.config import get_settings' replaced=1
+tests\unit\test_coverage_gaps.py : 'token = jwt.encode(~            payload,' replaced=3
+tests\unit\test_coverage_gaps.py : 'from app.core.config import get_settings' replaced=3
+tests\unit\test_config.py : '    def test_jwt_algorithm_is_hs256(self' replaced=1
+Request
+
+{
+  "content": "#!/bin/sh\ncd /app\nF=\"tests/unit/test_auth.py tests/unit/test_coverage_gaps.py tests/unit/test_config.py\"\nCOVERAGE_FILE=/tmp/.c python -m pytest -p no:cacheprovider -q -o addopts= $F --cov=app.core.auth --cov-report=term-missing --cov-fail-under=0 2>&1 | grep -E 'passed|failed|app/core/auth' \nflake8 $F && echo FLAKE8_OK\nblack --check -q $F && echo BLACK_OK\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\checkC.sh"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\checkC.sh
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"$s='C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\checkC.sh'; (Get-Content $s -Raw).Replace(\\\"`r`n\\\",\\\"`n\\\") | Set-Content -NoNewline -Encoding ascii $s; docker cp $s talkproof_api:/tmp/checkC.sh; docker exec talkproof_api sh /tmp/checkC.sh\""
+}
+Response
+
+app/core/auth.py      97     16    84%   48, 50, 52, 54, 71, 77, 79, 118-123, 192, 202, 214
+34 passed, 3 warnings in 4.34s
+FLAKE8_OK
+BLACK_OK
+Request
+
+{
+  "content": "fix(WP-01): tests — replace obsolete HS256 assumptions with RS256\n\nTEST-DEBT (obsolete assumptions after WP-01):\n- tests/unit/test_config.py: test_jwt_algorithm_is_hs256 asserted the old\n  default; now test_jwt_algorithm_is_rs256\n- tests/unit/test_auth.py (expired token) and tests/unit/test_coverage_gaps.py\n  (missing sub / role / email claims) minted tokens with\n  jwt.encode(jwt_secret_key, HS256). Under RS256 these were rejected before the\n  claim checks ran, so the tests passed vacuously. They now sign with the\n  service's RS256 private key (_jwt_keys()[0]) so the intended branches are\n  exercised again.\n\nNo production code changed. Narrow: 34 passed; flake8/black clean.\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\_msgC.txt"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\_msgC.txt
+Request
+
+{
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\fixcommit.ps1\" \"$(Get-Content 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\_msgC.txt' -Raw)\" services/api/tests/unit/test_auth.py services/api/tests/unit/test_coverage_gaps.py services/api/tests/unit/test_config.py"
+}
+Response
+
+0253317  services/api/tests/unit/test_auth.py, services/api/tests/unit/test_config.py, services/api/tests/unit/test_coverage_gaps.py
+## master...origin/master
+Auditing authentication and security test coverage for remaining issues.
+Request
+
+{
+  "content": "#!/bin/sh\ncd /app\nF=$(ls tests/unit/*auth* tests/unit/*sso* tests/unit/*mfa* tests/unit/*rbac* tests/unit/*m02* tests/unit/*m03* tests/unit/*session* tests/unit/*token* tests/unit/*security* tests/unit/*scim* tests/unit/*superadmin* tests/unit/*impersonat* tests/unit/*m09* tests/unit/*tenancy* tests/unit/*middleware* tests/integration/*auth* tests/integration/*sso* tests/integration/*mfa* tests/integration/*rbac* tests/integration/*m02* tests/integration/*m03* tests/integration/*session* tests/integration/*security* tests/integration/*scim* tests/integration/*superadmin* tests/integration/*impersonat* tests/integration/*m09* tests/integration/*m01* 2>/dev/null | sort -u)\necho \"files: $(echo $F | wc -w)\"\nCOVERAGE_FILE=/tmp/.c python -m pytest -p no:cacheprovider -q -o addopts= --tb=line $F 2>&1 | grep -E '^(FAILED|ERROR)|^E  |^/app/|passed|failed' | sed -E 's/ - .*//' | head -n 30\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\authwide.sh"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\authwide.sh
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"$s='C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\authwide.sh'; (Get-Content $s -Raw).Replace(\\\"`r`n\\\",\\\"`n\\\") | Set-Content -NoNewline -Encoding ascii $s; docker cp $s talkproof_api:/tmp/authwide.sh; docker exec talkproof_api sh /tmp/authwide.sh\""
+}
+Response
+
+files: 15
+300 passed, 4 warnings in 30.05s
+Stopping here at a clean checkpoint. Everything below is pushed; working tree is clean.
+
+1. First-attempt snapshots (section 1) — pushed 94867f5..8abbed1
+
+Commit	Subject	Files
+42865e9	audit(WP-13): initial AI implementation — unverified	tenancy.py, middleware.py, db.py
+ebed893	audit(WP-01): initial AI implementation — unverified	config.py, auth.py, test_impersonate.py (its only hunks were WP-01's _decode helper; no splitting needed)
+f1757e1	audit(WP-02): initial AI implementation — unverified	auth_service.py, superadmin_service.py, schemas/superadmin.py
+8abbed1	audit(WP-22): AI coverage test implementation — verification pending	the 7 WP-22 test files
+Bodies record exactly what you specified (quick-check counts, blocked RLS half, no migration, .env HS256, 15-minute window not implemented, full verification NOT RUN). No amend/squash/force; nothing improved before snapshotting. Note: the push necessarily carried the 19 accepted migration commits too.
+
+2. WP-01 test/defect loop (section 3) — three fix commits, all pushed
+
+WP	TEST	EXPECTED	ACTUAL	CLASS	Fix commit
+WP-01	test_auth_login.py:125 et al.	misconfigured algorithm refused at startup	HTTP 500 on every request from TenantMiddleware, X-Request-ID missing	DEFECT	4910841 — verify_jwt_configuration() in lifespan (RS256 check, key pair present, sign/verify round trip); JWT_PRIVATE_KEY_PATH/JWT_PUBLIC_KEY_PATH added because compose env_file can't carry multi-line PEM; half-configured pair refused. Regression: tests/unit/test_wp01_rs256.py (8 tests)
+WP-01	all auth tests	app runs RS256	JWTConfigurationError: got 'HS256' from .env.example, deploy/staging.env, ci.yml, DEPLOYMENT.md, local .env	ENVIRONMENT	d90fbe9 — tracked templates/CI/doc → RS256 + key-path vars; local untracked .env edited by hand; api container recreated
+WP-01	test_config::test_jwt_algorithm_is_hs256; test_auth.py, test_coverage_gaps.py ×3	tokens minted with RS256 key; default RS256	HS256 assumptions; the claim-check tests had become vacuous (rejected before the branch under test)	TEST-DEBT	0253317 — re-signed with _jwt_keys()[0]; test renamed …is_rs256
+Verification after fixes, no env override: wide auth/security set (15 files: auth, SSO, MFA, RBAC, SCIM, super-admin, impersonation, tenancy, middleware) — 300 passed, 0 failed. flake8/black clean on every touched file.
+
+3. Not yet done (next in order)
+
+WP-02 verification: exactly-five-failures, 30-minute lockout with boundary before/after expiry, 120 accepted / 121 rejected, existing impersonation security intact. Not started. The 15-minute window stays a recorded requirement gap for PO/design (needs persisted timing state).
+WP-13 verification of the ContextVar + after_begin wiring (leakage between requests, pool reuse, transaction boundaries, unauthenticated, super-admin/worker, exception cleanup). No RLS migration will be created until the login/super-admin/worker bypass design is decided.
+WP-22: Protocol ... lines decision still pending; full regression/100% gate still to run on a toolchain that traces async correctly (Python 3.11 image artefact remains a DEFERRED INVESTIGATION).
+Untouched as required: TC-1..TC-12, governance docs, migrated historical artifacts, S47-B stash (4894fc0b, still present). Orchestrator container remains stopped; api/postgres/redis up.
+
+Claude reached its tool-use limit for this turn.
