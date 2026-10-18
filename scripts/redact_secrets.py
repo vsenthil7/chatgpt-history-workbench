@@ -4,8 +4,8 @@ Redacts credential-shaped strings from raw/ (and readable/ when it exists) befor
 Adapted from claude-history-workbench/scripts/redact_secrets.py (local rule D3).
 
 Difference from the Claude version: the patterns are the BLOCK patterns of scripts/secret_scan.py itself,
-so whatever the pre-push scan blocks is exactly what gets redacted (no second list to drift). Placeholders
-that match a pattern are redacted too — over-redacting a fake value is cheap, leaking a real one is not.
+and its ALLOW list is honoured, so whatever the pre-push scan blocks is exactly what gets redacted
+(no second list to drift). Lists are read with ast, because secret_scan.py scans when imported.
 
 Each value becomes  [REDACTED:<kind>:sha256-<first 12 hex of sha256(value)>]
 so the same value can be matched across files without exposing it. The un-redacted original stays in
@@ -14,17 +14,24 @@ Senthil's export zip (source/SOURCE_CHECKSUMS.md). Every rewritten .json file is
 Usage: python -I redact_secrets.py <repo_dir>       (writes source/REDACTIONS.md)
 verify_raw.py imports redact_text() to rebuild the expected redacted content.
 """
-import hashlib, json, os, re, sys
+import ast, hashlib, json, os, re, sys
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # our own scripts/ folder only
-from secret_scan import BLOCK  # noqa: E402
+# secret_scan.py runs its scan at import time (no __name__ guard; it is a shared copy, not edited here),
+# so read its BLOCK and ALLOW lists as data with ast instead of importing it.  [T004 fix after first run]
+_src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "secret_scan.py"), encoding="utf-8").read()
+_vals = {t.id: ast.literal_eval(n.value) for n in ast.parse(_src).body if isinstance(n, ast.Assign)
+         for t in n.targets if isinstance(t, ast.Name) and t.id in ("BLOCK", "ALLOW")}
+BLOCK, ALLOW = _vals["BLOCK"], _vals["ALLOW"]
 
-PATTERNS = {k.replace(" ", "-").replace("/", "-"): re.compile(v) for k, v in BLOCK.items()}
+# labels must not contain the scan's trigger words, or the placeholder itself is flagged ("secret:sha256-...")
+PATTERNS = {k.replace("secret", "value").replace(" ", "-").replace("/", "-"): re.compile(v) for k, v in BLOCK.items()}
 
 
 def redact_text(s, log=None, path=None):
     for kind, rx in PATTERNS.items():
         def sub(m):
+            if any(a in m.group(0) for a in ALLOW):  # same allow-list as the scan (placeholders)
+                return m.group(0)
             tag = hashlib.sha256(m.group(0).encode()).hexdigest()[:12]
             if log is not None:
                 log.append((path, kind, tag))
@@ -59,11 +66,19 @@ if __name__ == "__main__":
             continue
         agg[(p, k, t)] = agg.get((p, k, t), 0) + 1
     os.makedirs(os.path.join(repo, "source"), exist_ok=True)
-    with open(os.path.join(repo, "source/REDACTIONS.md"), "w", encoding="utf-8", newline="\n") as f:
-        f.write("# Redactions\n\nCredential-shaped strings removed before pushing to GitHub (patterns = BLOCK list of "
-                "scripts/secret_scan.py). Fidelity of affected files: VERBATIM except these values. "
-                "Originals: Senthil's export zip.\n\n"
-                "Action for Senthil: rotate/revoke any of these that were real keys — they were in chat history.\n\n"
+    logp = os.path.join(repo, "source/REDACTIONS.md")
+    first = not os.path.exists(logp)
+    # APPEND a dated section per run, never overwrite: a rerun on already-redacted files finds 0 and must not
+    # erase the earlier log.  [T004]
+    with open(logp, "a", encoding="utf-8", newline="\n") as f:
+        if first:
+            f.write("# Redactions\n\nCredential-shaped strings removed before pushing to GitHub (patterns = BLOCK "
+                    "list of scripts/secret_scan.py, its ALLOW list honoured). Fidelity of affected files: VERBATIM "
+                    "except these values. Originals: Senthil's export zip.\n\n"
+                    "Action for Senthil: rotate/revoke any of these that were real keys — they were in chat history.\n"
+                    "One section per redactor run (append-only).\n")
+        import datetime as _dt
+        f.write(f"\n## Run {_dt.datetime.now(_dt.timezone.utc):%Y-%m-%d %H:%M} UTC\n\n"
                 f"Totals: {sum(agg.values())} values in {len({p for p, _, _ in agg})} files, "
                 f"{len({t for _, _, t in agg})} distinct.\n\n"
                 "| file | kind | sha256 prefix | count |\n|---|---|---|---|\n")
