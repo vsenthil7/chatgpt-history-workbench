@@ -1,0 +1,425 @@
+{
+ "conversation_id": "6ac2af98-d194-83ed-959b-6e9f6ba6279b",
+ "conversation_template_id": null,
+ "create_time": 1791143833.892701,
+ "current_node": "babf8a9a-808a-44d5-acc8-343793c96a50",
+ "default_model_slug": "gpt-5-6",
+ "id": "6ac2af98-d194-83ed-959b-6e9f6ba6279b",
+ "is_archived": false,
+ "is_do_not_remember": false,
+ "is_read_only": null,
+ "is_starred": null,
+ "is_study_mode": false,
+ "mapping": {
+  "3edabd8e-5e89-4502-9505-1ccd2324f0a4": {
+   "id": "3edabd8e-5e89-4502-9505-1ccd2324f0a4",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content": "Worked for 7s",
+     "content_type": "reasoning_recap"
+    },
+    "create_time": 1791143846.266342,
+    "id": "3edabd8e-5e89-4502-9505-1ccd2324f0a4",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "d7d47592-06b2-40eb-a181-d916861806cf"
+    }
+   },
+   "parent": "d7d47592-06b2-40eb-a181-d916861806cf"
+  },
+  "87ae84ff-0c69-4244-8326-b1a79bfa991d": {
+   "id": "87ae84ff-0c69-4244-8326-b1a79bfa991d",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Talkproof - review 04/10/2026 20:56 Claude response E-01 could not be completed in this pass — I hit the tool-call ceiling after reading V4 and roughly a third of the backend (pipeline, certification, auth, tenancy, provider vault, carriers, storage, SSO, compliance, resilience). The admin and Flutter repos are unzipped but not yet inspected, no tests have been run, and the report file does not exist yet. What follows is interim code evidence only, not the 46-row matrix.\n\n**Interim status:** 46 rows inspected / 0 fully written up · tests run 0 · failed 0 · external-runtime checks: not yet enumerated.\n\n**What the backend code proves so far (all CODE-VERIFIED, HIGH confidence unless noted):**\n\n1. **BYO vault is write-only.** `decrypt_secret` (`app/core/crypto.py:37`) is never called anywhere in `app/`. Keys are encrypted and stored, but no provider path ever reads them. Every \"BYO key by design\" seam is disconnected from the vault. This lowers BYO router (V4 D3) and touches every provider row.\n2. **Transcription abstraction is interface-only.** `app/services/transcription/` contains `base.py` + `__init__.py` only — no WhisperAdapter, no Google STT. The orchestrator (`orchestrator_service.py:336-342`) still calls `openai` directly with `whisper-1` literal and `os.environ[\"OPENAI_API_KEY\"]`. No diarisation, no word confidence. S47-T02 is not in the repo.\n3. **3-model consensus:** real SDK calls to Anthropic/OpenAI/Gemini (`:454`, `:476`, `:500`), model strings hard-coded, keys from env, 2-of-3 majority (`_majority_vote`), outcome vocabulary POSITIVE/NEGATIVE/NEUTRAL/INCONCLUSIVE. Any single model failure does **not** route to manual review — only `<2` valid results does (`:424`). Contradicts FR-040 as the PO upheld in D-04. Model name only, no version pin.\n4. **M07 `_invoke_model`** (`ai_service.py:79-93`) returns a hard-coded neutral envelope. Stub confirmed; two separate AI paths (M07 stub vs orchestrator real).\n5. **Certificate payload** (`certified_voice_service.py:145-153`) = call_id, campaign_id, tenant_id, verdict, agreement, model_count, per_model. No transcript, approver, timestamp, recording hash or consent. Smaller than V4's S12 description.\n6. **Anchoring:** `iota_client` is not in `requirements.txt`; `_submit_to_iota` returns env stub tx or raises. `anchor_tx_id` on `CallCertificate` is never written. PDF is campaign-level (reportlab, real) and embeds only the campaign IOTA tx, not the per-call certificate hash. No RFC3161 code exists. The real chain stops at \"canonical JSON + SHA-256 + HiL-gated status flip\".\n7. **RLS not wired.** `set_rls_tenant` is defined (`tenancy.py:100`) but never called in any request path; `enable_rls_all` is never called; no Alembic migration creates policies. Tenant isolation is application-layer `WHERE tenant_id` only.\n8. **Security values:** HS256 (`config.py:37`), 15-min lockout (`auth_service.py:44`), 60-min impersonation ceiling (`superadmin_service.py:40`). Confirms G29/G30/G31 drift.\n9. **SSO:** OIDC `_exchange_code` returns the token-endpoint JSON as if it were claims, no id_token/JWKS validation. SAML has a `/start` route only — no ACS/consume route exists.\n10. **Telephony:** Exotel is a real `httpx.post`, but `_build_adapter` reads `settings.exotel_account_sid`, which does not exist (`config.py` has `exotel_sid`) → URL is always `/Accounts//Calls/connect`. Status callback URL is relative (`/webhooks/exotel`). Twilio `_place`, M12 `_dial`/`_provision_number`, WhatsApp `_send`, Stripe `_stripe`, LiveKit `_mint_sfu_token`, push/email `_dispatch` are all deterministic fakes. Twilio/Telnyx/Vonage adapters absent.\n11. **Stripe webhook signature** (`billing.py:253-259`) is HMAC over the raw body compared to the header directly — not Stripe's `t=…,v1=…` scheme. V4 says \"attested real\"; it would reject every real Stripe event.\n12. **Storage drivers** (S3 via boto3, Drive v3) are real adapters, but no production code calls `.put()`; only `orchestrator` calls `.get()`. Nothing uploads recordings. No Object Lock.\n13. **Also found:** `escalate_overdue` has no caller (no scheduler); no WebSocket anywhere; audit hash chain is global, not per-tenant, with no concurrency guard; webhook secrets default to `\"dev-secret\"` when env is unset.\n\n**Recommended next step:** approve a continuation run of E-01 that (a) finishes the remaining backend modules, (b) inspects admin and Flutter wiring, (c) runs `pytest` unchanged and records the result, and (d) writes `TALKPROOF_E01_CODE_VERIFICATION_V001_20261004_HHMM.md` with all 13 sections and the 46-row matrix. Say \"go\" and I will resume from this evidence without re-reading what is already verified.\n\nContinue\n\nE-01 complete. Report is 13 sections (A–M), 46-row matrix reconciled, nothing in V4 touched, no V5, no decisions, no IDs, no sprints, no code edits.\n\n**46 rows inspected / 22 confirmed / 22 lowered / 0 raised / 2 unable to verify / tests run: backend 1,465 passed (repo's 100% coverage gate fails at 99.74%), admin Vitest 239 passed, Flutter not run (no SDK) / tests failed: 0 / external-runtime checks still required: 8.**\n\nProposed distribution after code: D1×5, D2×18, D3×23, D4×0 (V4 had D1×1, D2×9, D3×33, D4×3).\n\nBeyond the 13 points I gave you earlier, the second pass added: consent is never enforced on any call or message path; the rate limiter, HiL escalation, SIEM exporter, ConfigResolver and resilience primitives all have zero production callers; the only real AI calls (orchestrator) bypass the M22 ledger; the certificate issue flow has no anchor/PDF step at all, so D-06's ordering question has no code on either side; and the \"locked 100% coverage gate\" is red at HEAD.\n\nThe chain stops at: Whisper → 3-model vote → DB → HiL approve → SHA-256 of a seven-field summary → server self-check. Everything that makes a certificate trustworthy to a third party is absent or stubbed.\n\nRecommended next step: an independent review of this E-01 file against V4 Part 3, then the PO decides D-06/D-15/D-16..D-26 with these code facts in hand — in particular D-04 (code tolerates one failed model) and D-03 (anchor is campaign-level stub). V5 should carry no D4 forward without a live-run artefact."
+     ]
+    },
+    "create_time": 1791143836.785,
+    "id": "87ae84ff-0c69-4244-8326-b1a79bfa991d",
+    "metadata": {
+     "attachments": [
+      {
+       "id": "file_0000000014ec821088b2e6342a8524c4",
+       "library_file_id": "libfile_12bc8f0a1aa08191a2365244873b8486",
+       "mime_type": "text/markdown",
+       "name": "TALKPROOF_E01_CODE_VERIFICATION_V001_20261004_1945.md",
+       "size": 69241
+      },
+      {
+       "id": "file_00000000e3608210b1d3145999ab9e0e",
+       "library_file_id": "libfile_e63374b6b43881919a7363ef1b2b6358",
+       "mime_type": "text/markdown",
+       "name": "TALKPROOF_REQUIREMENT_RECOVERY_V4_20261004_2021(1).md",
+       "size": 171204
+      },
+      {
+       "id": "file_00000000d5e0821089cb069c754273b6",
+       "library_file_id": "libfile_c56786f555d48191b090e74509ccaad4",
+       "mime_type": "application/x-zip-compressed",
+       "name": "talkproof-admin-main(1).zip",
+       "size": 411993
+      },
+      {
+       "id": "file_00000000957881f4a147425e2cc5019a",
+       "library_file_id": "libfile_527423d5c1bc8191ba735c5392a9691e",
+       "mime_type": "application/x-zip-compressed",
+       "name": "talkproof-app-master(1).zip",
+       "size": 119396
+      },
+      {
+       "id": "file_00000000d7fc8246ac84815c2567659f",
+       "library_file_id": "libfile_8a48d3f5b4a88191bd874f15f99ac82a",
+       "mime_type": "application/x-zip-compressed",
+       "name": "talkproof-backend-master(1).zip",
+       "size": 3471564
+      }
+     ],
+     "serialization_metadata": {
+      "render_format": "markdown"
+     }
+    }
+   },
+   "parent": "client-created-root"
+  },
+  "babf8a9a-808a-44d5-acc8-343793c96a50": {
+   "id": "babf8a9a-808a-44d5-acc8-343793c96a50",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "## 04/10/2026 20:57 — TalkProof E-01 Review\n\nPartner, I reviewed Claude’s **E-01 output against V4 and the supplied E-01 report**. My position is:\n\n**Accept E-01 as the code-verification evidence package, but do not let Claude jump directly into requirements or sprints yet. The next artifact should be V5 — a controlled reconciliation of V4 + E-01.**\n\nClaude respected the gate: V4 was not modified, no V5 was created, no decisions D-16..D-26 were silently approved, and no source code was changed. fileciteturn0file0L3-L10 This matches V4’s intended sequence: **V4 correction → preservation/delta check → code verification of all 46 capabilities → PO decisions → requirements/sprint work.** fileciteturn0file1L1-L12\n\n### What E-01 materially changed\n\nThis was worth doing. V4's Part 3 was still tracker-attested; E-01 has now inspected all **46 capability rows**. The result is substantial: **22 confirmed, 22 lowered, none raised, 2 unable to verify**, with the proposed distribution moving from V4's `D1×1 / D2×9 / D3×33 / D4×3` to `D1×5 / D2×18 / D3×23 / D4×0`. fileciteturn0file0L14-L27\n\nMore importantly, Claude actually ran meaningful tests: backend **1,465 passed**, but the repository's own 100% coverage gate fails at **99.74%**; admin has **239 passing tests**; Flutter was not run because the SDK was unavailable. fileciteturn0file0L29-L31\n\nI agree with the central conclusion:\n\n> **TalkProof currently has a reasonably substantial application core, but not a production-integrated external-provider platform.**\n\nThat distinction matters enormously. The code proves tenancy/application scoping, auth/RBAC, APIs, HiL state handling, data models, audit mechanisms and other internal logic. But E-01 found **no external integration wired end-to-end**. fileciteturn0file0L29-L31\n\n### The biggest finding is actually the certificate chain\n\nThe original TalkProof differentiator is not merely \"AI analyses calls.\" V4's recovered product thesis requires three-model verification and a tamper-resistant externally verifiable certificate. The recovered requirements explicitly require **all three models**, RFC3161 TSA, blockchain anchoring, certified PDF and offline verification. fileciteturn0file1L41-L50\n\nBut the code-verification matrix shows:\n\n- certificate canonicalisation/verification: **D2**\n- RFC3161: **D1**\n- blockchain anchor: **D2**\n- PDF: **D3**, but campaign-summary rather than the complete per-call proof object\n- Object Lock: **D1**\n- client verification portal: **D2**\n\nfileciteturn0file0L66-L72\n\nSo Claude's sentence that the trustworthy chain currently stops around **Whisper → model vote → DB → HiL → SHA-256/self-verification** is directionally correct.\n\nThat means **TalkProof's central commercial claim is presently ahead of its implementation**. This is more important than whether individual screens or CRUD modules exist.\n\n### I would not approve Claude's suggested PO decisions yet\n\nThere is one sequencing adjustment I want.\n\nClaude proposes:\n\n**independent E-01 review → PO decides D-06/D-15/D-16..D-26 → V5**\n\nI would instead do:\n\n**E-01 accepted → V5 evidence reconciliation → PO Decision Gate → requirements → sprint design.**\n\nWhy? Because V4 itself says Part 3 is the provisional recovery baseline and its evidence chain is **requirement → tracker intent → tracker implementation claim → code verification → recovered D-level → gap → PO decision**. fileciteturn0file1L27-L31\n\nWe now possess the missing code-verification layer. Put that evidence into **one controlled V5** before you make 10+ product-owner decisions. Otherwise you will be deciding while mentally joining V4 and E-01 yourself.\n\n## Prompt to send Claude next\n\nAttach:\n\n**1. `TALKPROOF_REQUIREMENT_RECOVERY_V4_20261004_2021.md`**  \n**2. `TALKPROOF_E01_CODE_VERIFICATION_V001_20261004_1945.md`**\n\nThe three ZIPs are **not necessary for this particular pass** because E-01 is now the code-verification evidence artifact. Do **not** make Claude inspect the repositories again unless the independent reconciliation discovers a specific disputed code claim.\n\n:::writing{variant=\"document\" id=\"48317\" title=\"TalkProof V5 Controlled Reconciliation Prompt\"}\n# TALKPROOF — V5 CONTROLLED EVIDENCE RECONCILIATION\n\nYou are continuing the TalkProof requirement-recovery process.\n\n## INPUTS\n\n1. `TALKPROOF_REQUIREMENT_RECOVERY_V4_20261004_2021.md`\n2. `TALKPROOF_E01_CODE_VERIFICATION_V001_20261004_1945.md`\n\nTreat V4 as the candidate working baseline and E-01 as the completed code-verification evidence package.\n\nDo NOT re-perform E-01 from scratch.\n\n## PURPOSE OF THIS PASS\n\nCreate:\n\n`TALKPROOF_REQUIREMENT_RECOVERY_V5_20261004_HHMM.md`\n\nV5 is an EVIDENCE RECONCILIATION ONLY.\n\nIts job is to incorporate the verified E-01 code evidence into V4 without prematurely making Product Owner decisions or designing implementation work.\n\n## IMMUTABILITY\n\nV2, V3, V4 and E-01 remain immutable historical evidence.\n\nDo not edit or overwrite them.\n\nV5 must clearly state its lineage:\n\nV2 → V3 → V4 → E-01 code verification → V5 reconciled candidate baseline.\n\n## REQUIRED WORK\n\n### 1. Reconcile all 46 Part 3 capability rows\n\nFor every Part 3 capability:\n\n- preserve requirement/source evidence;\n- preserve tracker-attested state separately;\n- add E-01 CODE-VERIFIED state;\n- reconcile the recovered D-level using E-01 evidence;\n- preserve any split D-level where E-01 found different levels for different sub-capabilities;\n- carry confidence;\n- carry external-runtime verification requirements;\n- explicitly identify whether the row is:\n  - CONFIRMED,\n  - LOWERED,\n  - RAISED,\n  - UNABLE TO VERIFY.\n\nDo not silently collapse tracker evidence and code evidence.\n\n### 2. Reconcile the gap register\n\nFor every V4 gap affected by E-01:\n\nshow:\n\nV4 gap → V4 evidence → E-01 code fact → resulting V5 status.\n\nDo not close a gap merely because code exists.\n\nDistinguish:\n\n- implemented and wired,\n- implemented but not integrated,\n- stub/mock,\n- hard-coded,\n- interface/seam only,\n- test-only,\n- configuration-only,\n- absent,\n- externally dependent.\n\n### 3. Carry every material E-01 defect\n\nReconcile Section I of E-01 into the appropriate existing V4 gaps/capabilities.\n\nDo not lose defects merely because no existing V4 gap maps cleanly to them.\n\nWhere E-01 discovered a genuinely new implementation defect, add it to a clearly labelled:\n\n`CODE-DISCOVERED IMPLEMENTATION DEFECT`\n\nregister.\n\nDo NOT create a new product requirement from such a defect unless an existing authoritative requirement already requires the behaviour.\n\n### 4. Reconcile certificate/proof chain separately\n\nProduce one explicit evidence-chain table covering:\n\nrecording\n→ consent\n→ transcription\n→ transcript metadata\n→ 3-model consensus\n→ human review\n→ canonical evidence payload\n→ SHA-256\n→ RFC3161\n→ blockchain anchor\n→ certified PDF\n→ immutable storage\n→ client verification\n→ offline verification.\n\nFor every stage show:\n\n- authoritative requirement;\n- tracker claim;\n- code reality;\n- current D-level;\n- missing binding;\n- whether the stage is currently part of a real end-to-end chain.\n\nDo not describe TalkProof as tamper-proof, blockchain-certified, independently verifiable, or production certified unless the evidence supports that exact statement.\n\n### 5. Preserve conflicts\n\nDo NOT resolve D-01 through D-26 unless already explicitly approved by the Product Owner before this pass.\n\nIn particular, do not silently resolve:\n\n- JWT RS256 vs HS256;\n- lockout duration;\n- impersonation duration;\n- model failure behaviour;\n- verdict vocabulary;\n- blockchain provider;\n- HiL/certificate ordering;\n- AI-originated interactions;\n- D16–D26 frontier decisions.\n\nCode reality is evidence, not automatically the desired product requirement.\n\n### 6. D-level discipline\n\nUse the E-01 D-scale stated in E-01 for this reconciliation, but explicitly flag that its definitions still require reconciliation against the authoritative Req-1 D1–D7 definitions if those definitions are later supplied.\n\nNo capability may be D4+ solely because:\n\n- unit tests pass;\n- mocks pass;\n- an SDK is imported;\n- an adapter class exists;\n- a provider call appears in code;\n- tracker says DONE.\n\nDo not carry any V4 D4 forward without evidence satisfying the adopted D-level definition.\n\n### 7. Tests\n\nCarry E-01 test evidence exactly and distinguish:\n\n- passing tests;\n- coverage-gate result;\n- skipped tests;\n- tests not run;\n- provider boundaries mocked;\n- external runtime tests absent.\n\nDo not state \"100% tests pass\" because the repository's configured 100% coverage gate is red.\n\n### 8. External verification register\n\nPreserve all eight E-01 unresolved verification categories.\n\nCreate a compact table:\n\nID | verification required | why code cannot prove it | evidence needed | maximum D-level before evidence.\n\nDo not perform those external checks in this pass.\n\n### 9. PO decision pack\n\nAt the end create a separate:\n\n`PRODUCT OWNER DECISION PACK — NOT YET DECIDED`\n\nFor every still-open D decision show:\n\n- decision ID;\n- exact conflict/question;\n- authoritative requirement evidence;\n- tracker evidence;\n- E-01 code reality;\n- market/frontier evidence if already present in V4;\n- options;\n- consequence of each option;\n- your recommendation;\n- whether the decision blocks requirements/sprint creation.\n\nDo NOT mark your recommendation as approved.\n\n### 10. Change control\n\nInclude a V4 → V5 delta ledger.\n\nEvery substantive V5 change must trace to:\n\n- E-01 matrix row;\n- E-01 defect;\n- E-01 test result;\n- or an explicit correction of reconciliation logic.\n\nNo unexplained changes.\n\n## PROHIBITED IN THIS PASS\n\nDo NOT:\n\n- edit source code;\n- create implementation sprints;\n- number new sprints;\n- issue new FR/NFR IDs;\n- approve D-16..D-26;\n- redesign architecture;\n- shrink product scope;\n- add speculative features;\n- perform another broad market-research pass;\n- claim live provider verification;\n- claim production readiness;\n- claim enterprise readiness;\n- claim the certification chain works end-to-end.\n\n## FINAL CHECKS\n\nBefore writing V5, verify these invariants:\n\n- Part 3 contains exactly 46 capability rows.\n- All 46 have code-verification disposition.\n- E-01's 22 confirmed / 22 lowered / 0 raised / 2 unable-to-verify reconciliation is either preserved or every difference is explicitly justified.\n- No unsupported D4+ survives.\n- All material E-01 defects are represented.\n- All eight external-runtime verification categories remain visible.\n- No PO decision was silently made.\n- V2/V3/V4/E-01 remain unchanged.\n\nEnd with exactly:\n\nV5 status:\n46 capability rows reconciled / [x] confirmed / [x] lowered / [x] raised / [x] unable to verify\nOpen PO decisions: [count]\nExternal verification categories: [count]\nNew FR/NFR IDs issued: 0\nNew sprints created: 0\nSource code changed: NO\nReady for PO decision gate: YES/NO — [one-sentence reason]\n:::\n\nAfter Claude returns **V5**, bring **V5 + E-01** back here. **That is where I would do the next independent gate review.** Only after that review should we start making the D decisions and converting the accepted gaps into requirements and implementation sprints."
+     ]
+    },
+    "create_time": 1791143846.268645,
+    "id": "babf8a9a-808a-44d5-acc8-343793c96a50",
+    "metadata": {
+     "content_references": [
+      {
+       "alt": null,
+       "cloud_doc_url": null,
+       "connector_id": null,
+       "drug_file_reference": null,
+       "fff_metadata": null,
+       "id": "file_0000000014ec821088b2e6342a8524c4",
+       "input_pointer": {
+        "file_index": 0,
+        "line_range_end": 10,
+        "line_range_start": 3,
+        "message_id": "66922b91-91ee-4b7a-9be7-d51397511094",
+        "message_index": 0
+       },
+       "library_artifact_type": null,
+       "library_file_id": "libfile_12bc8f0a1aa08191a2365244873b8486",
+       "medical_file_reference": {
+        "authors_display": null,
+        "doi": null,
+        "journal_homepage_url": null,
+        "journal_name": null,
+        "publication_year": null,
+        "source_icon_url": null,
+        "source_label": null,
+        "source_url": null
+       },
+       "name": "TALKPROOF_E01_CODE_VERIFICATION_V001_20261004_1945.md",
+       "page_range_end": null,
+       "page_range_start": null,
+       "snippet": "**Artifact:** `TALKPROOF_E01_CODE_VERIFICATION_V001_20261004_1945.md` · **Run:** 2026-10-04 (UTC 19:45 close) · **Role:** code verifier only\n**Inputs:** `TALKPROOF_REQUIREMENT_RECOVERY_V4_20261004_2021.md` (read in full) · `talkproof-backend-master.zip` · `talkproof-admin-main.zip` · `talkproof-app-master.zip`\n**Scope control:** V2/V3/V4 unmodified. No V5. No R/G/D edits. No D-16..D-26 decision. No FR/NFR IDs. No sprint created or numbered. No source code changed. Tests were executed only with the repositories' own commands and configuration.",
+       "source": "my_files",
+       "type": "file"
+      },
+      {
+       "alt": null,
+       "cloud_doc_url": null,
+       "connector_id": null,
+       "drug_file_reference": null,
+       "fff_metadata": null,
+       "id": "file_00000000e3608210b1d3145999ab9e0e",
+       "input_pointer": {
+        "file_index": 1,
+        "line_range_end": 12,
+        "line_range_start": 1,
+        "message_id": "bfd28528-aa45-44e9-95dd-76a8b02a65af",
+        "message_index": 0
+       },
+       "library_artifact_type": null,
+       "library_file_id": "libfile_e63374b6b43881919a7363ef1b2b6358",
+       "medical_file_reference": {
+        "authors_display": null,
+        "doi": null,
+        "journal_homepage_url": null,
+        "journal_name": null,
+        "publication_year": null,
+        "source_icon_url": null,
+        "source_label": null,
+        "source_url": null
+       },
+       "name": "TALKPROOF_REQUIREMENT_RECOVERY_V4_20261004_2021.md",
+       "page_range_end": null,
+       "page_range_start": null,
+       "snippet": "# TalkProof — Requirement Recovery V4 (V3 + ten accepted independent-review corrections)\n**Session:** 2026-10-04 20:21 · **Lineage:** V2 (frozen recovery baseline) → V3 (`TALKPROOF_REQUIREMENT_RECOVERY_V3_20261004_1954.md`, first frontierecovery expansion, retained unchanged as historical review evidence) → **V4 (this file)**.\n> **V4 supersedes V3 as the candidate working document. V3 is retained unchanged as historical review evidence. V2 remains the frozen recovery baseline embedded/preserved through the lineage. V4 applies only the ten accepted independent-review corrections C01–C10 (independent review of 2026-10-04 20:16, accepted by Senthil 20:21); it does not retrospectively alter V3.** V4 change log: Part 8A. Gate sequence: V4 correction → verify V2 preservation + V3→V4 controlled delta → code-verify all 46 capabilities → PO decisions → requirements/sprint work.",
+       "source": "my_files",
+       "type": "file"
+      },
+      {
+       "alt": null,
+       "cloud_doc_url": null,
+       "connector_id": null,
+       "drug_file_reference": null,
+       "fff_metadata": null,
+       "id": "file_0000000014ec821088b2e6342a8524c4",
+       "input_pointer": {
+        "file_index": 0,
+        "line_range_end": 27,
+        "line_range_start": 14,
+        "message_id": "66922b91-91ee-4b7a-9be7-d51397511094",
+        "message_index": 0
+       },
+       "library_artifact_type": null,
+       "library_file_id": "libfile_12bc8f0a1aa08191a2365244873b8486",
+       "medical_file_reference": {
+        "authors_display": null,
+        "doi": null,
+        "journal_homepage_url": null,
+        "journal_name": null,
+        "publication_year": null,
+        "source_icon_url": null,
+        "source_label": null,
+        "source_url": null
+       },
+       "name": "TALKPROOF_E01_CODE_VERIFICATION_V001_20261004_1945.md",
+       "page_range_end": null,
+       "page_range_start": null,
+       "snippet": "## A. Executive verdict\n**46 Part 3 rows inspected: 46 · CONFIRMED at V4 D-level: 22 (48%) · LOWERED: 22 (48%) · RAISED: 0 · UNABLE TO VERIFY beyond V4 level: 2 (4%).**\n| Verdict | Rows (matrix #) |",
+       "source": "my_files",
+       "type": "file"
+      },
+      {
+       "alt": null,
+       "cloud_doc_url": null,
+       "connector_id": null,
+       "drug_file_reference": null,
+       "fff_metadata": null,
+       "id": "file_0000000014ec821088b2e6342a8524c4",
+       "input_pointer": {
+        "file_index": 0,
+        "line_range_end": 31,
+        "line_range_start": 29,
+        "message_id": "66922b91-91ee-4b7a-9be7-d51397511094",
+        "message_index": 0
+       },
+       "library_artifact_type": null,
+       "library_file_id": "libfile_12bc8f0a1aa08191a2365244873b8486",
+       "medical_file_reference": {
+        "authors_display": null,
+        "doi": null,
+        "journal_homepage_url": null,
+        "journal_name": null,
+        "publication_year": null,
+        "source_icon_url": null,
+        "source_label": null,
+        "source_url": null
+       },
+       "name": "TALKPROOF_E01_CODE_VERIFICATION_V001_20261004_1945.md",
+       "page_range_end": null,
+       "page_range_start": null,
+       "snippet": "**Tests actually executed (unchanged source; Section J):** backend pytest unit + integration against a real PostgreSQL 16: **1,465 passed / 0 failed / 0 skipped**; the repository's own `--cov-fail-under=100` gate **fails at 99.74%** (23 uncovered lines, listed in J); backend `tests/api` Playwright: **64 skipped** (needs live server); admin Vitest: **239 passed / 0 failed (30 files)**; admin Playwright E2E: **not run** (needs live backend + seeded super-admin); Flutter unit/integration: **not run** (no Flutter SDK in the verification environment).\n**One-position conclusion:** the repositories prove a well-tested *application core* (tenant scoping in queries, auth, RBAC, HiL state machine, hash-chained audit log, data models, REST surfaces) at D3, and prove that **no external integration is wired end-to-end**: every provider path is a deterministic stub, a hard-coded env-key SDK call outside the vault, or real adapter code that nothing reaches. The real evidence chain stops at \"canonical JSON + SHA-256 + HiL-gated status flip\" (Section H). V4 is directionally correct but too generous in 22 of 46 rows, and it does not know about seven material defects (Section I: broken Exotel settings attribute, non-Stripe signature scheme, OIDC claims bug, write-only vault, unenforced consent, unwired rate limiter, missing `iota_client` dependency).",
+       "source": "my_files",
+       "type": "file"
+      },
+      {
+       "alt": null,
+       "cloud_doc_url": null,
+       "connector_id": null,
+       "drug_file_reference": null,
+       "fff_metadata": null,
+       "id": "file_0000000014ec821088b2e6342a8524c4",
+       "input_pointer": {
+        "file_index": 0,
+        "line_range_end": 31,
+        "line_range_start": 29,
+        "message_id": "66922b91-91ee-4b7a-9be7-d51397511094",
+        "message_index": 0
+       },
+       "library_artifact_type": null,
+       "library_file_id": "libfile_12bc8f0a1aa08191a2365244873b8486",
+       "medical_file_reference": {
+        "authors_display": null,
+        "doi": null,
+        "journal_homepage_url": null,
+        "journal_name": null,
+        "publication_year": null,
+        "source_icon_url": null,
+        "source_label": null,
+        "source_url": null
+       },
+       "name": "TALKPROOF_E01_CODE_VERIFICATION_V001_20261004_1945.md",
+       "page_range_end": null,
+       "page_range_start": null,
+       "snippet": "**Tests actually executed (unchanged source; Section J):** backend pytest unit + integration against a real PostgreSQL 16: **1,465 passed / 0 failed / 0 skipped**; the repository's own `--cov-fail-under=100` gate **fails at 99.74%** (23 uncovered lines, listed in J); backend `tests/api` Playwright: **64 skipped** (needs live server); admin Vitest: **239 passed / 0 failed (30 files)**; admin Playwright E2E: **not run** (needs live backend + seeded super-admin); Flutter unit/integration: **not run** (no Flutter SDK in the verification environment).\n**One-position conclusion:** the repositories prove a well-tested *application core* (tenant scoping in queries, auth, RBAC, HiL state machine, hash-chained audit log, data models, REST surfaces) at D3, and prove that **no external integration is wired end-to-end**: every provider path is a deterministic stub, a hard-coded env-key SDK call outside the vault, or real adapter code that nothing reaches. The real evidence chain stops at \"canonical JSON + SHA-256 + HiL-gated status flip\" (Section H). V4 is directionally correct but too generous in 22 of 46 rows, and it does not know about seven material defects (Section I: broken Exotel settings attribute, non-Stripe signature scheme, OIDC claims bug, write-only vault, unenforced consent, unwired rate limiter, missing `iota_client` dependency).",
+       "source": "my_files",
+       "type": "file"
+      },
+      {
+       "alt": null,
+       "cloud_doc_url": null,
+       "connector_id": null,
+       "drug_file_reference": null,
+       "fff_metadata": null,
+       "id": "file_00000000e3608210b1d3145999ab9e0e",
+       "input_pointer": {
+        "file_index": 1,
+        "line_range_end": 50,
+        "line_range_start": 41,
+        "message_id": "bfd28528-aa45-44e9-95dd-76a8b02a65af",
+        "message_index": 0
+       },
+       "library_artifact_type": null,
+       "library_file_id": "libfile_e63374b6b43881919a7363ef1b2b6358",
+       "medical_file_reference": {
+        "authors_display": null,
+        "doi": null,
+        "journal_homepage_url": null,
+        "journal_name": null,
+        "publication_year": null,
+        "source_icon_url": null,
+        "source_label": null,
+        "source_url": null
+       },
+       "name": "TALKPROOF_REQUIREMENT_RECOVERY_V4_20261004_2021.md",
+       "page_range_end": null,
+       "page_range_start": null,
+       "snippet": "| R-01 | Pillars: *\"1 — Certified Core … 2 — RTC Suite … 3 — SaaS Platform\"* | PRD §1.2 | Scope baseline; no approved reduction found in any source. |\n| R-02 | *\"Three independent AI models verify exactly what was said. A tamper-proof, blockchain-anchored certified PDF — signed by a human reviewer — goes to the client\"* | PRD §1.1 | Core proof thesis. |\n| R-03 | *\"All three models must respond for a valid consensus. If any model times out (> 60s) or errors, the call enters `needs_manual_review` and routes to HiL regardless of other results. Models must come from ≥ 2 distinct providers\"* | FR-040 Business Rules | Fixes the vendor-down behaviour. |",
+       "source": "my_files",
+       "type": "file"
+      },
+      {
+       "alt": null,
+       "cloud_doc_url": null,
+       "connector_id": null,
+       "drug_file_reference": null,
+       "fff_metadata": null,
+       "id": "file_0000000014ec821088b2e6342a8524c4",
+       "input_pointer": {
+        "file_index": 0,
+        "line_range_end": 72,
+        "line_range_start": 66,
+        "message_id": "66922b91-91ee-4b7a-9be7-d51397511094",
+        "message_index": 0
+       },
+       "library_artifact_type": null,
+       "library_file_id": "libfile_12bc8f0a1aa08191a2365244873b8486",
+       "medical_file_reference": {
+        "authors_display": null,
+        "doi": null,
+        "journal_homepage_url": null,
+        "journal_name": null,
+        "publication_year": null,
+        "source_icon_url": null,
+        "source_label": null,
+        "source_url": null
+       },
+       "name": "TALKPROOF_E01_CODE_VERIFICATION_V001_20261004_1945.md",
+       "page_range_end": null,
+       "page_range_start": null,
+       "snippet": "| 16 | Hash + canonical certificate + offline hash verify | FR-054(1–2), FR-055 | D3 | IW but payload under-specified | **D2** | LOWER | `certified_voice_service.py:145-155` payload = call_id, campaign_id, tenant_id, verdict, agreement, model_count, per_model. **No transcript, approver, timestamp, recording hash, consent** (FR-054 lists metadata+transcript+consensus+approver+timestamp). `json.dumps(sort_keys, separators, default=str)` + SHA-256; **no algorithm identifier in payload**. `verify_certificate` recomputes hash from DB row (server-side, authenticated) — not a downloadable artefact, not in-browser. PDF does not carry `content_hash`. | HIGH |\n| 17 | RFC3161 TSA | FR-054(3), NFR-024 | D1 | AB | D1 | CONFIRM | No TSA code, no `rfc3161`/`tsq`/`tsr`/`openssl ts` anywhere. `CallCertificate.issued_at` is a DB timestamp with a comment \"RFC3161-style\". | HIGH |\n| 18 | Blockchain anchor | FR-054(4), NFR-023 | D3 | ST + CO (campaign-level only) | **D2** | LOWER | `iota_service.py:180-198`: stub via `IOTA_STUB_TX_ID` env, else `import iota_client` which is **not in `requirements.txt`** → `ImportError` → `IOTACertificationError` → `cert_status=FAILED`. Canonical JSON/SHA-256 real. Operates on `OutcomeCertification` per **campaign** (outcomes only); `CallCertificate.anchor_tx_id` **never written**. Retry 30/60/90 s with `time.sleep` inside a request handler. | HIGH |",
+       "source": "my_files",
+       "type": "file"
+      },
+      {
+       "alt": null,
+       "cloud_doc_url": null,
+       "connector_id": null,
+       "drug_file_reference": null,
+       "fff_metadata": null,
+       "id": "file_00000000e3608210b1d3145999ab9e0e",
+       "input_pointer": {
+        "file_index": 1,
+        "line_range_end": 31,
+        "line_range_start": 27,
+        "message_id": "bfd28528-aa45-44e9-95dd-76a8b02a65af",
+        "message_index": 0
+       },
+       "library_artifact_type": null,
+       "library_file_id": "libfile_e63374b6b43881919a7363ef1b2b6358",
+       "medical_file_reference": {
+        "authors_display": null,
+        "doi": null,
+        "journal_homepage_url": null,
+        "journal_name": null,
+        "publication_year": null,
+        "source_icon_url": null,
+        "source_label": null,
+        "source_url": null
+       },
+       "name": "TALKPROOF_REQUIREMENT_RECOVERY_V4_20261004_2021.md",
+       "page_range_end": null,
+       "page_range_start": null,
+       "snippet": "**Evidence chain used in every row:** authoritative requirement → historical sprint intent → tracker-attested implementation → code verification → recovered D-level → gap classification → open decision / candidate work.\n**Labels:** `[SOURCE]` quoted sentence + ID/section · `[TRACKER]` tracker/traceability completion-note text (the June–July team's own words) · `[CODE]` code inspected (none this session) · `CODE VERIFICATION PENDING` · `[USER REQUIREMENT — 2026-10-04]` · `[NEW DESIGN PROPOSAL]` · `[INFERENCE]` · `[RESEARCH REQUIRED]`.\n**Important scope statement:** no source code was opened in this session. Every \"implemented / stub / hardcoded\" statement below is tracker-attested. Code verification is a required step before any of it is treated as fact.",
+       "source": "my_files",
+       "type": "file"
+      }
+     ],
+     "model_slug": "gpt-5-6",
+     "parent_id": "3edabd8e-5e89-4502-9505-1ccd2324f0a4"
+    }
+   },
+   "parent": "3edabd8e-5e89-4502-9505-1ccd2324f0a4"
+  },
+  "client-created-root": {
+   "id": "client-created-root",
+   "message": null,
+   "parent": null
+  },
+  "d7d47592-06b2-40eb-a181-d916861806cf": {
+   "id": "d7d47592-06b2-40eb-a181-d916861806cf",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "2ddfb1e8-ece2-473c-bb14-b5b9359abc5b",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Read the code verification document"
+      }
+     ]
+    },
+    "create_time": 1791143846.262197,
+    "id": "d7d47592-06b2-40eb-a181-d916861806cf",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "55334171-6053-4dc3-8cb0-c2fcf97096aa",
+     "tool_icons": [
+      "code"
+     ]
+    }
+   },
+   "parent": "87ae84ff-0c69-4244-8326-b1a79bfa991d"
+  }
+ },
+ "memory_scope": "global_enabled",
+ "pinned_time": null,
+ "plugin_ids": null,
+ "title": "Talkproof Review recovery audit - 003 - 20261004",
+ "update_time": 1791146067.193364,
+ "voice": null
+}

@@ -1,0 +1,2083 @@
+{
+ "conversation_id": "6995f309-8644-838c-8ec6-76391f9c047b",
+ "conversation_template_id": "g-p-698ded68e9948191ab7f0c68f7448e91",
+ "create_time": 1771434825.567385,
+ "current_node": "2d62ca53-031e-4fab-a9d7-ca9d8c250321",
+ "default_model_slug": "gpt-5-2",
+ "id": "6995f309-8644-838c-8ec6-76391f9c047b",
+ "is_archived": false,
+ "is_do_not_remember": false,
+ "is_read_only": null,
+ "is_starred": null,
+ "is_study_mode": false,
+ "mapping": {
+  "1e1b6ace-cd4f-48e3-b711-2a08185849d6": {
+   "id": "1e1b6ace-cd4f-48e3-b711-2a08185849d6",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Perfect partner — this is the **conceptual consolidation moment** of Core II.  \nLet’s structure everything cleanly and precisely.\n\n---\n\n# 📌 Today’s Summary (Slide Breakdown)\n\n### 1️⃣ Shared Objects  \n> A canonical source of truth with rules.\n\nMeaning:\n- Globally visible\n- No owner\n- Write access controlled via capability\n- Requires validator consensus\n\nEnterprise analogy:\n> Central database with enforced access policy.\n\n---\n\n### 2️⃣ Dynamic Fields  \n> Efficient attached indexes (student → grant).\n\nMeaning:\n- Extends shared objects dynamically\n- Key → Value mapping\n- Scalable\n- Avoids fixed struct limitations\n\nThis is how you avoid hardcoding storage slots.\n\n---\n\n### 3️⃣ PTBs  \n> Multi-step flows executed atomically.\n\nMeaning:\n- Merge operations into one transaction\n- All-or-nothing execution\n- Deterministic\n- Gas efficient\n\n---\n\n# 🔥 PTBs — What Really Matters\n\nSala highlighted three properties:\n\n### ✅ 1. Atomicity  \nAll steps succeed OR nothing happens.\n\nExample:\n\n```\nmint → index → emit\n```\n\nIf index fails:\n- mint is rolled back\n- no partial state\n- no ghost grant\n\nThis prevents data corruption.\n\n---\n\n### ✅ 2. Determinism  \nInputs → predictable outputs.\n\nNo randomness.\nNo partial state.\nNo mid-flight side effects.\n\nYou know exactly what will happen before execution.\n\n---\n\n### ✅ 3. Efficiency  \nInstead of:\n\n```\n1000 transactions\n```\n\nYou can do:\n\n```\n1 PTB with 1000 calls\n```\n\nMassive gas + coordination efficiency.\n\n---\n\n# 🧠 PTB ≈ Super Transaction\n\nSingle commit block:\n\n```\nStep 1: mint()\nStep 2: index()\nStep 3: emit()\n```\n\nSubmit: All-or-Nothing\n\nThis is very close to:\n\n- Database transaction\n- ACID commit\n- 2-phase commit abstraction\n\n---\n\n# 🧩 Practical II Overview (What You’ll Build)\n\nYou will:\n\n1️⃣ Create shared Registry  \n2️⃣ Define write rules (AdminCap gating)  \n3️⃣ Index student → grant via dynamic fields  \n4️⃣ Build PTB that mints + indexes in one call  \n5️⃣ Verify by querying registry + events  \n\nThis is clean architectural layering.\n\n---\n\n# 🧠 Important Question Raised: Mempool on IOTA?\n\nShort Answer:\n> No public mempool like Ethereum/Solana.\n\nMeaning:\n\nYou cannot:\n- Peek into pending txs\n- See competition\n- Predict gas wars precisely\n\nBecause:\n\nShared object scheduling works differently.\n\nYou are not competing for:\n> One global slot\n\nYou are competing for:\n> Execution ordering under shared object concurrency\n\nThat’s fundamentally different.\n\n---\n\n# ⚙ Why This Matters\n\nOn Ethereum:\n- Public mempool\n- Visible pending transactions\n- MEV extraction possible\n- Gas wars visible\n\nOn IOTA:\n- No public mempool\n- No peeking\n- Concurrency scheduling\n- Object-based execution model\n\nIt changes gas economics entirely.\n\n---\n\n# 🧠 Deep Insight (Very Important)\n\nSala said something subtle:\n\n> You are competing for infinite slots.\n\nMeaning:\n\nNot a single block slot like Ethereum.\n\nInstead:\n- Multiple independent object updates\n- Concurrent execution\n- Object-level scheduling\n\nThis is object-oriented blockchain architecture.\n\n---\n\n# 🔷 Core II Architecture — Final Mental Model\n\n| Concept | Role |\n|---------|------|\n| Owned Object | Private state |\n| Shared Object | Coordinated state |\n| Dynamic Field | Scalable storage |\n| AdminCap | Capability gate |\n| PTB | Atomic orchestration |\n| No mempool | Hidden scheduling |\n\n---\n\n# 🚀 What Happens Next\n\nPractical coding:\n\n- registry.move\n- table::insert/remove\n- mint_return_id\n- PTB CLI call\n- Inspect shared object\n\nNow it shifts from theory to implementation.\n\n---\n\nIf you want next:\n\n- I can simulate the exact execution lifecycle of a PTB inside IOTA\n- Or give you a full state-transition diagram\n- Or prepare you for debugging scenarios during practical\n\nYou choose the direction, partner."
+     ]
+    },
+    "create_time": 1771666067.760856,
+    "id": "1e1b6ace-cd4f-48e3-b711-2a08185849d6",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "leurnp"
+      },
+      "1": {
+       "edited": false,
+       "id": "ggn575"
+      },
+      "2": {
+       "edited": false,
+       "id": "kzmqnk"
+      },
+      "3": {
+       "edited": false,
+       "id": "jbij3u"
+      }
+     },
+     "content_references": [],
+     "model_slug": "gpt-5-2",
+     "parent_id": "c4bbded2-8e1c-41bc-89ae-1b3809745eda"
+    }
+   },
+   "parent": "97679f4a-1be7-48b1-8940-8960360c0de3"
+  },
+  "2d62ca53-031e-4fab-a9d7-ca9d8c250321": {
+   "id": "2d62ca53-031e-4fab-a9d7-ca9d8c250321",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Good. Core II is officially wrapped.\n\nLet’s close this properly — not motivational, but strategic and structured.\n\n---\n\n# 📌 Session Close — What Was Actually Achieved\n\n## ✅ Covered Today\n\n1. Shared vs Owned Objects  \n2. Dynamic Fields (Table API)  \n3. Shared Registry creation  \n4. Capability-gated mutation  \n5. Programmable Transaction Blocks (PTBs)  \n6. Atomic mint + index flow  \n\nThis was not a syntax session.\n\nThis was a **state architecture session**.\n\n---\n\n# 🧠 What Changed From Core I → Core II\n\n### Core I\n- Mint owned object\n- Emit event\n- Verify ownership\n\n### Core II\n- Introduce shared state\n- Introduce indexed registry\n- Compose multi-step atomic flows\n\nYou moved from:\n\n> Object creation\n\nto\n\n> Coordinated shared state management\n\nThat is a different engineering level.\n\n---\n\n# 📅 Next Session — Core III (25 Feb, 6 PM CET)\n\nHe said:\n\n> We will make the app more production-ready.\n\nBased on the IOTA workshop structure, expect:\n\n- Capabilities & role refinement\n- State invariants\n- Tests\n- Possibly object versioning or stricter gating\n\nCore III is typically about tightening correctness.\n\n---\n\n# 🎯 Build Now Contest (23 Feb Deadline)\n\nThis matters.\n\nWhat they reward:\n- Clear problem\n- Clear solution\n- Built on IOTA L1\n- At least one IOTA service integrated\n\nNot polish.\n\nNot UI beauty.\n\nClarity + technical alignment.\n\n---\n\n# 🧠 Strategic Reality Check\n\nYou now have:\n\n- Capability gating\n- Shared registry\n- Atomic transaction composition\n\nThat is already a strong foundation for:\n\n- Grant system\n- Identity issuance\n- Tokenized scholarship\n- Reputation registry\n\nTechnically, you are not behind.\n\n---\n\n# 🔎 Important Insight From Disconnection Question\n\nWhen Salah asked:\n\n> When was I disconnected?\n\nThat tells you something subtle:\n\n- These sessions are live.\n- Small interruptions happen.\n- You need your own structured notes.\n\nWhich you are doing properly.\n\n---\n\n# 🧱 Clean Architectural Pattern You Learned\n\n```\nOwned Object → Private State\nShared Object → Global State\nDynamic Field → Indexed Storage\nAdminCap → Mutation Permission\nPTB → Atomic Orchestration\n```\n\nThis pattern is reusable.\n\n---\n\n# 🏁 End of Core II — Your Position\n\nYou now understand:\n\n- Why shared objects are expensive\n- When to use them\n- How to mutate safely\n- How to avoid partial failure\n- How to chain transactions deterministically\n\nThat’s foundational Web3 engineering.\n\n---\n\nIf you want, next we can:\n\n- 📊 Map this to a Build Now concept draft\n- 🧠 Extract a reusable “IOTA Shared Registry Pattern” template\n- 🛠 Prepare you technically for Core III\n- 🔍 Do a failure scenario deep dive\n\nYou’re thinking correctly now — at object model level, not tutorial level."
+     ]
+    },
+    "create_time": 1771668267.57548,
+    "id": "2d62ca53-031e-4fab-a9d7-ca9d8c250321",
+    "metadata": {
+     "content_references": [],
+     "model_slug": "gpt-5-2",
+     "parent_id": "934c7ce6-906b-48fe-9921-3bf13b3bebef"
+    }
+   },
+   "parent": "89f43ddf-d6f6-4fe5-9b0d-50ceeae0a5b4"
+  },
+  "2eeebf34-4c57-4b5c-b195-e0d6306f2183": {
+   "id": "2eeebf34-4c57-4b5c-b195-e0d6306f2183",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Good capture, partner. Let’s structure this properly for your **005-02 Core II page documentation**.\n\n---\n\n# 📌 Workshop II — Conceptual Framing\n\nSlide Title:\n> **Workshop II Builds on Workshop I**\n\nThe slide structure is extremely important architecturally.\n\n---\n\n## 🧱 We Keep (From Core I)\n\n| Concept | Meaning |\n|----------|----------|\n| Resource Safety | Move prevents duplication / accidental state corruption |\n| Capability Auth | AdminCap guards privileged actions |\n\nThis means:\n\nYou already built a **secure minting system**.\n\nBut security alone is not enough.\n\n---\n\n## ➕ We Add (Core II Enhancements)\n\n| Addition | Why |\n|----------|------|\n| Shared Registry | Central source of truth |\n| Dynamic Fields (student → grant) | Scalable mapping |\n| PTBs | Atomic multi-step execution |\n\nThis is the architectural shift.\n\nYou move from:\n\n> Event logging\n\nto\n\n> Searchable indexed state\n\n---\n\n## 🎯 We Achieve\n\n| Result | Impact |\n|--------|--------|\n| Searchable State | O(1) lookup |\n| One-click UX (PTBs) | Mint + Index together |\n| Predictable / Auditable Effects | No partial failures |\n\nThis is production thinking.\n\n---\n\n# 🔍 What Sala Is Explaining (Very Important)\n\nHe said something subtle but powerful:\n\n> Before, we only emitted events.  \n> Events are scattered.  \n> There is no central log.\n\nThis is the key design problem.\n\nEvents are:\n- Historical\n- Append-only\n- Not optimized for querying latest state\n\nA registry is:\n- Current state\n- Indexed\n- Directly queryable\n\nThis is the difference between:\n\n| Model | Example |\n|--------|----------|\n| Event-sourced system | Replay history to compute state |\n| Indexed state system | Direct lookup |\n\nCore II moves you toward indexed state model.\n\n---\n\n# 🧠 Architecture Evolution\n\nWorkshop I:\n```\nAdmin → Mint → Emit Event\n```\n\nWorkshop II:\n```\nAdmin → Mint → Index → Shared Registry\n```\n\nAnd both are executed atomically via PTB.\n\n---\n\n# 🧩 Shared vs Owned Objects (Coming Next in Lecture)\n\nOwned object:\n- One owner\n- Private state\n\nShared object:\n- Globally accessible\n- Mutated over time\n- Suitable for registries\n\nThis is foundational for:\n- Marketplaces\n- Governance\n- Grant systems\n- Leaderboards\n\n---\n\n# 🏗 Enterprise Interpretation (For You Specifically)\n\nThis is exactly the pattern you care about in governance kernel design:\n\n| Blockchain Concept | Enterprise Equivalent |\n|--------------------|-----------------------|\n| AdminCap | RBAC role token |\n| Shared Registry | Central state store |\n| Dynamic Field | Indexed map |\n| PTB | Atomic transaction |\n| Event | Audit log |\n\nIt’s the same architecture.\n\nDifferent substrate.\n\n---\n\n# 🎯 Build Now Contest — Strategic Note\n\nDeadline: **23 Feb 2026**\nMVP Deadline: **31 March 2026**\n\nTop 5 → Funding presentation  \nTop 10 → Incubation  \nTop 30 → Leaderboard + ecosystem exposure  \n\nGiven your structured mindset, your advantage is:\n\nYou already think in:\n\n- Atomic flows\n- Deterministic governance\n- Auditability\n- Upgrade compatibility\n\nThat aligns strongly with IOTA evaluation rules.\n\n---\n\nIf you want next:\n\n- I can extract exact evaluation checklist and map it to ScholarFlow\n- Or give you a Build Now contest strategy plan\n- Or continue transcribing and structuring the lecture as it progresses\n\nYou decide direction."
+     ]
+    },
+    "create_time": 1771665115.638816,
+    "id": "2eeebf34-4c57-4b5c-b195-e0d6306f2183",
+    "metadata": {
+     "content_references": [],
+     "model_slug": "gpt-5-2",
+     "parent_id": "1015a4ab-2305-4242-9bb9-a7a77aced090"
+    }
+   },
+   "parent": "9896ffdd-9553-4b36-b4d0-dc9e1347132d"
+  },
+  "2f1c4cdf-c5d3-4da4-b168-5e5734b5dad4": {
+   "id": "2f1c4cdf-c5d3-4da4-b168-5e5734b5dad4",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "18/02/2026 17:12 Chatgpt project name: AT-HACK0013-MasterZ IOTA Hackathon Chatgpt Page Name: 005-02-Class-21022026-shared-objects-dynamic-fields-ptbs \n\r\n\r\nCore 2\r\n📆 Sat 21 Feb\r\n⏰ 10:00 AM CET\r\n👉 find the lesson material here\r\nhttps://docs.iota.org/developer/workshops/core/II-shared-objects-dynamic-fields-ptbs\r\n\r\n\r\n\r\nInvito: MasterZ x IOTA Hackathon | Core II - sab 21 feb 2026 10AM - 12PM (CET) (v_senthil7@yahoo.com)\r\nYahoo\r\n/\r\nInbox\r\n\r\n21\r\nSAT, FEB\r\nMasterZ x IOTA Hackathon | Core II\r\nView on Calendar\r\nWhen\r\n09:00 - 11:00\r\nWho\r\nv_senthil7@yahoo.com\r\nAre you going?\r\nYes\r\nMaybe\r\nNo\r\n\r\n\r\nMasterZ Team\r\n \r\nFrom:\r\nmasterz@masterzblockchain.com\r\nTo:\r\nv_senthil7@yahoo.com\r\n\r\n\r\nTue 17 Feb at 12:48\r\n\r\n \r\nWelcome to the second live streaming of the MasterZ × IOTA Hackathon🚀\r\n\r\nHere’s the link to join:\r\n\r\n👉 https://us06web.zoom.us/webinar/register/WN_Jx3rX8gdQrGugyJeGzqScA\r\nQuando\r\nsabato 21 feb 2026 ⋅ 10AM – 12PM (Ora dell’Europa centrale - Roma)\r\nOrganizzatore\r\nMasterZ Team\r\nmasterz@masterzblockchain.com\r\nInvitati\r\n(L'elenco degli invitati è stato nascosto su richiesta dell'organizzatore)\r\nRispondi per v_senthil7@yahoo.com\r\nSì\r\nNo\r\nForse\r\nAltre opzioni\r\nInvito da Google Calendar\r\n\r\nHai ricevuto questa email perché partecipi all’evento.\r\n\r\nSe inoltri questo invito potresti consentire al destinatario di inviare una risposta all'organizzatore, di essere aggiunto all'elenco degli invitati oppure di invitare altre persone indipendentemente dallo stato dell'invito o ancora di modificare la tua risposta. Scopri di più\r\n\r\n\r\nhttps://docs.iota.org/developer/workshops/core/II-shared-objects-dynamic-fields-ptbs\r\n\r\n\r\nWorkshop II Practical — Shared State, Indexing & PTBs\r\nQuick recap\r\nWe published a Move package and received an AdminCap in init (publisher‑owned).\r\nWe minted a Grant object for a student and emitted a GrantMinted event.\r\nWe verified the new owned object on-chain.\r\nWhat’s next\r\nWe need a way to look up a student’s current grant. This is important for portals and verifiers to render status without replaying history.\r\n\r\nMissing piece: a shared, canonical index mapping student -> grant_id and a way to update it whenever we mint.\r\nWhy it matters:\r\nPortals and verifiers need O(1)‑style lookups to render “current grant” without replaying history.\r\nMultiple apps can coordinate on one source of truth instead of bespoke caches.\r\nA PTB lets us mint and index atomically — either both succeed or neither does — reducing partial failures and data drift.\r\nWhat you’ll build next:\r\n\r\nShare an on-chain Registry object that anyone can read\r\nAdd a write-gated index_grant entry for admins to insert student → grant\r\nEmit GrantIndexed when the index changes\r\nChain actions (mint → index) in a single PTB\r\nWhat we’re building (mental model first)\r\nA Registry shared object that holds a table from address -> ID. Shared means many users can touch it.\r\nA GrantIndexed event for analytics and UI updates. Will be emitted on every index change.\r\nAn index_grant function that “inserts” a student’s latest grant ID.\r\nA mint_return_id entry so we can capture a newly created Grant ID and pass it to index_grant in the same PTB.\r\nWhat is a shared object?\r\nObjects with shared ownership can be accessed and updated by many parties over time. They’re ideal for registries, markets, and leaderboards. Learn more: Shared vs Owned\r\n\r\nWhat is a table?\r\nTables are scalable, typed key–value stores built on dynamic fields. They’re a good fit when you don’t know keys ahead of time. Learn more: Dynamic Fields: Tables & Bags\r\n\r\nWhat is a PTB?\r\nA Programmable Transaction Block composes multiple calls and object ops into one atomic transaction. Great for “do X then Y if X succeeded” patterns. Learn more: Use Programmable Transaction Blocks and the CLI PTB Reference\r\n\r\nCarry-overs from Workshop I\r\nExport these for convenience (reuse from last session):\r\n\r\nexport PKG_ID=<0x...from Workshop I>\r\nexport ADMIN_CAP_ID=<0x...admin cap object id>\r\nexport PUBLISHER_ADDR=<0x...publisher address>\r\nexport STUDENT_ADDR=<0x...student address>\r\nexport AMOUNT=1000\r\n\r\nModel the Registry (start small)\r\nCreate sources/registry.move. Begin with the module, imports, and data types.\r\n\r\nmodule scholarflow::registry {\r\n    use iota::object::{Self, UID, ID};\r\n    use iota::tx_context::{Self, TxContext};\r\n    use iota::transfer;\r\n    use iota::event;\r\n    use iota::table::{Self as table, Table};\r\n    use std::option;\r\n\r\n    /// The shared Registry with an attached index of student -> grant ID.\r\n    public struct Registry has key {\r\n        id: UID,\r\n        by_student: Table<address, ID>,\r\n    }\r\n\r\n    /// Emitted when a student is indexed with a grant ID.\r\n    public struct GrantIndexed has copy, drop, store {\r\n        student: address,\r\n        grant_id: ID,\r\n    }\r\n}\r\n\r\nBig picture\r\nThis defines a single, shared “roster” where each student address points to their latest grant_id. UIs and indexers can query once and render state without chasing historical logs.\r\n\r\nMake it shared\r\nAppend a create entry to instantiate and share the Registry.\r\n\r\n    /// Create and share a Registry.\r\n    public entry fun create(\r\n        _cap: &scholarflow::grant::AdminCap,\r\n        ctx: &mut TxContext\r\n    ) {\r\n        let reg = Registry {\r\n            id: object::new(ctx),\r\n            by_student: table::new<address, ID>(ctx),\r\n        };\r\n        transfer::share_object(reg);\r\n    }\r\n\r\nWhat is write-gating?\r\nWe’ll require &AdminCap for mutating entries. Think of it as an admin badge controlling who can write to shared state.\r\n\r\nBig picture\r\nSharing the registry allows many transactions to see and update the same object over time, which is perfect for global indexes, markets, and registries.\r\n\r\nYour turn: index a student’s grant\r\nThe index_grant entry should insert student -> grant_id and emit a GrantIndexed event. Add the signature and start with a placeholder; then implement.\r\n\r\n    /// insert mapping student -> grant_id and emit an event.\r\n    public entry fun index_grant(\r\n        reg: &mut Registry,\r\n        student: address,\r\n        grant_id: ID,\r\n        _cap: &scholarflow::grant::AdminCap\r\n    ) {\r\n        // TODO: table::contains / table::remove / table::insert\r\n        // Emit event::emit(GrantIndexed { student, grant_id });\r\n        abort 0;\r\n    }\r\n\r\nTip: Remove an existing mapping first (if present), then insert the latest grant_id.\r\n\r\nBig picture\r\ninserting keeps the registry idempotent and always current for a given student. Frontends only need one read to show the latest grant.\r\n\r\nChain actions: return the minted ID\r\nTo compose with a PTB, we’ll expose a mint that returns the newly created Grant ID. Add this entry to your existing scholarflow::grant module.\r\n\r\nUpgrade compatibility\r\nDo NOT change the existing mint function’s signature from Workshop I. Upgrades must keep all existing public/entry function signatures identical.\r\nInstead, add a new entry function mint_return_id (below) alongside your existing mint.\r\nAlso avoid changing struct layouts or abilities; adding new functions or modules is fine.\r\nmodule scholarflow::grant {\r\n    /// ... existing imports, structs, events, and functions ...\r\n\r\n    /// Mint a grant and return its ID so callers (e.g., a PTB) can chain actions.\r\n    public entry fun mint_return_id(\r\n        student: address,\r\n        amount: u64,\r\n        _cap: &AdminCap,\r\n        ctx: &mut TxContext\r\n    ): ID {\r\n        let grant = Grant { id: object::new(ctx), student, amount };\r\n        let gid: ID = object::id(&grant);\r\n        event::emit(GrantMinted { student, amount, grant_id: gid });\r\n        transfer::transfer(grant, student);\r\n        gid\r\n    }\r\n}\r\n\r\n\r\nBig picture\r\nReturning the freshly minted Grant ID lets downstream steps (like indexing) reference it immediately, avoiding extra RPCs or guesswork.\r\n\r\nBuild and upgrade\r\nAutomated address management\r\nIOTA tracks package addresses per environment in Move.lock, so you don’t need published-at in Move.toml. Keep your package’s named address at 0x0 and rely on automated address management. If migrating an older package, see: Automated Address Management.\r\n\r\niota move build\r\n\r\niota client upgrade --package $PKG_ID --upgrade-cap <0x...UpgradeCapID> --gas-budget 150000000\r\n\r\n\r\nWhat is an upgrade?\r\nUpgrades let you evolve a package without changing its on-chain address, while enforcing compatibility rules. Learn more: Package Upgrades\r\n\r\nBig picture\r\nUpgrading preserves your package address so clients don’t need to be reconfigured and links don’t break.\r\n\r\nCreate the Registry and capture its ID\r\niota client call \\\r\n  --package $PKG_ID \\\r\n  --module registry \\\r\n  --function create \\\r\n  --args $ADMIN_CAP_ID \\\r\n  --gas-budget 80000000\r\n\r\n# After the call, set:\r\n# export REGISTRY_ID=<0x...registry object id>\r\n\r\nBig picture\r\nThe REGISTRY_ID is the anchor for all future index updates. Capture it once; reuse it across tools and scripts.\r\n\r\nCompose an atomic PTB: mint + index\r\nEnvironment:\r\n\r\nexport PKG_ID\r\nexport ADMIN_CAP_ID\r\nexport REGISTRY_ID\r\nexport STUDENT_ADDR\r\nexport AMOUNT\r\n\r\nMove CLI PTB example:\r\n\r\niota client ptb \\\r\n  --move-call \"$PKG_ID::grant::mint_return_id\" \"$STUDENT_ADDR\" \"$AMOUNT\" @\"$ADMIN_CAP_ID\" \\\r\n  --assign minted_id \\\r\n  --move-call \"$PKG_ID::registry::index_grant\" @\"$REGISTRY_ID\" \"$STUDENT_ADDR\" minted_id @\"$ADMIN_CAP_ID\" \\\r\n  --gas-budget 100000000\r\n\r\n\r\nExpected output (events excerpt):\r\n\r\n╭──────────────────────────────────────────────────────────────────────────────────────────────────────────╮\r\n│ Transaction Block Events                                                                                 │\r\n├──────────────────────────────────────────────────────────────────────────────────────────────────────────┤\r\n│  ┌──                                                                                                     │\r\n│  │ EventID: <event_id>:0                                                                                │\r\n│  │ PackageID: 0x<package_id>                                                                             │\r\n│  │ Transaction Module: grant                                                                             │\r\n│  │ Sender: 0x<sender_address>                                                                            │\r\n│  │ EventType: 0x<package_id>::grant::GrantMinted                                                         │\r\n│  │ ParsedJSON:                                                                                           │\r\n│  │   ┌──────────┬────────────────────────────────────────────────────────────────────┐                   │\r\n│  │   │ amount   │ <amount>                                                           │                   │\r\n│  │   ├──────────┼────────────────────────────────────────────────────────────────────┤                   │\r\n│  │   │ grant_id │ 0x<grant_object_id>                                                │                   │\r\n│  │   ├──────────┼────────────────────────────────────────────────────────────────────┤                   │\r\n│  │   │ student  │ 0x<student_address>                                                │                   │\r\n│  │   └──────────┴────────────────────────────────────────────────────────────────────┘                   │\r\n│  └──                                                                                                     │\r\n│  ┌──                                                                                                     │\r\n│  │ EventID: <event_id>:1                                                                                │\r\n│  │ PackageID: 0x<package_id>                                                                             │\r\n│  │ Transaction Module: registry                                                                          │\r\n│  │ Sender: 0x<sender_address>                                                                            │\r\n│  │ EventType: 0x<package_id>::registry::GrantIndexed                                                     │\r\n│  │ ParsedJSON:                                                                                           │\r\n│  │   ┌──────────┬────────────────────────────────────────────────────────────────────┐                   │\r\n│  │   │ grant_id │ 0x<grant_object_id>                                                │                   │\r\n│  │   ├──────────┼────────────────────────────────────────────────────────────────────┤                   │\r\n│  │   │ student  │ 0x<student_address>                                                │                   │\r\n│  │   └──────────┴────────────────────────────────────────────────────────────────────┘                   │\r\n│  └──                                                                                                     │\r\n╰──────────────────────────────────────────────────────────────────────────────────────────────────────────╯\r\n\r\n\r\nMore on composing PTBs: CLI PTB Reference\r\n\r\nWhy atomic?\r\nIf mint fails, index doesn’t run; if index would fail, mint is rolled back. One intent, one commit. This reduces partial failures and keeps state consistent.\r\n\r\nCLI PTB argument formatting\r\nAddresses: pass as plain 0x... (no @) or as a variable you assigned earlier. Example: --move-call ... \"0xabc...\" or --assign student @0xabc... then --move-call ... student.\r\nObject IDs: pass with @ (e.g., @\"$ADMIN_CAP_ID\", @0x...) or via a variable you assigned to an object ID.\r\nReturned values: use --assign name to capture a result (e.g., minted_id) and pass the variable name without @.\r\nVerify outcomes\r\niota client objects --owner $STUDENT_ADDR\r\niota client object --id $REGISTRY_ID\r\n\r\nYou should see the new grant under the student’s ownership and a shared Registry with the index populated.\r\n\r\nBig picture\r\nFrom here, your portal can fetch the grant and the registry mapping to render a student’s status instantly. Indexers can subscribe to GrantIndexed to drive analytics.\r\n\r\nCommon pitfalls\r\ncaution\r\nNetwork: ensure your CLI is connected to Testnet (iota client envs; switch with iota client switch --env testnet).\r\nFunding: request test tokens via faucet before publishing/calling (iota client faucet --address $PUBLISHER_ADDR).\r\nUpgrade compatibility: do not change existing public/entry function signatures (e.g., do not make mint return a value). Add a new entry like mint_return_id instead.\r\nUpgrading vs publishing new: ensure you reference the correct PKG_ID.\r\nWrite-gating: pass the correct ADMIN_CAP_ID to index_grant.\r\nCreate the Registry before trying to index, and capture REGISTRY_ID.\r\nTables: make sure key type is address and value type is ID.\r\nGas budgets: bump --gas-budget if you see out-of-gas failures.\r\nBring this to the next workshop\r\nPKG_ID\r\nREGISTRY_ID\r\nADMIN_CAP_ID\r\nAt least one GRANT_OBJECT_ID\r\n\r"
+     ]
+    },
+    "create_time": 1771434822.723,
+    "id": "2f1c4cdf-c5d3-4da4-b168-5e5734b5dad4",
+    "metadata": {
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "client-created-root"
+  },
+  "2f2681cd-94a5-4ec4-8077-a61be56c3627": {
+   "id": "2f2681cd-94a5-4ec4-8077-a61be56c3627",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Excellent, partner — this is the real conceptual core of Workshop II.  \nLet me break this down cleanly and structurally so you lock it in properly.\n\n---\n\n# 🧠 Today’s Move Essentials (Slide 1)\n\nThey are covering three pillars:\n\n1. **Shared vs Owned Objects**\n2. **PTBs (Programmable Transaction Blocks)**\n3. **Dynamic Fields**\n\nAnd importantly:\n\n> We are not building a new DApp.  \n> We are evolving the existing Grant DApp.\n\nThis is upgrade-based development thinking.\n\n---\n\n# 🟢 Owned vs 🔵 Shared Objects\n\n## Fundamental Rule in IOTA Move:\n> Everything is an object.\n\nAnd every object is either:\n\n| Type | Description |\n|------|------------|\n| **Owned** | Controlled by a single address |\n| **Shared** | Accessible by multiple users |\n\n---\n\n## 🟢 Owned Objects\n\nExamples:\n- Grant object\n- AdminCap\n- Coins\n- NFTs\n\nCharacteristics:\n\n- Only owner can execute transactions\n- No full validator consensus required\n- Verified by single validator\n- Fast\n- Cheap\n\nArchitectural meaning:\n\n> Single-writer model  \n> No contention  \n> Minimal coordination\n\n---\n\n## 🔵 Shared Objects\n\nExample:\n- Grant Registry\n\nCharacteristics:\n\n- Accessible by multiple users\n- Requires full validator consensus\n- Slower\n- More expensive\n- Needs scheduling\n\nArchitectural meaning:\n\n> Multi-writer coordination  \n> Concurrency management required\n\n---\n\n# 💰 Why Shared Objects Are Expensive (Very Important)\n\nSala explained the scheduling mechanism.\n\nLet’s simplify:\n\nWhen many transactions target a shared object:\n\n1. Network receives many txs\n2. Orders them by gas price\n3. Selects highest-paying subset\n4. Defers the rest\n\nThis is necessary because:\n\nShared objects can be modified by multiple users simultaneously.\n\nSo the network must:\n\n- Order them\n- Avoid conflicts\n- Reach consensus\n\nOwned objects do not compete like this.\n\nThey go:\n\n```\nSignature check → execute → done\n```\n\nNo scheduling battle.\n\n---\n\n# 🧠 Enterprise Analogy\n\nOwned object = Personal bank account  \nShared object = Central stock exchange ledger  \n\nOne is isolated.  \nOne requires coordinated ordering.\n\n---\n\n# 🔗 PTB Clarification (Good Question Raised)\n\nYes — PTB ≈ transaction bundle.\n\nLike:\n\n- Ethereum transaction bundle\n- Solana transaction batch\n\nBut atomic.\n\nMeaning:\n\n```\nmint\n+\nindex\n=\nsingle commit\n```\n\nIf one fails → whole thing reverts.\n\n---\n\n# 🔷 How Shared Objects Are Used\n\nSlide shows:\n\nUser A → Write  \nUser B → Write  \nAdmin → Write  \n\nAll go through:\n\nRole / Capability Gate  \n→ Shared Registry\n\nImportant concept:\n\n> Shared objects have no owner.  \n> Rules are enforced by contract logic.\n\nThis is capability-based governance.\n\nNot ownership-based governance.\n\n---\n\n# ⚙️ Dynamic Fields — The Core Technical Concept\n\nProblem:\n\nMove structs have fixed fields at compile time.\n\nExample:\n\n```move\nstruct Grant {\n    id: UID,\n    student: address,\n    amount: u64\n}\n```\n\nYou cannot dynamically add:\n\n- student_1\n- student_2\n- student_3\n\nFields are static.\n\n---\n\n## Solution: Dynamic Fields\n\nDynamic Fields allow:\n\n- Key → Value storage\n- Mutation inside shared objects\n- Structured extension of object storage\n\nExamples:\n\n- Table<address, ID>\n- Vector<T>\n\nThey allow:\n\n```\nstudent_address → grant_id\n```\n\nWithout knowing students ahead of time.\n\n---\n\n# 🔎 Why This Matters Architecturally\n\nWithout dynamic fields:\n\nYou would need:\n\n- Hardcoded slots\n- Fixed-size arrays\n- Static capacity\n\nWith dynamic fields:\n\nYou get:\n\n- Scalable registry\n- Infinite mappings\n- Clean state evolution\n\n---\n\n# 🧱 Conceptual Layering\n\nWorkshop I:\n```\nOwned objects + AdminCap + Events\n```\n\nWorkshop II:\n```\nShared Registry\n+ Dynamic Fields\n+ PTB atomic composition\n```\n\nThis is system evolution.\n\n---\n\n# 🚨 Subtle but Important Statement He Made\n\nHe said:\n\n> Events are scattered.\n\nThis is deep.\n\nEvents are:\n\n- Historical logs\n- Append-only\n- Not structured for current state queries\n\nRegistry is:\n\n- Current state snapshot\n- Indexed\n- Deterministic\n\nThis is the difference between:\n\nEvent-sourced architecture  \nvs  \nIndexed-state architecture\n\nYou are moving toward indexed state.\n\n---\n\n# 🔮 Why This Is Important For You\n\nYour mindset already revolves around:\n\n- Deterministic entry points\n- Explicit inputs\n- Predictable outcomes\n- Capability gating\n\nThat is exactly what this workshop is modeling.\n\nThe shared object with dynamic fields and capability gating is basically:\n\n> Governance kernel pattern on-chain.\n\n---\n\n# 🧠 Mental Model to Lock In\n\nOwned object = Isolated state  \nShared object = Coordinated state  \n\nDynamic field = Scalable storage  \nPTB = Atomic orchestration  \n\nCapability = Write permission control  \n\nRegistry = Single source of truth  \n\n---\n\nIf you want next, I can:\n\n- Draw the full architecture diagram in text form\n- Or simulate failure cases (what happens if index fails)\n- Or prepare you for the practical coding section coming next\n\nYou choose depth, partner."
+     ]
+    },
+    "create_time": 1771665816.61887,
+    "id": "2f2681cd-94a5-4ec4-8077-a61be56c3627",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "yet0f1"
+      },
+      "1": {
+       "edited": false,
+       "id": "a79c56"
+      },
+      "2": {
+       "edited": false,
+       "id": "ti29zh"
+      },
+      "3": {
+       "edited": false,
+       "id": "ghqep1"
+      },
+      "4": {
+       "edited": false,
+       "id": "qris4l"
+      },
+      "5": {
+       "edited": false,
+       "id": "jiw8fv"
+      }
+     },
+     "content_references": [],
+     "model_slug": "gpt-5-2",
+     "parent_id": "9a88f4d5-9e0a-47af-b422-2048b53e5264"
+    }
+   },
+   "parent": "d8007d94-e733-422c-a7ef-ba42189ed353"
+  },
+  "43b437a3-ce02-49a2-946c-8aef6d24429c": {
+   "id": "43b437a3-ce02-49a2-946c-8aef6d24429c",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Your line is already very good 👍 — just a small polish for natural flow.\n\n### ✅ Clean, natural version:\n> **“Good morning, everyone. I think we’re ready to start. First of all, good morning once again, and welcome.”**\n\n---\n\n### 🎤 Slightly more confident host version:\n> **“Good morning, everyone. I think we’re ready to begin. Once again, welcome — it’s great to have you here.”**\n\n---\n\n### 🧠 Why small change?\n- “Start” → “Begin” sounds slightly more formal for webinars.\n- Breaking into two sentences improves rhythm.\n- “It’s great to have you here” adds warmth.\n\nFor a live Zoom session, keep it calm and steady — your tone matters more than the words.\n\nYou’re sounding like a proper session host already. 🚀"
+     ]
+    },
+    "create_time": 1771664590.922058,
+    "id": "43b437a3-ce02-49a2-946c-8aef6d24429c",
+    "metadata": {
+     "content_references": [],
+     "model_slug": "gpt-5-2",
+     "parent_id": "71d99ff0-0032-431e-9051-63e1f43a4bcf"
+    }
+   },
+   "parent": "b8976ed6-ed5a-499a-89e1-5d965bdad6e4"
+  },
+  "460af4b1-f70e-408b-8b94-8d554ddb2ce0": {
+   "id": "460af4b1-f70e-408b-8b94-8d554ddb2ce0",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Good — this is the practical transition. Let’s structure what’s happening clearly so you don’t miss the mechanics.\n\n---\n\n# 🛠 Workshop II Practical — What’s Happening Now\n\nHe is doing three important things:\n\n1. Verifying AdminCap gating works  \n2. Creating a new `registry` module  \n3. Creating a shared object instance (`create` entry)\n\nThis is the architectural pivot.\n\n---\n\n# 1️⃣ AdminCap Experiment (Very Important)\n\nHe attempted:\n\n- Publish package from Address A  \n- Try calling `mint` from Address B  \n\nWhy?\n\nBecause this function signature:\n\n```move\npublic entry fun mint(\n    student: address,\n    amount: u64,\n    _cap: &AdminCap,\n    ctx: &mut TxContext\n)\n```\n\nRequires a reference to `AdminCap`.\n\nOnly the holder of that object can pass it.\n\nThis is capability-based access control.\n\nNot:\n\n``` id=\"wrongpattern\"\nif sender == admin\n```\n\nBut:\n\n``` id=\"correctpattern\"\nmust supply AdminCap object\n```\n\nThat is much stronger.\n\nBecause objects cannot be forged.\n\n---\n\n# 2️⃣ New Module: `registry`\n\nHe is separating modules — this is correct design.\n\nInstead of stuffing everything into `grant.move`, we now have:\n\n``` id=\"structure\"\nmodule scholarflow::grant\nmodule scholarflow::registry\n```\n\nClean separation:\n\n| Module | Responsibility |\n|--------|---------------|\n| grant | Mint logic |\n| registry | Indexing logic |\n\nThis prevents tight coupling.\n\n---\n\n# 3️⃣ Registry Struct Design\n\nHe defined:\n\n```move\npublic struct Registry has key {\n    id: UID,\n    by_student: Table<address, ID>,\n}\n```\n\nImportant points:\n\n### ✅ `has key`\nBecause it must exist on-chain as an object.\n\n### ✅ Uses `UID`\nEvery on-chain object must have a `UID`.\n\n### ✅ Uses `Table<address, ID>`\nDynamic mapping.\n\nThis is your student → grant index.\n\n---\n\n# 🔹 Why Table Instead of Vector?\n\nBecause:\n\n- You want direct lookup by student address.\n- Not sequential scanning.\n- Not position-based access.\n\nTable gives:\n\n``` id=\"lookup\"\nO(1)-style mapping\n```\n\nVector would require iteration.\n\n---\n\n# 4️⃣ `create` Entry Function\n\nHe is adding:\n\n```move\npublic entry fun create(\n    _cap: &AdminCap,\n    ctx: &mut TxContext\n)\n```\n\nInside:\n\n```move\nlet reg = Registry {\n    id: object::new(ctx),\n    by_student: table::new<address, ID>(ctx),\n};\ntransfer::share_object(reg);\n```\n\nKey line:\n\n```move\ntransfer::share_object(reg);\n```\n\nNot transfer to address.\n\nNot return to caller.\n\nIt becomes shared.\n\nThis is the switch from owned → shared state.\n\n---\n\n# 🔥 What Happens After `create`\n\nWhen executed:\n\n- A shared Registry object is created\n- It has its own object ID\n- It is globally readable\n- No owner address\n\nYou must capture:\n\n```\nREGISTRY_ID\n```\n\nYou will use it in PTBs.\n\n---\n\n# 🔍 Important Distinction\n\nOwned object creation:\n``` id=\"owned\"\ntransfer::transfer(obj, recipient);\n```\n\nShared object creation:\n``` id=\"shared\"\ntransfer::share_object(obj);\n```\n\nCompletely different lifecycle.\n\n---\n\n# 🧠 What You Should Notice\n\nUp to now:\n\n- Grant objects → owned\n- AdminCap → owned\n- Registry → shared\n\nYou now have a mixed system.\n\nThat’s realistic architecture.\n\n---\n\n# 🚀 Next Step (Coming Soon)\n\nHe will implement:\n\n```move\npublic entry fun index_grant(...)\n```\n\nWhich will:\n\n1. Take `&mut Registry`\n2. Insert mapping\n3. Emit `GrantIndexed`\n\nThen:\n\nHe will compose PTB:\n\n```bash\nmint_return_id → assign minted_id\nindex_grant → use minted_id\n```\n\nAtomic execution.\n\n---\n\n# 🧩 Architectural Pattern Emerging\n\nYou now have:\n\n```\nAdminCap (capability)\n        ↓\nmint → owned Grant\n        ↓\nindex_grant → shared Registry\n```\n\nAnd both inside PTB.\n\nThis is transactional state orchestration.\n\n---\n\n# ⚠ What To Watch During Practical\n\n1. Capture `REGISTRY_ID`\n2. Ensure correct `ADMIN_CAP_ID`\n3. Pass object IDs with `@`\n4. Return value used without `@`\n\nCommon mistake:\n- Using `@` on returned variable\n- Forgetting to remove existing mapping before insert\n\n---\n\nYou’re now at the most important structural part of Core II.\n\nIf you want, I can:\n\n- Walk you step-by-step through expected CLI output\n- Or simulate the exact PTB flow\n- Or preempt likely errors you’ll hit\n\nYour move, partner."
+     ]
+    },
+    "create_time": 1771666542.019112,
+    "id": "460af4b1-f70e-408b-8b94-8d554ddb2ce0",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "btl05k"
+      },
+      "1": {
+       "edited": false,
+       "id": "sqc4vl"
+      },
+      "10": {
+       "edited": false,
+       "id": "9c1hg5"
+      },
+      "11": {
+       "edited": false,
+       "id": "d7y8vw"
+      },
+      "12": {
+       "edited": false,
+       "id": "tf3fb2"
+      },
+      "13": {
+       "edited": false,
+       "id": "0ttuiw"
+      },
+      "14": {
+       "edited": false,
+       "id": "8bkb1v"
+      },
+      "2": {
+       "edited": false,
+       "id": "p3s767"
+      },
+      "3": {
+       "edited": false,
+       "id": "5beebr"
+      },
+      "4": {
+       "edited": false,
+       "id": "ebdh66"
+      },
+      "5": {
+       "edited": false,
+       "id": "im3b8n"
+      },
+      "6": {
+       "edited": false,
+       "id": "3f04ys"
+      },
+      "7": {
+       "edited": false,
+       "id": "0w8x5w"
+      },
+      "8": {
+       "edited": false,
+       "id": "1btmjy"
+      },
+      "9": {
+       "edited": false,
+       "id": "1wza6g"
+      }
+     },
+     "content_references": [],
+     "model_slug": "gpt-5-2",
+     "parent_id": "529d6bbc-0985-4163-97b1-84d2f551fd89"
+    }
+   },
+   "parent": "df9d13c2-3ca9-4dda-885f-8d0ace505605"
+  },
+  "69153c2f-caa8-4245-8e81-0389a0e34edf": {
+   "id": "69153c2f-caa8-4245-8e81-0389a0e34edf",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "multimodal_text",
+     "parts": [
+      {
+       "asset_pointer": "sediment://file_0000000052b4722fa7c4e92f96f0ca9f",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 479,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 403326,
+       "width": 940
+      },
+      {
+       "asset_pointer": "sediment://file_000000003d28722fb7f2019d084b08cb",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 622,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 367557,
+       "width": 940
+      },
+      {
+       "asset_pointer": "sediment://file_00000000f0d0722f856f98cad8a5ceeb",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 478,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 279893,
+       "width": 940
+      },
+      {
+       "asset_pointer": "sediment://file_000000008bf8722f9e64da5a88a047b8",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 470,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 264762,
+       "width": 940
+      },
+      {
+       "asset_pointer": "sediment://file_00000000cb74722f859f58f6bb6064a8",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 476,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 275199,
+       "width": 940
+      },
+      {
+       "asset_pointer": "sediment://file_000000008438722f857f7fae655f12ff",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 479,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 104839,
+       "width": 503
+      },
+      {
+       "asset_pointer": "sediment://file_0000000060ec722f84c112b38df720db",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 104,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 35648,
+       "width": 488
+      },
+      {
+       "asset_pointer": "sediment://file_00000000981c722f91aa9084fd78c04b",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 142,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 45247,
+       "width": 470
+      },
+      {
+       "asset_pointer": "sediment://file_000000006124722f8bc6d45fa3b41fde",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 64,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 16817,
+       "width": 373
+      },
+      {
+       "asset_pointer": "sediment://file_0000000003b8722fad2b8601bb01b659",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 554,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 93420,
+       "width": 504
+      },
+      "No, I mean, let's try it after we do index track. So then we are required to write a function with index track, and index track basically takes in the S3 object, and it takes a student address with the receiver, and it takes a grant ID, and finally the admin cap, because this has to be guarded. All right, so let's do the steps for that. Yeah, good, all right. So this function receives a registry, and it receives a student and the grant ID and the admin cap. So the first thing we are going to do is that we are going to check if the table already has an entry for the student, and if not, we remove it and add the new entry. So it's going to look like this. We are going to say if table, the table is basically the API, and if it's going to contain, basically, we should pass the table as the first parameter. And it is rec, and it has a field called myStudent, and the key here is student. We are going to do as follows. We are going to do basically remove the entry. And this returns a value, so you must do something like this. It basically tells the compiler to drop this value. This value is not... I'm not going to need it. So if an entry exists, we remove it. And then we need to add the new entry with the App API. It calls to take the table, and it takes the key, which is student, and finally the value, which is grant ID. And finally, we should emit the event, which is grant indexed. And it has two fields, which are student and grant ID. And of course, we should not forget this abort, because it just takes some time to lose the function again and so on. So yeah, that should be it. All right. So now, what we did is this. In the registry mode, we added a create function that allows only the admin to create the registry, and this is used to share the object, to make the object shared. Not let's start. Last time we had a transfer, not share object. Transfer transferred it as an owned object to one person, but this means the object is shared. And then we added the index grant function. Basically, we need to insert, like if a new grant is created, we want to insert it in the grant database. Basically, we see if there is an entry, we remove it, and then we add the new entry, and we just emit a new ID. Questions? And okay, how can you decide that you want a shared transaction? Is this an option when you want to do the transactions? Of course, it's an option. But how can you decide that you want a shared object is based on functionality. For example, in, like if you want to have a central database where everyone can see, everyone can write to, but with rules, of course, and it could be passed into functions like by anyone. You need a shared object for that. It has like very specific use cases that do some food. So yes, it's an option, but depends on the use case. All right, so can programmable transaction blocks help reduce contention on shared objects? And if so, how? Well, reducing contention on shared objects cannot be controlled by anyone. I mean, let's say you deploy a DApp or an NFT marketplace that is booming, that is, you know, that attracts a lot of attention and every people want to buy, everyone wants to buy NFTs from it. You cannot control that. The shared objects that the DApp uses will get contention on them and the participants of the network want to interact with your DApp will have to pay more. So contention on shared objects is an external factor which as a DApp you would do nothing about. Is this code shared on GitHub, like okay, the solution itself for the workshop? Like this one, no, it's not shared on GitHub, because I can share it, but this defeats the purpose of the workshop and I'm building together. Instead, I will urge you to solve it yourself and share it with me on GitHub instead. I want you to solve it with Git. Okay, why are we removing the already existing grant? Well, I mean, it's just the functionality. I mean, you could have, I mean, if there is an older grant, the key remains the same, and you cannot have a single key with two values. You should have, like, it's one-to-one. What you could do instead if the table already contains a grant for the student, what instead you could do is just, like, abort, or emit an event that this student already received grants. It's just for example, like I wanted to show that how you can remove and insert an element into the table. I just wanted to show off the table library. So the answer for that is... 09:44 09:46"
+     ]
+    },
+    "create_time": 1771667194.616,
+    "id": "69153c2f-caa8-4245-8e81-0389a0e34edf",
+    "metadata": {
+     "attachments": [
+      {
+       "height": 479,
+       "id": "file_0000000052b4722fa7c4e92f96f0ca9f",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "ee70e3f7-45af-4618-ae8e-4cb226aa6654.png",
+       "size": 403326,
+       "source": "local",
+       "width": 940
+      },
+      {
+       "height": 622,
+       "id": "file_000000003d28722fb7f2019d084b08cb",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "35adf4b5-6760-4154-9013-073b5ef34be0.png",
+       "size": 367557,
+       "source": "local",
+       "width": 940
+      },
+      {
+       "height": 478,
+       "id": "file_00000000f0d0722f856f98cad8a5ceeb",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "d4839fad-5ca9-4b25-a91c-57cb52ac44d0.png",
+       "size": 279893,
+       "source": "local",
+       "width": 940
+      },
+      {
+       "height": 470,
+       "id": "file_000000008bf8722f9e64da5a88a047b8",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "b55cb3b9-07ef-4394-9999-38ad6f4d93a2.png",
+       "size": 264762,
+       "source": "local",
+       "width": 940
+      },
+      {
+       "height": 476,
+       "id": "file_00000000cb74722f859f58f6bb6064a8",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "1616ee38-afbe-4731-9432-e90905f1b0a3.png",
+       "size": 275199,
+       "source": "local",
+       "width": 940
+      },
+      {
+       "height": 479,
+       "id": "file_000000008438722f857f7fae655f12ff",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "2e8868eb-180d-4853-9f3f-0b7a2d06df4f.png",
+       "size": 104839,
+       "source": "local",
+       "width": 503
+      },
+      {
+       "height": 104,
+       "id": "file_0000000060ec722f84c112b38df720db",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "ead163d7-8597-4a80-9f5c-ecfc6c0327e6.png",
+       "size": 35648,
+       "source": "local",
+       "width": 488
+      },
+      {
+       "height": 142,
+       "id": "file_00000000981c722f91aa9084fd78c04b",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "cc1ff3c9-be95-4b96-8439-d62b366bfdc1.png",
+       "size": 45247,
+       "source": "local",
+       "width": 470
+      },
+      {
+       "height": 64,
+       "id": "file_000000006124722f8bc6d45fa3b41fde",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "fdb17341-8e9e-4746-957f-4b6da2687fec.png",
+       "size": 16817,
+       "source": "local",
+       "width": 373
+      },
+      {
+       "height": 554,
+       "id": "file_0000000003b8722fad2b8601bb01b659",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "423fa5fe-8faa-4ec9-a612-de160bf9101a.png",
+       "size": 93420,
+       "source": "local",
+       "width": 504
+      }
+     ],
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "460af4b1-f70e-408b-8b94-8d554ddb2ce0"
+  },
+  "6c8c5725-d576-4a74-b39f-ae2ba5d09e52": {
+   "id": "6c8c5725-d576-4a74-b39f-ae2ba5d09e52",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "09:00Good morning once again and welcome back to the first European Web3 Hackathon brought to you by MasterZ and IOTA. Now, first and foremost, I really do hope that all of your questions regarding the core one with Sala on the 18th of February have been answered in your private respective groups. Now, here's the lesson schedule following up. We have the core two today, the 21st of February. We have then the core three on Wednesday, 25th of February at 6 p.m. CET. We then have notarization on Saturday, 28th of February at 10 a.m. CET. Then we have identity on Wednesday, 4th of March at 6 p.m. And then we have a gas station on Saturday, 7th of March at 10 a.m. CET. Now, keep in mind that the lesson will approximately last around an hour, hour and a half, and you will find the recording on the MasterZ Hackathon Discord announcement channel 24 hours later. So if you haven't participated in the live...09:04"
+     ]
+    },
+    "create_time": 1771664651.446,
+    "id": "6c8c5725-d576-4a74-b39f-ae2ba5d09e52",
+    "metadata": {
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "6f7afdb4-63de-418b-998a-ddbd8d024e8a"
+  },
+  "6e3b7bfd-9e05-4398-a78a-1816328b8921": {
+   "id": "6e3b7bfd-9e05-4398-a78a-1816328b8921",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Is it okay? Able to listen. Don't know how much Zoom creates problem."
+     ]
+    },
+    "create_time": 1771664350.203,
+    "id": "6e3b7bfd-9e05-4398-a78a-1816328b8921",
+    "metadata": {
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "fe7a65ab-f7b6-47bd-a07e-067a7d7cdf2f"
+  },
+  "6f7afdb4-63de-418b-998a-ddbd8d024e8a": {
+   "id": "6f7afdb4-63de-418b-998a-ddbd8d024e8a",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Yes partner — that sentence is understandable, but slightly broken English.\n\nIf you want it natural and clear during the Zoom session, say one of these:\n\n### ✅ Simple & Clear\n> “Is it okay? Are you able to hear me clearly? I’m not sure if Zoom is causing any issues.”\n\n### ✅ Slightly More Professional\n> “Can you hear me clearly? I’m not sure if Zoom is creating any audio issues.”\n\n### ✅ Very Short Version\n> “Is my audio clear? Any issues from Zoom?”\n\n---\n\nYour original:\n> “Is it okay? Able to listen. Don't know how much Zoom creates problem.”\n\nIt sounds fragmented because:\n- “Able to listen” needs a subject (Are you able…)\n- “creates problem” → should be “creates problems” or “is causing issues”\n\n---\n\nFor live sessions, keep it short and confident:\n\n> “Is my audio clear?”\n\nThat’s enough.\n\nYou’re good 👍"
+     ]
+    },
+    "create_time": 1771664352.60435,
+    "id": "6f7afdb4-63de-418b-998a-ddbd8d024e8a",
+    "metadata": {
+     "content_references": [],
+     "model_slug": "gpt-5-2",
+     "parent_id": "4b1299e6-d63a-4944-8018-924231307f6b"
+    }
+   },
+   "parent": "6e3b7bfd-9e05-4398-a78a-1816328b8921"
+  },
+  "89f43ddf-d6f6-4fe5-9b0d-50ceeae0a5b4": {
+   "id": "89f43ddf-d6f6-4fe5-9b0d-50ceeae0a5b4",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "multimodal_text",
+     "parts": [
+      {
+       "asset_pointer": "sediment://file_00000000d354722fb0b2927444acfebe",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 687,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 294377,
+       "width": 940
+      },
+      {
+       "asset_pointer": "sediment://file_0000000010e8722f8cc886cb81469214",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 360,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 190035,
+       "width": 940
+      },
+      "So guys, it disconnected. Can you tell me in the chat when I was disconnected? Because I have no idea which part did I last cover. Yeah, so basically that's it for today's session. Looks like we have covered shared objects, we have covered like how to create PTBs. And for the next session, we are going to make our app more production ready. So yeah, I hope you enjoyed today's session. Thanks. All right, great. Thank you very much, Salah. This was one amazing session today as well. Allow me just to quickly share my screen. I hope everyone has learned something new here. Now, some quick reminders before we finish today's meeting. We have created a private Discord group including your team or you as a solo builder, the MasterZ team, and the IOTA Foundation team, so keep up with that. You can use it to ask anything related to your project or request support on IOTA technology. The Build Now contest deadline is on February 23rd on 2026, and what is the Build contest? It practically rewards a team that has already have a clear problem and solution defined. We've shared all the details in Discord announcement channel and give in every private group. So make sure to fill out the form to participate. What do you win? Well, publication of the project concept on the official IOTA blog, which will also be shared on X with 250,000 followers, and LinkedIn with over 30,000 followers. Access to a private session with the IOTA production adaptation team. Get ready for core 3 on Wednesday, 25th of February at 6 p.m. CET, once again with the amazing Sala. Now, our advice is to start building immediately, and if you need any support, ask in your private Discord group. I hope you're ready, and I hope I see all of you once again on Wednesday, 25th, February at 6 p.m. CET. Thank you very much for watching, and goodbye. Recording. 10:03"
+     ]
+    },
+    "create_time": 1771668265.465,
+    "id": "89f43ddf-d6f6-4fe5-9b0d-50ceeae0a5b4",
+    "metadata": {
+     "attachments": [
+      {
+       "height": 687,
+       "id": "file_00000000d354722fb0b2927444acfebe",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "81b97f99-7eae-4295-a1d6-d2aba3c18a99.png",
+       "size": 294377,
+       "source": "local",
+       "width": 940
+      },
+      {
+       "height": 360,
+       "id": "file_0000000010e8722f8cc886cb81469214",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "f8bbd9f5-e88e-498d-9a8b-5eff68b6e666.png",
+       "size": 190035,
+       "source": "local",
+       "width": 940
+      }
+     ],
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "8b6bae2e-2664-48ae-8a2b-336718720e77"
+  },
+  "8b6bae2e-2664-48ae-8a2b-336718720e77": {
+   "id": "8b6bae2e-2664-48ae-8a2b-336718720e77",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Perfect. This is the full Core II execution loop completed.\n\nLet’s close the loop cleanly so the architecture is crystal clear.\n\n---\n\n# 🔁 What Just Happened (End-to-End Flow)\n\nYou completed:\n\n1️⃣ Publish upgraded package  \n2️⃣ Create shared `Registry`  \n3️⃣ Capture `REGISTRY_ID`  \n4️⃣ Compose PTB  \n5️⃣ Execute mint + index atomically  \n6️⃣ Observe shared object mutation  \n\nThat is a complete shared-state lifecycle.\n\n---\n\n# 🧱 Step-by-Step Breakdown\n\n## 1️⃣ Publish\n\nAfter modifying `mint` to return `ID`, you ran:\n\n```bash\niota client publish\n```\n\nThis produced:\n\n- New `PackageID`\n- New `AdminCap`\n\nBecause ABI changed.\n\nImportant rule:\n> Changing function signature requires republish/upgrade.\n\n---\n\n## 2️⃣ Create Registry\n\nYou executed:\n\n```bash\niota client call \\\n  --module registry \\\n  --function create \\\n  --args <ADMIN_CAP_ID>\n```\n\nResult:\n\n```\nObjectType: scholarflow::registry::Registry\nOwner: Shared\n```\n\nCritical observation:\n> Owner = Shared\n\nThis confirms global shared state.\n\n---\n\n## 3️⃣ Build PTB\n\nYour PTB:\n\n```bash\niota client ptb \\\n  --move-call <pkg>::grant::mint ...\n  --assign minted_id \\\n  --move-call <pkg>::registry::index_grant ...\n```\n\nTwo chained move calls.\n\n---\n\n# 🧠 What Happens Inside PTB\n\n### Step 1 — Mint\n\nCreates:\n- Grant object (owned)\n- Emits GrantMinted event\n- Transfers to student\n- Returns `grant_id`\n\nStored as:\n```\nminted_id\n```\n\n---\n\n### Step 2 — Index\n\nUses:\n```\nminted_id\n```\n\nMutates:\n- Shared Registry\n- Inserts student → grant_id mapping\n- Emits GrantIndexed event\n\n---\n\n# ⚡ Atomic Guarantee\n\nIf Step 2 fails:\n- Step 1 is rolled back.\n- Grant never exists.\n- Registry untouched.\n\nThis is ACID-level atomicity.\n\n---\n\n# 🧩 Final State After Execution\n\nOn-chain now:\n\nOwned Objects:\n- Grant (under student)\n\nShared Objects:\n- Registry (contains mapping)\n\nEvents:\n- GrantMinted\n- GrantIndexed\n\nEverything consistent.\n\n---\n\n# 🔎 Very Important Structural Insight\n\nYou now have a complete pattern:\n\n```\nCapability → Owned Creation → Shared Indexing → Atomic Commit\n```\n\nThis pattern scales to:\n\n- Marketplaces\n- Voting registries\n- NFT indexing\n- Governance systems\n- Identity systems\n- Leaderboards\n\n---\n\n# 🧠 Why This Matters Beyond Workshop\n\nWorkshop I = Object lifecycle  \nWorkshop II = Coordinated state  \n\nYou moved from:\n\n> “I can mint objects”\n\nTo:\n\n> “I can build shared indexed state with transactional guarantees”\n\nThat is real dApp architecture.\n\n---\n\n# 🧠 Subtle but Powerful Observations\n\n### ✔ Shared object has no owner  \n### ✔ Mutation controlled by capability  \n### ✔ Dynamic fields allow scalable indexing  \n### ✔ PTB allows atomic multi-step workflows  \n\nThis is object-oriented blockchain.\n\n---\n\n# 🔬 What You Should Now Be Able To Explain\n\nIf someone asks:\n\n**How does IOTA avoid partial state corruption?**\n\nYou answer:\n\n> By composing operations inside PTBs and using shared object mutation guarded by capability.\n\nIf someone asks:\n\n**How do you build a central registry?**\n\nYou answer:\n\n> Shared object + dynamic fields + index entry + atomic PTB.\n\nThat’s production-grade thinking.\n\n---\n\n# 🏁 Core II Completed\n\nYou now understand:\n\n- Owned vs Shared\n- Dynamic fields\n- Table API\n- PTBs\n- Atomic chaining\n- Shared object creation\n- Capability gating\n\nThat is the foundation.\n\n---\n\nIf you want next, we can:\n\n- 🔍 Analyze failure scenarios\n- 🧠 Map this to ScholarFlow architecture\n- 🏗 Extract reusable governance pattern\n- 📊 Simulate high-contention behavior\n\nYou’re now thinking at protocol layer depth."
+     ]
+    },
+    "create_time": 1771668215.676167,
+    "id": "8b6bae2e-2664-48ae-8a2b-336718720e77",
+    "metadata": {
+     "content_references": [],
+     "model_slug": "gpt-5-2",
+     "parent_id": "9f6eb6c1-77a1-4b7f-a36a-c3c96d222658"
+    }
+   },
+   "parent": "98bf15cd-b1b1-4f98-8997-2a4039259369"
+  },
+  "97679f4a-1be7-48b1-8940-8960360c0de3": {
+   "id": "97679f4a-1be7-48b1-8940-8960360c0de3",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "multimodal_text",
+     "parts": [
+      {
+       "asset_pointer": "sediment://file_0000000031287243a590ed58a16163be",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 270,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 93223,
+       "width": 714
+      },
+      {
+       "asset_pointer": "sediment://file_000000008fb87243a388eeb39f2a799e",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 435,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 166019,
+       "width": 940
+      },
+      {
+       "asset_pointer": "sediment://file_000000006ecc7243b458f65c163e645e",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 350,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 125486,
+       "width": 685
+      },
+      {
+       "asset_pointer": "sediment://file_00000000285c7243b5413e744ad194f8",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 373,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 57531,
+       "width": 669
+      },
+      "Alright, so now for the concept of programmable transaction blocks. So, do you remember transactions that we just did last time? The first transaction we did was deploy, the second transaction we did was queuing mint, right? And these were two separate transactions that we did in two separate steps in the CLI. But PTPs, they allow us to merge steps or operations in one transaction. So, for example, if we want to mint a grant and put it in our registry in one step, we can use PTPs for that. And the benefits of that is, first of all, atomicity. For example, you get all steps carried out or nothing. If a grant is created and the function failed for any reason, for example, there is not enough funds, there would be no endies. You will not find this in the registry because it will cut midway. Second thing is determinism. Determinism means that inputs are outputs are strict and they are known beforehand. Third is that this saves much time and money. Like you can do a lot of operations in one go. Let's say that you have a function that mints an NFT and you want to mint a thousand NFTs. How are you going to do that? You are not going to do that by a thousand transactions, but you can do that with a single PTP. So, today's summary. Basically, is first of all, a shared option, which is economically central source of truth that is regulated with the rules inside the contract. Second is dynamic fields, which is efficient and it gives us indexing capabilities on the blockchain. And finally is the PDBs, which is basically, we have multi steps, like, put together and executed as one atomic part. So yeah, these are the concepts for today, and this is what we are going to do in the practical. Basically, we are going to create a shared registry and define its write rules and read rules. We are going to index a student to grant using the dynamic fields. And then we will build a PDB that prints and indexes in one go. Then finally, we're gonna verify it via querying the shared registry object and see what grants are reserved and to whom's. The question is, is there a mempool on Iota? If yes, it's public. That is a really good question. Well, first of all, the concept of mempool is that does not exist on Iota, actually. Like, if you submit a transaction, if you come from the outside world and you want to submit a transaction, there is no way for you. There is no way for you to peek into the node and see what other transactions are there and compete with them. There is no way you can do that. And that's actually where I do my master's thesis, like how we can predict a gas price if I don't know who I'm competing with. This is like the title of my master's thesis. So yes, the concept of a group pool does not exist on IOTA because of this short object concept that I just explained. Like if we go back to here, in other blockchains like Solana, Ethereum, you don't have this concept of scalability. Whoever pays the most will just pass. But here, you don't pay for a single slot, which is like beating other transactions. You have to beat other transactions, and there has to be place for your transaction to fit as well. So that is the difference. You are not you are competing for completely different things. When we see Solana, you are competing for a single resource, which is your transaction also pass. But here you are competing for like an infinite number of slots. So yeah, that's the main difference. All right, I think we can now jump to the practical part. I think we stop sharing my screen for a minute. 09:25  09:27"
+     ]
+    },
+    "create_time": 1771666064.909,
+    "id": "97679f4a-1be7-48b1-8940-8960360c0de3",
+    "metadata": {
+     "attachments": [
+      {
+       "height": 270,
+       "id": "file_0000000031287243a590ed58a16163be",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "1379869d-7cb6-4754-8bd4-2024df92b866.png",
+       "size": 93223,
+       "source": "local",
+       "width": 714
+      },
+      {
+       "height": 435,
+       "id": "file_000000008fb87243a388eeb39f2a799e",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "ef74840a-33bb-4d89-83de-aa91d8e70c24.png",
+       "size": 166019,
+       "source": "local",
+       "width": 940
+      },
+      {
+       "height": 350,
+       "id": "file_000000006ecc7243b458f65c163e645e",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "412cff0c-b1cd-4ef0-9125-36600259509f.png",
+       "size": 125486,
+       "source": "local",
+       "width": 685
+      },
+      {
+       "height": 373,
+       "id": "file_00000000285c7243b5413e744ad194f8",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "ddc64501-ac02-4495-9e54-57f678a89395.png",
+       "size": 57531,
+       "source": "local",
+       "width": 669
+      }
+     ],
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "2f2681cd-94a5-4ec4-8077-a61be56c3627"
+  },
+  "9896ffdd-9553-4b36-b4d0-dc9e1347132d": {
+   "id": "9896ffdd-9553-4b36-b4d0-dc9e1347132d",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "multimodal_text",
+     "parts": [
+      {
+       "asset_pointer": "sediment://file_000000002d04724394172db768c0ac28",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 868,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 235300,
+       "width": 1296
+      },
+      "If you haven't participated in the live lesson on Core 1, you can check out the recording in the Masters E Hackathon Discord group announcement. Now, quick some reminders and useful information. We have created a private Discord group, including your team or you as a solo builder, the Masters E team, and the Iota Foundation team. You can use it to ask anything related to your project or request support on Iota technology. The Build Now contest deadline is on February 23, 2026, so please make sure to mark this date. What is the Build Contest? It rewards teams that already have clear problem and solution defined. We've shared all the details in the Discord announcement channel and in every private group. So make sure to fill out the form to participate. What do you win? Well, publication of your project concept on the official Iota blog, which will also be shared on X with over 250,000 followers, and then on LinkedIn with 30,000 followers. Access to a private session with the Iota product adaptation team. Now, quickly, some reminders and useful information. The building phase evaluation rules reminder. Deadline MVP delivery is on 31st of March 2026. As I said, make sure to mark the date. And to be eligible for evaluation, your project must meet these requirements. First, real-world problem the project must address and a concrete real-world use case built on Iota Layer 1. The core logic must be developed directly on the Iota testnet, mainnet Iota Layer 1. The use of Iota services. The solution must integrate at least one of the following. Iota digital identity, Iota notarization, Iota hierarchies, anything from the trust framework, or Iota tokenization. Working MVP. Deliver a functional MVP that clearly demonstrates the core value of the solution. The focus is on visibility, clarity, and real adaptation potential, not on future completeness. Our suggestion, as always, is dream big, but start concrete and simple. An incredible opportunities of master ZXAIL hackathon, the deadline once again is on 31st of March. The top five projects will have the opportunity to present their project directly to the IOTA Foundation and request funding, grow opportunities, and ecosystem support. The top 10 projects will win access to an incubational program. The top 30 projects will be featured in a detailed leaderboard, including full project description and team Solobuilder profiles. This leaderboard will be shared with IOTA ecosystem partners and industrial partners to generate career opportunities and potential solution integrations. Now, as I mentioned, the lesson will be approximately two hours, and you'll find the recording on MasterZ or Hackathon Discord announcements channel 24 hours later. Now, once again, I bring you Sala, the developer relations IOTA Foundation. Please, Sala, take it away. Hi, everyone. Can you hear me well? All right, perfect. So it's me again, and in today's workshop, we are going to cover mainly concepts around shared options. So a quick recap of what happened last Wednesday. We basically created a Grand Step where the admin can deploy the Dapp and receive admin rights. I have, sorry, I have not shared my screen yet. Now you can see the screen. All right, perfect. So, we created a grant step last Wednesday where the admin could deploy the application and receive admin rights in the form of admin cap option. After that, the admin calls the function mint to create a grant object for a student and the mint was guarded by admin cap. So that was like what basically happened last Wednesday. So today, we are going to cover this. So let's say we created 10 grants, right? How we are going to track them? Like how can the admin know which student received which grant? Before, we only logged these events as normal logs, right? We like when a grant was created, we emitted an event that the grant was created and that's it. And those events are scattered and basically there is no central log of who received what grant. So it's searchable, but it's hard to do so. In this workshop, we will create a registry, which is basically a structure or a database or a table that saves grant ID and maps them to the student. So basically have a mapping from a student to grant ID. So... We will keep the resource safety and capability authentication. Basically, we are guarding who mints grants by admin cap, so we keep that. But what we add is a shared registry in which there is like a central source of truth, which is the shared registry in which we can see the mapping between a student and a grant. We are going to add a dynamic field. A dynamic field in moves basically could be a mapping, could be a set, and we are going to dive into that further. And we are going to add PTBs. PTBs are short for programmable transaction blocks. This seems like a really long name. Don't think much about it. We'll cover it all. And so by adding those, we basically will achieve mainly, and the most important thing is a searchable state. So in order to achieve that, we should cover the following concepts. First is the shared versus owned objects. Second...09:11 "
+     ]
+    },
+    "create_time": 1771665113.186,
+    "id": "9896ffdd-9553-4b36-b4d0-dc9e1347132d",
+    "metadata": {
+     "attachments": [
+      {
+       "height": 868,
+       "id": "file_000000002d04724394172db768c0ac28",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "f99a7761-2b56-4ad6-959c-9bfb2fbb4090.png",
+       "size": 235300,
+       "source": "local",
+       "width": 1296
+      }
+     ],
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "a059dbee-97ad-4f0c-974e-73c117b9b6e3"
+  },
+  "98bf15cd-b1b1-4f98-8997-2a4039259369": {
+   "id": "98bf15cd-b1b1-4f98-8997-2a4039259369",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "multimodal_text",
+     "parts": [
+      {
+       "asset_pointer": "sediment://file_00000000895c722faedc55612ce18d9a",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 458,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 256664,
+       "width": 940
+      },
+      {
+       "asset_pointer": "sediment://file_00000000ca28722fb3f8f002ad631384",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 490,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 237043,
+       "width": 940
+      },
+      {
+       "asset_pointer": "sediment://file_00000000a3f4722fb181cc2aae05e5e2",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 234,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 102006,
+       "width": 923
+      },
+      {
+       "asset_pointer": "sediment://file_00000000904c722f88eb0f8df1842c3c",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 692,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 315846,
+       "width": 892
+      },
+      {
+       "asset_pointer": "sediment://file_0000000005dc722f9c247e6f85f04522",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 526,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 267803,
+       "width": 940
+      },
+      {
+       "asset_pointer": "sediment://file_00000000b3ac722f96126fdbd1355007",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 631,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 230485,
+       "width": 940
+      },
+      "we call create_rect. All right, so now that we created the registry, we can use it inside the Etib, so let's replace the values inside that one. Move code, the package ID, so we will just, I mean, I can export it. That's, I think that's better. But just for the sake of easiness, like I can paste a line here that says, like export package ID, but I will not do that, I will just paste it in place. Okay, so the package ID is here, that's this one. And we have the student address. I mean, I can enter any address. Let's see this one. That's okay, and amount, I mean, we could do whatever we do maybe. And then finally, admin cap ID and admin cap, I think we put it here at the end, and this is admin cap. We'll just put that, and we'll assign that to mintedID, and then after that, for the second move call, this is the exact same package I need, change, should remove that. And for registry ID, registry ID is, we just created it, and this one, basically you should check the object type and then get the object ID. And then the student address, it could be, as I said, my address, which is this one. And the third argument, I'm going to show you the arguments, the third argument is grant ID, which is here, minted ID, and finally, the admin cap. And admin cap was in that one. We assigned its output to a variable named minted ID, then we made another move called to index script. So now we wired two move codes, the first one is for mint, the second one is for index script. All right. So, until this point, what we have done is we just created the central registry, well, we interacted with it with the command line, and then finally we created a BTP that allowed you to call multiple functions at once with the CLI. Let me check. Yeah, all right, there is no more questions, so I'll stop sharing the screen. 10:00"
+     ]
+    },
+    "create_time": 1771668212.617,
+    "id": "98bf15cd-b1b1-4f98-8997-2a4039259369",
+    "metadata": {
+     "attachments": [
+      {
+       "height": 458,
+       "id": "file_00000000895c722faedc55612ce18d9a",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "f9867139-7705-4e37-bab4-20f6b4f436c8.png",
+       "size": 256664,
+       "source": "local",
+       "width": 940
+      },
+      {
+       "height": 490,
+       "id": "file_00000000ca28722fb3f8f002ad631384",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "a6b50e0e-588d-4f2c-bae1-0c6a815fbfb1.png",
+       "size": 237043,
+       "source": "local",
+       "width": 940
+      },
+      {
+       "height": 234,
+       "id": "file_00000000a3f4722fb181cc2aae05e5e2",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "5fda10dd-11eb-4b86-ac23-a9dcb2e17604.png",
+       "size": 102006,
+       "source": "local",
+       "width": 923
+      },
+      {
+       "height": 692,
+       "id": "file_00000000904c722f88eb0f8df1842c3c",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "c74eb1c8-1d21-401c-9202-7e304b4476fb.png",
+       "size": 315846,
+       "source": "local",
+       "width": 892
+      },
+      {
+       "height": 526,
+       "id": "file_0000000005dc722f9c247e6f85f04522",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "95b87989-beb6-44b8-8f45-fa3da0e581ea.png",
+       "size": 267803,
+       "source": "local",
+       "width": 940
+      },
+      {
+       "height": 631,
+       "id": "file_00000000b3ac722f96126fdbd1355007",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "59637256-b439-41a7-9e1a-79c7c76d4b5b.png",
+       "size": 230485,
+       "source": "local",
+       "width": 940
+      }
+     ],
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "dd0c6e47-df56-4f07-94bd-dd89ac66dd69"
+  },
+  "a059dbee-97ad-4f0c-974e-73c117b9b6e3": {
+   "id": "a059dbee-97ad-4f0c-974e-73c117b9b6e3",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Good capture 👍 — this is a clean opening announcement.  \nLet me structure it clearly for your **hackathon documentation page**.\n\n---\n\n# 📣 Opening Announcement Summary  \n**MasterZ × IOTA – European Web3 Hackathon**\n\n### 🎤 Welcome Message\n- Welcome back to the **first European Web3 Hackathon**\n- Organized by **MasterZ** and **IOTA**\n- Core I (18 Feb) follow-up questions should be resolved in private groups\n\n---\n\n# 📅 Full Lesson Schedule\n\n| Session | Date | Time (CET) | Topic |\n|----------|--------|-------------|--------|\n| Core I | 18 Feb | 6 PM | Introduction to Smart Contracts |\n| **Core II** | **21 Feb** | **10 AM** | Shared Objects, Dynamic Fields, PTBs |\n| Core III | 25 Feb | 6 PM | Capabilities, State & Tests |\n| Notarization | 28 Feb | 10 AM | IOTA Notarization |\n| Identity | 4 Mar | 6 PM | IOTA Identity |\n| Gas Station | 7 Mar | 10 AM | Gas Station Workshop |\n\nFor you (UK time 🇬🇧):\n- 10 AM CET = **9 AM UK**\n- 6 PM CET = **5 PM UK**\n\n---\n\n# ⏱ Session Format\n\n- Duration: **~1 to 1.5 hours**\n- Recording available:\n  - Posted in **MasterZ Hackathon Discord**\n  - Available **24 hours later**\n  - Found in the **announcement channel**\n\n---\n\n# 🧠 Strategic Note (For You, Partner)\n\nThis schedule is structured intentionally:\n\n1. Core I–III → Foundation (Move & Architecture)\n2. Notarization → Real-world document proof\n3. Identity → Decentralized identity\n4. Gas Station → Advanced transaction patterns\n\nIt’s layered skill building.\n\nYou’re currently at:\n> 🔹 Core II — entering shared state & atomic design\n\nThat’s where real Web3 architecture starts.\n\n---\n\nIf you want, I can now:\n- Convert this into a **clean page-ready formatted summary**\n- Or extract action checklist for you before each session\n- Or map each session to ScholarFlow architecture layers\n\nYou choose the depth."
+     ]
+    },
+    "create_time": 1771664653.151915,
+    "id": "a059dbee-97ad-4f0c-974e-73c117b9b6e3",
+    "metadata": {
+     "content_references": [],
+     "model_slug": "gpt-5-2",
+     "parent_id": "12b57c6f-eaca-430e-859c-43acae680f40"
+    }
+   },
+   "parent": "6c8c5725-d576-4a74-b39f-ae2ba5d09e52"
+  },
+  "b1c78174-7faa-4c50-9975-88ec5c0ef73d": {
+   "id": "b1c78174-7faa-4c50-9975-88ec5c0ef73d",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "21/02/2026 08:57  \nChatGPT Project: **AT-HACK0013-MasterZ IOTA Hackathon**  \nPage: **005-02-Class-21022026-shared-objects-dynamic-fields-ptbs**\n\n---\n\nGood. 👍  \n\nSince you're about to capture **auto transcript**, let’s do this clean and enterprise-grade — no chaos later.\n\n---\n\n# 🎙️ Live Stream Transcript Capture — Best Practice Plan\n\n## ✅ 1️⃣ What To Capture\n\nCapture:\n\n- Instructor explanation\n- CLI commands shown\n- Errors + debugging steps\n- Architecture reasoning (very important)\n- Q&A section (often exam gold)\n\nDo **not** worry about:\n- Filler talk\n- Greetings\n- Repeated examples\n\nWe will clean later.\n\n---\n\n# 🧠 While Class Is Running — Your Minimal Mental Checklist\n\nSince this is Core II, watch carefully for:\n\n### 🔹 Shared Object Behavior\n- How they explain locking / mutability\n- Any mention of concurrency\n\n### 🔹 Table Usage\n- Do they use `contains` + `remove`?\n- Or overwrite pattern?\n\n### 🔹 PTB Execution\n- How they assign return values\n- Any CLI formatting nuance\n\n### 🔹 Upgrade Compatibility Warnings\nThis is often where people fail in hackathons.\n\n---\n\n# ⚙️ Technical Advice for Transcript\n\nSince earlier you had:\n- CPU / RAM spike\n- “input too long” error\n- heavy page crash\n\nDo this:\n\n### Option A (Recommended)\nLet transcript save to file (txt or srt).  \nThen upload in chunks (max 8–10k words per message).\n\n### Option B\nIf using Whisper or diarization:\n- Save raw output to file\n- Don’t paste full thing here directly\n\nWe will process incrementally.\n\n---\n\n# 🧩 If You Want Enterprise Mode (Better Way)\n\nStructure transcript into:\n\n```\n[Timestamp]\nTopic:\nCommand:\nCode:\nConcept:\nRisk:\n```\n\nThis will later become:\n- Devpost documentation\n- GitHub README learning log\n- Hackathon submission proof\n\n---\n\n# 🚨 Important (From Earlier Experience)\n\nIf transcript becomes large:\n\nDO NOT paste entire file in one go.\n\nInstead:\n```\nPart 1 / 5\nPart 2 / 5\n...\n```\n\nOtherwise session will choke again.\n\n---\n\n# 🎯 After Class\n\nWe will:\n\n1️⃣ Extract architectural patterns  \n2️⃣ Clean CLI commands  \n3️⃣ Build deterministic notes  \n4️⃣ Align with ScholarFlow roadmap  \n\nEstimated post-class processing time:  \n🕒 60–90 minutes structured refinement.\n\n---\n\nYou start the class.  \nStream. Capture.  \n\nWhen ready, paste **Part 1**.\n\nI’m in architecture-review mode."
+     ]
+    },
+    "create_time": 1771664317.791504,
+    "id": "b1c78174-7faa-4c50-9975-88ec5c0ef73d",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "ieoygy"
+      },
+      "1": {
+       "edited": false,
+       "id": "s1pylh"
+      }
+     },
+     "content_references": [],
+     "model_slug": "gpt-5-2",
+     "parent_id": "2ca3eb00-93e1-4dc3-86fc-2714b5bf28c3"
+    }
+   },
+   "parent": "bbb21dcd-0c20-48df-89ce-02a4e4c0f0f0"
+  },
+  "b3214a7b-21bb-4e22-adae-849ae0d30486": {
+   "id": "b3214a7b-21bb-4e22-adae-849ae0d30486",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Excellent — this is the real implementation layer. Let’s cleanly consolidate what just happened.\n\nYou are now officially inside:\n\n> Shared-state mutation with dynamic fields + capability gating.\n\n---\n\n# 🔷 1️⃣ The `index_grant` Function — What It Actually Does\n\nSignature:\n\n```move\npublic entry fun index_grant(\n    reg: &mut Registry,\n    student: address,\n    grant_id: ID,\n    _cap: &scholarflow::grant::AdminCap\n)\n```\n\nBreakdown:\n\n| Parameter | Why |\n|------------|------|\n| `&mut Registry` | We are mutating shared state |\n| `student` | Mapping key |\n| `grant_id` | Mapping value |\n| `&AdminCap` | Write permission control |\n\nThis is proper shared object mutation.\n\n---\n\n# 🔷 2️⃣ The Table Logic\n\n### Step 1 — Check if entry exists\n\n```move\nif (table::contains(&reg.by_student, student)) {\n```\n\nThis prevents duplicate-key panic.\n\nBecause:\n\n> Table does not allow duplicate keys.\n\n---\n\n### Step 2 — Remove old entry\n\n```move\nlet _ = table::remove(&mut reg.by_student, student);\n```\n\nImportant detail:\n\n- `remove` returns the old value.\n- We don’t need it.\n- So we bind to `_`.\n\nThat tells Move:\n\n> Drop the value intentionally.\n\n---\n\n### Step 3 — Insert new mapping\n\n```move\ntable::insert(&mut reg.by_student, student, grant_id);\n```\n\nNow mapping is:\n\n```\nstudent → latest_grant_id\n```\n\nRegistry is updated.\n\n---\n\n### Step 4 — Emit Event\n\n```move\nevent::emit(GrantIndexed { student, grant_id });\n```\n\nThis gives:\n\n- Analytics\n- UI subscription\n- Historical log\n\nRegistry = current state  \nEvent = audit trail\n\n---\n\n# 🔷 Why Remove First?\n\nHe answered clearly:\n\nYou don’t strictly need to remove.\n\nAlternative strategies:\n\n1️⃣ Abort if exists  \n2️⃣ Keep history in a vector  \n3️⃣ Allow multiple grants per student  \n4️⃣ Emit warning event  \n\nHe removed it simply to demonstrate:\n\n- `contains`\n- `remove`\n- `insert`\n\nIt’s pedagogical.\n\n---\n\n# 🔷 Shared vs Owned — Decision Logic\n\nGood question asked:\n\n> How do you decide if you want a shared object?\n\nAnswer:\n\nDepends on use case.\n\nUse Shared Object when:\n\n- Multiple users need visibility\n- Multiple users need to mutate\n- It acts like a registry\n- It acts like a marketplace\n- It acts like global state\n\nUse Owned Object when:\n\n- Private state\n- Single owner\n- No coordination required\n- Performance critical\n\n---\n\n# 🔷 PTBs and Contention\n\nImportant clarification:\n\n> PTBs do NOT reduce contention.\n\nContention depends on:\n\n- How many users interact\n- Gas competition\n- Object popularity\n\nPTB reduces:\n\n- Partial failures\n- Gas overhead\n- Round trips\n\nBut not shared object competition.\n\nThat’s network-level.\n\n---\n\n# 🔷 Very Important Pattern Emerging\n\nYou now have:\n\n```\nOwned: Grant\nOwned: AdminCap\nShared: Registry\n```\n\nMutation flow:\n\n```\nAdminCap\n   ↓\nmint() → Grant\n   ↓\nindex_grant() → Registry\n```\n\nAnd soon:\n\n```\nPTB → atomic mint + index\n```\n\nThis is layered architecture.\n\n---\n\n# 🔷 One Subtle but Powerful Detail\n\nRegistry is:\n\n```move\npublic struct Registry has key\n```\n\nBut it is shared using:\n\n```move\ntransfer::share_object(reg);\n```\n\nOwnership model:\n\n- No owner\n- No address controls it\n- Only capability controls mutation\n\nThat’s extremely powerful.\n\nThat’s decentralized governance logic.\n\n---\n\n# 🔷 Practical Execution Sequence (What Will Happen Next)\n\n1️⃣ Upgrade package  \n2️⃣ Call `create()`  \n3️⃣ Capture `REGISTRY_ID`  \n4️⃣ Call PTB:\n\n```bash\nmint_return_id → assign minted_id\nindex_grant → use minted_id\n```\n\n5️⃣ Query:\n\n```bash\niota client object --id $REGISTRY_ID\n```\n\n6️⃣ Verify event output\n\n---\n\n# 🔷 Architecture Maturity Level\n\nYou are no longer in:\n\n> Object creation stage.\n\nYou are now in:\n\n> Coordinated shared state stage.\n\nThis is where real dApps begin.\n\n---\n\nIf you want, next I can:\n\n- Simulate exactly what the PTB execution stack looks like internally\n- Or show what happens if you forget to remove old entry\n- Or walk through common CLI mistakes that cause errors\n\nYou’re now in the real engineering zone."
+     ]
+    },
+    "create_time": 1771667196.920725,
+    "id": "b3214a7b-21bb-4e22-adae-849ae0d30486",
+    "metadata": {
+     "content_references": [],
+     "model_slug": "gpt-5-2",
+     "parent_id": "c73f4054-a989-40d6-bdf4-84324509ee37"
+    }
+   },
+   "parent": "69153c2f-caa8-4245-8e81-0389a0e34edf"
+  },
+  "b8976ed6-ed5a-499a-89e1-5d965bdad6e4": {
+   "id": "b8976ed6-ed5a-499a-89e1-5d965bdad6e4",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "09:00Morning, everyone. Right, I think we're all ready to start. And first of all, good morning once again, and welcome.09:03"
+     ]
+    },
+    "create_time": 1771664589.211,
+    "id": "b8976ed6-ed5a-499a-89e1-5d965bdad6e4",
+    "metadata": {
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "6f7afdb4-63de-418b-998a-ddbd8d024e8a"
+  },
+  "bbb21dcd-0c20-48df-89ce-02a4e4c0f0f0": {
+   "id": "bbb21dcd-0c20-48df-89ce-02a4e4c0f0f0",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "21/02/2026 08:57 2nd class start going to get ur stream auto transcript "
+     ]
+    },
+    "create_time": 1771664317.26387,
+    "id": "bbb21dcd-0c20-48df-89ce-02a4e4c0f0f0",
+    "metadata": {
+     "content_references": [],
+     "image_results": []
+    }
+   },
+   "parent": "fe7a65ab-f7b6-47bd-a07e-067a7d7cdf2f"
+  },
+  "c49e2e89-d83c-4755-8e00-cdb230be6ea2": {
+   "id": "c49e2e89-d83c-4755-8e00-cdb230be6ea2",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "multimodal_text",
+     "parts": [
+      {
+       "asset_pointer": "sediment://file_000000001b78722fae1de653fd1ee05e",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 473,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 256815,
+       "width": 940
+      },
+      {
+       "asset_pointer": "sediment://file_0000000023c8722fad8a0ac8f05d69d2",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 479,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 190681,
+       "width": 940
+      },
+      {
+       "asset_pointer": "sediment://file_00000000b870722f9b41096a9a3fd4f1",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 270,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 105888,
+       "width": 778
+      },
+      {
+       "asset_pointer": "sediment://file_000000003ad4722f86dd48b649da0072",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 284,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 103371,
+       "width": 757
+      },
+      {
+       "asset_pointer": "sediment://file_000000007d54722fabf874e0c45e1548",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 451,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 210319,
+       "width": 940
+      },
+      {
+       "asset_pointer": "sediment://file_00000000d544722faddb5363e1890fe7",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 603,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 251706,
+       "width": 895
+      },
+      {
+       "asset_pointer": "sediment://file_00000000e3a8722fb9813b546ef6adcd",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 564,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 245918,
+       "width": 906
+      },
+      "Yes, one page dashboard. The table is API and that's it. Actually, a better option would be if the table contains an already existing grant, you should maybe abort with a message that says, a grant already received by student. I think that is like the most correct course of action. So let's go back. So I have implemented that function. And now for the front part, I guess I should, I will skip that part intentionally, and I'm going to jump to PTBs to see because I want to show you something in it. So, but first of all, let's create a registry. I'll just put this. Publish again. All right, and after publishing, we can create a registry. So create function takes only one parameter, which is the admincap. So it's just type it here instead. This is just what I would write on the CLI, but it's easier to edit in file. It's Iota client call and the package of this one. And we'll change it to S3, the function S3. Now the function is just create and the module is registry. You have to go back to the module registry and we'll just edit. And the argument is just the admincap pushes in all those add. And we'll paste in admincap. So just remove that, go step, and remove that. All right, so now our registry is created, right? Our registry is created and it shows in the created objects. It shows that an object of type registry is created. This is object ID, and if you look at the owner field, there is no owner. It is just AzureDock. So now, what's left for us is to make a PTB that calls mint, that calls mint, and then calls index get, both at the same go. So let's see how that works. This is a PTB to do that, and let me just paste it in here. PTB input. All right, so let's dissect that one by one. So first, we need to call, like you have in a PTB, you have different functionalities. You can do move call, you can do assign, you can do transfer value, you can do like different operations, but in this operation, we need a move call because we are calling the function emit, right? And function mint takes in the student address, the amount, and admin cap ID. What does assign mean? Assign here means that whatever this function call emitted or returned, assign it to a variable. So this basically translates to this. This translates to minted ID is equal to function mint. Yep. It's equal to that one. So here, we need to index a grant, right? So index grant, if we go back, let's just tiny and I can show the other screen that's more clear. We're going to index grant. It is index grant takes the registry ID. It takes the student address, and it is, and it takes the grant ID. So the grant ID in our case is the minted ID we need already from the first step. So it's basically steps that are chained together. So if you go back to our original function mint, we can see that it does not return anything. We would basically have to change, we'd have to change that to make it return the grant ID, because in order for us to use it, we'll have to return it from that function. So let's edit it. And it should just return it. To make it a variable. Right here. So we can put grant ID here. And we could just return it at the end. And before we do that, we have to define a return here. So grant ID is of type ID. So now, function Mint, what we edit it with is basically, we returned the grant ID that was minted. And we did that because in the PDB, in order for you to use function calls, you have to return something from it and you have to use the assign keyword. So first, we made a function, like a move call, another move call to mint. Just we need a move call to mint, pass it its parameters, and we assign the output or the return to something named minted ID, I mean, you could use any name you want. And then with that, we need another move call to the index event function with those parameters. And yeah, these are the steps. Since we edited that, we should republish. OK, so after publishing, we need to create a registry, so we just copy the package ID from here and edit that. This is a new package. And we paste in the new admin cap. 09:54 09:55"
+     ]
+    },
+    "create_time": 1771667747.059,
+    "id": "c49e2e89-d83c-4755-8e00-cdb230be6ea2",
+    "metadata": {
+     "attachments": [
+      {
+       "height": 473,
+       "id": "file_000000001b78722fae1de653fd1ee05e",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "56f339c1-ac6b-4e9e-aa67-cb767ab45d83.png",
+       "size": 256815,
+       "source": "local",
+       "width": 940
+      },
+      {
+       "height": 479,
+       "id": "file_0000000023c8722fad8a0ac8f05d69d2",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "8fd2ae14-bc7b-44f7-9774-1b41f6cd5828.png",
+       "size": 190681,
+       "source": "local",
+       "width": 940
+      },
+      {
+       "height": 270,
+       "id": "file_00000000b870722f9b41096a9a3fd4f1",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "5ab87cf3-14b2-4074-854b-feb668bdfc72.png",
+       "size": 105888,
+       "source": "local",
+       "width": 778
+      },
+      {
+       "height": 284,
+       "id": "file_000000003ad4722f86dd48b649da0072",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "78684b6e-2934-4d6c-9e4f-8f7363426249.png",
+       "size": 103371,
+       "source": "local",
+       "width": 757
+      },
+      {
+       "height": 451,
+       "id": "file_000000007d54722fabf874e0c45e1548",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "81e66937-4344-4427-adb9-26d083bbf8e5.png",
+       "size": 210319,
+       "source": "local",
+       "width": 940
+      },
+      {
+       "height": 603,
+       "id": "file_00000000d544722faddb5363e1890fe7",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "e4a7a5b1-802a-4389-a931-388334eb3df1.png",
+       "size": 251706,
+       "source": "local",
+       "width": 895
+      },
+      {
+       "height": 564,
+       "id": "file_00000000e3a8722fb9813b546ef6adcd",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "d098327c-4666-416b-9651-b8897620d27a.png",
+       "size": 245918,
+       "source": "local",
+       "width": 906
+      }
+     ],
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "b3214a7b-21bb-4e22-adae-849ae0d30486"
+  },
+  "client-created-root": {
+   "id": "client-created-root",
+   "message": null,
+   "parent": null
+  },
+  "d8007d94-e733-422c-a7ef-ba42189ed353": {
+   "id": "d8007d94-e733-422c-a7ef-ba42189ed353",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "multimodal_text",
+     "parts": [
+      {
+       "asset_pointer": "sediment://file_000000008650720a832ac57afe275207",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 621,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 166937,
+       "width": 940
+      },
+      {
+       "asset_pointer": "sediment://file_00000000fe5472438d3ff269dfcab2d7",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 503,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 132862,
+       "width": 940
+      },
+      {
+       "asset_pointer": "sediment://file_00000000eb2872469089e540edbf146e",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 544,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 289437,
+       "width": 940
+      },
+      {
+       "asset_pointer": "sediment://file_000000007204720abe5f7e1762f7779e",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 585,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 180488,
+       "width": 842
+      },
+      {
+       "asset_pointer": "sediment://file_0000000024fc72439cad3d7bb8047647",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 533,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 281136,
+       "width": 940
+      },
+      {
+       "asset_pointer": "sediment://file_000000003510720a9a4a380293b08841",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 507,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 160581,
+       "width": 940
+      },
+      "First, we're going to cover them here in the slides. First, then we are going to do the practical part in the workshops. Please, guys, so there is a doc pasted, like a doc link pasted in the chat. So if you have questions, can you please paste them there because other people cannot see your questions. I will go to the doc like every once every now and then to check for questions. So now, we are going to showcase those concepts by evolving the Grand Step. We are not going to get anything new. We're just going to take the Grand Step and add functionality as we go through the workshops. Basically, we'll add a registry and a storage grand information and call multiple functions via PTB. All right, now the first concept to cover is owned versus owned objects. So, do you remember last time that we explained that everything in IOTA is an object? Now, an object in IOTA is one of two types: is either owned or shared. Owned, like the ones we discussed before, like the Grand object, like the admin object, if you own a coin, if you own an NFT, if you own your own asset, that's an owned object. And they are characterized by that only the owner can execute transactions. They are used and only used, and they do not require full validator consensus in transactions. Do you remember the blockchain scheme or the owned scheme that we explained last time, where multiple nodes agree on a single transaction to commit to the shared ledger? If you remember it, the owned object does not need to go through this consensus process. Only one validator will just verify the signature and just pass on the transaction, and that's it. Therefore, owned objects' transactions, they are really fast and cheap to deal with. On the other hand, there are shared object transactions, and that would be the grand registry object that we create. Basically, to deal with them, they are much slower and more expensive than owned objects, and any change to them requires full validator consensus. Let me go to the, all right, there is no questions. Let me go back to it. I got a question in the chat that says, is a PDB like transaction bundle? All right, is a PDB like transaction bundles on ETH and Solana? Yes, exactly. They bundle multiple transactions into one transaction. Therefore, you pay lower gas cost, and yeah, you basically save time doing it. So the answer is, I would say a short yes. So, why are shared objects expensive related to IOTA? Let me, I want to explain that why actually. Let's copy that image, expand on it. This one. It seems that I cannot copy it, but all right, that's fine. All right, so in each, like after, like every 10 minutes, the IOTA network will receive a bunch of transactions, like. And A and B, let's, A is an object, B is an object, C is an object, and D is an object as well, and they are shared objects. So every 10 minutes, as a node, every 10 minutes, just 10 minutes is an arbitrary number, like every small amount of time, the IOTA node will receive a bunch of transactions like this. And every transaction, every one of them, like has paid something in order to pass. For example, A and B paid 10, A paid 9 IOTAs, ABC paid 8 IOTAs, I mean. First, what the IOTA node does is it orders them with gas price. So whoever paid the most will get the highest priority. So basically, it will do this for all transactions, and these transactions paid more than that, paid more than that, so it's like descending order. And after that, the node will choose only a bunch of transactions, only like a subset of transactions to pass with this commit, and there is a commit every couple of minutes. So it basically chooses those, and those transactions will get deferred. There is no place to schedule it, basically. And that happens only with shared transactions. Like this process happens only with shared transactions because it basically must do some, you know, concurrency hand because shared objects are expected to be touched by multiple people as a registry object you are explaining. And for that, the node has to do some scheduling. So it will take those transactions who paid the most, and it would defer the rest. But owned objects do not go through that scheme. Owned objects just go through one validator. It just verifies the signature and passes. So returning back, let me recap on that. Owned object transactions are fast and they are cheap, while shared object transactions, since you have to compete with others, it's basically the competition. Like if you submit one of the transactions, you will basically have to compete with every one of them in order for your transaction to be passed before. And basically that's the shared objects versus owned object transaction speed and cost. All right, so how can we use shared objects? There is no ownership, like shared objects, they are not owned by anyone, but rules on the write and read, like how can I mutate it, is just forced by the contract, there are rules enforced by the contract itself. So yeah, that basically covers it for shared objects. But there is a problem in shared objects. I mean, objects, by definition, they are derived from structs. And as you can remember, like if I go to here, for instance, and this is the first workshop that we did, and for example, let's say that struct cred, I mean, the fields here are fixed, and they are fixed at compile time. What do I do if I want to add like a field that is continually increasing? What I can do is add another field here and assign it to a table, perhaps, or a vector, like a data structure that accepts multiple values. And that is mainly the concept. If we go back, and that immut, the table or the vector, they are under a type that is named dynamic fields, which is basically a way to mutate the stored contents of a shared objects with rules.09:20"
+     ]
+    },
+    "create_time": 1771665813.529,
+    "id": "d8007d94-e733-422c-a7ef-ba42189ed353",
+    "metadata": {
+     "attachments": [
+      {
+       "height": 621,
+       "id": "file_000000008650720a832ac57afe275207",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "bd397d1d-d0d4-4687-8e26-dc2c61cac67e.png",
+       "size": 166937,
+       "source": "local",
+       "width": 940
+      },
+      {
+       "height": 503,
+       "id": "file_00000000fe5472438d3ff269dfcab2d7",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "234c61ab-0aa0-4d60-8403-4f4c35eadcf9.png",
+       "size": 132862,
+       "source": "local",
+       "width": 940
+      },
+      {
+       "height": 544,
+       "id": "file_00000000eb2872469089e540edbf146e",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "d703952f-78b4-4694-a00d-87303088c3fa.png",
+       "size": 289437,
+       "source": "local",
+       "width": 940
+      },
+      {
+       "height": 585,
+       "id": "file_000000007204720abe5f7e1762f7779e",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "e0598ed0-6843-417a-9033-cac387ffc366.png",
+       "size": 180488,
+       "source": "local",
+       "width": 842
+      },
+      {
+       "height": 533,
+       "id": "file_0000000024fc72439cad3d7bb8047647",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "3b4d8caf-d837-47cd-bc1a-0f922c473deb.png",
+       "size": 281136,
+       "source": "local",
+       "width": 940
+      },
+      {
+       "height": 507,
+       "id": "file_000000003510720a9a4a380293b08841",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "27a540bf-f945-40e4-b5ff-671f67c3cfb1.png",
+       "size": 160581,
+       "source": "local",
+       "width": 940
+      }
+     ],
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "2eeebf34-4c57-4b5c-b195-e0d6306f2183"
+  },
+  "dd0c6e47-df56-4f07-94bd-dd89ac66dd69": {
+   "id": "dd0c6e47-df56-4f07-94bd-dd89ac66dd69",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Perfect. This is the most important execution phase of Core II.\n\nYou are now seeing the full lifecycle:\n\n- Upgrade\n- Create shared registry\n- Compose PTB\n- Modify mint to return ID\n- Chain mint → index atomically\n\nLet’s structure this cleanly.\n\n---\n\n# 1️⃣ Why `mint` Must Return `ID`\n\nOriginally:\n\n```move\npublic entry fun mint(...)\n```\n\nReturned nothing.\n\nBut in PTB:\n\n```bash\n--move-call mint_return_id ...\n--assign minted_id\n```\n\n`--assign` captures return value.\n\nSo mint must return:\n\n```move\n: ID\n```\n\nAnd at end:\n\n```move\ngrant_id\n```\n\nWithout return value:\n- You cannot chain outputs.\n- You cannot feed grant ID into `index_grant`.\n\nPTB requires data flow between steps.\n\n---\n\n# 2️⃣ What `--assign` Really Means\n\nInside PTB:\n\n```bash\n--move-call mint_return_id ...\n--assign minted_id\n```\n\nMeans:\n\n```\nminted_id = mint_return_id(...)\n```\n\nIt is not CLI magic.\n\nIt is variable binding inside the transaction block.\n\nThat value lives inside PTB execution scope.\n\n---\n\n# 3️⃣ Full PTB Flow\n\nYour PTB does:\n\n### Step 1\n\n```bash\n--move-call grant::mint_return_id ...\n--assign minted_id\n```\n\nResult:\n```\nminted_id = newly_created_grant_object_id\n```\n\n### Step 2\n\n```bash\n--move-call registry::index_grant ... minted_id ...\n```\n\nNow:\n\n```\nindex_grant(registry, student, minted_id, admin_cap)\n```\n\nAll inside one atomic transaction.\n\n---\n\n# 4️⃣ Why This Is Powerful\n\nWithout PTB:\n\n1. Mint\n2. Extract ID manually\n3. Call index\n4. Risk partial state\n\nWith PTB:\n\n```\nSingle commit\nAll-or-nothing\n```\n\nThat is real transactional integrity.\n\n---\n\n# 5️⃣ Shared Registry Creation\n\nWhen you ran:\n\n```bash\niota client call --module registry --function create\n```\n\nIt returned:\n\n```\nCreated object:\nType: scholarflow::registry::Registry\nOwner: Shared\n```\n\nKey detail:\n\nOwner is NOT an address.\n\nIt is Shared.\n\nThat confirms:\n\n- This object is globally accessible.\n- Requires consensus.\n- Can be passed into entry functions.\n\n---\n\n# 6️⃣ Important Subtlety: Why Re-Publish?\n\nYou edited `mint` signature.\n\nChanging function return type changes package ABI.\n\nSo:\n\n- You must publish or upgrade.\n- Old package cannot be used.\n- New AdminCap is minted.\n- New package ID generated (if publish).\n\nThis is why he copied new PKG_ID and ADMIN_CAP_ID.\n\n---\n\n# 7️⃣ What Happens Internally During PTB\n\nExecution engine:\n\n```\nTransactionBlock\n    |\n    |-- mint_return_id\n    |       create Grant\n    |       emit GrantMinted\n    |       transfer to student\n    |       return grant_id\n    |\n    |-- index_grant\n            mutate shared registry\n            emit GrantIndexed\n```\n\nThen:\n\nCommit.\n\nIf `index_grant` fails:\n\n- mint_return_id is reverted.\n- Grant object never exists.\n- Event not persisted.\n\nAtomicity preserved.\n\n---\n\n# 8️⃣ Important CLI Details\n\nInside PTB:\n\n- Object IDs must use `@`\n- Returned values must NOT use `@`\n- `--assign` must come immediately after move-call\n\nCorrect:\n\n```bash\n@\"$ADMIN_CAP_ID\"\nminted_id\n```\n\nIncorrect:\n\n```bash\n@\"minted_id\"\n```\n\nThat would fail.\n\n---\n\n# 9️⃣ Why This Pattern Is Architecturally Mature\n\nYou now have:\n\nOwned state:\n- Grant\n- AdminCap\n\nShared state:\n- Registry\n\nCoordinated mutation:\n- index_grant\n\nOrchestrated atomic flow:\n- PTB\n\nThat is layered design.\n\n---\n\n# 🔟 Big Picture for You\n\nThis pattern scales to:\n\n- Marketplaces\n- DAOs\n- Voting systems\n- Governance kernels\n- Identity registries\n\nIt is the same pattern:\n\n```\nCapability → Owned creation → Shared indexing → Atomic commit\n```\n\n---\n\n# What Happens Next in Workshop\n\nHe will:\n\n1. Execute PTB\n2. Show event outputs\n3. Query registry object\n4. Show mapping stored in dynamic fields\n\nThat final query is where everything connects.\n\n---\n\nYou are now at the core of Move object-oriented blockchain design.\n\nIf you want, next I can:\n\n- Diagram full state transitions step-by-step\n- Show failure case simulation\n- Or map this directly to ScholarFlow architecture layer\n\nYour move."
+     ]
+    },
+    "create_time": 1771667749.389465,
+    "id": "dd0c6e47-df56-4f07-94bd-dd89ac66dd69",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "xe6x06"
+      },
+      "1": {
+       "edited": false,
+       "id": "e6xfgk"
+      },
+      "10": {
+       "edited": false,
+       "id": "n6jzg1"
+      },
+      "11": {
+       "edited": false,
+       "id": "ek3p5e"
+      },
+      "12": {
+       "edited": false,
+       "id": "j6aabe"
+      },
+      "13": {
+       "edited": false,
+       "id": "1oeprb"
+      },
+      "14": {
+       "edited": false,
+       "id": "5bzyil"
+      },
+      "15": {
+       "edited": false,
+       "id": "i2r1om"
+      },
+      "16": {
+       "edited": false,
+       "id": "3k060b"
+      },
+      "2": {
+       "edited": false,
+       "id": "cltik4"
+      },
+      "3": {
+       "edited": false,
+       "id": "i3ko5u"
+      },
+      "4": {
+       "edited": false,
+       "id": "e65jqh"
+      },
+      "5": {
+       "edited": false,
+       "id": "qwb8zt"
+      },
+      "6": {
+       "edited": false,
+       "id": "e4rsio"
+      },
+      "7": {
+       "edited": false,
+       "id": "p4t1du"
+      },
+      "8": {
+       "edited": false,
+       "id": "x7bh4d"
+      },
+      "9": {
+       "edited": false,
+       "id": "u0742b"
+      }
+     },
+     "content_references": [],
+     "model_slug": "gpt-5-2",
+     "parent_id": "a8354853-36b1-4b02-8c4a-141ae12c7cf0"
+    }
+   },
+   "parent": "c49e2e89-d83c-4755-8e00-cdb230be6ea2"
+  },
+  "df9d13c2-3ca9-4dda-885f-8d0ace505605": {
+   "id": "df9d13c2-3ca9-4dda-885f-8d0ace505605",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "multimodal_text",
+     "parts": [
+      {
+       "asset_pointer": "sediment://file_00000000cbd872438e46612fc5b0d0aa",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 464,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 283692,
+       "width": 940
+      },
+      "This is for workshop 2, and we'll basically apply what we learned in the slides. So let me open Visual Studio to the side. Yep, all right. And now I have our setup. Perfect. That is the text OK? Like is it readable? Should I zoom in, zoom out? All right, good. OK, I got it. All right, so last time, we reached this state for the grants app. We basically had a function in it that creates the admin cap, and we had a function mint that creates the grant and send it back to the student. So now I want to do a little experiment because, so last time, I got a question that says, does this format allow function mint to be only called by the admin? So let's do a little experiment. So I have verified that, yes, this is the pattern that you use to guard your function from being only called by the holder of admin cap. So let's say, so for this experiment, we will need... addresses. The first address is, so you can access your addresses by Iota key tool command, and Iota key tool list, and this lists your addresses. So currently, my alias address is this. So let's create another one and try to basically deploy the package from an address and call function mint from another address in order to verify that it works. I have, let's just deploy this. Publish. So now, we deployed the grants package from the first address. So now let's switch to the second address, there we go, it will, and for that, use generate. So yeah, this is my second address. If I use key tool list again, it's going to now, actually, I'm going to switch. Oh, must be here, not the key tool. The two addresses are not currently shown, but yeah, I mean, the experiment was to basically generate two addresses and deploy the package from one and call the function mint from another, but it's going to take some time to debug that, so let's just continue on with the console. All right, so first, we published a move package, and it minted a grant object for a student and emitted the event, and we verified the new owned object on chain. So what's next? We basically should have a shared canal index, which is a mapping between student and grant ID. So yeah, let's do it. Yes, we are building a registry and a grant index for analytics and the function index grant and the function mint return ID. Now let's just let us see how it works. So we should create another module for that one. Yes, I can just put code inside, but I could just, you know, I could just separate them into modules. That's better. Someone was trying to, I'm varus content in the chat, but he's saying that Ayota client address gives you the list which has the address and which one is active. Yes, but the thing is, like there is an error in setup in my own Iota client when I'm gonna try to switch to an address. This is where the problem lies. But thanks for your help. I will basically try to debug it after the workshop is over. Let's copy that. This is just the move. All right, so we have that registry. And as you can notice, it has only the key capability, right? And it has a UID, not an ID. And it has a feed voice to it, which is a table. A table is like a mapping, right? It's just a way to map an address to the ID of a grant. And then we have our grant indexed event, which is just the normal way to emit events. All right, first make it short. Append create entry to instantiate and show the registry. So first, we are going to have a create function. It's going to create a registry and then just share it and not transfer it to the center. All right, let's add that. And after calling create, we should be able to see the registry object.09:34"
+     ]
+    },
+    "create_time": 1771666539.342,
+    "id": "df9d13c2-3ca9-4dda-885f-8d0ace505605",
+    "metadata": {
+     "attachments": [
+      {
+       "height": 464,
+       "id": "file_00000000cbd872438e46612fc5b0d0aa",
+       "is_big_paste": false,
+       "mime_type": "image/png",
+       "name": "240ae26e-fbdc-4bac-928c-1d796d093483.png",
+       "size": 283692,
+       "source": "local",
+       "width": 940
+      }
+     ],
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "1e1b6ace-cd4f-48e3-b711-2a08185849d6"
+  },
+  "fe7a65ab-f7b6-47bd-a07e-067a7d7cdf2f": {
+   "id": "fe7a65ab-f7b6-47bd-a07e-067a7d7cdf2f",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "18/02/2026 17:12  \nChatGPT Project Name: **AT-HACK0013-MasterZ IOTA Hackathon**  \nChatGPT Page Name: **005-02-Class-21022026-shared-objects-dynamic-fields-ptbs**\n\n---\n\n# 🧠 Core II — Shared Objects, Dynamic Fields & PTBs  \n📆 Sat 21 Feb 2026  \n⏰ 10:00 AM CET (09:00–11:00 UK time for you, partner 🇬🇧)  \nWorkshop: MasterZ × IOTA Hackathon  \n\nOfficial material:  \nhttps://docs.iota.org/developer/workshops/core/II-shared-objects-dynamic-fields-ptbs  \n\n---\n\n# 🔁 Quick Recap (Workshop I → Now)\n\nYou already built:\n\n- ✅ Move package deployed\n- ✅ `AdminCap` received at init (publisher-owned)\n- ✅ `Grant` object minted\n- ✅ `GrantMinted` event emitted\n- ✅ Owned object verified on-chain\n\nThat was **single-user state**.\n\nNow we move to:\n\n> 🌍 Shared global state + deterministic indexing + atomic execution.\n\nThis is where enterprise-grade blockchain design begins.\n\n---\n\n# 🎯 What Core II Is Actually Teaching (Big Picture)\n\nYou are building:\n\n| Layer | Purpose |\n|-------|----------|\n| Shared Object | Global registry accessible by many |\n| Dynamic Fields (Table) | Scalable key-value mapping |\n| Write Gating | Controlled mutation using AdminCap |\n| PTB | Atomic multi-step transaction |\n\nThis is not syntax learning.  \nThis is **state architecture design.**\n\n---\n\n# 🧩 1️⃣ Shared Object — The Registry\n\n## Mental Model\n\nPreviously:\n```\nStudent → owns Grant\n```\n\nNow we introduce:\n```\nShared Registry:\n    student_address → grant_id\n```\n\nWhy?\n\nBecause portals, verifiers, dashboards **cannot replay full history every time.**\n\nThey need:\n\n> O(1)-style lookup.\n\n---\n\n## Registry Structure\n\n```move\npublic struct Registry has key {\n    id: UID,\n    by_student: Table<address, ID>,\n}\n```\n\nThis is:\n\n- A shared object\n- With a dynamic key-value index\n- Mapping `address → ID`\n\n---\n\n# 🏗 What is a Shared Object?\n\nIn IOTA Move:\n\n- Owned objects → single owner\n- Shared objects → globally accessible & mutable over time\n\nShared objects are ideal for:\n\n- Registries\n- Markets\n- Leaderboards\n- DAOs\n\nYou are building a **global source of truth.**\n\n---\n\n# 🗃 2️⃣ Dynamic Fields (Tables)\n\nUsed:\n\n```move\nuse iota::table::{Self as table, Table};\n```\n\nWhy table?\n\nBecause:\n\n- Keys are not known at compile time\n- Student addresses are dynamic\n- It scales efficiently\n\nIt is internally implemented via dynamic fields.\n\n---\n\n# 🔐 3️⃣ Write Gating (AdminCap)\n\nMutation requires:\n\n```move\n_cap: &scholarflow::grant::AdminCap\n```\n\nThis is:\n\n- Your admin badge\n- Access control enforcement\n- On-chain role validation\n\nEnterprise analogy:\n\n> Only an authorized microservice may update shared registry.\n\n---\n\n# 🧮 4️⃣ Implement index_grant Properly\n\nYou must:\n\n1. Remove existing mapping (if any)\n2. Insert latest grant ID\n3. Emit event\n\nCorrect implementation:\n\n```move\npublic entry fun index_grant(\n    reg: &mut Registry,\n    student: address,\n    grant_id: ID,\n    _cap: &scholarflow::grant::AdminCap\n) {\n    if (table::contains(&reg.by_student, student)) {\n        table::remove(&mut reg.by_student, student);\n    };\n\n    table::insert(&mut reg.by_student, student, grant_id);\n\n    event::emit(GrantIndexed { student, grant_id });\n}\n```\n\nThis ensures:\n\n- Idempotency\n- Always latest grant\n- Clean overwrite\n\n---\n\n# 🔁 5️⃣ Why mint_return_id Is Critical\n\nYou CANNOT change existing `mint`.\n\nUpgrade compatibility rule:\n\n> Never change existing public/entry function signatures.\n\nSo instead you add:\n\n```move\npublic entry fun mint_return_id(...): ID\n```\n\nWhy?\n\nBecause PTB needs:\n\n```\nmint → capture ID → pass to index\n```\n\nWithout return value, you’d need:\n\n- Extra RPC\n- Guesswork\n- Non-deterministic behavior\n\nThis is enterprise design discipline.\n\n---\n\n# ⚛ 6️⃣ PTB — Programmable Transaction Block\n\nThis is the real core of this workshop.\n\nYou compose:\n\n```\n1️⃣ mint_return_id\n2️⃣ index_grant\n```\n\nInside one atomic transaction.\n\nCLI:\n\n```bash\niota client ptb \\\n  --move-call \"$PKG_ID::grant::mint_return_id\" \"$STUDENT_ADDR\" \"$AMOUNT\" @\"$ADMIN_CAP_ID\" \\\n  --assign minted_id \\\n  --move-call \"$PKG_ID::registry::index_grant\" @\"$REGISTRY_ID\" \"$STUDENT_ADDR\" minted_id @\"$ADMIN_CAP_ID\" \\\n  --gas-budget 100000000\n```\n\n---\n\n# 💡 Why Atomic Matters\n\nWithout PTB:\n\n- Mint succeeds\n- Index fails\n- System inconsistent\n\nWith PTB:\n\n> Either everything commits  \n> Or nothing commits\n\nThis is transactional integrity.\n\nEquivalent to:\n\n- Database ACID transaction\n- Two-phase commit abstraction\n\n---\n\n# 🧠 Architectural Shift You’re Learning\n\nWorkshop I → Object lifecycle  \nWorkshop II → Shared state governance  \n\nYou are now entering:\n\n> Multi-party coordination model.\n\nThis is foundational for:\n\n- Marketplaces\n- Registries\n- Governance systems\n- Tokenized grant systems\n- Reputation systems\n\n---\n\n# 🛠 Your Pre-Class Checklist (Bring This Ready)\n\nBefore Saturday session:\n\n✅ PKG_ID  \n✅ ADMIN_CAP_ID  \n✅ REGISTRY_ID  \n✅ At least one GRANT_OBJECT_ID  \n✅ Testnet environment selected  \n✅ Faucet funded  \n\n---\n\n# ⚠ Common Pitfalls (Be Ready)\n\n| Issue | Fix |\n|-------|------|\n| Out of gas | Increase gas budget |\n| Wrong network | `iota client switch --env testnet` |\n| Index fails | Check ADMIN_CAP_ID |\n| Table type mismatch | Must be `address, ID` |\n| Upgrade rejected | Don’t change existing signatures |\n\n---\n\n# 🎓 Your Strategic Advantage (Important)\n\nPartner — this workshop is not about Move syntax.\n\nIt is teaching:\n\n- Shared state discipline\n- Deterministic indexing\n- Upgrade-safe evolution\n- Atomic transaction design\n\nThese are the building blocks for:\n\n> Enterprise-grade governance kernel (which you’re obsessed with 😄)\n\nYou will later reuse this pattern in:\n\n- AUMNITY registry\n- Women empowerment proof index\n- Enterprise decision audit trail\n- Policy-controlled mutation layer\n\nSame mental model.\n\nDifferent domain.\n\n---\n\nIf you want next:\n\n- 🔍 I can give you a 30-minute pre-work coding drill\n- 🧪 Or simulate live PTB output and failure cases\n- 🏗 Or map this to enterprise governance kernel architecture\n\nYou decide the depth, partner."
+     ]
+    },
+    "create_time": 1771434825.403605,
+    "id": "fe7a65ab-f7b6-47bd-a07e-067a7d7cdf2f",
+    "metadata": {
+     "content_references": [],
+     "model_slug": "gpt-5-2",
+     "parent_id": "297ae925-5a8d-45cf-b53d-3b7ee54084be"
+    }
+   },
+   "parent": "2f1c4cdf-c5d3-4da4-b168-5e5734b5dad4"
+  }
+ },
+ "memory_scope": "global_enabled",
+ "pinned_time": null,
+ "plugin_ids": null,
+ "title": "005-02-Class-21022026-shared-objects-dynamic-fields-ptbs",
+ "update_time": 1771668288.154913,
+ "voice": null
+}

@@ -1,0 +1,2578 @@
+{
+ "conversation_id": "6ac57bc5-9a20-83eb-bd05-8fecbf67b807",
+ "conversation_template_id": null,
+ "create_time": 1791327178.26974,
+ "current_node": "e9789fbc-8f34-4090-a57e-926e5a52a389",
+ "default_model_slug": "gpt-5-6",
+ "id": "6ac57bc5-9a20-83eb-bd05-8fecbf67b807",
+ "is_archived": false,
+ "is_do_not_remember": false,
+ "is_read_only": null,
+ "is_starred": null,
+ "is_study_mode": false,
+ "mapping": {
+  "21785749-438c-44f2-803a-81e3727f5ce4": {
+   "id": "21785749-438c-44f2-803a-81e3727f5ce4",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "## 07/10/2026 00:06 — Where OpenClaw Actually Runs\n\nPartner, I found the important question buried in your pasted transcript:\n\n> **Is this OpenClaw/AGENTS/skills idea only for VS Code, or can we use it in this ChatGPT web page, Claude web, Perplexity, etc.?** fileciteturn0file0L1-L1\n\n**No — it is not a VS Code feature.** But there is an important distinction.\n\n### Think of 3 different layers\n\n```text\n                     YOUR GOVERNANCE\n              AGENTS.md + skills + scripts\n                         │\n        ┌────────────────┼─────────────────┐\n        ▼                ▼                 ▼\n   CODING AGENT      OPENCLAW         WEB CHAT\n   Claude Code       runtime          ChatGPT\n   Codex CLI                          Claude.ai\n   Gemini CLI                         Perplexity\n        │                │                 │\n        ▼                ▼                 ▼\n  DIRECTLY reads/    Can load/use      Usually cannot\n  executes repo      skills/tools      automatically run\n  instructions                         your local repo skills\n```\n\n### 1. VS Code — **yes, but VS Code isn't the important part**\n\nClaude Code or Codex can run from a terminal, IDE integration, or other supported environment.\n\nThe official shared-skills repo specifically gives installation locations for both:\n\n```text\n~/.codex/skills\n~/.claude/skills\n```\n\nSo the same canonical skills can be exposed to **Codex and Claude Code**. citeturn0search1\n\nTherefore:\n\n**VS Code is just the interface.**\n\nThe important thing is that the **agent has filesystem + Git + execution access**.\n\n---\n\n### 2. Claude Code — **YES, very applicable**\n\nThis is probably the cleanest immediate application for your current development workflow.\n\nInstead of repeatedly sending Claude:\n\n> Follow Git protocol → read tracker → work → test → update artifacts → commit → handoff...\n\nClaude Code gets a canonical skill.\n\n```text\nTalkProof Git\n│\n├── AGENTS.md\n│\n└── .agents/\n    └── skills/\n        ├── git-turn/\n        ├── implementation/\n        ├── testing/\n        ├── handoff/\n        └── traceability/\n```\n\nClaude executes against those rules.\n\nThe official OpenClaw shared-skills project explicitly supports symlinking its skills into Claude Code. citeturn0search1\n\n---\n\n### 3. Codex — **YES**\n\nSame principle.\n\nAnd OpenClaw itself now has a `coding-agent` skill capable of delegating coding work to Claude Code, Codex or OpenCode. citeturn0search2\n\nSo:\n\n```text\n                 OUR CANONICAL RULES\n                       │\n                ┌──────┴──────┐\n                ▼             ▼\n           Claude Code       Codex\n                │             │\n                └──────┬──────┘\n                       ▼\n                   TalkProof\n```\n\nThis is exactly where the approach becomes valuable.\n\n---\n\n### 4. This ChatGPT webpage we're using — **not automatically in the same way**\n\nThis distinction matters.\n\nYou cannot simply put:\n\n```text\n~/.agents/skills/git-turn/SKILL.md\n```\n\non your Windows machine and expect **this ChatGPT browser conversation** to automatically read and execute it.\n\nThis ChatGPT session is not your local Claude/Codex process.\n\nToday you compensate for that by telling me:\n\n> follow the Git turn protocol\n\nand having the relevant Git/project environment available through connected capabilities.\n\nSo there are really two things:\n\n```text\nCHATGPT WEB\n   │\n   ├── ChatGPT's own tools/capabilities\n   ├── connected sources\n   ├── conversation instructions/context\n   └── project files made available to it\n\nLOCAL CODING AGENT\n   │\n   ├── filesystem\n   ├── Git\n   ├── AGENTS.md\n   ├── SKILL.md\n   ├── scripts\n   └── shell/test execution\n```\n\nThey're not equivalent.\n\n---\n\n### 5. Claude.ai webpage — **same limitation**\n\nDon't confuse:\n\n**Claude.ai chat**\n\nwith\n\n**Claude Code**.\n\n```text\nClaude.ai web chat\n        ≠\nClaude Code\n```\n\nClaude Code is designed to work directly with repositories, files, shell commands, agent instructions and skills.\n\nA normal Claude web conversation doesn't automatically inherit an arbitrary local `~/.claude/skills` directory just because it exists on your PC.\n\n---\n\n### 6. Perplexity — **not directly**\n\nAgain, you can give Perplexity a document containing the methodology and ask it to follow it.\n\nBut that's different from:\n\n```text\nskill detected\n      ↓\nskill loaded\n      ↓\nscript executed\n      ↓\nGit inspected\n      ↓\nvalidator executed\n      ↓\nfailure blocks completion\n```\n\nFor our purpose I'd treat Perplexity primarily as **research**, not as an execution participant in this engineering governance loop.\n\n---\n\n# OpenClaw itself is another possibility\n\nThis is where your question becomes more interesting.\n\nOpenClaw isn't simply a collection of files.\n\nIt is an **agent runtime/gateway**. Its current quick-start documentation says it can reuse existing Claude Code/Codex authentication and opens a web dashboard after configuration. citeturn0search4\n\nAnd OpenClaw can run external coding harnesses including **Claude Code, Cursor, Copilot, Gemini CLI and others** through its agent infrastructure. citeturn0search11\n\nSo theoretically:\n\n```text\n                       YOU\n                        │\n                  OPENCLAW\n                        │\n             ┌──────────┼───────────┐\n             ▼          ▼           ▼\n           Claude      Codex      Gemini\n            Code\n             │          │           │\n             └──────────┼───────────┘\n                        ▼\n                     Git repo\n                        │\n                skills + validators\n```\n\nThat is much closer to the reel's promise.\n\n---\n\n# But I wouldn't install OpenClaw yet\n\nThis is the important decision.\n\nYou **don't need OpenClaw to obtain the most valuable benefit**.\n\nThe shared skills repository itself says its goal is:\n\n> write the workflow once and reuse it everywhere.\n\nAnd supports Claude Code + Codex directly. citeturn0search1\n\nSo I'd test this in stages:\n\n| Stage | What we test | Risk |\n|---|---|---:|\n| **1** | `AGENTS.md` | Very low |\n| **2** | One `git-turn` skill | Low |\n| **3** | Claude Code reads it | Low |\n| **4** | Codex reads same canonical skill | Low |\n| **5** | Add validator | Low |\n| **6** | Test TalkProof workflow | Medium |\n| **7** | Only then evaluate OpenClaw runtime | Separate decision |\n\nThat avoids introducing another giant tool before proving the underlying idea.\n\n---\n\n# And this connects to another reel in your transcript\n\nYou pasted another claim about huge contexts causing quality problems — “context rot” / lost-in-the-middle — and using external structure rather than continuously dumping everything into the context window. fileciteturn0file0L1-L1\n\n**That is directly relevant here.**\n\nOur current approach sometimes becomes:\n\n```text\nNEW PAGE\n\n\"Here is previous handover...\"\n+ protocol\n+ tracker\n+ specifications\n+ review\n+ old decisions\n+ Claude output\n+ more instructions\n+ another prompt\n+ DON'T FORGET X\n+ DON'T FORGET Y\n\n             ↓\n\n       HUGE CONTEXT\n```\n\nSkills permit a different architecture:\n\n```text\n                 SMALL ACTIVE CONTEXT\n                         │\n                \"Review WP-17\"\n                         │\n                         ▼\n                  Agent discovers\n                         │\n           ┌─────────────┼────────────┐\n           ▼             ▼            ▼\n       git-turn      review-skill    D-scale\n           │             │            │\n           └─────────────┼────────────┘\n                         ▼\n                  fetch only needed\n                  repo evidence\n                         │\n                         ▼\n                      reason\n```\n\n**That may be a bigger benefit than token savings.**\n\nIt reduces the amount of operational procedure competing with the actual engineering problem for the model's attention.\n\n---\n\n# One correction to my previous answer\n\nAfter checking the current OpenClaw docs more deeply, OpenClaw's skill system has evolved beyond simply `skills/`.\n\nIt now has multiple levels of skill loading, including workspace, project/personal and managed skills, with explicit precedence rules. citeturn0search0turn0search6\n\nThat's actually useful for us because we could eventually have:\n\n```text\nGLOBAL — YOUR ENGINEERING OS\n────────────────────────────\ngit-turn\nevidence-rules\nno-false-completion\nhandoff\naudit\n\n             +\n\nTALKPROOF-SPECIFIC\n────────────────────────────\nD-scale\nTalkProof architecture\nTalkProof test gates\nTalkProof traceability\n\n             +\n\nTASK-SPECIFIC\n────────────────────────────\nWP-17\n```\n\nThat is much cleaner than copying one giant protocol into every project.\n\n## My recommendation\n\n**Don't “adopt OpenClaw.”**\n\nFirst extract the architectural idea and run a controlled experiment on **one tiny part of TalkProof**:\n\n> **Can Claude Code and Codex follow exactly the same Git-turn skill, with a validator detecting when either agent fails to comply?**\n\nIf **yes**, then we have proven something valuable: a large part of the manual governance work you've been doing in these chats can move from **prompt reminders → executable engineering infrastructure**.\n\nOnly after that test would I decide whether OpenClaw itself adds enough value to justify another runtime. memcite"
+     ]
+    },
+    "create_time": 1791327980.36789,
+    "id": "21785749-438c-44f2-803a-81e3727f5ce4",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "gekmzh",
+       "preview_language": null,
+       "previewable": false
+      },
+      "1": {
+       "edited": false,
+       "id": "rd4p07",
+       "preview_language": null,
+       "previewable": false
+      },
+      "10": {
+       "edited": false,
+       "id": "cyvfm0",
+       "preview_language": null,
+       "previewable": false
+      },
+      "11": {
+       "edited": false,
+       "id": "q2qyyf",
+       "preview_language": null,
+       "previewable": false
+      },
+      "2": {
+       "edited": false,
+       "id": "k68n59",
+       "preview_language": null,
+       "previewable": false
+      },
+      "3": {
+       "edited": false,
+       "id": "qj7cfg",
+       "preview_language": null,
+       "previewable": false
+      },
+      "4": {
+       "edited": false,
+       "id": "84cj3k",
+       "preview_language": null,
+       "previewable": false
+      },
+      "5": {
+       "edited": false,
+       "id": "zp14c0",
+       "preview_language": null,
+       "previewable": false
+      },
+      "6": {
+       "edited": false,
+       "id": "sz0nyx",
+       "preview_language": null,
+       "previewable": false
+      },
+      "7": {
+       "edited": false,
+       "id": "uh8kpl",
+       "preview_language": null,
+       "previewable": false
+      },
+      "8": {
+       "edited": false,
+       "id": "mkcpie",
+       "preview_language": null,
+       "previewable": false
+      },
+      "9": {
+       "edited": false,
+       "id": "vzt36m",
+       "preview_language": null,
+       "previewable": false
+      }
+     },
+     "content_references": [
+      {
+       "alt": null,
+       "cloud_doc_url": null,
+       "connector_id": null,
+       "drug_file_reference": null,
+       "fff_metadata": null,
+       "id": "file_0000000067fc8210bbfab3691634b31e",
+       "input_pointer": {
+        "file_index": 0,
+        "line_range_end": 1,
+        "line_range_start": 1,
+        "message_id": "c9453165-4b59-4b0b-9ee9-eaba994a0224",
+        "message_index": 0
+       },
+       "library_artifact_type": null,
+       "library_file_id": "libfile_c328eac92838819192c409cc133d34d6",
+       "medical_file_reference": {
+        "authors_display": null,
+        "doi": null,
+        "journal_homepage_url": null,
+        "journal_name": null,
+        "publication_year": null,
+        "source_icon_url": null,
+        "source_label": null,
+        "source_url": null
+       },
+       "name": "Pasted markdown.md",
+       "page_range_end": null,
+       "page_range_start": null,
+       "snippet": "&#x20;open claw, can this be used only. With Visual Studio or can. That be applicable in the. Web page where we are working currently? In viewers or perplexity or in. Claude also, how to do that? And sinceSo, is— how is the dot DOT dot. ChatGPT? So, how to use that one? So, is it only available from Pro. So, is there any meaning in upgrading it? Since all these manual work may go away, what do you think about it? Yeah, yeah. Uh, sure. How can you learn GPT and Gemini Pro? We'll start off by the other interesting area. Basically, I don't know, நம்ம code base வந்து நிறைய API-யோட connect ஆயிருக்கும். திடீர்னு ஏதாவது ஒரு API-ல ஏதாவது change நடந்திருக்கும்னு நம்மளுக்கு information வந்தா, அதுல break ஆக ஆரம்பிச்சுரும். So, இதை வந்து என்ன சொல்ல வர்றாங்கன்னா, இப்ப இந்த agents நம்ம coding agents வந்து automatic-ஆ detect ஆகணும். நம்ம related-ஆ ஏதாவது ஒரு API-ல ஏதாவது change ஆச்சுன்னா, ஒன்னு அது வந்து inform பண்ணி, நம்ம code வந்து இதுவே PR generate பண்ணி, அப்புறம் நம்மள அதை approve பண்ண வச்சு, அதை fix automatic-ஆ நடத்துறோம். So, அதாவது dependent API-ல எதுவும் change நடந்துச்சுன்னா, அது automatic-ஆ நம்ம coding agent-ஐ நம்ம code-க்குள்ள changes பண்ணிரனும். So, இது மாதிரி எல்லாம் breakage எல்லாம் தடுத்துடலாம்ங்கிற மாதிரி. So, இந்த மாதிரி ஏதாச்சும் ஒரு idea-ல API provider-ஆ நீங்க work பண்ணிட்டு இருக்கீங்கன்னா, இந்த இதுக்கு apply பண்ணுங்க. இந்த review புடிச்சிருந்தா like பண்ணி comment பண்ணி share பண்ணுங்க. என் page-ஐ follow பண்ணுங்க. We'll start off idea ரொம்ப interesting-ஆ இருக்கு. Basically, என்னன்னா, பையன் யாருக்குமே மூவ் மாங்கா பேசாதே, திங்க்கிழமை AI-க்கு ஸ்கேல் ப்ராப்ளம்க்கு சால்வ் பண்ணு. ஆக்சுவலி, பால்ஸ் ஆல்சின்சி எய்க் ப்ராப்ளம் சால்வ் பண்ணி ஒரு ப்ராப்ளம் AI-க்கு சாட் ஜிபிடி ஆர் கிளவுடுக்கும் இதெல்லாம் இன்ஃபர்மேஷன் எது எத்தனை பேருக்கும் போகும். இட்ஸ் லிமிடேஷன்க்கு பாருங்க, AI கம்பெனிஸ் ரொம்ப ஜாதானி பதாதி, க்யூக்கி உங்களுக்கு மாடல்ஸ் ரொம்ப பேசினேன். பட் எ ப்ராப்ளம் அப்படித்தான் சால்வ் பண்ணி, ஏன் சமைச்சதுக்கு முன்னாடி ஏன் சமைச்சோம் ப்ராப்ளம் ஹேக்யா. அப்ப மான்லோ, தம்ல சாட் ஜிபிடி ஆர் கிளவுடுக்கும் போத் சாரி PDF, ப்ராம்ட்ஸ், ஏன் இன்ஸ்ட்ரக்ஷன் தேதி. எ சப் குச் இன்கே கான்டெக்ஸ்ட் விண்டோமே ஜாத்தா, அவர் இஸ்கோ AI-க்கு எக் மெமரி கிதாரா சமைச்சோம். ஆர் ஜித்னா இஸ் விண்டோமே எக் பார்ட்மே ஃபிட் ஹோ ஜாத்தா, பட் உத்தனேஹி டேட்டா கிசாத் AI எக் டைம்ல ரீசன் கர் சக்தா. பட் ப்ராப்ளம் த பாத்தீங்க, ஜப் தும் AI-க்கு இத்தன சாரா டேட்டா தேதி. ஏன் சோச்கே கி ஜித்னா ஜாதா டேட்டா தூங்கா, உத்தன சாரா ஸ்மார்ட் ஹோ த ஜாயா. ஜப் கி ஹோ த உல்ட்டா ஹே, தும் இஸ்கி கான்டெக்ஸ்ட் விண்டோ ஜித்னி ஜாதா வர்தே ஜாவோகி இங்கே ஆன்சர்ஸ்கி குவாலிட்டி உத்தன சாரா கிற்தி ஜாயிகி. ஆர் டெக்னிக்கல் டெர்ம்ஸ் மே இஸ்கி கோ கான்டெக்ஸ்ட் பிராட் கேத்தேன். அப் தும் சொன்னா ஹோக கி AI கம்பெனிஸ் மாடல் லான்ச் மே படி பிரவுட்லி போல்தி கி ஹமாரே மாடல் கி கான்டெக்ஸ்ட் விண்டோ தோ 10 லாக் ஹே. ஆர் எக் டெஸ்ட் கத்தே ப்ரூஃப் மே கத்தே திகாதேங்கி. இஸ் டெஸ்ட் கோ கேத்தே நீடில் இன் எ ஹே ஸ்டாப் டெஸ்ட். ஆர் எஹி சப்செ படி மார்க்கெட்டிங் ட்ரிக் ஹே, சம்ஜாதாம் கேசே. இஸ் டெஸ்ட் மே கியா கத்தே சோட்டி சி லைன் எக் பர்டி டெக்ஸ்ட் மே சுப்பாதேத்தே. ஆர் AI கோ கேத்தே டூண்டோ. ஆர் AI செ டூண்ட் பிலேத்தே. பட் இஸ்மே கேச் ஏஹே கி AI கோ இஸ் டெஸ்ட் மே சோசனா நீ பட்தா. AI பஸ் மில்தே ஜுத்தே வாட் இஸ் கோ சர்ச் கத்தே மேட்ச் கர்தேத்தா. பட் ரியல் வேர்ல்ட் அசே காம் நீ கட்தா. ரியல் வேர்ல்ட் மே தும் எக்ஸ்பெக்ட் கத்தே ஹோ கி மே சாரா டேட்டா AI கோ தும் ஆர் ஹோ ரீசன் கத்தே முஜா ஆன்சர்ஸ் தே. அப் AI கோ எக் பிமாரி ஹோ ஹே. ஏன் PDF பர் டாப் பர் பாட்டம் பார்ட் தோ யாத்ரகேகி, பட் பீச் வாலா புல்ஜாயகோ. ஆர் இஸ் ப்ராப்ளம் கோ டெக்னிக்கல் லாங்குவேஜ் மே கத்தே லாஸ்ட் இன் த மிடில் ப்ராப்ளம். அப் இஸ் காத் கோ சம்ஜோ கி கான்டெக்ஸ்ட் பிராட் கோ பக் நீ கி போ இன்ஜினியர் ஆகி இஸ்கோ கோட் செ பேட்ச் கர்தேவா. ஏன் இஸ்கே ட்ரான்ஸ்பார்மர் ஆர்கிடெக்சர் கி ப்ராப்ளம் ஹே. அப் கான்டெக்ஸ்ட் பிராட் கோ சால்வ் தோனி, பட் மேனேஜ் கண்ணேகி காபி தரிகே. உன்மேச சப்சே ஃபேமஸ் தரிகா ஹே ரேக். ஆர் 2026 க சப்சே அட்வான்ஸ் தரிகா ரிகர்சிவ் லாங்குவேஜ் மாடல். அப் வீடியோ ரெப்பி ஹோ ஜாயிகி, இஸ்லே யூடியூப் மே எக் டீடெய்ல்ட் வீடியோ பனையே. பையன் யாரு தும் மூவ் மாங்கா மேனேஜ் கண்ணேகி காபி தரிகே. உன்மேச சப்சே ஃபேமஸ் தரிகா ஹே ரேக். ஆர் 2026 க சப்சே அட்வான்ஸ் தரிகா ரிகர்சிவ் லாங்குவேஜ் மாடல். அப் வீடியோ ரெப்பி ஹோ ஜாயிகி, இஸ்லே யூடியூப் மே எக் டீடெய்ல்ட் வீடியோ பனையே. பையன் யாரு தும் மூவ் மாங்கா பேசாதே. பை. நிறைய வீடியோஸ் வந்து எங்களுக்கு ரொம்ப ஃபேவரிட். அதுல குறிப்பா நீங்க வடசென்னை படத்தோட சீரிஸ் பண்றது ஆல் டைம் ஃபேவரிட். சோ அது அது ஒரு பக்கம் இருக்கட்டும். இன்னொரு பக்கம் வந்து இந்த சிடுமூஞ்சி சேகர்ன்னு ஒரு கேரக்டர் நீங்க பண்ணிருப்பீங்க. பல கடைகள்ல நம்ம அதை பார்த்திருந்திருப்போம். அந்த ஐடியா எப்படி வந்தது? அந்த சிடுமூஞ்சி சேகரை கொஞ்சம் இங்க கொண்டு வர முடியுமா? அது வந்து எங்க வீட்டு பக்கத்துல எப்படி ஒரு கடைக்காரர் இருப்பாரு. அவர் வந்து இப்ப பேசுற அந்த ப்ரூஸ் ஸ்டோரி. ஆமா, பேசுற அந்த ப்ரூஸ் ஸ்டோரி தான். ஒரு தடவை வந்து எப்பயும் வந்து டார்க் ஃபேண்டஸி பிஸ்கட் வீட்ல சின்ன பையன் இருப்பான். அவன் கேப்பான், சரி ஒரு பால் பாக்கெட் டார்க் ஃபேண்டஸி பிஸ்கட் கேக்கலாம்னு. ஆனா அவர் பால் பாக்கெட் எல்லாம் அமைதியா இருக்கு, எதுவுமே சவுண்ட் கேக்கல. ஆனா பால் பாக்கெட் நான் வச்சிட்டேன்ப்பா அப்படின்னாரு. அதுக்கப்புறம் ஆனா டார்க் ஃபேண்டஸி பிஸ்கட்ல அதுவும் சவுண்ட் கேக்கல. உட்கார்ந்து டீ பாத்துட்டு இருக்காரு. ஆனா என்னன்னா வேலை செய்றீங்களா என்னன்னா பண்ணிட்டு இருக்கீங்களா இல்லப்பா அங்க எடுத்து வச்சிட்டேன்ப்பா என்ன ஒரு 10 மீட்டர் தள்ளி வச்சிருக்காரு அங்க இருந்து. என்னன்னா இந்த மாதிரி எப்பயுமே சீடு மூஞ்சி தான் பண்ணுவாரு. அவர் பால் காரணம் அதான் எத்தனை பவுன் தூக்கி போடுறது. சில்ட்ரன் எல்லாம் ஒழுங்கா எடுத்துட்டு வர மாதிரி கத்துது. அந்த மாதிரி எல்லாரும் ஃபேஸ் பண்ணாங்க. சோ லைஃப்லயும் நடக்குதுல. சோ அதை வச்சு பண்ணலாம்னு அவரை வச்சு பண்ணது தான். அவரு கடைக்கு போனா மட்டும் மைண்டுக்கு ஒரு மாதிரி ஸ்ட்ரெஸ் ஆயிரும். எவ்வளவு ஹாப்பியா இருந்தா அவர் கடைக்கு போனா சோகம் ஆயிரும்ல. அதே மாதிரியான ஒரு கேரக்டர். எப்பவுமே யோசிச்சிருக்கீங்களா பிரண்ட்ஸ்? நம்ம நமக்கு தெரியாதவங்க கிட்ட ரொம்ப நல்ல பையனா ரொம்ப ஜென்டிலா இருப்போம். அதே ஆப்போசிட் சைடுல நமக்கு ரொம்ப க்ளோஸ் ஆனவங்க கிட்ட ரூடா இருப்போம். சிடு சிடுன்னு சின்ன தப்புக்கெல்லாம் சண்டை போட்டுட்டு இருப்போம். ஏன்னா we know they gonna stayன்னு. நம்ம என்னதான் பண்ணாலும் என்னதான் வொர்க் பண்ணாலும் அவங்க இருப்பாங்க அப்படிங்கறது நம்மளுக்கு தெரியும். அதனால அவங்கள விட்டு பயங்கர கிராண்டடா நம்ம எடுத்துப்போம். ஏன்னா அவங்கள நம்மளோட ஒரு பார்ட்டா நம்ம பாக்குறோம். சோ நம்மள நம்ம எப்படி ட்ரீட் பண்றோமோ அதே மாதிரி தான் நம்ம மத்தவங்கள ட்ரீட் பண்ணுவோம். இந்த க்ளோஸர் சம் ஒன் இஸ் டு யூ. இந்த மோர் யூ ட்ரீட் தெம் லைக் யூ ட்ரீட் யுவர்செல்ப். சோ நம்ம நம்மகிட்ட ட்ரூயலா நடந்துக்கிட்டோம் அப்படின்னா நம்மளுக்கு க்ளோஸ் ஆனவங்க கிட்டயும் அப்படித்தான் நம்ம நடந்துப்போம். நம்ம நம்மள அதே மாதிரி கிரிட்டிசைஸ் பண்ணிட்டே இருந்தோம் அப்படின்னா நம்ம நம்ம பார்ட்னரையும் அதே மாதிரி கிரிட்டிசைஸ் பண்ணுவோம். நம்மளுக்கு நம்மளோட ப்ராக்ரஸ் பார்த்து சந்தோஷம் இல்லை அப்படின்னா நம்மளோட ஃபேமிலி மெம்பர்ஸ் ப்ராக்ரஸ் பண்ணாம இருக்கிறதையும் நம்மளால ஏத்துக்க முடியாது. நம்மளோட பாஸ்ட் மிஸ்டேக்ஸ்க்கு நம்மளால நம்மளையே மன்னிக்க முடியல அப்படின்னா மத்தவங்கள நம்மளால எப்படி மன்னிக்க முடியும்? சோ உங்களுக்கு புடிச்சவங்க கிட்ட உங்க ஃபேமிலி கிட்ட உங்க பிரண்ட்ஸ் கிட்ட நீங்க கைண்டா இருக்கணும் அப்படின்னா அதுக்கு முதல்ல உங்ககிட்ட நீங்க கைண்டா இருக்கணும். நம்மள நம்ம லவ் பண்ணோம்னா தான் ஆப்போசிட்ல இருக்குறவங்கள நம்மளால லவ் பண்ண முடியும். இல்ல அப்படி எல்லாம் முடியாது அப்படின்னா நம்மள விட நம்ம கூட இருக்குறவங்க தான் அதிகமா கஷ்டப்படுவாங்க. சோ பீ கைண்ட் டு யுவர்செல்ப். ஆனா பாருங்க ஒருத்தங்க நம்மகிட்ட ரூடா இருக்குறதே வந்துட்டு ஒரு ரொமான்டிக்கான விஷயம் தானே. அவ எல்லார்கிட்டயும் நல்லா பேசுறா. என்கிட்ட மட்டும் நல்லா பேச மாட்டேங்குறா. அப்ப இது லவ் தானே மச்சான் அப்படின்னு சொல்லிட்டு படத்துல கேட்கும்போது நம்மளுக்கு காமெடியா இருக்கும். பட் யோசிச்சு பார்த்தோம் அப்படின்னா டெக்னிக்கலி அது உண்மைதானே. இந்த மோர் க்ளோஸர் யுவர் வித் சம் ஒன். இந்த மோர் யூ ட்ரீட் தெம் எஸ் யூ ட்ரீட் யுவர்செல்ப். சோ ஒரு பெர்சனுக்கு உங்கள ரொம்ப புடிச்சிருந்தோ உங்ககிட்டயே அவர் நல்லா நடந்துக்க மாட்டேங்குறாரு அப்படின்னா அவர்கிட்ட அவர் எப்படி நடந்துப்பாருன்னு யோசிச்சு பாருங்க. சோ உங்களால முடிஞ்சுச்சு அப்படின்னா அவருக்கு கொஞ்சம் ஹெல்ப் பண்ணி அவர் அவரையவே காதலிக்க வைக்கிறதுக்கு ஹெல்ப் பண்ணுங்க. இது உங்களோட ஜாப் கிடையாது. ரூடா இருக்குறவங்க கூட எனக்கு என்னடா பேச்சு நீங்க விட்டுட்டு கூட போலாம். பட் இப் யூ வான்ட் டுனா. I don't know. More impressive that this Chinese robot can run like this and. Or that it decided to run like this. That's correct. Decided. So this is at the world humanoid robot games which is happening right now in Beijing. This is the second edition of the event and robots are really showing what they're made of in a bunch of sports: high jumps, long jumps, obstacle courses, gymnastics, and because robots should be useful, hammering nails and unpacking boxes in practical events. But of the hundreds of robots, this one, Tiangong Omni, stands out because it. Runs. Like no other robot or human. This was the 400 meter race and during simulation training, Chinese engineers continuously rewarded the robot for optimizing its movement. And so through iteration and through trial and error, the robot developed this unusual posture on its own. Swinging its arms like humans or other robots would have burdened its shoulder joints, causing them to overheat and waste energy. So instead, it found out that leaning. Forward and holding its arms up as if to cover its face was the optimal solution to its physical limitations. And it worked. It finished the race first in 45.66 seconds, which is faster than last year's winner. This year, the games raised the bar much higher than last year. The rules now favor autonomous robots. Those relying on AI for perception and decision making and penalize remote controlled ones. And the improvement in agility in ability is very clear. Robots are breaking human records set by top athletes. But more importantly, they're breaking other robot records. And sooner or later, all of this will end up in the real world. So I hope you're ready to run. I don't know what's Anthropic CEO is so pissed right now and why wouldn't he be? Claude code users are dropping the $200 max plan because two free tools just fixed the token problem for good. Gratify and Obsidian. Right now, every fresh session makes Claude read your whole project again. Every file, every function, and you're burning thousands of tokens before you've even asked a question. Both tools scan it once and turn it into a knowledge graph. Next session, Claude follows the map instead of rereading everything. That's about 70% fewer tokens. So a $20 plan does the work for your $200 one. The difference? Gratify only maps your code and stays out of the way. Obsidian maps it too, but it also keeps your notes, docs, and project context in the same place. Just want your tokens back? Pick Gratify. One home for everything your project knows? Pick Obsidian. Comment graphs and I'll send you the setup guide. Anthropic CEO is so pissed right now and why wouldn't he be? Claude code users are dropping the $200 max plan because two free tools just fixed the token problem for good. Gratify and Obsidian. Hello, I need to transfer money quickly. It's a Because. AI हमेशा। बदलने वाला है। Anthropic ने जिस कंपनी को धोखा दिया था, उसको Elon Musk ने खरीद लिया। जिसको नहीं पता, कर्सर वो कंपनी है जिसको Anthropic ने झूठ बोला था कि Claude code सिर्फ एक रिसर्च प्रोजेक्ट है। कर्सर वो कंपनी है जो किसी टाइम पे Anthropic को 50% रेवेन्यू लाके देती थी। पूरी बात समझाता हूं। और कर्सर और SpaceX की डील का असली मतलब समझो। अब चार एमआईटी स्टूडेंट्स ने 2022 में कर्सर को एक साइड प्रोजेक्ट की तरह स्टार्ट किया। मुझे अभी तक याद है कर्सर सिर्फ एक कोड एडिटर हुआ करता था शुरुआत में। अब इनिशियल फेज में जब कर्सर Anthropic का कॉम्पिटिटर नहीं था, तब कर्सर में Anthropic का Sonnet मेन मॉडल हुआ करता था। और उस टाइम पे Anthropic का 50% रेवेन्यू कर्सर लाके देता था। कर्सर को एक अच्छा मॉडल चाहिए था और Anthropic को रेवेन्यू। अब Anthropic चुपके से अपना Claude code डेवलप कर रहा था। अब जब कर्सर को इस बारे में पता चला तो Anthropic ने झूठ बोला कि डोंट वरी, Claude code सिर्फ एक रिसर्च प्रोजेक्ट है। अब Anthropic ने Claude code लॉन्च किया जो कि सीधा कर्सर का कॉम्पिटिटर था। अब कर्सर के फाउंडर माइकल टूवेल ने एक इमरजेंसी मीटिंग बुलाई जिसमें उन्होंने डिसाइड किया कि अब हम Anthropic के मॉडल पे डिपेंडेंट नहीं रहेंगे। हमें अपना मॉडल बनाना पड़ेगा। और वहां से शुरू होती है कंपोजर की कहानी जो कर्सर का अपना मॉडल है। और क्या कमाल का मॉडल बनाया कंपोजर को। अब कर्सर के पास सब कुछ था। 10 लाख से ज्यादा पेइंग कस्टमर्स, 19,000 करोड़ तो ये साल का बना रहे थे। पर कर्सर के पास एक चीज नहीं थी, कंप्यूट। और AI में कंप्यूट के बिना कुछ नहीं होता। अब होती है Elon Musk की एंट्री। अब चाहे कोई कुछ भी बोले, सबको पता है कि Grok फ्रंटियर मॉडल्स की रेस में पीछे है। पर Elon Musk ऑलरेडी AI मॉडल्स की रेस में पीछे था। अब Elon Musk के पास भी सब कुछ है। रॉकेट्स हैं, सैटेलाइट्स हैं, AI डेटा सेंटर्स हैं। तो Musk ने क्या किया? 12 जून को SpaceX का IPO था। हिस्ट्री का सबसे बड़ा IPO। ऑलमोस्ट 8 लाख करोड़ से ज्यादा रेज किया SpaceX ने। और चार दिन बाद SpaceX ने कर्सर को एक्वायर कर लिया। ऑलमोस्ट 5.5 लाख करोड़ में। और ये पूरी ऑल स्टॉक्स डील थी। मतलब Elon Musk ने SpaceX के शेयर्स का यूज किया कर्सर को एक्वायर करने के लिए। अब सुनो इंटरेस्टिंग पार्ट। कर्सर की पूरी 5.5 लाख करोड़ की कीमत के बराबर तो इनका स्टॉक कुछ घंटों में ही अप्रिशिएट कर गया। मतलब Musk ने प्रैक्टिकली कर्सर को खरीदने के लिए अपनी जेब से कुछ नहीं दिया। ये हिस्ट्री का वन ऑफ द लार्जेस्ट सॉफ्टवेयर एक्विजिशन था। सोचने वाली बात ये है कि Elon Musk ने SpaceX के कॉम्पिटिटर Anthropic को डेटा सेंटर रेंट पे दिया हुआ है। अभी तक Elon Musk डेटा सेंटर लैंडलॉर्ड था जो Anthropic और Google जैसी कंपनीज़ को कंप्यूट रेंट पे देता था। बट अब जब Musk ने कर्सर को खरीद लिया तो यही Anthropic अब Musk का कॉम्पिटिटर बन गया। अब Elon Musk और Anthropic की डील में 90 दिन का टर्मिनेशन क्लॉज है। मतलब Elon Musk चाहे तो Anthropic को 90 दिन का नोटिस पीरियड देके कंप्यूट वापस ले सकता है। तो फाइनल पिक्चर ये है कि SpaceX के पास डेटा सेंटर्स हैं और कर्सर के पास वो लेयर जहां 10 लाख इंजीनियर्स वो सॉफ्टवेयर लिखते हैं। और कर्सर का रियल वर्ल्ड कोडिंग डेटा Grok की ट्रेनिंग पाइपलाइन में सीधा फीड होगा। और ये मैनी कोडर SpaceX की S1 फाइलिंग में साफ-साफ लिखा हुआ है। मतलब SpaceX ने IPO लाने से पहले साफ-साफ मेंशन कर दिया था कि वो कर्सर को कैसे यूज करेंगे। बट इतना तो समझ लो कि कर्सर अभी बहुत पावरफुल होने वाला है। तो यार मैं ऐसी वीडियोस बनाता रहता हूं जो इस टेक और AI के केस में चैट को। हेलो सर, मैं क्या बेटा सर? हेलो, यार। ये अंदर की ये। डेट ऑफ बर्थ लेना ना, सिंगल अकाउंट डालना है ना, तो देर ना, मैं अभी सर्च करके निकाल लो और Facebook में फेक आईडी ले। उनके। மனசுக்குள்ள மரண பீதி இருக்கிறது, என் கண்ணுக்கு கண்ணாடி மாதிரி அப்படியே தெரியுது. அதே பீதி என்கிட்டயும் ஹெவியா இருக்கத்தான் செய்யுது. அதை வெளிகாட்டிக்கிறேன், அவனும் அரசியல் பண்ணனும், புரியுதா? சரி, தலைவரே, அதுக்காக தலைவனை எல்லாம் அத்து விட்டு ஓடிடக்கூடாது. அட்டாக்கு அப்பா, காலேஜ் பீஸ் கட்டணும்பா, அப்பா, எனக்கும் பீஸ் கட்டணும்பா, எவ்வளவு? 5000ப்பா, உனக்கும் 5000 ஆ. ஆமாப்பா, அதே 5000 தான்ப்பா. இதுல எவ்வளவு இருக்குன்னு என்ன? அந்த செக் புக்ல நான் சொல்ற அமௌன்ட்டு ஃபில் பண்ணு. 447. 4 அவர். காசு தேவை. இல்லப்பா, எனக்கு எழுது. இங்கிலீஷ்ல எழுதணும். எப்போ யூ ஆர் ஃபோர் ஆர்டி. மாசம் 2026. 3, 3000. அப்பா, முதல்ல நீங்க சைன் போட்டு கொடுத்ததுங்க, அதுக்கப்புறம் நான் நம்பர்ஸ் ஃபில் பண்றேன். சரிப்பா, இப்ப ரெண்டு பேரையும் ஒன்னத்துக்கு லாய்க்கல, இதுக்கு காலேஜ்க்கு போய் என்னத்த கிழிக்கிறதுன்னே தெரியல. இதுக்கு ஒரு பீஸ், ஒரு கேட், ஓடி போயிருன்னு சொல்லிட்டேன். அப்பா, சுண்டல் பீச்சா, ஜஸ்ட் குயிட்லி டிராப் 15 ஃப்ரீ AI டூல்ஸ், அண்ட் மோஸ்ட் பீப்பிள் ஹேவ் நோ ஐடியா தே எக்ஸிஸ்ட். லெட் மீ ஷோ யூ, தி ஃபர்ஸ்ட் இஸ் ஆன்டி கிராவிட்டி, இட்ஸ் கூகுள் AI கோடிங் டூல், பட் யூ டோன்ட் நீட் டு நோ ஹவ் டு கோட், ஜஸ்ட் டிஸ்கிரைப் வாட் யூ வான்ட் டு பில்ட், அண்ட் இட் ஸ்டார்ட் கிரியேட்டிங் தி சாப்ட்வேர் பார் யூ. தி செகண்ட் இஸ் பார் மெல்லி, இட் லேர்ன்ஸ் யுவர் பிராண்ட் பிரம் யுவர் வெப்சைட், இன்குலூடிங் யுவர் கலர்ஸ், ஃபான்ட்ஸ், அண்ட் ரைட்டிங் ஸ்டைல். தென், இட் கிரியேட் சோசியல் மீடியா போஸ்ட், ஆட்ஸ், அண்ட் அதர் கிரியேஷன்ஸ். தி தேர்ட் இஸ் ஸ்டிச், இன்ஸ்டெட் ஆப் டிசைனிங் யுவர் பிராண்ட், இட் டிசைன்ஸ் என்டையர் ஆப்ஸ், டிஸ்கிரைப் யுவர் ஐடியா, அண்ட் இட் கிரியேட்ஸ் எவ்ரி ஸ்கிரீன், பில்ட்ஸ் எ கிளிக்கபிள் ப்ரோட்டோடைப், அண்ட் ஈவன் ஜெனரேட்ஸ் தி கோட். தி ஃபோர்த் இஸ் ஓபன், இட் ஆட்டோமேட்ஸ் ரிப்பெடிட்டிவ் வொர்க், டெல் இட் சம்திங் லைக், எவ்ரி மார்னிங், கலெக்ட் தீஸ் ரிப்போர்ட்ஸ், அண்ட் ஈமெயில் மீ எ சப்ஜெக்ட், அண்ட் இட் பில்ட்ஸ் தி வொர்க் ஃப்ளோ பார் யூ. தி பிப்த் இஸ் ஃப்ளோ, கூகுள் AI ஃபில் மேக்கிங் டூல், டிஸ்கிரைப் எ சீன், ஆர் அப்லோட் அன் இமேஜ், அண்ட் இட் ஜெனரேட்ஸ் சினிமாட்டிக் வீடியோஸ், வித் ரியலிஸ்டிக் கேமரா மூவ்மென்ட்ஸ் அண்ட் லைட்டிங். யூ கேன் ஈவன் கீப் எடிட்டிங் தி சேம் சீன், ஃபார் எக்ஸாம்பிள், கண்டினியூ தி ஷாட், சேஞ்ச் தி கேமரா ஆங்கிள், ஸ்வாப் தி பேக்ரவுண்ட், ஆர் ஈவன் ரிப்ளேஸ் எ கேரக்டர். தேர் ஆர் 10 மோர் கூகுள் AI டூல்ஸ், ஐ குடன்ட் ஃபிட் இன்டு திஸ் வீடியோ, கமெண்ட் கூகுள், அண்ட் ஐ வில் சென்ட் தெம் டு யூ இன் யுவர் டிஎம்ஸ். சுண்டல் பீச்சாய், ஜஸ்ட் குயிட்லி டிராப் 15 ஃப்ரீ AI டூல்ஸ், அண்ட் மோஸ்ட் பீப்பிள் ஹேவ் நோ ஐடியா தே எக்ஸிஸ்ட். லெட் மீ ஷோ யூ, தி ஃபர்ஸ்ட் இஸ் ஆன்டி கிராவிட்டி, இட்ஸ் கூகுள் AI கோடிங் டூல், பட் யூ டோன்ட் நீட் டு நோ ஹவ் டு கோட், ஜஸ்ட் டிஸ்கிரைப் வாட் யூ வான்ட் டு பில்ட், அண்ட் ஸ்டார்ட் கிரியேட்டிங் தி சாப்ட்வேர் பார் யூ. தி செகண்ட் இஸ் பார் மெல்லி, இட் லேர்ன்ஸ் யுவர் பிராண்ட் பிரம் யுவர் வெப்சைட், இன்குலூடிங் யுவர் கலர்ஸ், ஃபான்ட்ஸ், அண்ட் ரைட்டிங் ஸ்டைல். தென், இட் கிரியேட்ஸ் சோசியல் மீடியா போஸ்ட், ஆட்ஸ், அண்ட் அதர் கிரியேஷன்ஸ். தி தேர்ட் இஸ் ஸ்டிச், இன்ஸ்டெட் ஆப் டிசைனிங் யுவர் பிராண்ட், இட் டிசைன்ஸ் என்டையர் ஆப்ஸ், டிஸ்கிரைப் யுவர் ஐடியா, அண்ட் இட் கிரியேட்ஸ் எவ்ரி ஸ்கிரீன், பில்ட்ஸ் எ கிளிக்கபிள் ப்ரோட்டோடைப், அண்ட் ஈவன் ஜெனரேட்ஸ் தி கோட். தி ஃபோர்த் இஸ் ஓபன், இட் ஆட்டோமேட்ஸ் ரிப்பெடிட்டிவ் வொர்க், டெல் இட் சம்திங் லைக், எவ்ரி மார்னிங், கலெக்ட் தீஸ் ரிப்போர்ட்ஸ், அண்ட் ஈமெயில் மீ எ சம்மரி, அண்ட் இட் பில்ட்ஸ் தி வொர்க் ஃப்ளோ பார் யூ. தி பிப்த் இஸ் ஃப்ளோ, கூகுள் AI ஃபில் மேக்கிங் டூல், டிஸ்கிரைப் எ சீன், ஆர் அப்லோட் அன் இமேஜ், அண்ட் இட் ஜெனரேட்ஸ் சினிமாட்டிக் வீடியோஸ், வித் ரியலிஸ்டிக் கேமரா மூவ்மென்ட்ஸ் அண்ட் லைட்டிங். யூ கேன் ஈவன் கீப் எடிட்டிங் தி சேம் சீன், ஃபார் எக்ஸாம்பிள், கண்டினியூ தி ஷாட், சேஞ்ச் தி கேமரா ஆங்கிள், ஸ்வாப் தி பேக்ரவுண்ட், ஆர் ஈவன் ரிப்ளேஸ் எ கேரக்டர். தேர் ஆர் 10 மோர் கூகுள் AI டூல்ஸ், ஐ குடன்ட் ஃபிட் இன்டு திஸ் வீடியோ, கமெண்ட் கூகுள், அண்ட் ஐ வில் சென்ட் தெம் டு யூ இன் யுவர் டிஎம்ஸ். சுண்டல் பீச்சாய், ஜஸ்ட் குயிட்லி டிராப் 15 ஃப்ரீ AI டூல்ஸ், அண்ட் மோஸ்ட் பீப்பிள் ஹேவ் நோ ஐடியா தே எக்ஸிஸ்ட். லெட் மீ ஷோ யூ, தி ஃபர்ஸ்ட் இஸ் ஆன்டி கிராவிட்டி, இட்ஸ் கூகுள் AI கோடிங் டூல், பட் யூ டோன்ட் நீட் டு நோ ஹவ் டு கோட், ஜஸ்ட் டிஸ்கிரைப் வாட் யூ வான்ட் டு பில்ட், அண்ட் இட் ஸ்டார்ட் கிரியேட்டிங் தி சாப்ட்வேர் பார் யூ. தி செகண்ட் இஸ் பார் மெல்லி, இட் லேர்ன்ஸ் யுவர் பிராண்ட் பிரம் யுவர் வெப்சைட், இன்குலூடிங் யுவர் கலர்ஸ், ஃபான்ட்ஸ், அண்ட் ரைட்டிங் ஸ்டைல். தென், இட் கிரியேட்ஸ் சோசியல் மீடியா போஸ்ட், ஆட்ஸ், அண்ட் அதர் கிரியேஷன்ஸ். தி தேர்ட் இஸ் ஸ்டிச், இன்ஸ்டெட் ஆப் டிசைனிங் யுவர் பிராண்ட், இட் டிசைன்ஸ் என்டையர் ஆப்ஸ், டிஸ்கிரைப் யுவர் ஐடியா, அண்ட் இட் கிரியேட்ஸ் எவ்ரி ஸ்கிரீன், பில்ட்ஸ் எ கிளிக்கபிள் ப்ரோட்டோடைப், அண்ட் ஈவன் ஜெனரேட்ஸ் தி கோட். தி ஃபோர்த் இஸ் ஓபன், இட் ஆட்டோமேட்ஸ் ரிப்பெடிட்டிவ் வொர்க், டெல் இட் சம்திங் லைக், எவ்ரி மார்னிங், கலெக்ட் தீஸ் ரிப்போர்ட்ஸ், அண்ட் ஈமெயில் மீ எ சம்மரி, அண்ட் இட் பில்ட்ஸ் தி வொர்க் ஃப்ளோ பார் யூ. தி பிப்த் இஸ் ஃப்ளோ, கூகுள் AI ஃபில் மேக்கிங் டூல், டிஸ்கிரைப் எ சீன், ஆர் அப்லோட் அன் இமேஜ், அண்ட் இட் ஜெனரேட்ஸ் சினிமாட்டிக் வீடியோஸ், வித் ரியலிஸ்டிக் கேமரா மூவ்மென்ட்ஸ் அண்ட் லைட்டிங். யூ கேன் ஈவன் கீப் எடிட்டிங் தி சேம் சீன், ஃபார் எக்ஸாம்பிள், கண்டினியூ தி ஷாட், சேஞ்ச் தி கேமரா ஆங்கிள், ஸ்வாப் தி பேக்ரவுண்ட், ஆர் ஈவன் ரிப்ளேஸ் எ கேரக்டர். தேர் ஆர் 10 மோர் கூகுள் AI டூல்ஸ், ஐ குடன்ட் ஃபிட் இன்டு திஸ் வீடியோ, கமெண்ட் கூகுள், அண்ட் ஐ வில் சென்ட் தெம் டு யூ இன் யுவர் டிஎம்ஸ். சுண்டல் பீச்சாய், ஜஸ்ட் குயிட்லி டிராப் 15 ஃப்ரீ AI டூல்ஸ், அண்ட் மோஸ்ட் பீப்பிள் ஹேவ் நோ ஐடியா தே எக்ஸிஸ்ட். லெட் மீ ஷோ யூ, தி ஃபர்ஸ்ட் இஸ் ஆன்டி கிராவிட்டி, இட்ஸ் கூகுள் AI கோடிங் டூல், பட் யூ டோன்ட் நீட் டு நோ ஹவ் டு கோட், ஜஸ்ட் டிஸ்கிரைப் வாட் யூ வான்ட் டு பில்ட், அண்ட் இட் ஸ்டார்ட் கிரியேட்டிங் தி சாப்ட்வேர் பார் யூ. தி செகண்ட் இஸ் பார் மெல்லி, இட் லேர்ன்ஸ் யுவர் பிராண்ட் பிரம் யுவர் வெப்சைட், இன்குலூடிங் யுவர் கலர்ஸ், ஃபான்ட்ஸ், அண்ட் ரைட்டிங் ஸ்டைல். தென், இட் கிரியேட்ஸ் சோசியல் மீடியா போஸ்ட், ஆட்ஸ், அண்ட் அதர் கிரியேஷன்ஸ். தி தேர்ட் இஸ் ஸ்டிச், இன்ஸ்டெட் ஆப் டிசைனிங் யுவர் பிராண்ட், இட் டிசைன்ஸ் என்டையர் ஆப்ஸ், டிஸ்கிரைப் யுவர் ஐடியா, அண்ட் இட் கிரியேட்ஸ் எவ்ரி ஸ்கிரீன், பில்ட்ஸ் எ கிளிக்கபிள் ப்ரோட்டோடைப், அண்ட் ஈவன் ஜெனரேட்ஸ் தி கோட். தி ஃபோர்த் இஸ் ஓபன், இட் ஆட்டோமேட்ஸ் ரிப்பெடிட்டிவ் வொர்க், டெல் இட் சம்திங் லைக், எவ்ரி மார்னிங், கலெக்ட் தீஸ் ரிப்போர்ட்ஸ், அண்ட் ஈமெயில் மீ எ சம்மரி, அண்ட் இட் பில்ட்ஸ் தி வொர்க் ஃப்ளோ பார் யூ. தி பிப்த் இஸ் ஃப்ளோ, கூகுள் AI ஃபில் மேக்கிங் டூல், டிஸ்கிரைப் எ சீன், ஆர் அப்லோட் அன் இமேஜ், அண்ட் இட் ஜெனரேட்ஸ் சினிமாட்டிக் வீடியோஸ், வித் ரியலிஸ்டிக் கேமரா மூவ்மென்ட்ஸ் அண்ட் லைட்டிங். யூ கேன் ஈவன் கீப் எடிட்டிங் தி சேம் சீன், ஃபார் எக்ஸாம்பிள், கண்டினியூ தி ஷாட், சேஞ்ச் தி கேமரா ஆங்கிள், ஸ்வாப் தி பேக்ரவுண்ட், ஆர் ஈவன் ரிப்ளேஸ் எ கேரக்டர். தேர் ஆர் 10 மோர் கூகுள் AI டூல்ஸ், ஐ குடன்ட் ஃபிட் இன்டு திஸ் வீடியோ, கமெண்ட் கூகுள், அண்ட் ஐ வில் சென்ட் தெம் டு யூ இன் யுவர் டிஎம்ஸ். சுண்டல் பீச்சாய், ஜஸ்ட் குயிட்லி டிராப் 15 ஃப்ரீ AI டூல்ஸ், அண்ட் மோஸ்ட் பீப்பிள் ஹேவ் நோ ஐடியா தே எக்ஸிஸ்ட். லெட் மீ ஷோ யூ, தி ஃபர்ஸ்ட் இஸ் ஆன்டி கிராவிட்டி, இட்ஸ் கூகுள் AI கோடிங் டூல், பட் யூ டோன்ட் நீட் டு நோ ஹவ் டு கோட், ஜஸ்ட் டிஸ்கிரைப் வாட் யூ வான்ட் டு பில்ட், அண்ட் இட் ஸ்டார்ட் கிரியேட்டிங் தி சாப்ட்வேர் பார் யூ. தி செகண்ட் இஸ் பார் மெல்லி, இட் லேர்ன்ஸ் யுவர் பிராண்ட் பிரம் யுவர் வெப்சைட், இன்குலூடிங் யுவர் கலர்ஸ், ஃபான்ட்ஸ், அண்ட் ரைட்டிங் ஸ்டைல். தென், இட் கிரியேட்ஸ் சோசியல் மீடியா போஸ்ட், ஆட்ஸ், அண்ட் அதர் கிரியேஷன்ஸ். தி தேர்ட் இஸ் ஸ்டிச், இன்ஸ்டெட் ஆப் டிசைனிங் யுவர் பிராண்ட், இட் டிசைன்ஸ் என்டையர் ஆப்ஸ், டிஸ்கிரைப் யுவர் ஐடியா, அண்ட் இட் கிரியேட்ஸ் எவ்ரி ஸ்கிரீன், பில்ட்ஸ் எ கிளிக்கபிள் ப்ரோட்டோடைப், அண்ட் ஈவன் ஜெனரேட்ஸ் தி கோட். தி ஃபோர்த் இஸ் ஓபன், இட் ஆட்டோமேட்ஸ் ரிப்பெடிட்டிவ் வொர்க், டெல் இட் சம்திங் லைக், எவ்ரி மார்னிங், கலெக்ட் தீஸ் ரிப்போர்ட்ஸ், அண்ட் ஈமெயில் மீ எ சம்மரி, அண்ட் இட் பில்ட்ஸ் தி வொர்க் ஃப்ளோ பார் யூ. தி பிப்த் இஸ் ஃப்ளோ, கூகுள் AI ஃபில் மேக்கிங் டூல், டிஸ்கிரைப் எ சீன், ஆர் அப்லோட் அன் இமேஜ், அண்ட் இட் ஜெனரேட்ஸ் சினிமாட்டிக் வீடியோஸ், வித் ரியலிஸ்டிக் கேமரா மூவ்மென்ட்ஸ் அண்ட் லைட்டிங். யூ கேன் ஈவன் கீப் எடிட்டிங் தி சேம் சீன், ஃபார் எக்ஸாம்பிள், கண்டினியூ தி ஷாட், சேஞ்ச் தி கேமரா ஆங்கிள், ஸ்வாப் தி பேக்ரவுண்ட், ஆர் ஈவன் ரிப்ளேஸ் எ கேரக்டர். தேர் ஆர் 10 மோர் கூகுள் AI டூல்ஸ், ஐ குடன்ட் ஃபிட் இன்டு திஸ் வீடியோ, கமெண்ட் கூகுள், அண்ட் ஐ வில் சென்ட் தெம் டு யூ இன் யுவர் டிஎம்ஸ். சுண்டல் பீச்சாய், ஜஸ்ட் குயிட்லி டிராப் 15 ஃப்ரீ AI டூல்ஸ், அண்ட் மோஸ்ட் பீப்பிள் ஹேவ் நோ ஐடியா. There's a line in there which I'm not sure you read it, so if you can walk with King's nor lose the common touch, and if it's this whole series of trade-offs and. Unfortunately, today's world, it's like we'll either you a billionaire or you put the reality is these things coexist and. It is. Possible for seemingly. Anthropic இப்போ சொந்தமா பயாலஜிலாவே வச்சிருக்காங்க அந்த லேப்ல கிளாட் இப்போ சயின்டிஸ்ட் யாருமே கவனிக்காத ஒரு புது பயாலஜிக்கல் சிஸ்டத்தையே இது இப்போ ஐடென்டிஃபை பண்ணி கண்டுபிடிச்சிருக்கு சயின்டிஸ்ட் கிளாடுக்கு ஒரு டாஸ்க் கொடுத்திருக்காங்க டிஎன்ஏ டேட்டால அன்யூஸ்வலான என்சைம் சிஸ்டம்ஸ தேடணும் என்சைம்னா உயிரினங்களுக்குள்ள கெமிக்கல் ரியாக்ஷன்ஸ் நடக்க ஹெல்ப் பண்ற சின்ன மெஷின் மாதிரி சுமார் 950 ஏi ஏஜென்ட்ஸ் 21 ஹவர்ஸ் டிஎன்ஏ டேட்டால சர்ச் பண்ணிருக்கு அப்போதான் ஒரு ஏஜென்ட் என்சைமோட ஜீன் பக்கத்துல அன்யூஸ்வலான ரிப்பீட்டிங் டிஎன்ஏ பேட்டர்ன நோட்டிஸ் பண்ணிருக்கு அந்த என்சைம் சயின்டிஸ்ட்க்கு ஆல்ரெடி தெரியும் ஆனா அதை சுத்தி இருந்த இந்த ஃபுல் சிஸ்டத்தை அப்போதான் ஐடென்டிஃபை பண்ணிருக்காங்க அது புது பைண்டிங் தானாங்கிறத கிளாட் எடுத்து செக் பண்ணிருக்கு அந்த பேட்டர்ன் எத்தனை முறை ரிப்பீட் ஆகுதுன்னு கவுண்ட் பண்ணி ஆல்ரெடி தெரிஞ்ச சிஸ்டம்ஸோட கம்பேர் பண்ணிருக்கு இதை யாராவது முன்னாடியே டிஸ்கவர் பண்ணிருக்காங்களான்னு ரிசர்ச் பேப்பர்ஸும் செக் பண்ணிருக்கு இந்த பைண்டிங்ஸ ஹியூமன் சயின்டிஸ்ட் ரிவ்யூ பண்ணி லேப் எக்ஸ்பெரிமென்ட்ஸ் மூலமா ஃபர்தர் இன்வெஸ்டிகேட் பண்ணிருக்காங்க அந்த புது சிஸ்டத்துக்கு ஏஆர்டின்னு பேர் வச்சிருக்காங்க இது ஏன் சயின்டிஸ்டோட இன்ட்ரஸ்ட் அட்ராக்ட் பண்ணுதுன்னா டிஎன்ஏவ எடிட் பண்ண யூஸ் ஆகுற கிரிஸ்பர் சிஸ்டம்ல இருக்குற ரிப்பீட்டிங் பேட்டர்ன் மாதிரி இதுலயும் இருக்கு கிரிஸ்பரோட ஸ்டோரியும் இப்படித்தான் ஆரம்பிச்சது டிஎன்ஏல அன்யூஸ்வலான ரிப்பீட்ஸ சயின்டிஸ்ட் நோட்டிஸ் பண்ணினாங்க அதை புரிஞ்சுகிட்ட பிறகு அதை பேஸ் பண்ணி ஒரு பவர்ஃபுல் ஜீன் எடிட்டிங் டூல டெவலப் பண்ணினாங்க அந்த மாதிரி ஏஆர்டில இருந்து ஒரு யூஸ்ஃபுல் டூல் உருவாகுமாங்கிற பாசிபிலிட்டியை எக்ஸ்ப்ளோர் பண்ணிட்டு இருக்காங்க ஆனா ஏஆர்டி என்ன வேலை செய்யுதுங்கிறது இன்னும் தெரியல இதை வச்சு ஜீன் எடிட்டிங் பண்ண முடியும்ங்கிறது இன்னும் ப்ரூவ் ஆகல சோ இங்க கிளாட் பண்ணிருக்கிறது ஸ்பெசிபிக்கான ஒரு வேலை கவனிக்கப்படாத பேட்டர்ன கண்டுபிடிச்சு அது புதுசான்னு இன்வெஸ்டிகேட் பண்ணி சயின்டிஸ்ட் ஃபர்தர் ரிசர்ச் பண்ண ஒரு டிஸ்கவரிய கொடுத்திருக்கு என்ன பொறுத்தவரைக்கும் அடுத்த இம்பார்ட்டன்ட் டிஸ்கவரி எங்க இருக்கலாம் தேடுறதுல ஏ ஹெல்ப் பண்றதுதான் இந்த நியூஸோட எக்சைட்டிங் பார்ட் சோ தட் பீயிங் செட் நாளைக்கு உங்களை இன்னொரு இம்பார்ட்டன்ட் ஏ நியூஸ் அப்டேட் வீடியோவோட வந்து சந்திக்கிறேன் அன்டில் தென் திஸ் இஸ் யுவர் ஏ கோச் ஜான் சைனிங் ஆப். ஆந்த்ராபிக் இப்போ சொந்தமா பயாலஜி லேபே வச்சிருக்காங்க அந்த லேப்ல கிளாட் இப்போ சயின்டிஸ்ட் யாருமே கவனிக்காத ஒரு புது பயாலஜிக்கல் சிஸ்டத்தையே இது இப்போ ஐடென்டிஃபை பண்ணி கண்டுபிடிச்சிருக்கு சயின்டிஸ்ட் கிளாடுக்கு ஒரு டாஸ்க் கொடுத்திருக்காங்க டிஎன்ஏ டேட்டால அன்யூஸ்வலான என்சைம் சிஸ்டம்ஸ தேடணும் என்சைம்னா உயிரினங்களுக்குள்ள கெமிக்கல் ரியாக்ஷன்ஸ் நடக்க ஹெல்ப் பண்ற சின்ன மெஷின் மாதிரி சுமார் 950 ஏi ஏஜென்ட்ஸ் 21 ஹவர்ஸ் டிஎன்ஏ டேட்டால சர்ச் பண்ணிருக்கு அப்போதான் ஒரு ஏஜென்ட் என்சைமோட ஜீன் பக்கத்துல அன்யூஸ்வலான. I'm begging the creator of open claw just open source his entire agent setup and it's going viral his name is vitas steinberger he's the guy who built open claw and this is the exact file he uses to run his own ai agents across every single project he works on inside it you get his master rules file the one document every agent reads before it touches anything so codex and clawed code behave the same way in every reboot you get his skills folder which is basically a library of reusable workflows his agents pick up automatically including tools that crawl slack discord whatsapp and i message you get the scripts that sync all of those skills across his machines a validator that catches broken skills before they cause problems and even a browser tool that lets his agent open chrome click around take screenshots and read what's happening on a page this is if you want access to it just comment agent and I'll send it straight to you creator of open claw just open sourced his entire agent setup and it's open claw, can this be used only. With Visual Studio or can. That be applicable in the. Web page where we are working currently? In viewers or perplexity or in. Claude also, how to do that? And since that looks like we are checking out from there and using it, so is it only for Visual Studio Code or for other areas like what I said? &#x20;",
+       "source": "my_files",
+       "type": "file"
+      },
+      {
+       "alt": "([GitHub](https://github.com/openclaw/agent-skills?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "GitHub - openclaw/agent-skills: Useful skills for agents and claws. · GitHub",
+         "url": "https://github.com/openclaw/agent-skills?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([GitHub](https://github.com/openclaw/agent-skills?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "GitHub - openclaw/agent-skills: Useful skills for agents and claws. · GitHub",
+         "url": "https://github.com/openclaw/agent-skills?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([GitHub](https://github.com/openclaw/openclaw/blob/main/skills/coding-agent/SKILL.md?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 2,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "openclaw/skills/coding-agent/SKILL.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/skills/coding-agent/SKILL.md?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([OpenClaw](https://docs.openclaw.ai/quickstart?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenClaw",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 4,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Getting started - OpenClaw",
+         "url": "https://docs.openclaw.ai/quickstart?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([GitHub](https://github.com/openclaw/openclaw/blob/main/docs/tools/acp-agents.md?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 11,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "openclaw/docs/tools/acp-agents.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/docs/tools/acp-agents.md?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([GitHub](https://github.com/openclaw/agent-skills?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "GitHub - openclaw/agent-skills: Useful skills for agents and claws. · GitHub",
+         "url": "https://github.com/openclaw/agent-skills?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": null,
+       "cloud_doc_url": null,
+       "connector_id": null,
+       "drug_file_reference": null,
+       "fff_metadata": null,
+       "id": "file_0000000067fc8210bbfab3691634b31e",
+       "input_pointer": {
+        "file_index": 0,
+        "line_range_end": 1,
+        "line_range_start": 1,
+        "message_id": "c9453165-4b59-4b0b-9ee9-eaba994a0224",
+        "message_index": 0
+       },
+       "library_artifact_type": null,
+       "library_file_id": "libfile_c328eac92838819192c409cc133d34d6",
+       "medical_file_reference": {
+        "authors_display": null,
+        "doi": null,
+        "journal_homepage_url": null,
+        "journal_name": null,
+        "publication_year": null,
+        "source_icon_url": null,
+        "source_label": null,
+        "source_url": null
+       },
+       "name": "Pasted markdown.md",
+       "page_range_end": null,
+       "page_range_start": null,
+       "snippet": "&#x20;open claw, can this be used only. With Visual Studio or can. That be applicable in the. Web page where we are working currently? In viewers or perplexity or in. Claude also, how to do that? And sinceSo, is— how is the dot DOT dot. ChatGPT? So, how to use that one? So, is it only available from Pro. So, is there any meaning in upgrading it? Since all these manual work may go away, what do you think about it? Yeah, yeah. Uh, sure. How can you learn GPT and Gemini Pro? We'll start off by the other interesting area. Basically, I don't know, நம்ம code base வந்து நிறைய API-யோட connect ஆயிருக்கும். திடீர்னு ஏதாவது ஒரு API-ல ஏதாவது change நடந்திருக்கும்னு நம்மளுக்கு information வந்தா, அதுல break ஆக ஆரம்பிச்சுரும். So, இதை வந்து என்ன சொல்ல வர்றாங்கன்னா, இப்ப இந்த agents நம்ம coding agents வந்து automatic-ஆ detect ஆகணும். நம்ம related-ஆ ஏதாவது ஒரு API-ல ஏதாவது change ஆச்சுன்னா, ஒன்னு அது வந்து inform பண்ணி, நம்ம code வந்து இதுவே PR generate பண்ணி, அப்புறம் நம்மள அதை approve பண்ண வச்சு, அதை fix automatic-ஆ நடத்துறோம். So, அதாவது dependent API-ல எதுவும் change நடந்துச்சுன்னா, அது automatic-ஆ நம்ம coding agent-ஐ நம்ம code-க்குள்ள changes பண்ணிரனும். So, இது மாதிரி எல்லாம் breakage எல்லாம் தடுத்துடலாம்ங்கிற மாதிரி. So, இந்த மாதிரி ஏதாச்சும் ஒரு idea-ல API provider-ஆ நீங்க work பண்ணிட்டு இருக்கீங்கன்னா, இந்த இதுக்கு apply பண்ணுங்க. இந்த review புடிச்சிருந்தா like பண்ணி comment பண்ணி share பண்ணுங்க. என் page-ஐ follow பண்ணுங்க. We'll start off idea ரொம்ப interesting-ஆ இருக்கு. Basically, என்னன்னா, பையன் யாருக்குமே மூவ் மாங்கா பேசாதே, திங்க்கிழமை AI-க்கு ஸ்கேல் ப்ராப்ளம்க்கு சால்வ் பண்ணு. ஆக்சுவலி, பால்ஸ் ஆல்சின்சி எய்க் ப்ராப்ளம் சால்வ் பண்ணி ஒரு ப்ராப்ளம் AI-க்கு சாட் ஜிபிடி ஆர் கிளவுடுக்கும் இதெல்லாம் இன்ஃபர்மேஷன் எது எத்தனை பேருக்கும் போகும். இட்ஸ் லிமிடேஷன்க்கு பாருங்க, AI கம்பெனிஸ் ரொம்ப ஜாதானி பதாதி, க்யூக்கி உங்களுக்கு மாடல்ஸ் ரொம்ப பேசினேன். பட் எ ப்ராப்ளம் அப்படித்தான் சால்வ் பண்ணி, ஏன் சமைச்சதுக்கு முன்னாடி ஏன் சமைச்சோம் ப்ராப்ளம் ஹேக்யா. அப்ப மான்லோ, தம்ல சாட் ஜிபிடி ஆர் கிளவுடுக்கும் போத் சாரி PDF, ப்ராம்ட்ஸ், ஏன் இன்ஸ்ட்ரக்ஷன் தேதி. எ சப் குச் இன்கே கான்டெக்ஸ்ட் விண்டோமே ஜாத்தா, அவர் இஸ்கோ AI-க்கு எக் மெமரி கிதாரா சமைச்சோம். ஆர் ஜித்னா இஸ் விண்டோமே எக் பார்ட்மே ஃபிட் ஹோ ஜாத்தா, பட் உத்தனேஹி டேட்டா கிசாத் AI எக் டைம்ல ரீசன் கர் சக்தா. பட் ப்ராப்ளம் த பாத்தீங்க, ஜப் தும் AI-க்கு இத்தன சாரா டேட்டா தேதி. ஏன் சோச்கே கி ஜித்னா ஜாதா டேட்டா தூங்கா, உத்தன சாரா ஸ்மார்ட் ஹோ த ஜாயா. ஜப் கி ஹோ த உல்ட்டா ஹே, தும் இஸ்கி கான்டெக்ஸ்ட் விண்டோ ஜித்னி ஜாதா வர்தே ஜாவோகி இங்கே ஆன்சர்ஸ்கி குவாலிட்டி உத்தன சாரா கிற்தி ஜாயிகி. ஆர் டெக்னிக்கல் டெர்ம்ஸ் மே இஸ்கி கோ கான்டெக்ஸ்ட் பிராட் கேத்தேன். அப் தும் சொன்னா ஹோக கி AI கம்பெனிஸ் மாடல் லான்ச் மே படி பிரவுட்லி போல்தி கி ஹமாரே மாடல் கி கான்டெக்ஸ்ட் விண்டோ தோ 10 லாக் ஹே. ஆர் எக் டெஸ்ட் கத்தே ப்ரூஃப் மே கத்தே திகாதேங்கி. இஸ் டெஸ்ட் கோ கேத்தே நீடில் இன் எ ஹே ஸ்டாப் டெஸ்ட். ஆர் எஹி சப்செ படி மார்க்கெட்டிங் ட்ரிக் ஹே, சம்ஜாதாம் கேசே. இஸ் டெஸ்ட் மே கியா கத்தே சோட்டி சி லைன் எக் பர்டி டெக்ஸ்ட் மே சுப்பாதேத்தே. ஆர் AI கோ கேத்தே டூண்டோ. ஆர் AI செ டூண்ட் பிலேத்தே. பட் இஸ்மே கேச் ஏஹே கி AI கோ இஸ் டெஸ்ட் மே சோசனா நீ பட்தா. AI பஸ் மில்தே ஜுத்தே வாட் இஸ் கோ சர்ச் கத்தே மேட்ச் கர்தேத்தா. பட் ரியல் வேர்ல்ட் அசே காம் நீ கட்தா. ரியல் வேர்ல்ட் மே தும் எக்ஸ்பெக்ட் கத்தே ஹோ கி மே சாரா டேட்டா AI கோ தும் ஆர் ஹோ ரீசன் கத்தே முஜா ஆன்சர்ஸ் தே. அப் AI கோ எக் பிமாரி ஹோ ஹே. ஏன் PDF பர் டாப் பர் பாட்டம் பார்ட் தோ யாத்ரகேகி, பட் பீச் வாலா புல்ஜாயகோ. ஆர் இஸ் ப்ராப்ளம் கோ டெக்னிக்கல் லாங்குவேஜ் மே கத்தே லாஸ்ட் இன் த மிடில் ப்ராப்ளம். அப் இஸ் காத் கோ சம்ஜோ கி கான்டெக்ஸ்ட் பிராட் கோ பக் நீ கி போ இன்ஜினியர் ஆகி இஸ்கோ கோட் செ பேட்ச் கர்தேவா. ஏன் இஸ்கே ட்ரான்ஸ்பார்மர் ஆர்கிடெக்சர் கி ப்ராப்ளம் ஹே. அப் கான்டெக்ஸ்ட் பிராட் கோ சால்வ் தோனி, பட் மேனேஜ் கண்ணேகி காபி தரிகே. உன்மேச சப்சே ஃபேமஸ் தரிகா ஹே ரேக். ஆர் 2026 க சப்சே அட்வான்ஸ் தரிகா ரிகர்சிவ் லாங்குவேஜ் மாடல். அப் வீடியோ ரெப்பி ஹோ ஜாயிகி, இஸ்லே யூடியூப் மே எக் டீடெய்ல்ட் வீடியோ பனையே. பையன் யாரு தும் மூவ் மாங்கா மேனேஜ் கண்ணேகி காபி தரிகே. உன்மேச சப்சே ஃபேமஸ் தரிகா ஹே ரேக். ஆர் 2026 க சப்சே அட்வான்ஸ் தரிகா ரிகர்சிவ் லாங்குவேஜ் மாடல். அப் வீடியோ ரெப்பி ஹோ ஜாயிகி, இஸ்லே யூடியூப் மே எக் டீடெய்ல்ட் வீடியோ பனையே. பையன் யாரு தும் மூவ் மாங்கா பேசாதே. பை. நிறைய வீடியோஸ் வந்து எங்களுக்கு ரொம்ப ஃபேவரிட். அதுல குறிப்பா நீங்க வடசென்னை படத்தோட சீரிஸ் பண்றது ஆல் டைம் ஃபேவரிட். சோ அது அது ஒரு பக்கம் இருக்கட்டும். இன்னொரு பக்கம் வந்து இந்த சிடுமூஞ்சி சேகர்ன்னு ஒரு கேரக்டர் நீங்க பண்ணிருப்பீங்க. பல கடைகள்ல நம்ம அதை பார்த்திருந்திருப்போம். அந்த ஐடியா எப்படி வந்தது? அந்த சிடுமூஞ்சி சேகரை கொஞ்சம் இங்க கொண்டு வர முடியுமா? அது வந்து எங்க வீட்டு பக்கத்துல எப்படி ஒரு கடைக்காரர் இருப்பாரு. அவர் வந்து இப்ப பேசுற அந்த ப்ரூஸ் ஸ்டோரி. ஆமா, பேசுற அந்த ப்ரூஸ் ஸ்டோரி தான். ஒரு தடவை வந்து எப்பயும் வந்து டார்க் ஃபேண்டஸி பிஸ்கட் வீட்ல சின்ன பையன் இருப்பான். அவன் கேப்பான், சரி ஒரு பால் பாக்கெட் டார்க் ஃபேண்டஸி பிஸ்கட் கேக்கலாம்னு. ஆனா அவர் பால் பாக்கெட் எல்லாம் அமைதியா இருக்கு, எதுவுமே சவுண்ட் கேக்கல. ஆனா பால் பாக்கெட் நான் வச்சிட்டேன்ப்பா அப்படின்னாரு. அதுக்கப்புறம் ஆனா டார்க் ஃபேண்டஸி பிஸ்கட்ல அதுவும் சவுண்ட் கேக்கல. உட்கார்ந்து டீ பாத்துட்டு இருக்காரு. ஆனா என்னன்னா வேலை செய்றீங்களா என்னன்னா பண்ணிட்டு இருக்கீங்களா இல்லப்பா அங்க எடுத்து வச்சிட்டேன்ப்பா என்ன ஒரு 10 மீட்டர் தள்ளி வச்சிருக்காரு அங்க இருந்து. என்னன்னா இந்த மாதிரி எப்பயுமே சீடு மூஞ்சி தான் பண்ணுவாரு. அவர் பால் காரணம் அதான் எத்தனை பவுன் தூக்கி போடுறது. சில்ட்ரன் எல்லாம் ஒழுங்கா எடுத்துட்டு வர மாதிரி கத்துது. அந்த மாதிரி எல்லாரும் ஃபேஸ் பண்ணாங்க. சோ லைஃப்லயும் நடக்குதுல. சோ அதை வச்சு பண்ணலாம்னு அவரை வச்சு பண்ணது தான். அவரு கடைக்கு போனா மட்டும் மைண்டுக்கு ஒரு மாதிரி ஸ்ட்ரெஸ் ஆயிரும். எவ்வளவு ஹாப்பியா இருந்தா அவர் கடைக்கு போனா சோகம் ஆயிரும்ல. அதே மாதிரியான ஒரு கேரக்டர். எப்பவுமே யோசிச்சிருக்கீங்களா பிரண்ட்ஸ்? நம்ம நமக்கு தெரியாதவங்க கிட்ட ரொம்ப நல்ல பையனா ரொம்ப ஜென்டிலா இருப்போம். அதே ஆப்போசிட் சைடுல நமக்கு ரொம்ப க்ளோஸ் ஆனவங்க கிட்ட ரூடா இருப்போம். சிடு சிடுன்னு சின்ன தப்புக்கெல்லாம் சண்டை போட்டுட்டு இருப்போம். ஏன்னா we know they gonna stayன்னு. நம்ம என்னதான் பண்ணாலும் என்னதான் வொர்க் பண்ணாலும் அவங்க இருப்பாங்க அப்படிங்கறது நம்மளுக்கு தெரியும். அதனால அவங்கள விட்டு பயங்கர கிராண்டடா நம்ம எடுத்துப்போம். ஏன்னா அவங்கள நம்மளோட ஒரு பார்ட்டா நம்ம பாக்குறோம். சோ நம்மள நம்ம எப்படி ட்ரீட் பண்றோமோ அதே மாதிரி தான் நம்ம மத்தவங்கள ட்ரீட் பண்ணுவோம். இந்த க்ளோஸர் சம் ஒன் இஸ் டு யூ. இந்த மோர் யூ ட்ரீட் தெம் லைக் யூ ட்ரீட் யுவர்செல்ப். சோ நம்ம நம்மகிட்ட ட்ரூயலா நடந்துக்கிட்டோம் அப்படின்னா நம்மளுக்கு க்ளோஸ் ஆனவங்க கிட்டயும் அப்படித்தான் நம்ம நடந்துப்போம். நம்ம நம்மள அதே மாதிரி கிரிட்டிசைஸ் பண்ணிட்டே இருந்தோம் அப்படின்னா நம்ம நம்ம பார்ட்னரையும் அதே மாதிரி கிரிட்டிசைஸ் பண்ணுவோம். நம்மளுக்கு நம்மளோட ப்ராக்ரஸ் பார்த்து சந்தோஷம் இல்லை அப்படின்னா நம்மளோட ஃபேமிலி மெம்பர்ஸ் ப்ராக்ரஸ் பண்ணாம இருக்கிறதையும் நம்மளால ஏத்துக்க முடியாது. நம்மளோட பாஸ்ட் மிஸ்டேக்ஸ்க்கு நம்மளால நம்மளையே மன்னிக்க முடியல அப்படின்னா மத்தவங்கள நம்மளால எப்படி மன்னிக்க முடியும்? சோ உங்களுக்கு புடிச்சவங்க கிட்ட உங்க ஃபேமிலி கிட்ட உங்க பிரண்ட்ஸ் கிட்ட நீங்க கைண்டா இருக்கணும் அப்படின்னா அதுக்கு முதல்ல உங்ககிட்ட நீங்க கைண்டா இருக்கணும். நம்மள நம்ம லவ் பண்ணோம்னா தான் ஆப்போசிட்ல இருக்குறவங்கள நம்மளால லவ் பண்ண முடியும். இல்ல அப்படி எல்லாம் முடியாது அப்படின்னா நம்மள விட நம்ம கூட இருக்குறவங்க தான் அதிகமா கஷ்டப்படுவாங்க. சோ பீ கைண்ட் டு யுவர்செல்ப். ஆனா பாருங்க ஒருத்தங்க நம்மகிட்ட ரூடா இருக்குறதே வந்துட்டு ஒரு ரொமான்டிக்கான விஷயம் தானே. அவ எல்லார்கிட்டயும் நல்லா பேசுறா. என்கிட்ட மட்டும் நல்லா பேச மாட்டேங்குறா. அப்ப இது லவ் தானே மச்சான் அப்படின்னு சொல்லிட்டு படத்துல கேட்கும்போது நம்மளுக்கு காமெடியா இருக்கும். பட் யோசிச்சு பார்த்தோம் அப்படின்னா டெக்னிக்கலி அது உண்மைதானே. இந்த மோர் க்ளோஸர் யுவர் வித் சம் ஒன். இந்த மோர் யூ ட்ரீட் தெம் எஸ் யூ ட்ரீட் யுவர்செல்ப். சோ ஒரு பெர்சனுக்கு உங்கள ரொம்ப புடிச்சிருந்தோ உங்ககிட்டயே அவர் நல்லா நடந்துக்க மாட்டேங்குறாரு அப்படின்னா அவர்கிட்ட அவர் எப்படி நடந்துப்பாருன்னு யோசிச்சு பாருங்க. சோ உங்களால முடிஞ்சுச்சு அப்படின்னா அவருக்கு கொஞ்சம் ஹெல்ப் பண்ணி அவர் அவரையவே காதலிக்க வைக்கிறதுக்கு ஹெல்ப் பண்ணுங்க. இது உங்களோட ஜாப் கிடையாது. ரூடா இருக்குறவங்க கூட எனக்கு என்னடா பேச்சு நீங்க விட்டுட்டு கூட போலாம். பட் இப் யூ வான்ட் டுனா. I don't know. More impressive that this Chinese robot can run like this and. Or that it decided to run like this. That's correct. Decided. So this is at the world humanoid robot games which is happening right now in Beijing. This is the second edition of the event and robots are really showing what they're made of in a bunch of sports: high jumps, long jumps, obstacle courses, gymnastics, and because robots should be useful, hammering nails and unpacking boxes in practical events. But of the hundreds of robots, this one, Tiangong Omni, stands out because it. Runs. Like no other robot or human. This was the 400 meter race and during simulation training, Chinese engineers continuously rewarded the robot for optimizing its movement. And so through iteration and through trial and error, the robot developed this unusual posture on its own. Swinging its arms like humans or other robots would have burdened its shoulder joints, causing them to overheat and waste energy. So instead, it found out that leaning. Forward and holding its arms up as if to cover its face was the optimal solution to its physical limitations. And it worked. It finished the race first in 45.66 seconds, which is faster than last year's winner. This year, the games raised the bar much higher than last year. The rules now favor autonomous robots. Those relying on AI for perception and decision making and penalize remote controlled ones. And the improvement in agility in ability is very clear. Robots are breaking human records set by top athletes. But more importantly, they're breaking other robot records. And sooner or later, all of this will end up in the real world. So I hope you're ready to run. I don't know what's Anthropic CEO is so pissed right now and why wouldn't he be? Claude code users are dropping the $200 max plan because two free tools just fixed the token problem for good. Gratify and Obsidian. Right now, every fresh session makes Claude read your whole project again. Every file, every function, and you're burning thousands of tokens before you've even asked a question. Both tools scan it once and turn it into a knowledge graph. Next session, Claude follows the map instead of rereading everything. That's about 70% fewer tokens. So a $20 plan does the work for your $200 one. The difference? Gratify only maps your code and stays out of the way. Obsidian maps it too, but it also keeps your notes, docs, and project context in the same place. Just want your tokens back? Pick Gratify. One home for everything your project knows? Pick Obsidian. Comment graphs and I'll send you the setup guide. Anthropic CEO is so pissed right now and why wouldn't he be? Claude code users are dropping the $200 max plan because two free tools just fixed the token problem for good. Gratify and Obsidian. Hello, I need to transfer money quickly. It's a Because. AI हमेशा। बदलने वाला है। Anthropic ने जिस कंपनी को धोखा दिया था, उसको Elon Musk ने खरीद लिया। जिसको नहीं पता, कर्सर वो कंपनी है जिसको Anthropic ने झूठ बोला था कि Claude code सिर्फ एक रिसर्च प्रोजेक्ट है। कर्सर वो कंपनी है जो किसी टाइम पे Anthropic को 50% रेवेन्यू लाके देती थी। पूरी बात समझाता हूं। और कर्सर और SpaceX की डील का असली मतलब समझो। अब चार एमआईटी स्टूडेंट्स ने 2022 में कर्सर को एक साइड प्रोजेक्ट की तरह स्टार्ट किया। मुझे अभी तक याद है कर्सर सिर्फ एक कोड एडिटर हुआ करता था शुरुआत में। अब इनिशियल फेज में जब कर्सर Anthropic का कॉम्पिटिटर नहीं था, तब कर्सर में Anthropic का Sonnet मेन मॉडल हुआ करता था। और उस टाइम पे Anthropic का 50% रेवेन्यू कर्सर लाके देता था। कर्सर को एक अच्छा मॉडल चाहिए था और Anthropic को रेवेन्यू। अब Anthropic चुपके से अपना Claude code डेवलप कर रहा था। अब जब कर्सर को इस बारे में पता चला तो Anthropic ने झूठ बोला कि डोंट वरी, Claude code सिर्फ एक रिसर्च प्रोजेक्ट है। अब Anthropic ने Claude code लॉन्च किया जो कि सीधा कर्सर का कॉम्पिटिटर था। अब कर्सर के फाउंडर माइकल टूवेल ने एक इमरजेंसी मीटिंग बुलाई जिसमें उन्होंने डिसाइड किया कि अब हम Anthropic के मॉडल पे डिपेंडेंट नहीं रहेंगे। हमें अपना मॉडल बनाना पड़ेगा। और वहां से शुरू होती है कंपोजर की कहानी जो कर्सर का अपना मॉडल है। और क्या कमाल का मॉडल बनाया कंपोजर को। अब कर्सर के पास सब कुछ था। 10 लाख से ज्यादा पेइंग कस्टमर्स, 19,000 करोड़ तो ये साल का बना रहे थे। पर कर्सर के पास एक चीज नहीं थी, कंप्यूट। और AI में कंप्यूट के बिना कुछ नहीं होता। अब होती है Elon Musk की एंट्री। अब चाहे कोई कुछ भी बोले, सबको पता है कि Grok फ्रंटियर मॉडल्स की रेस में पीछे है। पर Elon Musk ऑलरेडी AI मॉडल्स की रेस में पीछे था। अब Elon Musk के पास भी सब कुछ है। रॉकेट्स हैं, सैटेलाइट्स हैं, AI डेटा सेंटर्स हैं। तो Musk ने क्या किया? 12 जून को SpaceX का IPO था। हिस्ट्री का सबसे बड़ा IPO। ऑलमोस्ट 8 लाख करोड़ से ज्यादा रेज किया SpaceX ने। और चार दिन बाद SpaceX ने कर्सर को एक्वायर कर लिया। ऑलमोस्ट 5.5 लाख करोड़ में। और ये पूरी ऑल स्टॉक्स डील थी। मतलब Elon Musk ने SpaceX के शेयर्स का यूज किया कर्सर को एक्वायर करने के लिए। अब सुनो इंटरेस्टिंग पार्ट। कर्सर की पूरी 5.5 लाख करोड़ की कीमत के बराबर तो इनका स्टॉक कुछ घंटों में ही अप्रिशिएट कर गया। मतलब Musk ने प्रैक्टिकली कर्सर को खरीदने के लिए अपनी जेब से कुछ नहीं दिया। ये हिस्ट्री का वन ऑफ द लार्जेस्ट सॉफ्टवेयर एक्विजिशन था। सोचने वाली बात ये है कि Elon Musk ने SpaceX के कॉम्पिटिटर Anthropic को डेटा सेंटर रेंट पे दिया हुआ है। अभी तक Elon Musk डेटा सेंटर लैंडलॉर्ड था जो Anthropic और Google जैसी कंपनीज़ को कंप्यूट रेंट पे देता था। बट अब जब Musk ने कर्सर को खरीद लिया तो यही Anthropic अब Musk का कॉम्पिटिटर बन गया। अब Elon Musk और Anthropic की डील में 90 दिन का टर्मिनेशन क्लॉज है। मतलब Elon Musk चाहे तो Anthropic को 90 दिन का नोटिस पीरियड देके कंप्यूट वापस ले सकता है। तो फाइनल पिक्चर ये है कि SpaceX के पास डेटा सेंटर्स हैं और कर्सर के पास वो लेयर जहां 10 लाख इंजीनियर्स वो सॉफ्टवेयर लिखते हैं। और कर्सर का रियल वर्ल्ड कोडिंग डेटा Grok की ट्रेनिंग पाइपलाइन में सीधा फीड होगा। और ये मैनी कोडर SpaceX की S1 फाइलिंग में साफ-साफ लिखा हुआ है। मतलब SpaceX ने IPO लाने से पहले साफ-साफ मेंशन कर दिया था कि वो कर्सर को कैसे यूज करेंगे। बट इतना तो समझ लो कि कर्सर अभी बहुत पावरफुल होने वाला है। तो यार मैं ऐसी वीडियोस बनाता रहता हूं जो इस टेक और AI के केस में चैट को। हेलो सर, मैं क्या बेटा सर? हेलो, यार। ये अंदर की ये। डेट ऑफ बर्थ लेना ना, सिंगल अकाउंट डालना है ना, तो देर ना, मैं अभी सर्च करके निकाल लो और Facebook में फेक आईडी ले। उनके। மனசுக்குள்ள மரண பீதி இருக்கிறது, என் கண்ணுக்கு கண்ணாடி மாதிரி அப்படியே தெரியுது. அதே பீதி என்கிட்டயும் ஹெவியா இருக்கத்தான் செய்யுது. அதை வெளிகாட்டிக்கிறேன், அவனும் அரசியல் பண்ணனும், புரியுதா? சரி, தலைவரே, அதுக்காக தலைவனை எல்லாம் அத்து விட்டு ஓடிடக்கூடாது. அட்டாக்கு அப்பா, காலேஜ் பீஸ் கட்டணும்பா, அப்பா, எனக்கும் பீஸ் கட்டணும்பா, எவ்வளவு? 5000ப்பா, உனக்கும் 5000 ஆ. ஆமாப்பா, அதே 5000 தான்ப்பா. இதுல எவ்வளவு இருக்குன்னு என்ன? அந்த செக் புக்ல நான் சொல்ற அமௌன்ட்டு ஃபில் பண்ணு. 447. 4 அவர். காசு தேவை. இல்லப்பா, எனக்கு எழுது. இங்கிலீஷ்ல எழுதணும். எப்போ யூ ஆர் ஃபோர் ஆர்டி. மாசம் 2026. 3, 3000. அப்பா, முதல்ல நீங்க சைன் போட்டு கொடுத்ததுங்க, அதுக்கப்புறம் நான் நம்பர்ஸ் ஃபில் பண்றேன். சரிப்பா, இப்ப ரெண்டு பேரையும் ஒன்னத்துக்கு லாய்க்கல, இதுக்கு காலேஜ்க்கு போய் என்னத்த கிழிக்கிறதுன்னே தெரியல. இதுக்கு ஒரு பீஸ், ஒரு கேட், ஓடி போயிருன்னு சொல்லிட்டேன். அப்பா, சுண்டல் பீச்சா, ஜஸ்ட் குயிட்லி டிராப் 15 ஃப்ரீ AI டூல்ஸ், அண்ட் மோஸ்ட் பீப்பிள் ஹேவ் நோ ஐடியா தே எக்ஸிஸ்ட். லெட் மீ ஷோ யூ, தி ஃபர்ஸ்ட் இஸ் ஆன்டி கிராவிட்டி, இட்ஸ் கூகுள் AI கோடிங் டூல், பட் யூ டோன்ட் நீட் டு நோ ஹவ் டு கோட், ஜஸ்ட் டிஸ்கிரைப் வாட் யூ வான்ட் டு பில்ட், அண்ட் இட் ஸ்டார்ட் கிரியேட்டிங் தி சாப்ட்வேர் பார் யூ. தி செகண்ட் இஸ் பார் மெல்லி, இட் லேர்ன்ஸ் யுவர் பிராண்ட் பிரம் யுவர் வெப்சைட், இன்குலூடிங் யுவர் கலர்ஸ், ஃபான்ட்ஸ், அண்ட் ரைட்டிங் ஸ்டைல். தென், இட் கிரியேட் சோசியல் மீடியா போஸ்ட், ஆட்ஸ், அண்ட் அதர் கிரியேஷன்ஸ். தி தேர்ட் இஸ் ஸ்டிச், இன்ஸ்டெட் ஆப் டிசைனிங் யுவர் பிராண்ட், இட் டிசைன்ஸ் என்டையர் ஆப்ஸ், டிஸ்கிரைப் யுவர் ஐடியா, அண்ட் இட் கிரியேட்ஸ் எவ்ரி ஸ்கிரீன், பில்ட்ஸ் எ கிளிக்கபிள் ப்ரோட்டோடைப், அண்ட் ஈவன் ஜெனரேட்ஸ் தி கோட். தி ஃபோர்த் இஸ் ஓபன், இட் ஆட்டோமேட்ஸ் ரிப்பெடிட்டிவ் வொர்க், டெல் இட் சம்திங் லைக், எவ்ரி மார்னிங், கலெக்ட் தீஸ் ரிப்போர்ட்ஸ், அண்ட் ஈமெயில் மீ எ சப்ஜெக்ட், அண்ட் இட் பில்ட்ஸ் தி வொர்க் ஃப்ளோ பார் யூ. தி பிப்த் இஸ் ஃப்ளோ, கூகுள் AI ஃபில் மேக்கிங் டூல், டிஸ்கிரைப் எ சீன், ஆர் அப்லோட் அன் இமேஜ், அண்ட் இட் ஜெனரேட்ஸ் சினிமாட்டிக் வீடியோஸ், வித் ரியலிஸ்டிக் கேமரா மூவ்மென்ட்ஸ் அண்ட் லைட்டிங். யூ கேன் ஈவன் கீப் எடிட்டிங் தி சேம் சீன், ஃபார் எக்ஸாம்பிள், கண்டினியூ தி ஷாட், சேஞ்ச் தி கேமரா ஆங்கிள், ஸ்வாப் தி பேக்ரவுண்ட், ஆர் ஈவன் ரிப்ளேஸ் எ கேரக்டர். தேர் ஆர் 10 மோர் கூகுள் AI டூல்ஸ், ஐ குடன்ட் ஃபிட் இன்டு திஸ் வீடியோ, கமெண்ட் கூகுள், அண்ட் ஐ வில் சென்ட் தெம் டு யூ இன் யுவர் டிஎம்ஸ். சுண்டல் பீச்சாய், ஜஸ்ட் குயிட்லி டிராப் 15 ஃப்ரீ AI டூல்ஸ், அண்ட் மோஸ்ட் பீப்பிள் ஹேவ் நோ ஐடியா தே எக்ஸிஸ்ட். லெட் மீ ஷோ யூ, தி ஃபர்ஸ்ட் இஸ் ஆன்டி கிராவிட்டி, இட்ஸ் கூகுள் AI கோடிங் டூல், பட் யூ டோன்ட் நீட் டு நோ ஹவ் டு கோட், ஜஸ்ட் டிஸ்கிரைப் வாட் யூ வான்ட் டு பில்ட், அண்ட் ஸ்டார்ட் கிரியேட்டிங் தி சாப்ட்வேர் பார் யூ. தி செகண்ட் இஸ் பார் மெல்லி, இட் லேர்ன்ஸ் யுவர் பிராண்ட் பிரம் யுவர் வெப்சைட், இன்குலூடிங் யுவர் கலர்ஸ், ஃபான்ட்ஸ், அண்ட் ரைட்டிங் ஸ்டைல். தென், இட் கிரியேட்ஸ் சோசியல் மீடியா போஸ்ட், ஆட்ஸ், அண்ட் அதர் கிரியேஷன்ஸ். தி தேர்ட் இஸ் ஸ்டிச், இன்ஸ்டெட் ஆப் டிசைனிங் யுவர் பிராண்ட், இட் டிசைன்ஸ் என்டையர் ஆப்ஸ், டிஸ்கிரைப் யுவர் ஐடியா, அண்ட் இட் கிரியேட்ஸ் எவ்ரி ஸ்கிரீன், பில்ட்ஸ் எ கிளிக்கபிள் ப்ரோட்டோடைப், அண்ட் ஈவன் ஜெனரேட்ஸ் தி கோட். தி ஃபோர்த் இஸ் ஓபன், இட் ஆட்டோமேட்ஸ் ரிப்பெடிட்டிவ் வொர்க், டெல் இட் சம்திங் லைக், எவ்ரி மார்னிங், கலெக்ட் தீஸ் ரிப்போர்ட்ஸ், அண்ட் ஈமெயில் மீ எ சம்மரி, அண்ட் இட் பில்ட்ஸ் தி வொர்க் ஃப்ளோ பார் யூ. தி பிப்த் இஸ் ஃப்ளோ, கூகுள் AI ஃபில் மேக்கிங் டூல், டிஸ்கிரைப் எ சீன், ஆர் அப்லோட் அன் இமேஜ், அண்ட் இட் ஜெனரேட்ஸ் சினிமாட்டிக் வீடியோஸ், வித் ரியலிஸ்டிக் கேமரா மூவ்மென்ட்ஸ் அண்ட் லைட்டிங். யூ கேன் ஈவன் கீப் எடிட்டிங் தி சேம் சீன், ஃபார் எக்ஸாம்பிள், கண்டினியூ தி ஷாட், சேஞ்ச் தி கேமரா ஆங்கிள், ஸ்வாப் தி பேக்ரவுண்ட், ஆர் ஈவன் ரிப்ளேஸ் எ கேரக்டர். தேர் ஆர் 10 மோர் கூகுள் AI டூல்ஸ், ஐ குடன்ட் ஃபிட் இன்டு திஸ் வீடியோ, கமெண்ட் கூகுள், அண்ட் ஐ வில் சென்ட் தெம் டு யூ இன் யுவர் டிஎம்ஸ். சுண்டல் பீச்சாய், ஜஸ்ட் குயிட்லி டிராப் 15 ஃப்ரீ AI டூல்ஸ், அண்ட் மோஸ்ட் பீப்பிள் ஹேவ் நோ ஐடியா தே எக்ஸிஸ்ட். லெட் மீ ஷோ யூ, தி ஃபர்ஸ்ட் இஸ் ஆன்டி கிராவிட்டி, இட்ஸ் கூகுள் AI கோடிங் டூல், பட் யூ டோன்ட் நீட் டு நோ ஹவ் டு கோட், ஜஸ்ட் டிஸ்கிரைப் வாட் யூ வான்ட் டு பில்ட், அண்ட் இட் ஸ்டார்ட் கிரியேட்டிங் தி சாப்ட்வேர் பார் யூ. தி செகண்ட் இஸ் பார் மெல்லி, இட் லேர்ன்ஸ் யுவர் பிராண்ட் பிரம் யுவர் வெப்சைட், இன்குலூடிங் யுவர் கலர்ஸ், ஃபான்ட்ஸ், அண்ட் ரைட்டிங் ஸ்டைல். தென், இட் கிரியேட்ஸ் சோசியல் மீடியா போஸ்ட், ஆட்ஸ், அண்ட் அதர் கிரியேஷன்ஸ். தி தேர்ட் இஸ் ஸ்டிச், இன்ஸ்டெட் ஆப் டிசைனிங் யுவர் பிராண்ட், இட் டிசைன்ஸ் என்டையர் ஆப்ஸ், டிஸ்கிரைப் யுவர் ஐடியா, அண்ட் இட் கிரியேட்ஸ் எவ்ரி ஸ்கிரீன், பில்ட்ஸ் எ கிளிக்கபிள் ப்ரோட்டோடைப், அண்ட் ஈவன் ஜெனரேட்ஸ் தி கோட். தி ஃபோர்த் இஸ் ஓபன், இட் ஆட்டோமேட்ஸ் ரிப்பெடிட்டிவ் வொர்க், டெல் இட் சம்திங் லைக், எவ்ரி மார்னிங், கலெக்ட் தீஸ் ரிப்போர்ட்ஸ், அண்ட் ஈமெயில் மீ எ சம்மரி, அண்ட் இட் பில்ட்ஸ் தி வொர்க் ஃப்ளோ பார் யூ. தி பிப்த் இஸ் ஃப்ளோ, கூகுள் AI ஃபில் மேக்கிங் டூல், டிஸ்கிரைப் எ சீன், ஆர் அப்லோட் அன் இமேஜ், அண்ட் இட் ஜெனரேட்ஸ் சினிமாட்டிக் வீடியோஸ், வித் ரியலிஸ்டிக் கேமரா மூவ்மென்ட்ஸ் அண்ட் லைட்டிங். யூ கேன் ஈவன் கீப் எடிட்டிங் தி சேம் சீன், ஃபார் எக்ஸாம்பிள், கண்டினியூ தி ஷாட், சேஞ்ச் தி கேமரா ஆங்கிள், ஸ்வாப் தி பேக்ரவுண்ட், ஆர் ஈவன் ரிப்ளேஸ் எ கேரக்டர். தேர் ஆர் 10 மோர் கூகுள் AI டூல்ஸ், ஐ குடன்ட் ஃபிட் இன்டு திஸ் வீடியோ, கமெண்ட் கூகுள், அண்ட் ஐ வில் சென்ட் தெம் டு யூ இன் யுவர் டிஎம்ஸ். சுண்டல் பீச்சாய், ஜஸ்ட் குயிட்லி டிராப் 15 ஃப்ரீ AI டூல்ஸ், அண்ட் மோஸ்ட் பீப்பிள் ஹேவ் நோ ஐடியா தே எக்ஸிஸ்ட். லெட் மீ ஷோ யூ, தி ஃபர்ஸ்ட் இஸ் ஆன்டி கிராவிட்டி, இட்ஸ் கூகுள் AI கோடிங் டூல், பட் யூ டோன்ட் நீட் டு நோ ஹவ் டு கோட், ஜஸ்ட் டிஸ்கிரைப் வாட் யூ வான்ட் டு பில்ட், அண்ட் இட் ஸ்டார்ட் கிரியேட்டிங் தி சாப்ட்வேர் பார் யூ. தி செகண்ட் இஸ் பார் மெல்லி, இட் லேர்ன்ஸ் யுவர் பிராண்ட் பிரம் யுவர் வெப்சைட், இன்குலூடிங் யுவர் கலர்ஸ், ஃபான்ட்ஸ், அண்ட் ரைட்டிங் ஸ்டைல். தென், இட் கிரியேட்ஸ் சோசியல் மீடியா போஸ்ட், ஆட்ஸ், அண்ட் அதர் கிரியேஷன்ஸ். தி தேர்ட் இஸ் ஸ்டிச், இன்ஸ்டெட் ஆப் டிசைனிங் யுவர் பிராண்ட், இட் டிசைன்ஸ் என்டையர் ஆப்ஸ், டிஸ்கிரைப் யுவர் ஐடியா, அண்ட் இட் கிரியேட்ஸ் எவ்ரி ஸ்கிரீன், பில்ட்ஸ் எ கிளிக்கபிள் ப்ரோட்டோடைப், அண்ட் ஈவன் ஜெனரேட்ஸ் தி கோட். தி ஃபோர்த் இஸ் ஓபன், இட் ஆட்டோமேட்ஸ் ரிப்பெடிட்டிவ் வொர்க், டெல் இட் சம்திங் லைக், எவ்ரி மார்னிங், கலெக்ட் தீஸ் ரிப்போர்ட்ஸ், அண்ட் ஈமெயில் மீ எ சம்மரி, அண்ட் இட் பில்ட்ஸ் தி வொர்க் ஃப்ளோ பார் யூ. தி பிப்த் இஸ் ஃப்ளோ, கூகுள் AI ஃபில் மேக்கிங் டூல், டிஸ்கிரைப் எ சீன், ஆர் அப்லோட் அன் இமேஜ், அண்ட் இட் ஜெனரேட்ஸ் சினிமாட்டிக் வீடியோஸ், வித் ரியலிஸ்டிக் கேமரா மூவ்மென்ட்ஸ் அண்ட் லைட்டிங். யூ கேன் ஈவன் கீப் எடிட்டிங் தி சேம் சீன், ஃபார் எக்ஸாம்பிள், கண்டினியூ தி ஷாட், சேஞ்ச் தி கேமரா ஆங்கிள், ஸ்வாப் தி பேக்ரவுண்ட், ஆர் ஈவன் ரிப்ளேஸ் எ கேரக்டர். தேர் ஆர் 10 மோர் கூகுள் AI டூல்ஸ், ஐ குடன்ட் ஃபிட் இன்டு திஸ் வீடியோ, கமெண்ட் கூகுள், அண்ட் ஐ வில் சென்ட் தெம் டு யூ இன் யுவர் டிஎம்ஸ். சுண்டல் பீச்சாய், ஜஸ்ட் குயிட்லி டிராப் 15 ஃப்ரீ AI டூல்ஸ், அண்ட் மோஸ்ட் பீப்பிள் ஹேவ் நோ ஐடியா தே எக்ஸிஸ்ட். லெட் மீ ஷோ யூ, தி ஃபர்ஸ்ட் இஸ் ஆன்டி கிராவிட்டி, இட்ஸ் கூகுள் AI கோடிங் டூல், பட் யூ டோன்ட் நீட் டு நோ ஹவ் டு கோட், ஜஸ்ட் டிஸ்கிரைப் வாட் யூ வான்ட் டு பில்ட், அண்ட் இட் ஸ்டார்ட் கிரியேட்டிங் தி சாப்ட்வேர் பார் யூ. தி செகண்ட் இஸ் பார் மெல்லி, இட் லேர்ன்ஸ் யுவர் பிராண்ட் பிரம் யுவர் வெப்சைட், இன்குலூடிங் யுவர் கலர்ஸ், ஃபான்ட்ஸ், அண்ட் ரைட்டிங் ஸ்டைல். தென், இட் கிரியேட்ஸ் சோசியல் மீடியா போஸ்ட், ஆட்ஸ், அண்ட் அதர் கிரியேஷன்ஸ். தி தேர்ட் இஸ் ஸ்டிச், இன்ஸ்டெட் ஆப் டிசைனிங் யுவர் பிராண்ட், இட் டிசைன்ஸ் என்டையர் ஆப்ஸ், டிஸ்கிரைப் யுவர் ஐடியா, அண்ட் இட் கிரியேட்ஸ் எவ்ரி ஸ்கிரீன், பில்ட்ஸ் எ கிளிக்கபிள் ப்ரோட்டோடைப், அண்ட் ஈவன் ஜெனரேட்ஸ் தி கோட். தி ஃபோர்த் இஸ் ஓபன், இட் ஆட்டோமேட்ஸ் ரிப்பெடிட்டிவ் வொர்க், டெல் இட் சம்திங் லைக், எவ்ரி மார்னிங், கலெக்ட் தீஸ் ரிப்போர்ட்ஸ், அண்ட் ஈமெயில் மீ எ சம்மரி, அண்ட் இட் பில்ட்ஸ் தி வொர்க் ஃப்ளோ பார் யூ. தி பிப்த் இஸ் ஃப்ளோ, கூகுள் AI ஃபில் மேக்கிங் டூல், டிஸ்கிரைப் எ சீன், ஆர் அப்லோட் அன் இமேஜ், அண்ட் இட் ஜெனரேட்ஸ் சினிமாட்டிக் வீடியோஸ், வித் ரியலிஸ்டிக் கேமரா மூவ்மென்ட்ஸ் அண்ட் லைட்டிங். யூ கேன் ஈவன் கீப் எடிட்டிங் தி சேம் சீன், ஃபார் எக்ஸாம்பிள், கண்டினியூ தி ஷாட், சேஞ்ச் தி கேமரா ஆங்கிள், ஸ்வாப் தி பேக்ரவுண்ட், ஆர் ஈவன் ரிப்ளேஸ் எ கேரக்டர். தேர் ஆர் 10 மோர் கூகுள் AI டூல்ஸ், ஐ குடன்ட் ஃபிட் இன்டு திஸ் வீடியோ, கமெண்ட் கூகுள், அண்ட் ஐ வில் சென்ட் தெம் டு யூ இன் யுவர் டிஎம்ஸ். சுண்டல் பீச்சாய், ஜஸ்ட் குயிட்லி டிராப் 15 ஃப்ரீ AI டூல்ஸ், அண்ட் மோஸ்ட் பீப்பிள் ஹேவ் நோ ஐடியா. There's a line in there which I'm not sure you read it, so if you can walk with King's nor lose the common touch, and if it's this whole series of trade-offs and. Unfortunately, today's world, it's like we'll either you a billionaire or you put the reality is these things coexist and. It is. Possible for seemingly. Anthropic இப்போ சொந்தமா பயாலஜிலாவே வச்சிருக்காங்க அந்த லேப்ல கிளாட் இப்போ சயின்டிஸ்ட் யாருமே கவனிக்காத ஒரு புது பயாலஜிக்கல் சிஸ்டத்தையே இது இப்போ ஐடென்டிஃபை பண்ணி கண்டுபிடிச்சிருக்கு சயின்டிஸ்ட் கிளாடுக்கு ஒரு டாஸ்க் கொடுத்திருக்காங்க டிஎன்ஏ டேட்டால அன்யூஸ்வலான என்சைம் சிஸ்டம்ஸ தேடணும் என்சைம்னா உயிரினங்களுக்குள்ள கெமிக்கல் ரியாக்ஷன்ஸ் நடக்க ஹெல்ப் பண்ற சின்ன மெஷின் மாதிரி சுமார் 950 ஏi ஏஜென்ட்ஸ் 21 ஹவர்ஸ் டிஎன்ஏ டேட்டால சர்ச் பண்ணிருக்கு அப்போதான் ஒரு ஏஜென்ட் என்சைமோட ஜீன் பக்கத்துல அன்யூஸ்வலான ரிப்பீட்டிங் டிஎன்ஏ பேட்டர்ன நோட்டிஸ் பண்ணிருக்கு அந்த என்சைம் சயின்டிஸ்ட்க்கு ஆல்ரெடி தெரியும் ஆனா அதை சுத்தி இருந்த இந்த ஃபுல் சிஸ்டத்தை அப்போதான் ஐடென்டிஃபை பண்ணிருக்காங்க அது புது பைண்டிங் தானாங்கிறத கிளாட் எடுத்து செக் பண்ணிருக்கு அந்த பேட்டர்ன் எத்தனை முறை ரிப்பீட் ஆகுதுன்னு கவுண்ட் பண்ணி ஆல்ரெடி தெரிஞ்ச சிஸ்டம்ஸோட கம்பேர் பண்ணிருக்கு இதை யாராவது முன்னாடியே டிஸ்கவர் பண்ணிருக்காங்களான்னு ரிசர்ச் பேப்பர்ஸும் செக் பண்ணிருக்கு இந்த பைண்டிங்ஸ ஹியூமன் சயின்டிஸ்ட் ரிவ்யூ பண்ணி லேப் எக்ஸ்பெரிமென்ட்ஸ் மூலமா ஃபர்தர் இன்வெஸ்டிகேட் பண்ணிருக்காங்க அந்த புது சிஸ்டத்துக்கு ஏஆர்டின்னு பேர் வச்சிருக்காங்க இது ஏன் சயின்டிஸ்டோட இன்ட்ரஸ்ட் அட்ராக்ட் பண்ணுதுன்னா டிஎன்ஏவ எடிட் பண்ண யூஸ் ஆகுற கிரிஸ்பர் சிஸ்டம்ல இருக்குற ரிப்பீட்டிங் பேட்டர்ன் மாதிரி இதுலயும் இருக்கு கிரிஸ்பரோட ஸ்டோரியும் இப்படித்தான் ஆரம்பிச்சது டிஎன்ஏல அன்யூஸ்வலான ரிப்பீட்ஸ சயின்டிஸ்ட் நோட்டிஸ் பண்ணினாங்க அதை புரிஞ்சுகிட்ட பிறகு அதை பேஸ் பண்ணி ஒரு பவர்ஃபுல் ஜீன் எடிட்டிங் டூல டெவலப் பண்ணினாங்க அந்த மாதிரி ஏஆர்டில இருந்து ஒரு யூஸ்ஃபுல் டூல் உருவாகுமாங்கிற பாசிபிலிட்டியை எக்ஸ்ப்ளோர் பண்ணிட்டு இருக்காங்க ஆனா ஏஆர்டி என்ன வேலை செய்யுதுங்கிறது இன்னும் தெரியல இதை வச்சு ஜீன் எடிட்டிங் பண்ண முடியும்ங்கிறது இன்னும் ப்ரூவ் ஆகல சோ இங்க கிளாட் பண்ணிருக்கிறது ஸ்பெசிபிக்கான ஒரு வேலை கவனிக்கப்படாத பேட்டர்ன கண்டுபிடிச்சு அது புதுசான்னு இன்வெஸ்டிகேட் பண்ணி சயின்டிஸ்ட் ஃபர்தர் ரிசர்ச் பண்ண ஒரு டிஸ்கவரிய கொடுத்திருக்கு என்ன பொறுத்தவரைக்கும் அடுத்த இம்பார்ட்டன்ட் டிஸ்கவரி எங்க இருக்கலாம் தேடுறதுல ஏ ஹெல்ப் பண்றதுதான் இந்த நியூஸோட எக்சைட்டிங் பார்ட் சோ தட் பீயிங் செட் நாளைக்கு உங்களை இன்னொரு இம்பார்ட்டன்ட் ஏ நியூஸ் அப்டேட் வீடியோவோட வந்து சந்திக்கிறேன் அன்டில் தென் திஸ் இஸ் யுவர் ஏ கோச் ஜான் சைனிங் ஆப். ஆந்த்ராபிக் இப்போ சொந்தமா பயாலஜி லேபே வச்சிருக்காங்க அந்த லேப்ல கிளாட் இப்போ சயின்டிஸ்ட் யாருமே கவனிக்காத ஒரு புது பயாலஜிக்கல் சிஸ்டத்தையே இது இப்போ ஐடென்டிஃபை பண்ணி கண்டுபிடிச்சிருக்கு சயின்டிஸ்ட் கிளாடுக்கு ஒரு டாஸ்க் கொடுத்திருக்காங்க டிஎன்ஏ டேட்டால அன்யூஸ்வலான என்சைம் சிஸ்டம்ஸ தேடணும் என்சைம்னா உயிரினங்களுக்குள்ள கெமிக்கல் ரியாக்ஷன்ஸ் நடக்க ஹெல்ப் பண்ற சின்ன மெஷின் மாதிரி சுமார் 950 ஏi ஏஜென்ட்ஸ் 21 ஹவர்ஸ் டிஎன்ஏ டேட்டால சர்ச் பண்ணிருக்கு அப்போதான் ஒரு ஏஜென்ட் என்சைமோட ஜீன் பக்கத்துல அன்யூஸ்வலான. I'm begging the creator of open claw just open source his entire agent setup and it's going viral his name is vitas steinberger he's the guy who built open claw and this is the exact file he uses to run his own ai agents across every single project he works on inside it you get his master rules file the one document every agent reads before it touches anything so codex and clawed code behave the same way in every reboot you get his skills folder which is basically a library of reusable workflows his agents pick up automatically including tools that crawl slack discord whatsapp and i message you get the scripts that sync all of those skills across his machines a validator that catches broken skills before they cause problems and even a browser tool that lets his agent open chrome click around take screenshots and read what's happening on a page this is if you want access to it just comment agent and I'll send it straight to you creator of open claw just open sourced his entire agent setup and it's open claw, can this be used only. With Visual Studio or can. That be applicable in the. Web page where we are working currently? In viewers or perplexity or in. Claude also, how to do that? And since that looks like we are checking out from there and using it, so is it only for Visual Studio Code or for other areas like what I said? &#x20;",
+       "source": "my_files",
+       "type": "file"
+      },
+      {
+       "alt": "([GitHub](https://github.com/openclaw/openclaw/blob/main/docs/tools/skills.md?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 6,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "OpenClaw",
+           "pub_date": null,
+           "snippet": "",
+           "title": "Skills - OpenClaw",
+           "url": "https://docs.openclaw.ai/skills?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "openclaw/docs/tools/skills.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/docs/tools/skills.md?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": null,
+       "prefix": null,
+       "prompt_text": null,
+       "type": "hidden"
+      },
+      {
+       "alt": "",
+       "has_images": false,
+       "prefix": null,
+       "prompt_text": null,
+       "sources": [
+        {
+         "attribution": "GitHub",
+         "title": "GitHub - openclaw/agent-skills: Useful skills for agents and claws. · GitHub",
+         "url": "https://github.com/openclaw/agent-skills?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "OpenClaw",
+         "title": "Getting started - OpenClaw",
+         "url": "https://docs.openclaw.ai/quickstart?utm_source=chatgpt.com"
+        }
+       ],
+       "type": "sources_footnote"
+      }
+     ],
+     "model_slug": "gpt-5-6",
+     "parent_id": "eedd35fe-9367-4ac6-b843-c8c230316e55",
+     "search_result_groups": [
+      {
+       "domain": "github.com",
+       "entries": [
+        {
+         "attribution": "github.com",
+         "snippet": "summary  | Skills: managed vs workspace, gating rules, and config/env wiring read_when  | Adding or modifying skills Changing skill gating or load rules title  | Skills  SKILLS (OPENCLAW)  OpenClaw u...",
+         "title": "openclaw-official/docs/tools/skills.md at main · tfspire/openclaw-official · GitHub",
+         "url": "https://github.com/tfspire/openclaw-official/blob/main/docs/tools/skills.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "GATING  OpenClaw filters skills at load time using `metadata.openclaw` (JSON5 object embedded in the frontmatter, see the parsing note above). A skill with no `metadata.openclaw` block is always eligi...",
+         "title": "docs/docs/tools/skills.md at main · openclaw/docs · GitHub",
+         "url": "https://github.com/openclaw/docs/blob/main/docs/tools/skills.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "MIGRATION FROM OPENCLAW  Coming from OpenClaw? Claude-Agent includes a one-click migration tool.  PREVIEW WHAT WILL BE MIGRATED (NO CHANGES MADE) node scripts/migrate-openclaw.cjs --dry-run  RUN THE M...",
+         "title": "GitHub - claude-world/claude-agent: Persistent personal assistant powered by Claude Code — autonomous memory, 13 skills, 4 MCP servers, content pipeline, OpenClaw migration · GitHub",
+         "url": "https://github.com/claude-world/claude-agent?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "ROUTING BINDINGS  Use routing bindings to pin inbound channel traffic to a specific agent.  If you also want different visible skills per agent, configure `agents.defaults.skills` and `agents.entries....",
+         "title": "docs/docs/cli/agents.md at main · openclaw/docs · GitHub",
+         "url": "https://github.com/openclaw/docs/blob/main/docs/cli/agents.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "BUNDLED SKILL ALLOWLIST  Optional allowlist for **bundled** skills only. When set, only bundled skills in the list are eligible. Managed, agent-level, and workspace skills are unaffected.  PER-SKILL E...",
+         "title": "docs/docs/tools/skills-config.md at main · openclaw/docs · GitHub",
+         "url": "https://github.com/openclaw/docs/blob/main/docs/tools/skills-config.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "AGENTS.MD  40 original AI agent skills for OpenClaw.  This repo contains only skills we created or significantly modified. For external/third-party skills, see EXTERNAL.md.  STRUCTURE  `skills/ ├── A...",
+         "title": "openclaw-skills/AGENTS.md at main · mfang0126/openclaw-skills · GitHub",
+         "url": "https://github.com/mfang0126/openclaw-skills/blob/main/AGENTS.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "AGENTS.MD  The task defines scope and authorization; its chosen workflow owns execution,  review, publication, recovery, and cleanup. Explicit user instructions take  precedence over skill guidelines...",
+         "title": "openclaw/AGENTS.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/AGENTS.md?plain=1&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "title  | Skills config sidebarTitle  | Skills config summary  | Full reference for the skills.* config schema, agent allowlists, workshop settings, and sandbox env var handling. read_when  | Configur...",
+         "title": "openclaw/docs/tools/skills-config.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/docs/tools/skills-config.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "summary  | Move Claude Code and Claude Desktop local state into OpenClaw with a previewed import read_when  | You are coming from Claude Code or Claude Desktop and want to keep instructions, MCP serv...",
+         "title": "openclaw/docs/install/migrating-claude.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/docs/install/migrating-claude.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "summary  | Get OpenClaw installed and run your first chat in minutes. read_when  | First time setup from zero You want the fastest path to a working chat title  | Getting started  Install OpenClaw, r...",
+         "title": "openclaw/docs/start/getting-started.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/docs/start/getting-started.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "OPENCLAW AGENT SKILLS  Shared skills for coding agents that work on OpenClaw projects.  This repo is the public canonical source for common workflows such as review closeout and remote validation. Th...",
+         "title": "agent-skills/README.md at main · openclaw/agent-skills · GitHub",
+         "url": "https://github.com/openclaw/agent-skills/blob/main/README.md?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "openclaw.ai",
+       "entries": [
+        {
+         "attribution": "openclaw.ai",
+         "snippet": "Skills  SKILLS  Capabilities Skills  Skills are markdown instruction files that teach the agent how and when to use tools. Each skill lives in a directory containing a `SKILL.md` file with YAML front...",
+         "title": "Skills - OpenClaw",
+         "url": "https://docs.openclaw.ai/skills?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openclaw.ai",
+         "snippet": "Plugins  PLUGIN BUNDLES  Capabilities Plugins  OpenClaw can install plugins from four external ecosystems: the vendor-neutral Agent Plugins standard, plus Codex, Claude, and Cursor. These are called...",
+         "title": "Plugin bundles - OpenClaw",
+         "url": "https://docs.openclaw.ai/plugins/bundles?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openclaw.ai",
+         "snippet": "MARKETPLACE SOURCES  * a Claude known-marketplace name from `~/.claude/plugins/known_marketplaces.json` * a local marketplace root or `marketplace.json` path * a GitHub repo shorthand such as `owner/r...",
+         "title": "Install plugins - OpenClaw",
+         "url": "https://docs.openclaw.ai/cli/plugins/install?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openclaw.ai",
+         "snippet": "Skills  SKILLS CONFIG  Capabilities Skills  Most skills configuration lives under `skills` in `~/.openclaw/openclaw.json`. Agent-specific visibility lives under `agents.defaults.skills` and `agents.e...",
+         "title": "Skills config - OpenClaw",
+         "url": "https://docs.openclaw.ai/tools/skills-config?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openclaw.ai",
+         "snippet": "REQUIREMENTS  * The official `@openclaw/codex` plugin installed. Include `codex` in `plugins.allow` if your config uses an allowlist. * Managed Codex app-server `0.160.0`. The plugin ships and manages...",
+         "title": "Codex harness - OpenClaw",
+         "url": "https://docs.openclaw.ai/plugins/codex-harness?utm_source=chatgpt.com"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "parent": "eedd35fe-9367-4ac6-b843-c8c230316e55"
+  },
+  "295f9621-607f-45b0-8a54-e9c1c5ced97c": {
+   "id": "295f9621-607f-45b0-8a54-e9c1c5ced97c",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "multimodal_text",
+     "parts": [
+      {
+       "asset_pointer": "sediment://file_0000000067b08210b1897c9590f6f022",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 937,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 136176,
+       "width": 1911
+      },
+      "00:31 07/19/2026"
+     ]
+    },
+    "create_time": 1791329507.746,
+    "id": "295f9621-607f-45b0-8a54-e9c1c5ced97c",
+    "metadata": {
+     "attachments": [
+      {
+       "height": 937,
+       "id": "file_0000000067b08210b1897c9590f6f022",
+       "library_file_id": "libfile_88e585e505308191925738e6aac2a96d",
+       "mime_type": "image/png",
+       "name": "image(20261006-233137).png",
+       "size": 136176,
+       "width": 1911
+      }
+     ]
+    }
+   },
+   "parent": "583b752d-e704-488d-9abb-eb7130bbf5bb"
+  },
+  "2da607f5-8ece-46af-964e-f0edba1b9308": {
+   "id": "2da607f5-8ece-46af-964e-f0edba1b9308",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "## 06/10/2026 23:53 — Viral OpenClaw Claim Check\n\nPartner, **the reel is based on something real, but it badly mangles the name and exaggerates what was released.**\n\nThe person is **Peter Steinberger**, not “Vitas Steinberger.” He is the creator/lead behind urlOpenClawhttps://github.com/openclaw/openclaw. The current OpenClaw material explicitly credits “Peter Steinberger and the community.” citeturn0search2\n\nMore importantly for **what we have been doing with TalkProof/Git/turn protocols**, there really is something worth studying here.\n\n### What is actually true\n\nThe official OpenClaw organization has published an open-source repository called urlOpenClaw Agent Skillshttps://github.com/openclaw/agent-skills. It describes itself as the **public canonical source for common agent workflows**. citeturn0search1\n\nIt contains the architecture the reel is talking about:\n\n```text\nagent-skills/\n├── AGENTS.md\n├── skills/\n│   ├── agent-transcript/\n│   ├── autoreview/\n│   ├── behavior-validator/\n│   ├── beam/\n│   ├── crabbox/\n│   ├── handoff/\n│   └── session-viewer/\n└── scripts/\n    ├── install-skills\n    ├── validate-skills\n    └── check-skills\n```\n\nAnd **Codex + Claude Code sharing the same skills is explicitly supported**. The repo gives installation/symlink instructions for both `~/.codex/skills` and `~/.claude/skills`. citeturn0search1\n\nSo this part of the reel is substantially correct:\n\n**write the operating procedure once → make multiple coding agents consume the same procedure.**\n\n---\n\n### But the reel oversells several things\n\n| Reel claim | What I can verify |\n|---|---|\n| “Vitas Steinberger” created OpenClaw | ❌ Wrong name. **Peter Steinberger** |\n| “He open-sourced his entire personal agent setup” | ⚠️ I cannot substantiate **entire personal setup** |\n| Master `AGENTS.md` | ✅ Real |\n| Reusable `skills/` | ✅ Real |\n| Skills shared with Codex + Claude Code | ✅ Explicitly supported |\n| Skill validation scripts | ✅ Real |\n| Browser automation | ✅ OpenClaw has browser/tool capabilities |\n| WhatsApp/Slack/Discord/iMessage integration | ✅ OpenClaw supports messaging-channel integrations |\n| “These skills crawl all his Slack/Discord/WhatsApp/iMessage” | ⚠️ Much stronger claim than the evidence I found |\n| “Exact file he personally uses across every project” | ⚠️ I haven't found evidence establishing that |\n\nOpenClaw itself uses workspace files such as `AGENTS.md`, `SOUL.md` and `TOOLS.md`, and workspace skills live under the workspace's `skills/.../SKILL.md`. citeturn0search2turn0search3\n\nThere is also an important security point missing from the reel: OpenClaw's own documentation says to treat third-party skills as **untrusted code** and inspect them before enabling them. citeturn0search3\n\n## Why I think this matters to **our** work\n\nThis is actually very close to the problem you've repeatedly been solving manually with me and Claude.\n\nFor TalkProof, you've been saying things like:\n\n```text\nFollow Git turn protocol\n↓\nRead handover\n↓\nRead tracker\n↓\nDo the work\n↓\nCreate review artifact\n↓\nUpdate tracker\n↓\nCommit\n↓\nGive Claude the handoff\n↓\nNext turn: DON'T FORGET THE PROTOCOL\n```\n\nThe architectural idea behind `AGENTS.md + SKILL.md + validators` is:\n\n```text\n                 ONE VERSIONED OPERATING SYSTEM\n                           │\n                     AGENTS.md\n                           │\n              ┌────────────┼────────────┐\n              ▼            ▼            ▼\n          Git Skill    Review Skill   Handoff Skill\n              │            │            │\n              └────────────┼────────────┘\n                           ▼\n                    Validation scripts\n                           │\n             ┌─────────────┴─────────────┐\n             ▼                           ▼\n        Claude Code                    Codex\n             │                           │\n             └──────── SAME RULES ───────┘\n```\n\nAnd **that is not social-media fantasy**. The official agent-skills repository specifically says its purpose is to write a workflow once and reuse it rather than hand-copying long `SKILL.md` files between repositories. citeturn0search1\n\n### The particularly interesting bit for you\n\nTheir root OpenClaw `AGENTS.md` begins with an instruction that the agent must read the root policy and the nearest scoped `AGENTS.md` before working in a subtree, and tells the agent to inspect Git status before editing. citeturn0search4\n\nThat is remarkably close to the direction you've independently been pushing:\n\n**Git isn't merely storing the code. Git stores the operating contract for the AI doing the work.**\n\nSo I would **not copy Peter's setup wholesale**.\n\nI would study it and compare it against your current TalkProof Git-turn protocol. We may find that a substantial amount of your repeated prompting can become:\n\n**AGENTS.md → reusable skills → deterministic scripts → validators → agent-specific execution.**\n\nThat could be a meaningful improvement to the system you've already built, rather than replacing it with OpenClaw. memcite"
+     ]
+    },
+    "create_time": 1791327204.466044,
+    "id": "2da607f5-8ece-46af-964e-f0edba1b9308",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "kcd456",
+       "preview_language": null,
+       "previewable": false
+      },
+      "1": {
+       "edited": false,
+       "id": "wve5cm",
+       "preview_language": null,
+       "previewable": false
+      },
+      "2": {
+       "edited": false,
+       "id": "ovzcy7",
+       "preview_language": null,
+       "previewable": false
+      }
+     },
+     "content_references": [
+      {
+       "alt": "[OpenClaw](https://github.com/openclaw/openclaw?utm_source=chatgpt.com)",
+       "logo": null,
+       "prefix": null,
+       "prompt_text": null,
+       "title": "OpenClaw",
+       "type": "url"
+      },
+      {
+       "alt": "([GitHub](https://github.com/ntutangyun/openclaw?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 2,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "GitHub - ntutangyun/openclaw · GitHub",
+         "url": "https://github.com/ntutangyun/openclaw?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "[OpenClaw Agent Skills](https://github.com/openclaw/agent-skills?utm_source=chatgpt.com)",
+       "logo": null,
+       "prefix": null,
+       "prompt_text": null,
+       "title": "OpenClaw Agent Skills",
+       "type": "url"
+      },
+      {
+       "alt": "([GitHub](https://github.com/openclaw/agent-skills?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "GitHub - openclaw/agent-skills: Useful skills for agents and claws. · GitHub",
+         "url": "https://github.com/openclaw/agent-skills?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([GitHub](https://github.com/openclaw/agent-skills?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "GitHub - openclaw/agent-skills: Useful skills for agents and claws. · GitHub",
+         "url": "https://github.com/openclaw/agent-skills?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([GitHub](https://github.com/ntutangyun/openclaw?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 2,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 3,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "GitHub",
+           "pub_date": null,
+           "snippet": "",
+           "title": "openclaw/docs/tools/skills.md at main · openclaw/openclaw · GitHub",
+           "url": "https://github.com/openclaw/openclaw/blob/main/docs/tools/skills.md?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "GitHub - ntutangyun/openclaw · GitHub",
+         "url": "https://github.com/ntutangyun/openclaw?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([GitHub](https://github.com/openclaw/openclaw/blob/main/docs/tools/skills.md?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 3,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "openclaw/docs/tools/skills.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/docs/tools/skills.md?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([GitHub](https://github.com/openclaw/agent-skills?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "GitHub - openclaw/agent-skills: Useful skills for agents and claws. · GitHub",
+         "url": "https://github.com/openclaw/agent-skills?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Upd.dev](https://upd.dev/openclaw/openclaw/src/commit/444418e27d0b5c422a85d4ecea3f5416450c8f98/AGENTS.md?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Upd.dev",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1788912000.0,
+         "refs": [
+          {
+           "ref_index": 4,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "openclaw/AGENTS.md at 444418e27d0b5c422a85d4ecea3f5416450c8f98 - openclaw/openclaw - upd.dev",
+         "url": "https://upd.dev/openclaw/openclaw/src/commit/444418e27d0b5c422a85d4ecea3f5416450c8f98/AGENTS.md?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": null,
+       "prefix": null,
+       "prompt_text": null,
+       "type": "hidden"
+      },
+      {
+       "alt": "",
+       "has_images": false,
+       "prefix": null,
+       "prompt_text": null,
+       "sources": [
+        {
+         "attribution": "GitHub",
+         "title": "GitHub - ntutangyun/openclaw · GitHub",
+         "url": "https://github.com/ntutangyun/openclaw?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "Upd.dev",
+         "title": "openclaw/AGENTS.md at 444418e27d0b5c422a85d4ecea3f5416450c8f98 - openclaw/openclaw - upd.dev",
+         "url": "https://upd.dev/openclaw/openclaw/src/commit/444418e27d0b5c422a85d4ecea3f5416450c8f98/AGENTS.md?utm_source=chatgpt.com"
+        }
+       ],
+       "type": "sources_footnote"
+      }
+     ],
+     "model_slug": "gpt-5-6",
+     "parent_id": "d0f9fa49-0cb3-4d34-8b31-0e7e17137053",
+     "search_result_groups": [
+      {
+       "domain": "github.com",
+       "entries": [
+        {
+         "attribution": "github.com",
+         "snippet": "AGENTS.MD  40 original AI agent skills for OpenClaw.  This repo contains only skills we created or significantly modified. For external/third-party skills, see EXTERNAL.md.  STRUCTURE  `skills/ ├── A...",
+         "title": "openclaw-skills/AGENTS.md at main · mfang0126/openclaw-skills · GitHub",
+         "url": "https://github.com/mfang0126/openclaw-skills/blob/main/AGENTS.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "FILE METADATA AND CONTROLS  * Preview  * Code  * Blame  472 lines (359 loc) · 16.8 KB  Raw  name  | openclaw description  | The definitive reference for OpenClaw, the self-hosted personal AI assistan...",
+         "title": "openclaw-skill/SKILL.md at main · zeb-global/openclaw-skill · GitHub",
+         "url": "https://github.com/zeb-global/openclaw-skill/blob/main/SKILL.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "title  | Skills config sidebarTitle  | Skills config summary  | Full reference for the skills.* config schema, agent allowlists, workshop settings, and sandbox env var handling. read_when  | Configur...",
+         "title": "openclaw/docs/tools/skills-config.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/docs/tools/skills-config.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "Each env var must exist in the process or be provided via config. Each `openclaw.json` path must be truthy. Env var name associated with `skills.entries..apiKey`. Optional installer specs used by the...",
+         "title": "docs/docs/tools/skills.md at main · openclaw/docs · GitHub",
+         "url": "https://github.com/openclaw/docs/blob/main/docs/tools/skills.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "AGENT WORKSPACE  The workspace is the agent's \"home directory\" containing persona files, memory, and skills.  Default location: `~/.openclaw/workspace`  * If `OPENCLAW_PROFILE` is set: `~/.openclaw/wo...",
+         "title": "TheBigClaw/openclawdoc.md at main · RogueIteration/TheBigClaw · GitHub",
+         "url": "https://github.com/RogueIteration/TheBigClaw/blob/main/openclawdoc.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "summary  | Skills: managed vs workspace, gating rules, and config/env wiring read_when  | Adding or modifying skills Changing skill gating or load rules title  | Skills  SKILLS (OPENCLAW)  OpenClaw u...",
+         "title": "openclaw-official/docs/tools/skills.md at main · tfspire/openclaw-official · GitHub",
+         "url": "https://github.com/tfspire/openclaw-official/blob/main/docs/tools/skills.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "SKILLS.MD  Copy path  Blame More file actions  Blame More file actions  LATEST COMMIT  steipete  Mar 7, 2026  HISTORY  Open commit details  History  BREADCRUMBS  1. openclaw 2. /docs 3. /tools  /  SK...",
+         "title": "openclaw/docs/tools/skills.md at main · ProjectOpenCannibal/openclaw · GitHub",
+         "url": "https://github.com/ProjectOpenCannibal/openclaw/blob/main/docs/tools/skills.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "openclaw / openclaw Public  * ### Uh oh!  There was an error while loading. Please reload this page.  * Notifications You must be signed in to change notification settings * Fork 82k * Star  * Code *...",
+         "title": "GitHub - openclaw/openclaw at infer.blog · GitHub",
+         "url": "https://github.com/openclaw/openclaw?ref=infer.blog&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "openclaw / openclaw Public  * ### Uh oh!  There was an error while loading. Please reload this page.  * Notifications You must be signed in to change notification settings * Fork 82k * Star  * Code *...",
+         "title": "GitHub - openclaw/openclaw at archy.net · GitHub",
+         "url": "https://github.com/openclaw/openclaw?ref=archy.net&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "openclaw / openclaw Public  * ### Uh oh!  There was an error while loading. Please reload this page.  * Notifications You must be signed in to change notification settings * Fork 81.9k * Star  * Code...",
+         "title": "GitHub - openclaw/openclaw at iai88.com · GitHub",
+         "url": "https://github.com/openclaw/openclaw?ref=iai88.com&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "OPENCLAW 🦞 — YOUR ASSISTANT, ON YOUR DEVICES, IN YOUR CHATS  Image: OpenClaw — EXFOLIATE! EXFOLIATE! Your AI assistant, running on your own devices.  OpenClaw is an open-source AI assistant that runs...",
+         "title": "GitHub - openclaw/openclaw at discoverhub · GitHub",
+         "url": "https://github.com/openclaw/openclaw?ref=discoverhub&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "CLAWHUB (INSTALL + SYNC)  ClawHub is the public skills registry for OpenClaw. Browse at https://clawhub.com. Use native `openclaw skills` commands to discover/install/update skills, or the separate `c...",
+         "title": "openclaw/docs/tools/skills.md at main · sidonsoft/openclaw · GitHub",
+         "url": "https://github.com/sidonsoft/openclaw/blob/main/docs/tools/skills.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "OPENCLAW 🦞 — YOUR ASSISTANT, ON YOUR DEVICES, IN YOUR CHATS  Image: OpenClaw — EXFOLIATE! EXFOLIATE! Your AI assistant, running on your own devices.  OpenClaw is an open-source AI assistant that runs...",
+         "title": "GitHub - openclaw/openclaw at imbila-ai.ghost.io · GitHub",
+         "url": "https://github.com/openclaw/openclaw?ref=imbila-ai.ghost.io&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "openclaw / openclaw Public  * ### Uh oh!  There was an error while loading. Please reload this page.  * Notifications You must be signed in to change notification settings * Fork 81.9k * Star  * Code...",
+         "title": "GitHub - openclaw/openclaw at toolbrain.net · GitHub",
+         "url": "https://github.com/openclaw/openclaw?ref=toolbrain.net&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "OPENCLAW 🦞 — YOUR ASSISTANT, ON YOUR DEVICES, IN YOUR CHATS  Image: OpenClaw — EXFOLIATE! EXFOLIATE! Your AI assistant, running on your own devices.  OpenClaw is an open-source AI assistant that runs...",
+         "title": "GitHub - openclaw/openclaw at matveev.tech · GitHub",
+         "url": "https://github.com/openclaw/openclaw?ref=matveev.tech&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "PETER STEINBERGER STEIPETE  🤖  beep boop  Came back from retirement to mess with AI. Clawdfather @openclaw Previously: Founder of @PSPDFKit.  53.2k followers · 109 following  * OpenAI  * London / San...",
+         "title": "steipete’s gists · GitHub",
+         "url": "https://gist.github.com/steipete?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "V0.3.0  First public release of Evidra Benchmark.  CORE PIPELINE  * Canonicalization adapters: Kubernetes (kubectl, oc, helm), Terraform, Docker (docker, nerdctl, podman), generic fallback * Risk matr...",
+         "title": "evidra/CHANGELOG.md at main · vitas/evidra · GitHub",
+         "url": "https://github.com/vitas/evidra/blob/main/CHANGELOG.md?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "fossies.org",
+       "entries": [
+        {
+         "attribution": "fossies.org",
+         "snippet": "|  | ```json5  |  | ```json5 { agents: { defaults: { skipBootstrap: true } } }  |  | { agents: { defaults: { skipBootstrap: true } } } ```  |  | ``` BUILT-IN TOOLS  |  | ## BUILT-IN TOOLS |  | Core to...",
+         "title": "openclaw: docs/concepts/agent.md - 2026.9.3 vs. 2026.9.4 changes | Fossies Diffs",
+         "url": "https://fossies.org/diffs/openclaw/2026.9.3_vs_2026.9.4/docs/concepts/agent.md-diff.html?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "fossies.org",
+         "snippet": "SKILLS  |  | ## SKILLS |  | OpenClaw loads skills from these locations (highest precedence first):  |  | OpenClaw loads skills from these locations (highest precedence first): |  | - Workspace: `<work...",
+         "title": "openclaw: docs/concepts/agent.md - 2026.7.1-2 vs. 2026.8.1 changes | Fossies Diffs",
+         "url": "https://fossies.org/diffs/openclaw/2026.7.1-2_vs_2026.8.1/docs/concepts/agent.md-diff.html?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "skills.rest",
+       "entries": [
+        {
+         "attribution": "skills.rest",
+         "snippet": "Home/Software Engineering/openclaw/openclaw  openclawOfficial·120 Agent Skills Included  OPENCLAW  Run a personal AI assistant across your devices and chat apps  Runs a self-hosted AI assistant gatew...",
+         "title": "openclaw — Agent Skills Repository by openclaw | skills.rest",
+         "url": "https://skills.rest/repo/openclaw/openclaw?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "openclaw.ai",
+       "entries": [
+        {
+         "attribution": "openclaw.ai",
+         "snippet": "`AGENTS ADD [NAME]`  Options: `--role <role>`, `--workspace <dir>`, `--model <id>`, `--agent-dir <dir>`, `--bind <channel[:accountId]>` (repeatable), `--non-interactive`, `--json`.  * The automation f...",
+         "title": "Agents - OpenClaw",
+         "url": "https://docs.openclaw.ai/cli/agents?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openclaw.ai",
+         "snippet": "Skills  CREATING SKILLS  Capabilities Skills  Skills teach the agent how and when to use tools. Each skill is a directory containing a `SKILL.md` file with YAML frontmatter and markdown instructions....",
+         "title": "Creating skills - OpenClaw",
+         "url": "https://docs.openclaw.ai/tools/creating-skills?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openclaw.ai",
+         "snippet": "Skills  SKILLS  Capabilities Skills  Skills are markdown instruction files that teach the agent how and when to use tools. Each skill lives in a directory containing a `SKILL.md` file with YAML front...",
+         "title": "Skills - OpenClaw",
+         "url": "https://docs.openclaw.ai/tools/skills?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openclaw.ai",
+         "snippet": "Skills  SKILLS CONFIG  Capabilities Skills  Most skills configuration lives under `skills` in `~/.openclaw/openclaw.json`. Agent-specific visibility lives under `agents.defaults.skills` and `agents.e...",
+         "title": "Skills config - OpenClaw",
+         "url": "https://docs.openclaw.ai/tools/skills-config?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "laiyagushi.com",
+       "entries": [
+        {
+         "attribution": "laiyagushi.com",
+         "snippet": "AGENT WORKSPACE + SKILLS  * Workspace root: `~/.openclaw/workspace` (configurable via `agents.defaults.workspace`). * Injected prompt files: `AGENTS.md`, `SOUL.md`, `TOOLS.md`. * Skills: `~/.openclaw/...",
+         "title": "GitHub - opencolin/openclaw: Your own personal AI assistant. Any OS. Any Platform. The lobster way. 🦞 · GitHub",
+         "url": "https://github.laiyagushi.com/opencolin/openclaw?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "plaud.ai",
+       "entries": [
+        {
+         "attribution": "plaud.ai",
+         "snippet": "README.MD  Copy path  [Input: Go to file]  Blame More file actions  Blame More file actions  OPENCLAW AGENT SKILLS  Shared skills for coding agents that work on OpenClaw projects.  This repo is the p...",
+         "title": "agent-skills/README.md at main · openclaw/agent-skills · GitHub",
+         "url": "https://download.plaud.ai/openclaw/agent-skills/blob/main/README.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "plaud.ai",
+         "snippet": "skills.sh.json  | skills.sh.json  |    | [Button: View all files]  OPENCLAW AGENT SKILLS  Shared skills for coding agents that work on OpenClaw projects.  This repo is the public canonical source for...",
+         "title": "GitHub - openclaw/agent-skills: Useful skills for agents and claws. · GitHub",
+         "url": "https://download.plaud.ai/openclaw/agent-skills?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "plaud.ai",
+         "snippet": "README.MD  Copy path  [Input: Go to file]  Blame More file actions  Blame More file actions  OPENCLAW 🦞 — YOUR ASSISTANT, ON YOUR DEVICES, IN YOUR CHATS  Image: OpenClaw — EXFOLIATE! EXFOLIATE! Your...",
+         "title": "openclaw/README.md at main · openclaw/openclaw · GitHub",
+         "url": "https://download.plaud.ai/openclaw/openclaw/blob/main/README.md?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "github.blog",
+       "entries": [
+        {
+         "attribution": "github.blog",
+         "snippet": "Home / Open Source / Maintainers  OPENCLAW WENT VIRAL. MEET THE MAINTAINERS BUILDING AND SECURING IT.  OpenClaw is the fastest-growing project in GitHub history. Peter Steinberger and several maintai...",
+         "title": "OpenClaw went viral. Meet the maintainers building and securing it. - The GitHub Blog",
+         "url": "https://github.blog/open-source/maintainers/openclaw-went-viral-meet-the-maintainers-building-and-securing-it/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "ccwu.cc",
+       "entries": [
+        {
+         "attribution": "ccwu.cc",
+         "snippet": "OPENCLAW 🦞 — YOUR ASSISTANT, ON YOUR DEVICES, IN YOUR CHATS  Image: OpenClaw — EXFOLIATE! EXFOLIATE! Your AI assistant, running on your own devices.  OpenClaw is an open-source AI assistant that runs...",
+         "title": "GitHub - openclaw/openclaw: The AI that really does things. Any OS. Any Platform. The lobster way. 🦞 · GitHub",
+         "url": "https://gh.zkt.ccwu.cc/openclaw/openclaw?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "unpkg.com",
+       "entries": [
+        {
+         "attribution": "unpkg.com",
+         "snippet": "Managed `~/.openclaw/skills` and personal `~/.agents/skills` directories already accept skill-directory symlinks (per-skill `SKILL.md` containment still applies). ## Sandboxed skills and env vars <War...",
+         "title": "UNPKG",
+         "url": "https://app.unpkg.com/openclaw%402026.6.6/files/docs/tools/skills-config.md?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "kobo.com",
+       "entries": [
+        {
+         "attribution": "kobo.com",
+         "snippet": "OPENCLAW 🦞 — YOUR ASSISTANT, ON YOUR DEVICES, IN YOUR CHATS  Image: OpenClaw — EXFOLIATE! EXFOLIATE! Your AI assistant, running on your own devices.  OpenClaw is an open-source AI assistant that runs...",
+         "title": "GitHub - openclaw/openclaw: The AI that really does things. Any OS. Any Platform. The lobster way. 🦞 · GitHub",
+         "url": "https://custcareportal.kobo.com/https/github.com/openclaw/openclaw/tree/main?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "vocalmiddle.com",
+       "entries": [
+        {
+         "attribution": "vocalmiddle.com",
+         "snippet": "2026-03-04  〖首席 AI 顧問專欄〗小龍蝦登頂 GITHUB，這是品牌治理的新奇點  首席 AI 顧問專欄張昊煒（Vitas ZHANG）ximuAI PR  Image: 〖首席 AI 顧問專欄〗小龍蝦登頂 Github，這是品牌治理的新奇點  OpenClaw 短短數月就登頂，成為 GitHub 歷史星標排行榜第一的新聞，不只是技術話題的爆點；它是一個明確訊號：個人化、代理化的...",
+         "title": "〖首席 AI 顧問專欄〗小龍蝦登頂 Github，這是品牌治理的新奇點 | 布爾喬亞 公關顧問 | Built for Making Impact",
+         "url": "https://www.vocalmiddle.com/insights/pm-talks/20260304?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "linkedin.com",
+       "entries": [
+        {
+         "attribution": "linkedin.com",
+         "snippet": "JARNO DONGSTRA    Groningen en omgeving  240 volgers 240 connecties   GEMEENSCHAPPELIJKE CONNECTIES MET JARNO WEERGEVEN  Jarno kan u introduceren bij meer dan 10 mensen bij KPN   KPN  Hanzehogeschool...",
+         "title": "Jarno Dongstra - KPN | LinkedIn",
+         "url": "https://nl.linkedin.com/in/jarno-dongstra-4b148a28?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "linkedin.com",
+         "snippet": "* Jobs * Games  Join now Sign in  Beau D.  3mo  “From architecting massive Sitecore & Azure solutions at VITAS Healthcare and eBay Enterprise… to realizing most companies still can’t safely use cuttin...",
+         "title": "Private AI Ecosystem for Enterprise Security | Beau D. posted on the topic | LinkedIn",
+         "url": "https://www.linkedin.com/posts/beaudamore_aiforenterprise-privatellm-secureai-activity-7413670941446074368-Gj3u?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "linkedin.com",
+         "snippet": "* Robert Aumiller R.AU-Computertechnik GmbH &… • 114 Follower:innen 【14† VVT - Pflicht oder Papiertiger? Das Verzeichnis von Verarbeitungstätigkeiten (VVT) bildet die strukturierte Übersicht aller Pro...",
+         "title": "Marie Distler – VITAS - Virtuelle Telefonassistenten | LinkedIn",
+         "url": "https://de.linkedin.com/in/marie-distler?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "linkedin.com",
+         "snippet": "Verify field behavior against your own tenant.  `` `` ``  * Melverick Ng  2mo  I accidentally update my openclaw version to 2026.4.1 and my agent refuse to do many tasks on its own. This is how I foun...",
+         "title": "#aiagents #aigovernance #runtimegovernance #devtools #ai #aitools #llm #developertools #aiengineering | Arnold Cartagena | 18 comments",
+         "url": "https://www.linkedin.com/posts/arnold-cartagena_aiagents-aigovernance-runtimegovernance-activity-7438499129368080384-g6Zc?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "linkedin.com",
+         "snippet": "The idea of being a teacher has always…】  DURING MY TIME AWAY FROM HOME, I'VE BEEN ABLE TO REFLECT ON HOW I CAN BEST USE MY CAREER TO SERVE OTHERS. THE IDEA OF BEING A TEACHER HAS ALWAYS…  LIKED BY SI...",
+         "title": "Silpa Ajjarapu - MongoDB | LinkedIn",
+         "url": "https://www.linkedin.com/in/silpa-ajjarapu?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "gamebrew.org",
+       "entries": [
+        {
+         "attribution": "gamebrew.org",
+         "snippet": "LIST OF VITA HOMEBREW GAMES  From GameBrew  * Applications * Games * Emulators * Plugins * Demos * Rom Hacks * PC Utilities * All Action | Adventure | Arcade | Board | Card | Game Engine | Music | Pl...",
+         "title": "List of Vita homebrew games - GameBrew",
+         "url": "https://www.gamebrew.org/wiki/List_of_Vita_homebrew_games?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "twstalker.com",
+       "entries": [
+        {
+         "attribution": "twstalker.com",
+         "snippet": "TOM NASH X @IAMTOMNASHXX  Father, Husband. @stock_mvp Co-Founder. University of Michigan. MBA. Ex Deloitte. Geo Politics Fanatic. Cyoutube.com/tomnashtv Joined September 2014  * Tweets  0  * Follower...",
+         "title": "Tom Nash X @iamtomnashxx - Twitter Profile | TwStalker",
+         "url": "https://www6.twstalker.com/iamtomnashxx?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "aiszotar.hu",
+       "entries": [
+        {
+         "attribution": "aiszotar.hu",
+         "snippet": "Az OpenAI a mai generatív-MI-piac egyik meghatározó szereplője.  Rokon fogalmak: ChatGPT, Anthropic, LLM, frontier  OPENCLAW  Angol megfelelő: nincs rövidítés, angol terméknév  Az OpenClaw egy önálló,...",
+         "title": "AI-szótár – mesterséges intelligencia fogalmak magyarul",
+         "url": "https://aiszotar.hu/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "8bitsecurity.com",
+       "entries": [
+        {
+         "attribution": "8bitsecurity.com",
+         "snippet": "【9†OpenClaw’s Skill Marketplace and the Emerging AI Supply Chain Threat OpenClaw is an AI agent that executes third-party skills from ClawHub, its dedicated marketplace. Skills are markdown-driven pac...",
+         "title": "github.com - Nexus8",
+         "url": "https://nexus8.8bitsecurity.com/entity/ioc-github-com?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "peerspot.com",
+       "entries": [
+        {
+         "attribution": "peerspot.com",
+         "snippet": "BREAKING IT OPENCLAW VS CALABRIO ONE COMPARISON  Breaking IT and Calabrio are both solutions in the AI Scheduling & Coordination category. Breaking IT is ranked #14, while Calabrio is ranked #4. Addi...",
+         "title": "Breaking IT OpenClaw vs Calabrio ONE (2026)",
+         "url": "https://www.peerspot.com/products/comparisons/breaking-it-openclaw_vs_calabrio-one?utm_source=chatgpt.com"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "parent": "d0f9fa49-0cb3-4d34-8b31-0e7e17137053"
+  },
+  "2e8cbbec-4129-4b75-986b-b822a54a04e7": {
+   "id": "2e8cbbec-4129-4b75-986b-b822a54a04e7",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "I'm begging the creator of open claw just open source his entire agent setup and it's going viral his name is vitas steinberger he's the guy who built open claw and this is the exact file he uses to run his own ai agents across every single project he works on inside it you get his master rules file the one document every agent reads before it touches anything so codex and clawed code behave the same way in every reboot you get his skills folder which is basically a library of reusable workflows his agents pick up automatically including tools that crawl slack discord whatsapp and i message you get the scripts that sync all of those skills across his machines a validator that catches broken skills before they cause problems and even a browser tool that lets his agent open chrome click around take screenshots and read what's happening on a page this is if you want access to it just comment agent and I'll send it straight to you  is this true? 06/19/2026 23:53 got from a erel"
+     ]
+    },
+    "create_time": 1791327201.443,
+    "id": "2e8cbbec-4129-4b75-986b-b822a54a04e7"
+   },
+   "parent": "client-created-root"
+  },
+  "4fc4f13a-981a-4880-8bfe-06ba1f717c09": {
+   "id": "4fc4f13a-981a-4880-8bfe-06ba1f717c09",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "multimodal_text",
+     "parts": [
+      {
+       "asset_pointer": "sediment://file_000000000b0c8210ba37274207389d48",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 1012,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 276677,
+       "width": 1753
+      },
+      "cannt use this? what abt in chatgpt?"
+     ]
+    },
+    "create_time": 1791329361.16,
+    "id": "4fc4f13a-981a-4880-8bfe-06ba1f717c09",
+    "metadata": {
+     "attachments": [
+      {
+       "height": 1012,
+       "id": "file_000000000b0c8210ba37274207389d48",
+       "library_file_id": "libfile_cc62a55cb4f881919bdc84da1330771a",
+       "mime_type": "image/png",
+       "name": "image(20261006-232905).png",
+       "size": 276677,
+       "width": 1753
+      }
+     ]
+    }
+   },
+   "parent": "21785749-438c-44f2-803a-81e3727f5ce4"
+  },
+  "557370f4-1451-4a92-ad11-9051d27c3dbb": {
+   "id": "557370f4-1451-4a92-ad11-9051d27c3dbb",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "07/10/2026 00:06"
+     ]
+    },
+    "create_time": 1791327977.61,
+    "id": "557370f4-1451-4a92-ad11-9051d27c3dbb",
+    "metadata": {
+     "attachments": [
+      {
+       "id": "file_0000000067fc8210bbfab3691634b31e",
+       "is_big_paste": true,
+       "library_file_id": "libfile_c328eac92838819192c409cc133d34d6",
+       "mime_type": "text/plain",
+       "name": "Pasted markdown(9).md",
+       "size": 60590
+      }
+     ]
+    }
+   },
+   "parent": "c18049da-1052-4ee1-90df-6521b2113d64"
+  },
+  "583b752d-e704-488d-9abb-eb7130bbf5bb": {
+   "id": "583b752d-e704-488d-9abb-eb7130bbf5bb",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "## 07/10/2026 00:28 — Yes, Claude Web Can Use It\n\n**Yes. Your screenshot proves an important correction to what I said earlier.** I was too restrictive when I said Claude web could not use these skills in the same way.\n\nWhat you're showing is **Claude.ai → Customize → Skills → Add → Upload skill / Create a skill / Create with Claude**.\n\nAnthropic's current documentation confirms that **custom Skills work directly in Claude.ai chat**, not only Claude Code. You can upload a ZIP containing `skill.md`, enable it, and Claude dynamically loads it when relevant. Skills are currently available on Free, Pro, Max, Team and Enterprise, provided code execution is enabled. citeturn0search0turn0search3\n\n### This changes our TalkProof idea considerably\n\nWe could create:\n\n```text\ntalkproof-git-turn/\n│\n├── skill.md\n│\n├── references/\n│   └── turn-protocol.md\n│\n└── scripts/\n    └── validate-turn.py\n```\n\nUpload it using exactly the **Upload skill** button you're showing.\n\nThen in a completely new Claude web chat you could say:\n\n> Review the next TalkProof work package.\n\nClaude can identify that the TalkProof Git-turn skill is relevant and load it. Anthropic specifically describes this as **progressive disclosure**: Claude sees enough metadata to identify the relevant skill and loads the detailed material when required rather than putting every skill's complete contents into every context. citeturn0search6\n\nSo this can reduce your repeated:\n\n```text\nDon't forget Git turn protocol\nDon't forget artifact\nDon't forget tracker\nDon't forget handoff\nDon't forget...\n```\n\n**even in Claude web.**\n\nAnd there is an extra benefit I didn't mention: current Claude Code can sync skills from your Claude.ai account. Anthropic says the sync happens when a Claude Code session starts and checks for changes roughly every ten minutes. citeturn0search0\n\nSo potentially:\n\n```text\n                ONE TALKPROOF SKILL\n                        │\n                Claude.ai account\n                        │\n              ┌─────────┴─────────┐\n              ▼                   ▼\n         CLAUDE WEB           CLAUDE CODE\n              │                   │\n              └─────────┬─────────┘\n                        ▼\n              SAME TURN PROTOCOL\n```\n\nThat's **very relevant to what you're trying to achieve.**\n\n---\n\n# And what about ChatGPT?\n\nHere is the bigger correction:\n\n## **ChatGPT now has Skills too.**\n\nOpenAI's current documentation describes essentially the same concept: reusable workflows, generally defined with a `SKILL.md`, which ChatGPT can automatically select or which the user can explicitly invoke. citeturn0search1turn0search2\n\nThe important catch is **account availability**.\n\nOpenAI currently documents ChatGPT Skills as available to eligible **Business, Enterprise, Healthcare and Edu** workspaces. citeturn0search2\n\nSo on your current **personal ChatGPT Plus account**, you should **not expect the Claude-like Skills UI to be available**.\n\nWhen available, the documented ChatGPT route is:\n\n**Sidebar → Plugins → Plugin Directory → Skills**\n\nand users can create through chat/editor or upload a skill from the computer. citeturn0search2\n\n---\n\n# This makes your original idea much more interesting\n\nThere's now an emerging **Agent Skills open standard**.\n\nAnthropic says its Agent Skills specification is an open standard and skills aren't inherently locked to Claude. citeturn0search6\n\nOpenAI likewise says its skills are compatible with the **open Agent Skills standard**. citeturn0search8\n\nSo instead of designing:\n\n```text\nCLAUDE TURN PROTOCOL\n+\nCHATGPT TURN PROTOCOL\n+\nCODEX TURN PROTOCOL\n+\nOPENCLAW TURN PROTOCOL\n```\n\nwe should investigate designing:\n\n```text\n               AUMNITY / YOUR AI OPERATING SYSTEM\n\n                       AGENT SKILLS\n                           │\n                    ┌──────┴──────┐\n                    │  SKILL.md   │\n                    │ references  │\n                    │ scripts     │\n                    └──────┬──────┘\n                           │\n          ┌────────────────┼────────────────┐\n          ▼                ▼                ▼\n      Claude.ai          Codex           ChatGPT*\n          │                │                │\n      Claude Code          │            Workspaces*\n          │                │\n          └────────────────┼────────────────┘\n                           ▼\n                    SAME GOVERNANCE\n```\n\n`*` subject to ChatGPT product/workspace availability.\n\nThis is **not just an OpenClaw trick anymore**.\n\n---\n\n## One major warning\n\nA skill gives the model **procedure**.\n\nIt does **not magically give every environment identical capabilities**.\n\nFor example, our skill might say:\n\n```text\n1. git status\n2. read tracker\n3. inspect last commit\n4. perform review\n5. run tests\n6. create artifact\n7. update tracker\n8. commit artifact\n```\n\nClaude Code with repository/shell access could execute all of that.\n\nClaude web can understand and follow the same workflow, but whether it can perform each operation depends on the tools/connectors/environment available in that Claude session.\n\nLikewise, a ChatGPT skill doesn't magically give ChatGPT access to a Git repository. OpenAI describes the same separation: **skills provide the workflow; tools/plugins provide live information and actions.** citeturn0search9\n\nSo:\n\n```text\nSKILL = HOW I WANT THE AI TO WORK\n\nTOOLS = WHAT THE AI IS ACTUALLY ABLE TO DO\n```\n\nThat's the key distinction.\n\n---\n\n# This is worth testing — before OpenClaw\n\nI would change my recommendation based on what you've shown me.\n\n**Don't install OpenClaw first.**\n\nFirst create **one portable Agent Skill** from the Git-turn protocol you've already developed through all these TalkProof sessions.\n\nThen test exactly the same skill in:\n\n| Environment | Test |\n|---|---|\n| Claude.ai | Does it automatically follow our turn protocol? |\n| Claude Code | Does it execute the protocol against Git? |\n| Codex | Can the same/open-standard skill work? |\n| ChatGPT Plus | Not currently the documented Skills target |\n| ChatGPT eligible workspace | Test same skill when available |\n| OpenClaw | **Only later**, if it adds orchestration we actually need |\n\nIf that succeeds, we've found something much more significant than the viral reel:\n\n**Your months of accumulated AI-working rules can become a portable, versioned AI operating system instead of instructions you repeatedly type into individual chats.**\n\nAnd *that* directly attacks one of the biggest problems you've been experiencing across TalkProof: Claude and ChatGPT forgetting or drifting from the process between pages/turns. memcite"
+     ]
+    },
+    "create_time": 1791329365.349124,
+    "id": "583b752d-e704-488d-9abb-eb7130bbf5bb",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "e4z3h9",
+       "preview_language": null,
+       "previewable": false
+      },
+      "1": {
+       "edited": false,
+       "id": "kk8jdn",
+       "preview_language": null,
+       "previewable": false
+      },
+      "2": {
+       "edited": false,
+       "id": "dy9k77",
+       "preview_language": null,
+       "previewable": false
+      },
+      "3": {
+       "edited": false,
+       "id": "ndfb3d",
+       "preview_language": null,
+       "previewable": false
+      },
+      "4": {
+       "edited": false,
+       "id": "jyut3r",
+       "preview_language": null,
+       "previewable": false
+      },
+      "5": {
+       "edited": false,
+       "id": "kqgj92",
+       "preview_language": null,
+       "previewable": false
+      },
+      "6": {
+       "edited": false,
+       "id": "yvjkk6",
+       "preview_language": null,
+       "previewable": false
+      }
+     },
+     "content_references": [
+      {
+       "alt": "([Claude Help Center](https://support.claude.com/en/articles/12512180-use-skills-in-claude?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Claude Help Center",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 3,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "Claude Help Center",
+           "pub_date": 1784678400.0,
+           "snippet": "",
+           "title": "How to create custom skills | Claude Help Center",
+           "url": "https://support.claude.com/en/articles/12512198-how-to-create-custom-skills?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "Use skills in Claude | Claude Help Center",
+         "url": "https://support.claude.com/en/articles/12512180-use-skills-in-claude?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Claude Help Center](https://support.claude.com/en/articles/12512176-what-are-skills?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Claude Help Center",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 6,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "What are skills? | Claude Help Center",
+         "url": "https://support.claude.com/en/articles/12512176-what-are-skills?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Claude Help Center](https://support.claude.com/en/articles/12512180-use-skills-in-claude?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Claude Help Center",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Use skills in Claude | Claude Help Center",
+         "url": "https://support.claude.com/en/articles/12512180-use-skills-in-claude?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([OpenAI](https://openai.com/academy/skills/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1775779200.0,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 2,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "OpenAI Help Center",
+           "pub_date": null,
+           "snippet": "",
+           "title": "Skills in ChatGPT | OpenAI Help Center",
+           "url": "https://help.openai.com/en/articles/20001066-skills-in-chatgpt?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "Using skills | OpenAI",
+         "url": "https://openai.com/academy/skills/?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([OpenAI Help Center](https://help.openai.com/en/articles/20001066-skills-in-chatgpt?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI Help Center",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 2,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Skills in ChatGPT | OpenAI Help Center",
+         "url": "https://help.openai.com/en/articles/20001066-skills-in-chatgpt?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([OpenAI Help Center](https://help.openai.com/en/articles/20001066-skills-in-chatgpt?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI Help Center",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 2,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Skills in ChatGPT | OpenAI Help Center",
+         "url": "https://help.openai.com/en/articles/20001066-skills-in-chatgpt?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Claude Help Center](https://support.claude.com/en/articles/12512176-what-are-skills?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Claude Help Center",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 6,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "What are skills? | Claude Help Center",
+         "url": "https://support.claude.com/en/articles/12512176-what-are-skills?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([OpenAI Developers](https://developers.openai.com/api/docs/guides/tools-skills?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI Developers",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 8,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Skills | OpenAI API",
+         "url": "https://developers.openai.com/api/docs/guides/tools-skills?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([OpenAI Developers](https://developers.openai.com/plugins/concepts/skills?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI Developers",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 9,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Skills – Plugins | OpenAI Developers",
+         "url": "https://developers.openai.com/plugins/concepts/skills?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": null,
+       "prefix": null,
+       "prompt_text": null,
+       "type": "hidden"
+      },
+      {
+       "alt": "",
+       "has_images": false,
+       "prefix": null,
+       "prompt_text": null,
+       "sources": [
+        {
+         "attribution": "Claude Help Center",
+         "title": "Use skills in Claude | Claude Help Center",
+         "url": "https://support.claude.com/en/articles/12512180-use-skills-in-claude?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "OpenAI",
+         "title": "Using skills | OpenAI",
+         "url": "https://openai.com/academy/skills/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "OpenAI Help Center",
+         "title": "Skills in ChatGPT | OpenAI Help Center",
+         "url": "https://help.openai.com/en/articles/20001066-skills-in-chatgpt?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "OpenAI Developers",
+         "title": "Skills | OpenAI API",
+         "url": "https://developers.openai.com/api/docs/guides/tools-skills?utm_source=chatgpt.com"
+        }
+       ],
+       "type": "sources_footnote"
+      }
+     ],
+     "model_slug": "gpt-5-6",
+     "parent_id": "7fa340cc-9b37-4cf3-9894-ad2705ea111b",
+     "search_result_groups": [
+      {
+       "domain": "claude.com",
+       "entries": [
+        {
+         "attribution": "claude.com",
+         "snippet": "HOW TO CREATE CUSTOM SKILLS  July 22, 2026  Copy for LLM  Skills are available for users on Free, Pro, Max, Team, and Enterprise plans. This feature requires code execution to be enabled. Skills are...",
+         "title": "How to create custom skills | Claude Help Center",
+         "url": "https://support.claude.com/en/articles/12512198-how-to-create-custom-skills?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "claude.com",
+         "snippet": "BROWSE SKILLS, CONNECTORS, AND PLUGINS IN ONE DIRECTORY  Updated over a week ago  Copy for LLM  Our unified directory brings skills, connectors, and plugins together in one place so you can find and...",
+         "title": "Browse skills, connectors, and plugins in one directory | Claude Help Center",
+         "url": "https://support.claude.com/en/articles/14328846-browse-skills-connectors-and-plugins-in-one-directory?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "claude.com",
+         "snippet": "USE SKILLS SHARED WITH YOU  On Team and Enterprise plans, your skills list in Customize > Skills is organized into three sections:  * Personal skills: Skills you've created or uploaded yourself.  * Sh...",
+         "title": "Use skills in Claude | Claude Help Center",
+         "url": "https://support.claude.com/en/articles/12512180-use-skills-in-claude?38d7aa68_page=12&d7430fcd_page=2&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "claude.com",
+         "snippet": "UNDERSTANDING CLAUDE'S PERSONALIZATION FEATURES  Updated over 2 weeks ago  Copy for LLM  Claude offers several ways to personalize your experience. Each serves a different purpose in helping Claude b...",
+         "title": "Understanding Claude's personalization features | Claude Help Center",
+         "url": "https://support.claude.com/en/articles/10185728-understanding-claude-s-personalization-features?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "claude.com",
+         "snippet": "FEATURES AND CAPABILITIES  30 articles  What are artifacts and how do I use them?  Share artifacts  Get started with Claude Docs  Get started with Claude Design  Set up your design system in Claude D...",
+         "title": "Features and capabilities | Claude Help Center",
+         "url": "https://support.claude.com/en/collections/18031719-features-and-capabilities?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "claude.com",
+         "snippet": "在 CLAUDE 中使用技能  一周前更新  复制供大语言模型使用  技能通过为 Claude 提供专业知识和工作流程的访问权限来扩展其功能。本指南向您展示如何在 Claude 中启用、发现和使用技能。  技能适用于免费版、专业版、最大版、团队版和企业版计划的用户。此功能需要启用代码执行。技能也可在 Claude Code 中使用，并对所有使用代码执行工具的 API 用户处于测试阶段。  前置条...",
+         "title": "在 Claude 中使用技能 | Anthropic Help Center",
+         "url": "https://support.claude.com/zh-CN/articles/12512180-%E5%9C%A8-claude-%E4%B8%AD%E4%BD%BF%E7%94%A8%E6%8A%80%E8%83%BD?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "claude.com",
+         "snippet": "PROVISION AND MANAGE SKILLS FOR YOUR ORGANIZATION  Updated yesterday  Copy for LLM  This article explains how organization owners can provision skills for everyone in their organization, and how to s...",
+         "title": "Provision and manage skills for your organization | Claude Help Center",
+         "url": "https://support.claude.com/en/articles/13119606-provision-and-manage-skills-for-your-organization?939688b5_page=2&e45d281a_page=4&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "claude.com",
+         "snippet": "WHAT'S AVAILABLE ON EACH SURFACE  Cowork in the cloud is in beta, and some features aren’t available yet. Here's what you can use on each surface today:  Feature  | Desktop  | Web  | Mobile Start, ste...",
+         "title": "Use Claude Cowork on web, desktop, and mobile | Claude Help Center",
+         "url": "https://support.claude.com/en/articles/15520349-use-claude-cowork-on-web-desktop-and-mobile?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "claude.com",
+         "snippet": "CÓMO CREAR HABILIDADES PERSONALIZADAS  22 de julio de 2026  Copiar para LLM  Las habilidades están disponibles para usuarios en planes Free, Pro, Max, Team y Enterprise. Esta función requiere que la...",
+         "title": "Cómo crear habilidades personalizadas | Centro de ayuda de Anthropic",
+         "url": "https://support.claude.com/es/articles/12512198-como-crear-habilidades-personalizadas?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "claude.com",
+         "snippet": "GET STARTED WITH SKILL AND PLUGIN SCANNING  Updated over a week ago  Copy for LLM  Skill and plugin scanning automatically checks third-party skills and plugins for malicious content when someone upl...",
+         "title": "Get started with skill and plugin scanning | Claude Help Center",
+         "url": "https://support.claude.com/en/articles/15927065-get-started-with-skill-and-plugin-scanning?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "openai.com",
+       "entries": [
+        {
+         "attribution": "openai.com",
+         "snippet": "Article  February 25, 2026 · Last updated on September 4, 2026  SKILLS  Image: Skills  WORKPLACE & BUSINESS  CHATGPT  ADVANCED & BUILDER SKILLS  WORK  PORTFOLIO COMPANY FINANCE  PORTFOLIO ACADEMY KNO...",
+         "title": "Skills - Resource | OpenAI Academy",
+         "url": "https://academy.openai.com/en/public/clubs/work-users-ynjqu/resources/skills?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openai.com",
+         "snippet": "GPTS IN CHATGPT  Learn what GPTs are in ChatGPT, what they can include, who can use and build them, and how they interact with privacy, workspaces, and the GPT Store.  Updated: 7 days ago  We’re plan...",
+         "title": "GPTs in ChatGPT | OpenAI Help Center",
+         "url": "https://help.openai.com/en/articles/8554407-gpts-in-chatgpt?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openai.com",
+         "snippet": "CUSTOM GPT RETIREMENT AND MIGRATION FAQ  Learn how to prepare for custom GPT retirement, migrate a GPT you created, and find out what changes if you use someone else's GPT.  Updated: 2 days ago  OVER...",
+         "title": "Custom GPT retirement and migration FAQ | OpenAI Help Center",
+         "url": "https://help.openai.com/en/articles/20001519-custom-gpt-retirement-and-migration-faq?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openai.com",
+         "snippet": "PLUGINS IN CHATGPT  Learn how plugins work in ChatGPT Chat, Work and Codex, how to install them, and how connected apps and workspace settings affect access.  Updated: 8 hours ago  OVERVIEW  Plugins...",
+         "title": "Plugins in ChatGPT | OpenAI Help Center",
+         "url": "https://help.openai.com/en/articles/20001256-plugins-in-chatgpt?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openai.com",
+         "snippet": "PLUGINS IN CHATGPT AND CODEX  Learn how plugins work in ChatGPT and Codex, how to install them, and how connected apps and workspace settings affect access.  OVERVIEW  Plugins help ChatGPT and Codex...",
+         "title": "Plugins in ChatGPT and Codex | OpenAI Help Center",
+         "url": "https://help.openai.com/en/articles/20001256?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openai.com",
+         "snippet": "Feb 10, 2026  SKILLS IN OPENAI API  Emre Okcular (OpenAI)  View on GitHub Download raw  Package a CSV analysis workflow as a skill, upload it, and run it with GPT-6 Astra in hosted shell. You can als...",
+         "title": "Skills in OpenAI API",
+         "url": "https://developers.openai.com/cookbook/examples/skills_in_api?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openai.com",
+         "snippet": "OpenAI  April 10, 2026  OpenAI Academy  PERSONALIZING CHATGPT  Customize ChatGPT’s behavior with instructions and memory to fit your needs.  Share  Custom instructions  * Custom instructions * Memory...",
+         "title": "Personalizing ChatGPT | OpenAI",
+         "url": "https://openai.com/academy/personalization/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openai.com",
+         "snippet": "PLUGIN ARCHITECTURE  Understand how plugins combine skills, MCP servers, and optional UI.  Copy Page  Plugins are the packages people discover, install, share, and publish in ChatGPT and Codex. A plu...",
+         "title": "Plugin architecture – Plugins | OpenAI Developers",
+         "url": "https://developers.openai.com/plugins/concepts/plugins?utm_source=chatgpt.com"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "parent": "7fa340cc-9b37-4cf3-9894-ad2705ea111b"
+  },
+  "6e5120c8-74b8-47fa-bf9a-857b63a13cc3": {
+   "id": "6e5120c8-74b8-47fa-bf9a-857b63a13cc3",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "ok study and show? 23:56"
+     ]
+    },
+    "create_time": 1791327386.363,
+    "id": "6e5120c8-74b8-47fa-bf9a-857b63a13cc3"
+   },
+   "parent": "2da607f5-8ece-46af-964e-f0edba1b9308"
+  },
+  "7fa340cc-9b37-4cf3-9894-ad2705ea111b": {
+   "id": "7fa340cc-9b37-4cf3-9894-ad2705ea111b",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content": "Worked for a couple of seconds",
+     "content_type": "reasoning_recap"
+    },
+    "create_time": 1791329365.345106,
+    "id": "7fa340cc-9b37-4cf3-9894-ad2705ea111b",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "997d3fd3-bf3c-4c79-b6bf-b2c8eb8f5f48"
+    }
+   },
+   "parent": "997d3fd3-bf3c-4c79-b6bf-b2c8eb8f5f48"
+  },
+  "997d3fd3-bf3c-4c79-b6bf-b2c8eb8f5f48": {
+   "id": "997d3fd3-bf3c-4c79-b6bf-b2c8eb8f5f48",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "b465691e-667b-435b-9e64-84b767fefd4a",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Searched 5 websites"
+      }
+     ]
+    },
+    "create_time": 1791329365.339284,
+    "id": "997d3fd3-bf3c-4c79-b6bf-b2c8eb8f5f48",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "cc525585-ea70-4887-b332-70176d9ea224",
+     "tool_icons": [
+      "https://www.google.com/s2/favicons?domain=support.claude.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=openai.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=help.openai.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=academy.openai.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=developers.openai.com&sz=128"
+     ]
+    }
+   },
+   "parent": "4fc4f13a-981a-4880-8bfe-06ba1f717c09"
+  },
+  "a3073f3d-1bef-4eb5-b362-d600b5e94fe4": {
+   "id": "a3073f3d-1bef-4eb5-b362-d600b5e94fe4",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "7e16f5fa-099f-478b-825d-1657e3d6495a",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Searched 5 websites"
+      }
+     ]
+    },
+    "create_time": 1791327204.453109,
+    "id": "a3073f3d-1bef-4eb5-b362-d600b5e94fe4",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "00fa7dc8-7cb4-40ac-b72a-4d813edab069",
+     "tool_icons": [
+      "https://www.google.com/s2/favicons?domain=github.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=upd.dev&sz=128",
+      "https://www.google.com/s2/favicons?domain=fossies.org&sz=128",
+      "https://www.google.com/s2/favicons?domain=skills.rest&sz=128",
+      "https://www.google.com/s2/favicons?domain=docs.openclaw.ai&sz=128"
+     ]
+    }
+   },
+   "parent": "2e8cbbec-4129-4b75-986b-b822a54a04e7"
+  },
+  "a8fdbced-0551-46cd-abe8-bccbc4ff8454": {
+   "id": "a8fdbced-0551-46cd-abe8-bccbc4ff8454",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "d4508038-ee29-4e8d-87a8-4834ce5cd506",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Searched 1 website"
+      }
+     ]
+    },
+    "create_time": 1791327388.289193,
+    "id": "a8fdbced-0551-46cd-abe8-bccbc4ff8454",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "9b689bb6-d7ae-44d3-8c40-c017bf950986",
+     "tool_icons": [
+      "https://www.google.com/s2/favicons?domain=github.com&sz=128"
+     ]
+    }
+   },
+   "parent": "6e5120c8-74b8-47fa-bf9a-857b63a13cc3"
+  },
+  "ad9d3e42-f67c-4bee-9d3a-1f0ef0bfd84b": {
+   "id": "ad9d3e42-f67c-4bee-9d3a-1f0ef0bfd84b",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content": "Worked for a couple of seconds",
+     "content_type": "reasoning_recap"
+    },
+    "create_time": 1791327388.294021,
+    "id": "ad9d3e42-f67c-4bee-9d3a-1f0ef0bfd84b",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "a8fdbced-0551-46cd-abe8-bccbc4ff8454"
+    }
+   },
+   "parent": "a8fdbced-0551-46cd-abe8-bccbc4ff8454"
+  },
+  "b945c9f9-76e9-4e24-badc-8faf8f3d964b": {
+   "id": "b945c9f9-76e9-4e24-badc-8faf8f3d964b",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "0d0ff384-a337-4cbb-af18-87e9ffbf3f16",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Searched 2 websites"
+      }
+     ]
+    },
+    "create_time": 1791327980.361752,
+    "id": "b945c9f9-76e9-4e24-badc-8faf8f3d964b",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "c4d0706d-ab7b-4d31-b4d3-5b88808f1791",
+     "tool_icons": [
+      "https://www.google.com/s2/favicons?domain=github.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=docs.openclaw.ai&sz=128"
+     ]
+    }
+   },
+   "parent": "557370f4-1451-4a92-ad11-9051d27c3dbb"
+  },
+  "c18049da-1052-4ee1-90df-6521b2113d64": {
+   "id": "c18049da-1052-4ee1-90df-6521b2113d64",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "## 06/10/2026 23:56 — OpenClaw Setup Study\n\nYes. I studied the actual repositories/docs rather than the reel description.\n\n**There is something genuinely useful here for us.** But I would **not adopt OpenClaw itself yet**. The valuable part is the **operating pattern**.\n\n### What they have actually built\n\nThe public urlOpenClaw Agent Skills repositoryhttps://github.com/openclaw/agent-skills describes its purpose very clearly: **write a workflow once, reuse it everywhere, rather than copying long instructions between repositories.** It currently includes reusable skills for review, handoff, behavioural validation, session provenance and remote validation. citeturn0search4turn0search3\n\nThe architecture is roughly:\n\n```text\n                    SHARED AI OPERATING RULES\n                           AGENTS.md\n                               │\n              ┌────────────────┼────────────────┐\n              │                │                │\n           SKILLS          SCRIPTS         VALIDATORS\n              │                │                │\n       ┌──────┼──────┐         │                │\n       │      │      │         │                │\n     Review Handoff Behaviour  deterministic   check\n                    Validator  operations      skills\n       │      │      │\n       └──────┼──────┘\n              │\n      ┌───────┴────────┐\n      ▼                ▼\n Claude Code          Codex\n      │                │\n      └──── same workflows ────┘\n```\n\nTheir installer explicitly supports putting the same skill library into both Codex and Claude Code. citeturn0search4\n\n---\n\n# Now compare that with what **we are doing**\n\nThis is where it becomes interesting.\n\nYou currently have something conceptually like:\n\n```text\nTalkProof\n│\n├── Product specs\n├── Sprint tracker\n├── Traceability\n├── Code\n│\n├── ChatGPT review instructions\n├── Claude implementation instructions\n│\n├── Git Turn Protocol\n│      ├── bootstrap\n│      ├── inspect git\n│      ├── work\n│      ├── test\n│      ├── artifact\n│      ├── tracker update\n│      ├── commit\n│      └── handoff\n│\n└── Hundreds of session/review/handover artifacts\n```\n\nThe weakness is **not the process itself**.\n\nThe weakness is that we're still repeatedly telling agents:\n\n> “Follow turn protocol.”\n\n> “Don't forget Git.”\n\n> “Create the review artifact.”\n\n> “Update tracker.”\n\n> “Give prompt to Claude.”\n\n> “Did you create the artifact for this turn?”\n\nYou've had to become the **runtime enforcing the AI runtime**.\n\nThat shouldn't be your job.\n\n---\n\n# What I would take from OpenClaw\n\nI would restructure our AI engineering layer like this:\n\n```text\nTalkProof repo\n│\n├── AGENTS.md                    ← constitution\n│\n├── .agents/\n│   │\n│   ├── skills/\n│   │   │\n│   │   ├── git-turn/\n│   │   │   └── SKILL.md\n│   │   │\n│   │   ├── independent-review/\n│   │   │   └── SKILL.md\n│   │   │\n│   │   ├── sprint-closeout/\n│   │   │   └── SKILL.md\n│   │   │\n│   │   ├── handoff/\n│   │   │   └── SKILL.md\n│   │   │\n│   │   ├── traceability/\n│   │   │   └── SKILL.md\n│   │   │\n│   │   └── product-owner-gate/\n│   │       └── SKILL.md\n│   │\n│   └── scripts/\n│       ├── validate-turn.py\n│       ├── validate-tracker.py\n│       ├── validate-handoff.py\n│       └── validate-traceability.py\n│\n├── docs/\n├── backend/\n├── admin/\n└── flutter/\n```\n\nThat is much closer to a proper **AI development operating system**.\n\nOpenClaw itself supports workspace and project-agent skills and has explicit precedence rules for them. citeturn0search0turn0search1\n\n---\n\n## `AGENTS.md` should NOT contain everything\n\nThis is an important lesson from their design.\n\nDon't make a 2,000-line monster saying everything an AI might ever need.\n\n`AGENTS.md` becomes the **constitution**:\n\n```text\n# TalkProof Agent Constitution\n\n1. Git is authoritative.\n2. Never claim implementation without code evidence.\n3. Never claim test success without executable evidence.\n4. Read current tracker before changing product state.\n5. Preserve traceability.\n6. Every engineering turn follows git-turn.\n7. Implementation and independent review remain separate.\n8. Product-owner blocked decisions cannot be silently assumed.\n9. Never hide failures.\n10. Every completed unit leaves a reproducible handoff.\n```\n\nThen detailed procedures move into skills.\n\nThat matches OpenClaw's philosophy: skill bodies are supposed to be **operational and terse**, while reusable command logic belongs in helper scripts. citeturn0search3turn0search4\n\n---\n\n# Example: our Git Turn Protocol becomes a skill\n\nInstead of you reminding me 15 times:\n\n```text\n.agents/skills/git-turn/SKILL.md\n```\n\nConceptually:\n\n```text\n---\nname: git-turn\ndescription: Mandatory engineering-turn lifecycle.\n---\n\nBEFORE WORK\n\n1. git status\n2. identify branch\n3. identify current commit\n4. read AGENTS.md\n5. read active tracker\n6. read previous handoff\n7. establish intended work unit\n\nWORK\n\n8. perform only declared work\n9. record assumptions\n10. record failures\n11. run relevant tests\n\nAFTER WORK\n\n12. update evidence\n13. update traceability if affected\n14. update sprint tracker if affected\n15. create turn artifact\n16. validate artifact\n17. git diff\n18. commit\n19. verify clean/expected working tree\n20. produce next-agent handoff\n```\n\nNow Claude doesn't need a giant prompt explaining this.\n\nCodex doesn't need another version.\n\nAnd theoretically ChatGPT/other agents don't need yet another version.\n\n**One source of truth.**\n\n---\n\n# But OpenClaw has something even more important\n\n### Validators.\n\nThis is the piece I think we should steal aggressively.\n\nCurrently we depend too much on the model saying:\n\n> “Yes, I followed the protocol.”\n\nThat's weak.\n\nInstead:\n\n```text\nAI says\n\"I completed WP-17.\"\n       │\n       ▼\nvalidate-turn.py\n       │\n       ├── artifact exists? ───────── NO → FAIL\n       │\n       ├── tracker updated? ───────── NO → FAIL\n       │\n       ├── tests recorded? ────────── NO → FAIL\n       │\n       ├── evidence referenced? ───── NO → FAIL\n       │\n       ├── handoff created? ───────── NO → FAIL\n       │\n       └── Git state acceptable? ──── NO → FAIL\n                                      │\n                                      ▼\n                              TURN NOT COMPLETE\n```\n\nOpenClaw's shared repository does exactly this kind of separation: `validate-skills` performs lightweight frontmatter validation, while `check-skills` runs broader syntax/tests/typechecking. citeturn0search4\n\n**This is much stronger than prompt engineering.**\n\nWe're moving from:\n\n**“AI, please remember the rules.”**\n\nto:\n\n**“Software prevents the AI from claiming completion unless the rules pass.”**\n\n---\n\n# Their `behavior-validator` is especially relevant to TalkProof\n\nThis caught my attention.\n\nTheir shared library includes a **behavior-validator**, described as source-blind validation of user-visible behaviour against a contract. citeturn0search4\n\nThat's conceptually close to the problem we've repeatedly encountered:\n\n```text\nTracker says DONE\n        ≠\nCode exists\n        ≠\nCode integrated\n        ≠\nFeature works\n        ≠\nUser-visible behaviour works\n```\n\nRemember our TalkProof D0–D5 discussion?\n\nWe could formalise that:\n\n```text\nRequirement\n    ↓\nImplementation evidence\n    ↓\nIntegration evidence\n    ↓\nAutomated test evidence\n    ↓\nBehaviour validation\n    ↓\nRuntime evidence\n    ↓\nD-level\n```\n\nThat could make your **D-scale executable rather than merely documented**.\n\n---\n\n# Another useful idea: skills aren't capabilities\n\nOpenClaw explicitly distinguishes these.\n\nA skill is essentially **instructions telling an agent how to use capabilities it already has**. Plugins/tools provide actual capability. citeturn0search10\n\nSo:\n\n```text\nSKILL\n\"How TalkProof review must be performed\"\n\n≠\n\nTOOL\n\"Ability to execute Git / browser / database / API\"\n```\n\nThat's an important architectural separation for what you've been building.\n\n---\n\n# Browser claim from the reel\n\nThis part is real too.\n\nThere is currently a dedicated `browser-automation` skill for multi-step browser control, including checking browser state and recovering from stale references/timeouts. citeturn0search5\n\nBut again:\n\n**skill ≠ magical browser.**\n\nThe browser plugin/tool provides the capability; the skill tells the agent how to operate it reliably.\n\n---\n\n# One thing I would NOT copy\n\nOpenClaw can discover/load lots of skills automatically.\n\nFor our engineering environment, I'd be more restrictive.\n\nOpenClaw itself supports **agent allowlists**, including giving an agent only a specific final set of skills or even none. citeturn0search1\n\nFor TalkProof I'd want:\n\n```text\nClaude BUILD agent\n────────────────────\ngit-turn\nimplementation\ntesting\nhandoff\ntraceability\n\nChatGPT REVIEW agent\n────────────────────\ngit-turn\nindependent-review\nevidence-validation\nD-scale\ntraceability\nhandoff\n\nPO / Human\n────────────────────\nproduct-decision\nscope-approval\nrelease-gate\n```\n\nClaude shouldn't casually become its own independent reviewer.\n\nReviewer shouldn't silently become builder.\n\nThat's stronger than simply giving every AI every skill.\n\n---\n\n# And there is now a self-improvement concept\n\nOpenClaw has a **Skill Workshop** where an agent can propose reusable work as a new skill rather than immediately altering the canonical skill library. Those proposals can be inspected/evaluated/applied. citeturn0search1\n\nThat suggests a very good model for us:\n\n```text\nRepeated problem occurs\n       ↓\nAgent notices pattern\n       ↓\nPROPOSE new skill/change\n       ↓\nHuman / validator review\n       ↓\nAccept?\n   │          │\n  NO         YES\n   │          │\n discard     update canonical skill\n                 ↓\n          all future agents\n          inherit improvement\n```\n\nThat's **learn → fix the operating system → don't repeat the mistake**.\n\nVery close to what you were discussing earlier today about **learn → unlearn → relearn**, except implemented technically.\n\n---\n\n# So where are we compared with this?\n\nMy assessment:\n\n| Area | Our current method | OpenClaw pattern | Better direction |\n|---|---|---|---|\n| Git discipline | **Strong** | Strong | Keep ours |\n| Turn audit trail | **Very strong** | Some similar mechanisms | Keep ours |\n| Product traceability | **Strong** | Not its core purpose | Keep ours |\n| Independent review | **Strong concept** | Reusable review skill | Combine |\n| Repeated prompts | ❌ Too much | **Much better** | Adopt skills |\n| Cross-agent consistency | ⚠️ Manual | **Strong** | Adopt |\n| Protocol validation | ⚠️ Mostly AI/human | **Scripts** | Adopt aggressively |\n| Skill reuse | ⚠️ Limited | **Excellent** | Adopt |\n| Human reminders | ❌ Too many | Reduced | Automate |\n| Evidence maturity/D-scale | **Ours is richer** | Behaviour validation useful | Combine |\n| Self-improving procedure | Mostly manual | Workshop/proposal model | Adopt later |\n\n### Therefore I would **not replace our system with OpenClaw**.\n\nI would build:\n\n> **Our Git-first engineering governance + OpenClaw-style reusable skills + deterministic validators.**\n\nThat is materially better than either approach alone.\n\nAnd the biggest immediate win isn't WhatsApp, browser automation, or OpenClaw itself.\n\nIt's much simpler:\n\n**You should stop having to tell Claude/ChatGPT “don't forget the turn protocol.”**\n\nThe protocol should become **machine-enforced infrastructure**. memcite"
+     ]
+    },
+    "create_time": 1791327388.297825,
+    "id": "c18049da-1052-4ee1-90df-6521b2113d64",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "75s8ak",
+       "preview_language": null,
+       "previewable": false
+      },
+      "1": {
+       "edited": false,
+       "id": "saxdnf",
+       "preview_language": null,
+       "previewable": false
+      },
+      "10": {
+       "edited": false,
+       "id": "t05mka",
+       "preview_language": null,
+       "previewable": false
+      },
+      "11": {
+       "edited": false,
+       "id": "i7jvl4",
+       "preview_language": null,
+       "previewable": false
+      },
+      "2": {
+       "edited": false,
+       "id": "q3stxl",
+       "preview_language": null,
+       "previewable": false
+      },
+      "3": {
+       "edited": false,
+       "id": "rz7yp4",
+       "preview_language": null,
+       "previewable": false
+      },
+      "4": {
+       "edited": false,
+       "id": "k30knl",
+       "preview_language": null,
+       "previewable": false
+      },
+      "5": {
+       "edited": false,
+       "id": "8yuaj1",
+       "preview_language": null,
+       "previewable": false
+      },
+      "6": {
+       "edited": false,
+       "id": "gbsta9",
+       "preview_language": null,
+       "previewable": false
+      },
+      "7": {
+       "edited": false,
+       "id": "yyjar5",
+       "preview_language": null,
+       "previewable": false
+      },
+      "8": {
+       "edited": false,
+       "id": "jvo0au",
+       "preview_language": null,
+       "previewable": false
+      },
+      "9": {
+       "edited": false,
+       "id": "grtv30",
+       "preview_language": null,
+       "previewable": false
+      }
+     },
+     "content_references": [
+      {
+       "alt": "[OpenClaw Agent Skills repository](https://github.com/openclaw/agent-skills?utm_source=chatgpt.com)",
+       "logo": null,
+       "prefix": null,
+       "prompt_text": null,
+       "title": "OpenClaw Agent Skills repository",
+       "type": "url"
+      },
+      {
+       "alt": "([GitHub](https://github.com/openclaw/agent-skills?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 4,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 3,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "GitHub",
+           "pub_date": null,
+           "snippet": "",
+           "title": "agent-skills/AGENTS.md at main · openclaw/agent-skills · GitHub",
+           "url": "https://github.com/openclaw/agent-skills/blob/main/AGENTS.md?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "GitHub - openclaw/agent-skills: Useful skills for agents and claws. · GitHub",
+         "url": "https://github.com/openclaw/agent-skills?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([GitHub](https://github.com/openclaw/agent-skills?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 4,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "GitHub - openclaw/agent-skills: Useful skills for agents and claws. · GitHub",
+         "url": "https://github.com/openclaw/agent-skills?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([GitHub](https://github.com/openclaw/openclaw/blob/main/docs/concepts/agent.md?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "GitHub",
+           "pub_date": null,
+           "snippet": "",
+           "title": "openclaw/docs/tools/skills.md at main · openclaw/openclaw · GitHub",
+           "url": "https://github.com/openclaw/openclaw/blob/main/docs/tools/skills.md?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "openclaw/docs/concepts/agent.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/docs/concepts/agent.md?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([GitHub](https://github.com/openclaw/agent-skills/blob/main/AGENTS.md?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 3,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 4,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "GitHub",
+           "pub_date": null,
+           "snippet": "",
+           "title": "GitHub - openclaw/agent-skills: Useful skills for agents and claws. · GitHub",
+           "url": "https://github.com/openclaw/agent-skills?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "agent-skills/AGENTS.md at main · openclaw/agent-skills · GitHub",
+         "url": "https://github.com/openclaw/agent-skills/blob/main/AGENTS.md?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([GitHub](https://github.com/openclaw/agent-skills?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 4,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "GitHub - openclaw/agent-skills: Useful skills for agents and claws. · GitHub",
+         "url": "https://github.com/openclaw/agent-skills?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([GitHub](https://github.com/openclaw/agent-skills?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 4,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "GitHub - openclaw/agent-skills: Useful skills for agents and claws. · GitHub",
+         "url": "https://github.com/openclaw/agent-skills?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([GitHub](https://github.com/openclaw/openclaw/blob/main/docs/tools/index.md?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 10,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "openclaw/docs/tools/index.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/docs/tools/index.md?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([GitHub](https://github.com/openclaw/openclaw/blob/main/extensions/browser/skills/browser-automation/SKILL.md?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 5,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "openclaw/extensions/browser/skills/browser-automation/SKILL.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/extensions/browser/skills/browser-automation/SKILL.md?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([GitHub](https://github.com/openclaw/openclaw/blob/main/docs/tools/skills.md?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "openclaw/docs/tools/skills.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/docs/tools/skills.md?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([GitHub](https://github.com/openclaw/openclaw/blob/main/docs/tools/skills.md?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "openclaw/docs/tools/skills.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/docs/tools/skills.md?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": null,
+       "prefix": null,
+       "prompt_text": null,
+       "type": "hidden"
+      },
+      {
+       "alt": "",
+       "has_images": false,
+       "prefix": null,
+       "prompt_text": null,
+       "sources": [
+        {
+         "attribution": "GitHub",
+         "title": "GitHub - openclaw/agent-skills: Useful skills for agents and claws. · GitHub",
+         "url": "https://github.com/openclaw/agent-skills?utm_source=chatgpt.com"
+        }
+       ],
+       "type": "sources_footnote"
+      }
+     ],
+     "model_slug": "gpt-5-6",
+     "parent_id": "ad9d3e42-f67c-4bee-9d3a-1f0ef0bfd84b",
+     "search_result_groups": [
+      {
+       "domain": "github.com",
+       "entries": [
+        {
+         "attribution": "github.com",
+         "snippet": "doc-schema-version  | 1 title  | Creating skills sidebarTitle  | Creating skills summary  | Build, test, and publish custom SKILL.md workspace skills or personal skills on a shared Gateway. read_when...",
+         "title": "openclaw/docs/tools/creating-skills.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/docs/tools/creating-skills.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "SKILLS.MD  FILE METADATA AND CONTROLS  * Preview  * Code  * Blame  994 lines (842 loc) · 46.9 KB  Raw  Copy raw file  Download raw file  Outline  Edit and raw actions  title  | Skills sidebarTitle  |...",
+         "title": "docs/docs/tools/skills.md at main · openclaw/docs · GitHub",
+         "url": "https://github.com/openclaw/docs/blob/main/docs/tools/skills.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "AGENTS.DEFAULT.MD  AGENTS.DEFAULT.MD  140 lines (103 loc) · 7.23 KB  Raw   summary  | Default OpenClaw agent instructions and skills roster for the personal assistant setup title  | Default AGENTS.md...",
+         "title": "openclaw/docs/reference/AGENTS.default.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/docs/reference/AGENTS.default.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "doc-schema-version  | 1 summary  | CLI reference for `openclaw skills` (search/install/update/verify/list/info/check/library/workshop) read_when  | You want to see which skills are available and read...",
+         "title": "openclaw/docs/cli/skills.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/docs/cli/skills.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "title  | Skills config sidebarTitle  | Skills config summary  | Full reference for the skills.* config schema, agent allowlists, workshop settings, and sandbox env var handling. read_when  | Configur...",
+         "title": "openclaw/docs/tools/skills-config.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/docs/tools/skills-config.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "AGENTS.MD  The task defines scope and authorization; its chosen workflow owns execution,  review, publication, recovery, and cleanup. Explicit user instructions take  precedence over skill guidelines...",
+         "title": "openclaw/AGENTS.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/AGENTS.md?plain=1&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "summary  | Index of the OpenClaw browser documentation, one page per reader job read_when  | Adding agent-controlled browser automation Debugging why openclaw is interfering with your own Chrome Impl...",
+         "title": "openclaw/docs/tools/browser.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/docs/tools/browser.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "ROUTING BINDINGS  Use routing bindings to pin inbound channel traffic to a specific agent.  If you also want different visible skills per agent, configure `agents.defaults.skills` and `agents.entries....",
+         "title": "docs/docs/cli/agents.md at main · openclaw/docs · GitHub",
+         "url": "https://github.com/openclaw/docs/blob/main/docs/cli/agents.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "BREADCRUMBS  1. openclaw 2. /.agents 3. /skills 4. /autoreview  /  AGENTS.MD  Copy path  [Input: Go to file]  Blame More file actions  Blame More file actions   FILE METADATA AND CONTROLS  * Preview...",
+         "title": "openclaw/.agents/skills/autoreview/AGENTS.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/.agents/skills/autoreview/AGENTS.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "91 lines (66 loc) · 2.27 KB  Raw  Copy raw file  Download raw file  Outline  Edit and raw actions  name  | clawhub description  | Search ClawHub for skills when a requested capability is not already...",
+         "title": "openclaw/skills/clawhub/SKILL.md at main · openclaw/openclaw · GitHub",
+         "url": "https://github.com/openclaw/openclaw/blob/main/skills/clawhub/SKILL.md?utm_source=chatgpt.com"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "parent": "ad9d3e42-f67c-4bee-9d3a-1f0ef0bfd84b"
+  },
+  "client-created-root": {
+   "id": "client-created-root",
+   "message": null,
+   "parent": null
+  },
+  "d0f9fa49-0cb3-4d34-8b31-0e7e17137053": {
+   "id": "d0f9fa49-0cb3-4d34-8b31-0e7e17137053",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content": "Worked for a couple of seconds",
+     "content_type": "reasoning_recap"
+    },
+    "create_time": 1791327204.461699,
+    "id": "d0f9fa49-0cb3-4d34-8b31-0e7e17137053",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "a3073f3d-1bef-4eb5-b362-d600b5e94fe4"
+    }
+   },
+   "parent": "a3073f3d-1bef-4eb5-b362-d600b5e94fe4"
+  },
+  "e9789fbc-8f34-4090-a57e-926e5a52a389": {
+   "id": "e9789fbc-8f34-4090-a57e-926e5a52a389",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "## 07/10/2026 00:31 — Correction: You Already Have ChatGPT Skills\n\n**Yes. Your screenshot settles it.** You have **Skills available on your personal ChatGPT Plus account right now**.\n\nMy previous statement that you shouldn't expect this on Plus was wrong/outdated relative to what is actually enabled on your account.\n\nYour screenshot shows:\n\n- **ChatGPT Plus**\n- **Plugins → Skills**\n- installed `skill-creator`\n- **Create with chat**\n- **Create with editor**\n- **Upload from your computer**\n\nSo we can test this **here in ChatGPT as well as Claude.ai**.\n\n### This is much better than I thought\n\nWe now potentially have:\n\n```text\n                    OUR COMMON SKILL\n                         SKILL.md\n                            │\n             ┌──────────────┴──────────────┐\n             ▼                             ▼\n        ChatGPT Skills                Claude Skills\n             │                             │\n         ChatGPT web                   Claude web\n             │                             │\n             ▼                             ▼\n        ChatGPT tools              Claude capabilities\n```\n\nAnd separately the same underlying methodology can be consumed by coding agents such as Codex/Claude Code where they have actual repository and shell access.\n\n### What I would do first\n\n**Don't create ten skills. Don't install OpenClaw.**\n\nCreate **one experimental skill**:\n\n**`git-turn-governance`**\n\nIts job is only to enforce the process we've been struggling with:\n\n> bootstrap → establish Git state → read authoritative sources → declare work unit → execute → test → record evidence/failures → update tracker/traceability where applicable → create turn artifact → validate → commit → handoff.\n\nThen we install/test the **same conceptual skill in ChatGPT and Claude**.\n\nThe experiment isn't whether they can *read* the instructions. We already know that.\n\nThe useful test is:\n\n> **Start a fresh conversation, give only a normal TalkProof task, and see whether each AI autonomously invokes the skill and follows the protocol without you saying “don't forget Git turn protocol.”**\n\nThen deliberately create failure cases—missing artifact, uncommitted change, missing tracker update—and see whether the skill/validator catches them.\n\nIf that works, **then** we expand into `independent-review`, `D-scale`, `handoff`, `traceability`, etc.\n\nThat would give us evidence rather than another architecture idea.\n\n**I think this experiment is worth doing before any further OpenClaw work.** memcite"
+     ]
+    },
+    "create_time": 1791329509.261653,
+    "id": "e9789fbc-8f34-4090-a57e-926e5a52a389",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "1jw8j8",
+       "preview_language": null,
+       "previewable": false
+      }
+     },
+     "content_references": [
+      {
+       "alt": null,
+       "prefix": null,
+       "prompt_text": null,
+       "type": "hidden"
+      }
+     ],
+     "model_slug": "gpt-5-6",
+     "parent_id": "692d2bc9-3d20-4497-a357-42aece493352"
+    }
+   },
+   "parent": "295f9621-607f-45b0-8a54-e9c1c5ced97c"
+  },
+  "eedd35fe-9367-4ac6-b843-c8c230316e55": {
+   "id": "eedd35fe-9367-4ac6-b843-c8c230316e55",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content": "Worked for a couple of seconds",
+     "content_type": "reasoning_recap"
+    },
+    "create_time": 1791327980.365844,
+    "id": "eedd35fe-9367-4ac6-b843-c8c230316e55",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "b945c9f9-76e9-4e24-badc-8faf8f3d964b"
+    }
+   },
+   "parent": "b945c9f9-76e9-4e24-badc-8faf8f3d964b"
+  }
+ },
+ "memory_scope": "global_enabled",
+ "pinned_time": null,
+ "plugin_ids": null,
+ "title": "Verify OpenClaw Claim",
+ "update_time": 1791329517.856716,
+ "voice": null
+}

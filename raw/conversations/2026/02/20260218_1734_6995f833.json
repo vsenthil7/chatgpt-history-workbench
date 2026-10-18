@@ -1,0 +1,521 @@
+{
+ "conversation_id": "6995f833-7a0c-8386-b3c1-35d019fa7396",
+ "conversation_template_id": "g-p-698ded68e9948191ab7f0c68f7448e91",
+ "create_time": 1771436093.359095,
+ "current_node": "1d463747-639f-4ee2-b676-5c4dd2ac2aa1",
+ "default_model_slug": "gpt-5-2",
+ "id": "6995f833-7a0c-8386-b3c1-35d019fa7396",
+ "is_archived": false,
+ "is_do_not_remember": false,
+ "is_read_only": null,
+ "is_starred": null,
+ "is_study_mode": false,
+ "mapping": {
+  "1d463747-639f-4ee2-b676-5c4dd2ac2aa1": {
+   "id": "1d463747-639f-4ee2-b676-5c4dd2ac2aa1",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "18/02/2026 17:29  \n**ChatGPT Project:** AT-HACK0013-MasterZ IOTA Hackathon  \n**ChatGPT Page:** 005-03_04-workshops-25022026-2nd_capstone-minting-and-managing-tokens  \n\n---\n\n# 2nd Capstone – Minting and Managing Tokens (WKT dApp)\n\nOfficial Workshop:  \n🔗 https://docs.iota.org/developer/workshops/minting-and-managing-tokens  \nPlatform: entity[\"blockchain_network\",\"IOTA Network\",\"layer1 dlt\"]  \nLanguage: entity[\"programming_language\",\"Move\",\"smart contract language\"]  \nFrontend Stack: entity[\"software_framework\",\"React\",\"javascript ui library\"] + entity[\"software_tool\",\"Vite\",\"frontend build tool\"]  \nIntegration Kit: entity[\"software_library\",\"IOTA dApp Kit\",\"web3 frontend sdk\"]  \n\n---\n\n## 🧠 What This Capstone Actually Is (Architect View)\n\nThis is **not just token minting**.\n\nIt is a **complete token economy system** consisting of:\n\n- Fungible token (WKT)\n- NFT badge system\n- Admin governance layer\n- User engagement mechanics\n- Event-driven blockchain architecture\n- React dApp integration\n- Unit-tested Move contract\n\nThis is closer to a **mini economic protocol** than a tutorial.\n\n---\n\n# System Architecture Overview\n\n```\nMove Smart Contract (token_contract.move)\n        ↓\nShared Faucet Object (On-chain State)\n        ↓\nFrontend dApp (React + IOTA dApp Kit)\n        ↓\nUser/Admin Wallet Interaction\n```\n\n---\n\n# Core On-Chain Model\n\n## 1️⃣ WKT – Fungible Token\n\nCreated during `init()`\n- Symbol: WKT\n- Supply: Minted dynamically via treasury cap\n- Metadata frozen\n\n---\n\n## 2️⃣ WorkshopBadge – NFT\n\nContains:\n- recipient\n- minted_at\n- workshop_id\n- metadata URL\n\nActs as:\n- Achievement proof\n- Redeemable asset\n- Auto-minted reward\n\n---\n\n## 3️⃣ Faucet – Shared Contract State\n\nThis is the **economic brain** of the system.\n\nStores:\n- Treasury cap\n- Admin address\n- Daily claim tracker\n- Coupon registry\n- Badge issuance tracker\n- Redemption tracker\n- Auto-badge config\n\nIt is shared globally via:\n\n```move\ntransfer::share_object(faucet);\n```\n\n---\n\n# 🔐 Admin Control Layer\n\n## Admin Capabilities\n\nimage_group{\"layout\":\"carousel\",\"aspect_ratio\":\"16:9\",\"query\":[\"admin dashboard web3 dark theme\",\"web3 coupon management ui\",\"nft minting admin panel web interface\",\"web3 settings configuration dashboard dark theme\"],\"num_per_query\":1}\n\nAdmin can:\n\n- Add coupon codes\n- Remove coupon codes\n- Set auto-badge configuration\n- Mint badges manually\n- Transfer admin rights\n\nSecurity enforced via:\n\n```move\nassert!(tx_context::sender(ctx) == faucet.admin, ENotAdmin);\n```\n\nThis is **role-based authorization at contract level**.\n\n---\n\n# 👤 User Economic Layer\n\nUsers interact through:\n\n---\n\n## Daily Claim System\n\nimage_group{\"layout\":\"carousel\",\"aspect_ratio\":\"16:9\",\"query\":[\"crypto faucet daily claim ui dark theme\",\"token claim button disabled web app\",\"web3 reward claim interface\",\"blockchain dapp claim tokens screen\"],\"num_per_query\":1}\n\nRules:\n- 10 WKT per day\n- Based on UTC timestamp\n- Enforced via table mapping\n\n```move\nlet today: u64 = now_ms / 86400000u64;\n```\n\nHard deterministic logic. No frontend trust.\n\n---\n\n## Coupon Claim System\n\n- Admin registers coupon\n- User redeems once\n- Coupon usage tracked per user\n\nPrevents:\n- Replay\n- Double use\n- Invalid codes\n\nError model:\n- `EInvalidCoupon`\n- `ECouponAlreadyUsed`\n\n---\n\n# 🏅 Badge Economy\n\n## Manual Minting\n\nAdmin → creates NFT → transfers to recipient\n\n---\n\n## Auto Badge Minting (First Payment)\n\nimage_group{\"layout\":\"carousel\",\"aspect_ratio\":\"16:9\",\"query\":[\"confetti celebration modal web app\",\"nft reward notification popup\",\"web3 payment success screen dark theme\",\"blockchain badge earned animation ui\"],\"num_per_query\":1}\n\nTriggered inside `make_payment()` if:\n\n- First outgoing payment\n- Auto config set\n- No prior badge issued\n\nThis is **state-conditional minting logic**.\n\n---\n\n## Badge Redemption\n\nUsers can:\n- Burn badge\n- Receive 30 WKT\n- One-time redemption\n\nEnforced via:\n\n```move\nassert!(!table::contains(&faucet.nft_redeemed, sender), EAlreadyRedeemed);\n```\n\nCircular economy loop:\n\nBadge → Burn → Mint tokens\n\n---\n\n# 💸 Peer-to-Peer Payments\n\n```\ncoin::split()\ntransfer::public_transfer()\n```\n\nEnforced:\n- Balance validation\n- Emits PaymentMade event\n- Optional auto badge mint\n\nThis completes:\nToken issuance → circulation → reward → redemption\n\n---\n\n# 🧪 Testing Discipline\n\nRun:\n\n```\niota move test\n```\n\nTests cover:\n\n- Admin authorization failures\n- Double daily claim prevention\n- Invalid coupon prevention\n- Badge ownership enforcement\n- Double redemption prevention\n- Insufficient payment failure\n\nThis is **production-grade contract discipline**, not demo code.\n\n---\n\n# 🌐 Frontend Layer\n\nUses:\n- Wallet connection via IOTA dApp Kit\n- DevInspect for view calls\n- React Query for state sync\n- Radix UI for consistent theme\n- Transaction building via `Transaction()` objects\n\nImportant architectural pattern:\n\nFrontend never trusts itself.  \nAll validation is on-chain.\n\n---\n\n# 📊 Sequence Model (Conceptual Flow)\n\nAdmin deploys →  \nContract initializes →  \nFaucet shared →  \nUsers claim →  \nUsers pay →  \nBadges minted →  \nBadges redeemed →  \nEvents emitted →  \nFrontend reacts.\n\nThis is event-driven Web3 architecture.\n\n---\n\n# 🚀 Why This Capstone Matters for You\n\nPartner — this is the first workshop that forces you to think in:\n\n- Shared state architecture\n- Token economy design\n- On-chain authorization\n- Event emission patterns\n- Deterministic validation\n- Frontend-chain separation\n\nThis is closer to your **Enterprise Kernel thinking** than previous workshops.\n\nIt introduces:\n\n- Role-based access control\n- State mutation protection\n- Multi-feature contract layering\n- Test-driven Move development\n\n---\n\n# 🧩 Extension (Platform Thinking)\n\nThe extension suggestion in the workshop hints at:\n\n- Token factory pattern\n- Multi-tenant token deployment\n- Tiered NFT systems\n- Time-based schedulers\n- Creator analytics dashboards\n\nThat moves from:\nSingle dApp → Platform architecture.\n\n---\n\n# ⏱ Suggested Study Block (Per Your Learning Style)\n\nYou prefer structured 60–90 min blocks.\n\n### Session Plan\n\n1️⃣ 45 min — Deep read Move contract only  \n2️⃣ 30 min — Draw your own state diagram  \n3️⃣ 30 min — Identify invariants  \n4️⃣ 45 min — Trace one full payment lifecycle  \n\nTotal: ~2.5 hours deep architecture study.\n\n---\n\n# 🧠 Big Question for You (Architect Mode)\n\nIf you were to integrate this into AUMNITY or your enterprise kernel:\n\n- Would Faucet be a governance module?\n- Should badge issuance be policy-driven?\n- Can coupon logic become contract-based approvals?\n- Can WKT become a reputation token?\n\nThis capstone is small.  \nBut its structure is scalable.\n\n---\n\nIf you want next:\n\n- I can extract pure contract invariants.\n- Or we can design a hardened enterprise version.\n- Or build a minimal version first inside IOTA tools only.\n\nYou decide direction."
+     ]
+    },
+    "create_time": 1771436093.23293,
+    "id": "1d463747-639f-4ee2-b676-5c4dd2ac2aa1",
+    "metadata": {
+     "content_references": [
+      {
+       "alt": "IOTA Network",
+       "entity_data": null,
+       "extra_params": {
+        "disambiguation": "layer1 dlt"
+       },
+       "metadata": null,
+       "name": "IOTA Network",
+       "prompt_text": "IOTA Network",
+       "type": "entity"
+      },
+      {
+       "alt": "Move",
+       "entity_data": null,
+       "extra_params": {
+        "disambiguation": "smart contract language"
+       },
+       "metadata": null,
+       "name": "Move",
+       "prompt_text": "Move",
+       "type": "entity"
+      },
+      {
+       "alt": "React",
+       "entity_data": null,
+       "extra_params": {
+        "disambiguation": "javascript ui library"
+       },
+       "metadata": null,
+       "name": "React",
+       "prompt_text": "React",
+       "type": "entity"
+      },
+      {
+       "alt": "Vite",
+       "entity_data": null,
+       "extra_params": {
+        "disambiguation": "frontend build tool"
+       },
+       "metadata": null,
+       "name": "Vite",
+       "prompt_text": "Vite",
+       "type": "entity"
+      },
+      {
+       "alt": "IOTA dApp Kit",
+       "entity_data": null,
+       "extra_params": {
+        "disambiguation": "web3 frontend sdk"
+       },
+       "metadata": null,
+       "name": "IOTA dApp Kit",
+       "prompt_text": "IOTA dApp Kit",
+       "type": "entity"
+      },
+      {
+       "alt": "![Image](https://cdn.dribbble.com/userupload/10786025/file/original-8de1b433e81f5cb4df8cde82d9241c90.jpg?resize=400x0)\n\n![Image](https://cdn.dribbble.com/userupload/13071584/file/original-7c83c0fd324affaf05c85498bcaf3e7e.png)\n\n![Image](https://market-resized.envatousercontent.com/previews/files/386085357/02_Bids-Lights.jpg?cf_fit=crop&crop=top&format=auto&h=300&q=85&s=2d651501fc56fc0cab62152bd185a7a3ed24dbda6ab88c9b53b314416cbb892b&w=590)\n\n![Image](https://market-resized.envatousercontent.com/previews/files/386085357/03_Saved-Lights.jpg?cf_fit=crop&crop=top&format=auto&h=300&q=85&s=abdaa0c1e1916cf404b03170b2ef8a2828b9b1a4caefb618c508d9d750044577&w=590)",
+       "images": [
+        {
+         "image_ref_id": null,
+         "image_result": {
+          "content_size": {
+           "height": 360,
+           "width": 400
+          },
+          "content_url": "https://cdn.dribbble.com/userupload/10786025/file/original-8de1b433e81f5cb4df8cde82d9241c90.jpg?resize=400x0",
+          "preview_url": null,
+          "scores": {
+           "blender_rank": null,
+           "grader_score": 0.75,
+           "retrieval_score": null
+          },
+          "show_url": true,
+          "source": "bright",
+          "thumbnail_crop_info": {
+           "center_x_percent": 0.48945147679324896,
+           "center_y_percent": 0.40375586854460094
+          },
+          "thumbnail_size": {
+           "height": 213,
+           "width": 237
+          },
+          "thumbnail_url": "https://images.openai.com/static-rsc-1/ORWIlmxgMxK70XYuCRGj7GxsCK0lj4epz9C6pW_3LpD1h-Hgi_PWbQdTQYMr3BqylADbaAl0RoTp-WNMgnBrhP6G5TZmLP_4jLG2HtddWybvxs_WEy7yn1rH0B1HrFXBoLANbZt9PcyIt3jTmw7mLA",
+          "title": "Browse thousands of Admin Dashboard Dark Theme images for design  inspiration | Dribbble",
+          "url": "https://dribbble.com/search/admin-dashboard-dark-theme?utm_source=chatgpt.com"
+         },
+         "image_search_query": "admin dashboard web3 dark theme",
+         "image_search_system": null
+        },
+        {
+         "image_ref_id": null,
+         "image_result": {
+          "content_size": {
+           "height": 2400,
+           "width": 3200
+          },
+          "content_url": "https://cdn.dribbble.com/userupload/13071584/file/original-7c83c0fd324affaf05c85498bcaf3e7e.png",
+          "preview_url": null,
+          "scores": {
+           "blender_rank": null,
+           "grader_score": 0.75,
+           "retrieval_score": null
+          },
+          "show_url": true,
+          "source": "bright",
+          "thumbnail_crop_info": {
+           "center_x_percent": 0.33976833976833976,
+           "center_y_percent": 0.19072164948453607
+          },
+          "thumbnail_size": {
+           "height": 194,
+           "width": 259
+          },
+          "thumbnail_url": "https://images.openai.com/static-rsc-1/M9CZREEPuC1xVDIR7JB6vpoo6AR4e0d3ZmGMpIVYl_gcFWlnBXipKWvYcASC4TgasV6zV0POubxki1mg2FWBVp1GelJlRWyKZLgp9LPXtXGZLxoMzglmmXbOGUBCxVlOrM4KHIOIo4qgmyFxdZd-FA",
+          "title": "Coupon Management Dashboard Design by Daniel Barr for Luminalogik on  Dribbble",
+          "url": "https://dribbble.com/shots/23649155-Coupon-Management-Dashboard-Design?utm_source=chatgpt.com"
+         },
+         "image_search_query": "web3 coupon management ui",
+         "image_search_system": null
+        },
+        {
+         "image_ref_id": null,
+         "image_result": {
+          "content_size": {
+           "height": 300,
+           "width": 590
+          },
+          "content_url": "https://market-resized.envatousercontent.com/previews/files/386085357/02_Bids-Lights.jpg?cf_fit=crop&crop=top&format=auto&h=300&q=85&s=2d651501fc56fc0cab62152bd185a7a3ed24dbda6ab88c9b53b314416cbb892b&w=590",
+          "preview_url": null,
+          "scores": {
+           "blender_rank": null,
+           "grader_score": 0.75,
+           "retrieval_score": null
+          },
+          "show_url": true,
+          "source": "bright",
+          "thumbnail_crop_info": {
+           "center_x_percent": 0.2126984126984127,
+           "center_y_percent": 0.10625
+          },
+          "thumbnail_size": {
+           "height": 160,
+           "width": 315
+          },
+          "thumbnail_url": "https://images.openai.com/static-rsc-1/1o_r53nDUok1qY4o53VozNsdfVBd3dys4Ejmt23eEYVnu0vF-XSXb0_HRsCoIbqIfgXz9bYzX-xgj722GgE0B1T9sS52sNTr9bMqGlui2WDXrP6LVxdFFJMc4eByEz3IvFXtw6fDCp9KifIyCMDmwQ",
+          "title": "Nft Dashboard Website Templates | ThemeForest",
+          "url": "https://themeforest.net/search/nft%20dashboard?srsltid=AfmBOoo2N6EJgdkL5BoHI9Z9hJs2KDrJfjeeVUVVxragJYd1Gs6FXXux&utm_source=chatgpt.com"
+         },
+         "image_search_query": "nft minting admin panel web interface",
+         "image_search_system": null
+        },
+        {
+         "image_ref_id": null,
+         "image_result": {
+          "content_size": {
+           "height": 300,
+           "width": 590
+          },
+          "content_url": "https://market-resized.envatousercontent.com/previews/files/386085357/03_Saved-Lights.jpg?cf_fit=crop&crop=top&format=auto&h=300&q=85&s=abdaa0c1e1916cf404b03170b2ef8a2828b9b1a4caefb618c508d9d750044577&w=590",
+          "preview_url": null,
+          "scores": {
+           "blender_rank": null,
+           "grader_score": 0.75,
+           "retrieval_score": null
+          },
+          "show_url": true,
+          "source": "bright",
+          "thumbnail_crop_info": {
+           "center_x_percent": 0.2571428571428571,
+           "center_y_percent": 0.1
+          },
+          "thumbnail_size": {
+           "height": 160,
+           "width": 315
+          },
+          "thumbnail_url": "https://images.openai.com/static-rsc-1/bj7WgayIvzfhYNtD0si9BKyTj1V3rrUp2ELpk5MCI_RDzuD9cERFwNGYtG1Cbk5nyD0OzQOGItRFVG2uK7zusIqtFVY1MhazlPhiLrNtcATzqMeDji-Kzky_VMN0Y9WjMFfflKKYwmwujXR9lbnqhw",
+          "title": "Nft Dashboard Website Templates | ThemeForest",
+          "url": "https://themeforest.net/search/nft%20dashboard?srsltid=AfmBOooaf39_fHsh8j6rDsrbP5AVhhnaoZzC4HGUU7sokVNzD-BRtcmh&utm_source=chatgpt.com"
+         },
+         "image_search_query": "nft minting admin panel web interface",
+         "image_search_system": null
+        }
+       ],
+       "prompt_text": "![Image](https://cdn.dribbble.com/userupload/10786025/file/original-8de1b433e81f5cb4df8cde82d9241c90.jpg?resize=400x0)\n\n![Image](https://cdn.dribbble.com/userupload/13071584/file/original-7c83c0fd324affaf05c85498bcaf3e7e.png)\n\n![Image](https://market-resized.envatousercontent.com/previews/files/386085357/02_Bids-Lights.jpg?cf_fit=crop&crop=top&format=auto&h=300&q=85&s=2d651501fc56fc0cab62152bd185a7a3ed24dbda6ab88c9b53b314416cbb892b&w=590)\n\n![Image](https://market-resized.envatousercontent.com/previews/files/386085357/03_Saved-Lights.jpg?cf_fit=crop&crop=top&format=auto&h=300&q=85&s=abdaa0c1e1916cf404b03170b2ef8a2828b9b1a4caefb618c508d9d750044577&w=590)",
+       "type": "image_group"
+      },
+      {
+       "alt": "![Image](https://cdn.dribbble.com/userupload/14765754/file/original-9b6f1189df1e236b86617ed96c21bf30.jpg?resize=400x0)\n\n![Image](https://global.discourse-cdn.com/brave/optimized/3X/3/7/37f6d3703bb4cd8356f46db92ea1380b07342e78_2_1024x549.png)\n\n![Image](https://img.bgstatic.com/multiLang/web/7b55c543e189fe1d9e7c267e2f8a239b.png)\n\n![Image](https://cdn.dribbble.com/userupload/45562756/file/de25a4ffe24e3fd3272b0a57603347b9.png?format=webp&resize=400x300&vertical=center)",
+       "images": [
+        {
+         "image_ref_id": null,
+         "image_result": {
+          "content_size": {
+           "height": 300,
+           "width": 400
+          },
+          "content_url": "https://cdn.dribbble.com/userupload/14765754/file/original-9b6f1189df1e236b86617ed96c21bf30.jpg?resize=400x0",
+          "preview_url": null,
+          "scores": {
+           "blender_rank": null,
+           "grader_score": 0.75,
+           "retrieval_score": null
+          },
+          "show_url": true,
+          "source": "bright",
+          "thumbnail_crop_info": {
+           "center_x_percent": 0.17374517374517376,
+           "center_y_percent": 0.5824742268041238
+          },
+          "thumbnail_size": {
+           "height": 194,
+           "width": 259
+          },
+          "thumbnail_url": "https://images.openai.com/thumbnails/url/y-_7Znicu5mSUVJSUGylr5-al1xUWVCSmqJbkpRnoJdeXJJYkpmsl5yfq5-Zm5ieWmxfaAuUsXL0S7F0Tw4yTwoKc3L1DIyqdC51znSrNDAzMc8OsTDILHRODw0MDKsKznMszfD096woVysGAIujJB0",
+          "title": "Browse thousands of Crypto Faucet images for design inspiration ...",
+          "url": "https://dribbble.com/search/crypto-faucet?utm_source=chatgpt.com"
+         },
+         "image_search_query": "crypto faucet daily claim ui dark theme",
+         "image_search_system": null
+        },
+        {
+         "image_ref_id": null,
+         "image_result": {
+          "content_size": {
+           "height": 549,
+           "width": 1024
+          },
+          "content_url": "https://global.discourse-cdn.com/brave/optimized/3X/3/7/37f6d3703bb4cd8356f46db92ea1380b07342e78_2_1024x549.png",
+          "preview_url": null,
+          "scores": {
+           "blender_rank": null,
+           "grader_score": 0.75,
+           "retrieval_score": null
+          },
+          "show_url": true,
+          "source": "bright",
+          "thumbnail_crop_info": {
+           "center_x_percent": 0.2687074829931973,
+           "center_y_percent": 0.2857142857142857
+          },
+          "thumbnail_size": {
+           "height": 315,
+           "width": 588
+          },
+          "thumbnail_url": "https://images.openai.com/thumbnails/url/jA3xDnicu5meUVJSUGylr5-al1xUWVCSmqJbkpRnoJdeXJJYkpmsl5yfq5-Zm5ieWmxfaAuUsXL0S7F0Tw4pryr3iy9OcXWpSo_w9y8IKA8pjcjWTSpJCsqKdHPWLcnyK9HNzstMLjd3VCu2NTQAADToJhY",
+          "title": "Claim button is appearing but can't claim rewards - Brave-Ads ...",
+          "url": "https://community.brave.app/t/claim-button-is-appearing-but-cant-claim-rewards/305337?utm_source=chatgpt.com"
+         },
+         "image_search_query": "token claim button disabled web app",
+         "image_search_system": null
+        },
+        {
+         "image_ref_id": null,
+         "image_result": {
+          "content_size": {
+           "height": 1012,
+           "width": 1717
+          },
+          "content_url": "https://img.bgstatic.com/multiLang/web/7b55c543e189fe1d9e7c267e2f8a239b.png",
+          "preview_url": null,
+          "scores": {
+           "blender_rank": null,
+           "grader_score": 0.75,
+           "retrieval_score": null
+          },
+          "show_url": true,
+          "source": "bright",
+          "thumbnail_crop_info": {
+           "center_x_percent": 0.4406196213425129,
+           "center_y_percent": 0.2238372093023256
+          },
+          "thumbnail_size": {
+           "height": 344,
+           "width": 581
+          },
+          "thumbnail_url": "https://images.openai.com/thumbnails/url/_veNb3icu5meUVJSUGylr5-al1xUWVCSmqJbkpRnoJdeXJJYkpmsl5yfq5-Zm5ieWmxfaAuUsXL0S7F0Tw4K800ty63KcUsujnL3yDQxSverCkgONK_wMAlJDywzNk41SvM0SE41DQ51VCu2NTQAABU2JLs",
+          "title": "Unlock Web3 Rewards with Bitget Wallet's Reward Center: Airdrops ...",
+          "url": "https://web3.bitget.com/en/blog/articles/bitget-wallet-rewards-center?utm_source=chatgpt.com"
+         },
+         "image_search_query": "web3 reward claim interface",
+         "image_search_system": null
+        },
+        {
+         "image_ref_id": null,
+         "image_result": {
+          "content_size": {
+           "height": 300,
+           "width": 400
+          },
+          "content_url": "https://cdn.dribbble.com/userupload/45562756/file/de25a4ffe24e3fd3272b0a57603347b9.png?format=webp&resize=400x300&vertical=center",
+          "preview_url": null,
+          "scores": {
+           "blender_rank": null,
+           "grader_score": 0.75,
+           "retrieval_score": null
+          },
+          "show_url": true,
+          "source": "bright",
+          "thumbnail_crop_info": {
+           "center_x_percent": 0.49,
+           "center_y_percent": 0.3233333333333333
+          },
+          "thumbnail_size": {
+           "height": 300,
+           "width": 400
+          },
+          "thumbnail_url": "https://images.openai.com/thumbnails/url/8VcX63icu5meUVJSUGylr5-al1xUWVCSmqJbkpRnoJdeXJJYkpmsl5yfq5-Zm5ieWmxfaAuUsXL0S7F0Tw5OzzDOCC_NdDdNzfU3rkr3qchztPTxyDXx9PfwyfEu8PN2C8nyzja29AgLVCu2NTQAAA3DJKc",
+          "title": "Browse thousands of Claim Reward UI images for design inspiration ...",
+          "url": "https://dribbble.com/search/claim-reward-ui?utm_source=chatgpt.com"
+         },
+         "image_search_query": "web3 reward claim interface",
+         "image_search_system": null
+        }
+       ],
+       "prompt_text": "![Image](https://cdn.dribbble.com/userupload/14765754/file/original-9b6f1189df1e236b86617ed96c21bf30.jpg?resize=400x0)\n\n![Image](https://global.discourse-cdn.com/brave/optimized/3X/3/7/37f6d3703bb4cd8356f46db92ea1380b07342e78_2_1024x549.png)\n\n![Image](https://img.bgstatic.com/multiLang/web/7b55c543e189fe1d9e7c267e2f8a239b.png)\n\n![Image](https://cdn.dribbble.com/userupload/45562756/file/de25a4ffe24e3fd3272b0a57603347b9.png?format=webp&resize=400x300&vertical=center)",
+       "type": "image_group"
+      },
+      {
+       "alt": "![Image](https://cdn.dribbble.com/userupload/23828914/file/original-8d917b60bcb82c4dae50b8dab9a0ed9e.png?format=webp&resize=400x300&vertical=center)\n\n![Image](https://www.pcrisk.com/images/stories/screenshots202405/usdt-nft-airdrop-scam-main.jpg)\n\n![Image](https://cdn.dribbble.com/userupload/17706844/file/original-07d73fdbbdb38db445e3ed3d6f1b24c2.png?crop=0x0-2400x1800&format=webp&resize=400x300&vertical=center)\n\n![Image](https://uihut-data.fra1.cdn.digitaloceanspaces.com/design/web-app/single/preview/UH31YWctI4SuYQzj.jpg)",
+       "images": [
+        {
+         "image_ref_id": null,
+         "image_result": {
+          "content_size": {
+           "height": 300,
+           "width": 400
+          },
+          "content_url": "https://cdn.dribbble.com/userupload/23828914/file/original-8d917b60bcb82c4dae50b8dab9a0ed9e.png?format=webp&resize=400x300&vertical=center",
+          "preview_url": null,
+          "scores": {
+           "blender_rank": null,
+           "grader_score": 0.75,
+           "retrieval_score": null
+          },
+          "show_url": true,
+          "source": "bright",
+          "thumbnail_crop_info": {
+           "center_x_percent": 0.46332046332046334,
+           "center_y_percent": 0.520618556701031
+          },
+          "thumbnail_size": {
+           "height": 194,
+           "width": 259
+          },
+          "thumbnail_url": "https://images.openai.com/static-rsc-1/nY4WyDD7kAF_rftGC3UbVjYXBEsjczGO-W9I7yeEaqm74cwkhP3cGP-OCcSZj2RKuLua3TCA16RSrdn-OJEMWZkf-e3-ZdHZ8PtRHA61LCWITlr1ThKZj6aMn3y5M9h7bJ-5BX2zcuG4bilGkNHnkQ",
+          "title": "Browse thousands of Confetti Modal images for design inspiration | Dribbble",
+          "url": "https://dribbble.com/search/confetti-modal?utm_source=chatgpt.com"
+         },
+         "image_search_query": "confetti celebration modal web app",
+         "image_search_system": null
+        },
+        {
+         "image_ref_id": null,
+         "image_result": {
+          "content_size": {
+           "height": 600,
+           "width": 790
+          },
+          "content_url": "https://www.pcrisk.com/images/stories/screenshots202405/usdt-nft-airdrop-scam-main.jpg",
+          "preview_url": null,
+          "scores": {
+           "blender_rank": null,
+           "grader_score": 0.75,
+           "retrieval_score": null
+          },
+          "show_url": true,
+          "source": "bright",
+          "thumbnail_crop_info": {
+           "center_x_percent": 0.1937984496124031,
+           "center_y_percent": 0.5204081632653061
+          },
+          "thumbnail_size": {
+           "height": 196,
+           "width": 258
+          },
+          "thumbnail_url": "https://images.openai.com/static-rsc-1/L6w89_NCbXq8ErjTD5buIxMnU1sKykUL_mjz8hGoRuGvfE-rXlzLXfy0b8DxMzncpQ6kfPiKIqXitSFRpgw8gDmzTpOdyTqB1j_A6Y0kEGcquHs6TnZyXB6J7Nehx2KAvLzMHKB8OuPkn2_Q1QkinQ",
+          "title": "USDT NFT Airdrop Scam - Removal and recovery steps (updated)",
+          "url": "https://www.pcrisk.com/removal-guides/29885-usdt-nft-airdrop-scam?utm_source=chatgpt.com"
+         },
+         "image_search_query": "nft reward notification popup",
+         "image_search_system": null
+        },
+        {
+         "image_ref_id": null,
+         "image_result": {
+          "content_size": {
+           "height": 300,
+           "width": 400
+          },
+          "content_url": "https://cdn.dribbble.com/userupload/17706844/file/original-07d73fdbbdb38db445e3ed3d6f1b24c2.png?crop=0x0-2400x1800&format=webp&resize=400x300&vertical=center",
+          "preview_url": null,
+          "scores": {
+           "blender_rank": null,
+           "grader_score": 0.75,
+           "retrieval_score": null
+          },
+          "show_url": true,
+          "source": "bright",
+          "thumbnail_crop_info": {
+           "center_x_percent": 0.4980694980694981,
+           "center_y_percent": 0.28350515463917525
+          },
+          "thumbnail_size": {
+           "height": 194,
+           "width": 259
+          },
+          "thumbnail_url": "https://images.openai.com/static-rsc-1/oLplD5WQ8Zkp5MkP1aT_yFoc2jcnoOF5AmWO5bnTrv25RDGJ0Gvl7UIGvD_BGnfmRQJVhJObEzmCDV4zFmTPwgKSShtRXzP_0jXlsOVRm8-pnIJHG9Bvcvynv-r_2QFBesLLfIvjJdMJHyUdGCmNXA",
+          "title": "Payment Successful designs, themes, templates and downloadable graphic  elements on Dribbble",
+          "url": "https://dribbble.com/tags/payment-successful?utm_source=chatgpt.com"
+         },
+         "image_search_query": "web3 payment success screen dark theme",
+         "image_search_system": null
+        },
+        {
+         "image_ref_id": null,
+         "image_result": {
+          "content_size": {
+           "height": 2478,
+           "width": 3204
+          },
+          "content_url": "https://uihut-data.fra1.cdn.digitaloceanspaces.com/design/web-app/single/preview/UH31YWctI4SuYQzj.jpg",
+          "preview_url": null,
+          "scores": {
+           "blender_rank": null,
+           "grader_score": 0.75,
+           "retrieval_score": null
+          },
+          "show_url": true,
+          "source": "bright",
+          "thumbnail_crop_info": {
+           "center_x_percent": 0.8588235294117647,
+           "center_y_percent": 0.467005076142132
+          },
+          "thumbnail_size": {
+           "height": 197,
+           "width": 255
+          },
+          "thumbnail_url": "https://images.openai.com/static-rsc-1/Vq1tOvUMZvCsRnwilnoMnsuwsYXKC8UisuyffS8r4mRMl4ZkR70nAZ8EDrwCC6u1wmBVUkO2n_KOp3PM_DLCtMpdVeXE_VmzK-oN_5jeg3K9YXEovOvtHnpF84fmYkG7RG6ECskfwMI9eMVbte4Pvw",
+          "title": "Payment Successful Page Web App Screen Design",
+          "url": "https://uihut.com/designs/15264?utm_source=chatgpt.com"
+         },
+         "image_search_query": "web3 payment success screen dark theme",
+         "image_search_system": null
+        }
+       ],
+       "prompt_text": "![Image](https://cdn.dribbble.com/userupload/23828914/file/original-8d917b60bcb82c4dae50b8dab9a0ed9e.png?format=webp&resize=400x300&vertical=center)\n\n![Image](https://www.pcrisk.com/images/stories/screenshots202405/usdt-nft-airdrop-scam-main.jpg)\n\n![Image](https://cdn.dribbble.com/userupload/17706844/file/original-07d73fdbbdb38db445e3ed3d6f1b24c2.png?crop=0x0-2400x1800&format=webp&resize=400x300&vertical=center)\n\n![Image](https://uihut-data.fra1.cdn.digitaloceanspaces.com/design/web-app/single/preview/UH31YWctI4SuYQzj.jpg)",
+       "type": "image_group"
+      }
+     ],
+     "model_slug": "gpt-5-2",
+     "parent_id": "5094c9eb-b58d-4b0f-a32b-90390add2dc3"
+    }
+   },
+   "parent": "dddcc75e-3c69-4974-9aa2-c75053df0e3b"
+  },
+  "client-created-root": {
+   "id": "client-created-root",
+   "message": null,
+   "parent": null
+  },
+  "dddcc75e-3c69-4974-9aa2-c75053df0e3b": {
+   "id": "dddcc75e-3c69-4974-9aa2-c75053df0e3b",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "18/02/2026 17:29 17:34\r\n\r\nChatgpt project name: AT-HACK0013-MasterZ IOTA Hackathon \r\n\r\nChatgpt Page Name: 005-03_04-workshops-25022026-2nd_capstone-minting-and-managing-tokens\r\n\r\nNot meeting/Class but in workshop website have a 2nd capstone after 3 classes. So keep separate page\r\n\r\nhttps://docs.iota.org/developer/workshops/minting-and-managing-tokens\r\n\r\nMinting and Managing Tokens\r\nIn this tutorial, we build the WKT dApp — a decentralized Workshop Token and Badge system — using the Move language for blockchain contracts and the IOTA dApp kit for the frontend. The project starts with creating and deploying the Move package on the IOTA Network, then building the frontend dApp to enable wallet connection, daily token claims, coupon redemptions, peer payments with auto-badge minting, badge redemption, and admin controls using React and other libraries for routing and UI components. This tutorial demonstrates seamless integration between Move smart contracts and IOTA's frontend tools — using:\r\n\r\nMove smart contracts for blockchain logic\r\nIOTA dApp Kit for frontend interaction\r\nReact + Vite for UI\r\nThe dApp allows:\r\n\r\nDaily token claims\r\nCoupon-based claims\r\nPeer-to-peer payments\r\nAuto and manual badge minting\r\nBadge redemption\r\nAdmin management controls\r\nPrerequisites\r\nNode.js >= v22.14.0\r\nnpx >= 11.4.2\r\niota CLI >= 1.5.0\r\nBasic knowledge of React and TypeScript\r\nCreate a Move Package\r\nWe start by creating a Move package for our Workshop Token contract. This sets up the project structure, scaffolds the necessary files, and prepares the environment to implement blockchain logic. Once the package is created, we'll explore the package structure and understand how the token and badge functionality will be implemented.\r\n\r\nRun the following command to create a Move package:\r\n\r\niota move new token_contract && cd token_contract\r\n\r\nPackage Overview\r\nStruct and Constants\r\nWKT - The main token type for Workshop Token as a fungible token type.\r\nWorkshopBadge - NFT badge struct containing recipient, minting timestamp, workshop ID, and metadata URL.\r\nFaucet - Main contract state storing treasury, admin address, claims, coupons, issued badges, auto badge config, and redemption tracking.\r\nEvents\r\nTokensClaimed - Emitted on daily or coupon token claim.\r\nClaimStatus - Emitted for claim status checks.\r\nBadgeMinted - Emitted when a badge NFT is minted.\r\nBadgeRedeemed - Emitted when a badge is redeemed (burned for tokens).\r\nPaymentMade - Emitted for peer-to-peer payments.\r\nError Codes\r\nEAlreadyClaimed - User has already claimed tokens for the day\r\nEInvalidCoupon - Coupon code does not exist or is invalid\r\nECouponAlreadyUsed - Coupon has already been redeemed by the user\r\nENotAdmin - Caller is not the admin, unauthorized action\r\nENoBadge - Badge does not belong to caller or is missing\r\nEAlreadyRedeemed - Badge already redeemed once by the user\r\nEInsufficientBalance - Insufficient WKT token balance to make payment\r\nFrontend Overview\r\nAfter setting up the Move package, we build a frontend dApp to interact with our token contract. This section explains how to create a React project, connect it to the IOTA network, and provide interfaces for users and admins to claim tokens, redeem badges, and make payments.\r\n\r\nSet Up the Frontend dApp\r\nStart by creating a new React project with Vite or your preferred tool (or from existing source).\r\n\r\nFirst, create an initial react app using the following command:\r\n\r\npnpm create @iota/create-dapp\r\n\r\nnote\r\nIOTA dApp kit\r\n\r\nSelect the following options when prompted:\r\n\r\nWhich starter template would you like to use? … ▸ react-client-dapp React Client dApp that reads data from wallet and the blockchain ▸ react-e2e-counter React dApp with a move smart contract that implements a distributed counter\r\n\r\nyou have to select react-client-dapp\r\n\r\nInstall required dependencies:\r\npnpm install\r\n\r\nCore dependencies include:\r\n@iota/dapp-kit for blockchain interaction and wallet connection\r\n\r\n@radix-ui/themes and @radix-ui/react-tabs for UI components and styling\r\n\r\nreact-router-dom for client-side routing\r\n\r\n@tanstack/react-query for data fetching and caching\r\n\r\nFrontend folder/file Structure\r\n.\r\n├── eslint.config.js\r\n├── index.html\r\n├── package.json\r\n├── pnpm-lock.yaml\r\n├── prettier.config.cjs\r\n├── README.md\r\n├── src\r\n│   ├── App.tsx\r\n│   ├── components\r\n│   │   ├── AdminPanel.tsx\r\n│   │   ├── BadgeGallery.tsx\r\n│   │   ├── CelebrationModal.tsx\r\n│   │   ├── ClaimCoupon.tsx\r\n│   │   ├── ClaimTokens.tsx\r\n│   │   ├── Home\r\n│   │   │   ├── ActionTabs.tsx\r\n│   │   │   ├── DashboardSummary.tsx\r\n│   │   │   ├── Home.tsx\r\n│   │   │   └── HomeStyles.css\r\n│   │   ├── MakePayment.tsx\r\n│   │   ├── molecules\r\n│   │   │   ├── Button.tsx\r\n│   │   │   ├── Loading.tsx\r\n│   │   │   └── Tooltip.tsx\r\n│   │   └── RedeemBadge.tsx\r\n│   ├── hooks\r\n│   │   └── useWKTContract.ts\r\n│   ├── main.tsx\r\n│   ├── networkConfig.ts\r\n│   ├── OwnedObjects.tsx\r\n│   ├── theme\r\n│   │   └── darkTheme.ts\r\n│   ├── types\r\n│   │   └── index.ts\r\n│   ├── utils\r\n│   │   └── errorHandling.ts\r\n│   ├── vite-env.d.ts\r\n│   └── WalletStatus.tsx\r\n├── tsconfig.json\r\n├── tsconfig.node.json\r\n└── vite.config.ts\r\n\r\nThe frontend source is organized as:\r\n\r\nsrc/components - Contains UI components for Dashboard, Claims, Payments, Badges, and Admin panel.\r\nsrc/hooks - Contains useWKTContract.ts custom hook to handle all blockchain calls.\r\nsrc/utils - Utility functions including error parsing.\r\nsrc/types - Shared type definitions.\r\nUser Components\r\nKey user components include:\r\n\r\nDashboardSummary - Overview of token balances and badges.\r\nActionTabs - Tabs to switch between token/payment actions and badge/reward views.\r\nOwnedObjects - Lists badges and token info owned by the user.\r\nClaimTokens / ClaimCoupon - Interfaces to claim tokens daily or via coupon code given by admin.\r\nMakePayment - Send tokens to another wallet with balance checks.\r\nRedeemBadge - Redeem earned badges for bonus tokens.\r\nBadgeGallery - Browse earned badges with redeem button.\r\nAdmin Panel\r\nManage coupon codes: Add or remove coupon codes.\r\nConfigure auto badge minting settings.\r\nManually mint badges to recipients.\r\nAdmin-only access gated based on blockchain admin check.\r\nUI Styling and Feedback\r\nConsistent dark theme using Radix UI themes.\r\nTooltips provide help and guidance.\r\nSuccess and error messages with icons and colors for clear feedback.\r\nLoading spinner for async operations and data fetching.\r\nnote\r\nBelow Set Up Network Configuration is to be done after complete implementation and deploying the Move package:\r\n\r\nMake sure to replace <YOUR_PACKAGE_ID> and <YOUR_FAUCET_Object_ID> with actual object IDs from your deployment.\r\n\r\nSet Up Network Configuration\r\nAdd the following variables in the networkConfig.ts file:\r\n\r\nworkshop-module-7/workshop-token-frontend/src/networkConfig.ts\r\nimport { getFullnodeUrl } from \"@iota/iota-sdk/client\";\r\nimport { createNetworkConfig } from \"@iota/dapp-kit\";\r\n\r\nconst { networkConfig, useNetworkVariable } = createNetworkConfig({\r\n  devnet: {\r\n    url: getFullnodeUrl(\"devnet\"),\r\n    variables: {\r\n      packageId: \"\",\r\n      faucetObject: \"\",\r\n    },\r\n  },\r\n  testnet: {\r\n    url: getFullnodeUrl(\"testnet\"),\r\n    variables: {\r\n      packageId:\r\n        \"<YOUR_PACKAGE_ID>\",\r\n      faucetObject:\r\n        \"<YOUR_FAUCET_Object_ID>\",\r\n    },\r\n  },\r\n});\r\n\r\nexport { useNetworkVariable, networkConfig };\r\n\r\nSee full example on GitHub\r\nYou should retrieve the shared objects from the transaction digest of the published package.\r\n\r\nStart Development Server\r\nRun the dev server to launch your dApp locally:\r\n\r\npnpm run dev\r\n\r\nOpen the provided URL (usually http://localhost:3000) in a browser to interact with the dApp.\r\nThis section prepares the environment to launch the frontend connected to your deployed Move contract on IOTA.\r\nImplementation Section Layout\r\n(Smart Contract -> Frontend (User/Admin Interactions) -> Tests For Move Package):\r\n\r\nOur implementation follows this pattern for each feature:\r\n\r\nSmart Contract - Move Package Code with blockchain logic\r\nFrontend - User/Admin interactions through React components\r\nTests - Move package tests for validation\r\nImplementation Overview\r\nWe’ll now build the Workshop Token dApp step-by-step, adding one feature at a time.\r\n\r\nFor each feature:\r\n\r\nWe'll look at what the feature does in the dApp (with a screenshot).\r\nExplore the corresponding Move smart contract logic.\r\nImplement the frontend interaction using IOTA dApp Kit.\r\nVerify with relevant unit tests.\r\nInitialization (init Function)\r\nDashboard Interface of the dApp\r\n\r\nThis is the main dashboard view of the Workshop Token dApp after wallet connection. It displays the user’s connected address, token balances, badges, and quick access to claim, payment, and redemption actions and on each and every step tooltips are showcased for better user experience. Dashboard Interface\r\n\r\nThe init function is called once at the contract deployment to set up the initial state of the WKT token ecosystem.\r\n\r\nCreates the WKT fungible token with metadata (name, symbol, description).\r\n\r\nFreezes token metadata to prevent modification after deployment.\r\n\r\nInitializes the shared Faucet object containing:\r\n\r\nThe token treasury cap for minting new WKT tokens.\r\nAdmin address set as contract deployer.\r\nEmpty tables and maps to track daily claims, coupons, badge issuance, and redemption.\r\nDefault empty strings for auto badge configuration.\r\nShares the Faucet object on-chain to allow shared access during contract interactions.\r\n\r\nMove Package Code:\r\n\r\nworkshop-module-7/token_contract/sources/token_contract.move\r\n// ===================== Initialization =====================\r\nfun init(witness: WKT, ctx: &mut TxContext) {\r\n    let (treasury_cap, metadata) = coin::create_currency(\r\n        witness,\r\n        0,\r\n        b\"WKT\",\r\n        b\"Workshop Token\",\r\n        b\"Token for workshop participation and rewards\",\r\n        option::none(),\r\n        ctx\r\n    );\r\n\r\n    transfer::public_freeze_object(metadata);\r\n\r\n    let faucet = Faucet {\r\n        id: object::new(ctx),\r\n        treasury_cap,\r\n        admin: tx_context::sender(ctx),\r\n        claimed: table::new(ctx),\r\n        user_coupons: table::new(ctx),\r\n        nft_redeemed: table::new(ctx),\r\n        coupon_codes: vec_map::empty(),\r\n        badge_counter: 0,\r\n        badge_issued: table::new(ctx),\r\n        auto_badge_workshop_id: string::utf8(b\"\"),\r\n        auto_badge_url: string::utf8(b\"\")\r\n    };\r\n\r\n    transfer::share_object(faucet);\r\n}\r\n\r\nSee full example on GitHub\r\nPackage Test code:\r\n\r\nworkshop-module-7/token_contract/tests/token_contract_tests.move\r\n#[test_only]\r\nmodule token_contract::wkt_tests {\r\n    use iota::test_scenario::{Self, Scenario};\r\n    use iota::coin::{Self, Coin};\r\n    use token_contract::wkt::{\r\n        WKT,\r\n        Faucet,\r\n        WorkshopBadge,\r\n        test_init,\r\n        add_coupon_code,\r\n        remove_coupon_code,\r\n        transfer_admin,\r\n        set_auto_badge_config,\r\n        mint_badge,\r\n        claim_tokens,\r\n        claim_with_coupon,\r\n        redeem_badge,\r\n        make_payment,\r\n        is_valid_coupon_for_user,\r\n        has_redeemed_badge,\r\n        get_badge_count,\r\n        EAlreadyClaimed,\r\n        ECouponAlreadyUsed,\r\n        ENotAdmin,\r\n        EAlreadyRedeemed,\r\n        EInsufficientBalance,\r\n        EInvalidCoupon,\r\n        ENoBadge\r\n    };\r\n\r\n    // === Test Addresses ===\r\n    const ADMIN: address = @0xA1;\r\n    const USER1: address = @0xB1;\r\n    const USER2: address = @0xC1;\r\n\r\n    // === Test Setup Function ===\r\n    fun initialize(scenario: &mut Scenario) {\r\n        test_scenario::next_tx(scenario, ADMIN);\r\n        {\r\n            // The call is now simpler and correct\r\n            test_init(test_scenario::ctx(scenario));\r\n        };\r\n    }\r\n\r\nSee full example on GitHub\r\nAdmin Functions\r\nThe admin manages the token economy. Here we describe how administrators can add/remove coupons, configure auto-badge settings, mint badges manually, and transfer admin rights — ensuring control and security within the system.\r\n\r\nAdmin functions provide the control panel for our token ecosystem, allowing authorized administrators to manage coupon distribution, configure badge settings, and maintain system security. These functions are protected to ensure only the contract admin can perform critical management operations.\r\n\r\nAdmin functions allow the authorized admin to manage coupon codes, badges, configurations, and transfer admin rights. Authorization is enforced by asserting the transaction sender matches the stored faucet.admin address.\r\n\r\nAdd Coupon Code\r\nAllows the admin to add a coupon code to the contract for token claims.\r\n\r\nAdmin Panel Coupon Management Interface\r\n\r\nAdmin dashboard section for managing coupon codes — showing options to add, remove, and view available coupon codes for token rewards. Coupon Management\r\n\r\nMove Package Code:\r\n\r\nworkshop-module-7/token_contract/sources/token_contract.move\r\npublic entry fun add_coupon_code(\r\n    faucet: &mut Faucet,\r\n    code: vector<u8>,\r\n    ctx: &mut TxContext\r\n) {\r\n    assert!(tx_context::sender(ctx) == faucet.admin, ENotAdmin);\r\n    let code_str = string::utf8(code);\r\n    vec_map::insert(&mut faucet.coupon_codes, code_str, true);\r\n}\r\n\r\nSee full example on GitHub\r\nVerifies sender is admin.\r\nConverts coupon code bytes to string.\r\nInserts the coupon code as active into coupon_codes map.\r\nRemove Coupon Code\r\nAllows the admin to remove a coupon code.\r\n\r\nMove Package Code:\r\n\r\nworkshop-module-7/token_contract/sources/token_contract.move\r\npublic entry fun remove_coupon_code(\r\n    faucet: &mut Faucet,\r\n    code: vector<u8>,\r\n    ctx: &mut TxContext\r\n) {\r\n    assert!(tx_context::sender(ctx) == faucet.admin, ENotAdmin);\r\n    let code_str = string::utf8(code);\r\n    vec_map::remove(&mut faucet.coupon_codes, &code_str);\r\n}\r\n\r\nSee full example on GitHub\r\nChecks admin authority.\r\nRemoves the coupon code from coupon_codes.\r\nTransfer Admin Rights\r\nTransfers the admin role to a new address.\r\n\r\nMove Package Code:\r\n\r\nworkshop-module-7/token_contract/sources/token_contract.move\r\npublic entry fun transfer_admin(\r\n    faucet: &mut Faucet,\r\n    new_admin: address,\r\n    ctx: &mut TxContext\r\n) {\r\n    assert!(tx_context::sender(ctx) == faucet.admin, ENotAdmin);\r\n    faucet.admin = new_admin;\r\n}\r\n\r\nSee full example on GitHub\r\nEnsures only current admin can transfer adminship.\r\nUpdates admin address in Faucet.\r\nSet Auto Badge Configuration\r\nConfigures the Workshop ID and URL for automatic badge minting on first payment.\r\n\r\nAdmin Panel Auto Badge Configuration Interface\r\n\r\nAdmin view to configure automatic badge minting settings, including Workshop ID and badge metadata URL used when a user performs their first payment. Auto Badge Configuration\r\n\r\nMove Package Code:\r\n\r\nworkshop-module-7/token_contract/sources/token_contract.move\r\npublic entry fun set_auto_badge_config(\r\n    faucet: &mut Faucet,\r\n    workshop_id: vector<u8>,\r\n    url: vector<u8>,\r\n    ctx: &mut TxContext\r\n) {\r\n    assert!(tx_context::sender(ctx) == faucet.admin, ENotAdmin);\r\n    faucet.auto_badge_workshop_id = string::utf8(workshop_id);\r\n    faucet.auto_badge_url = string::utf8(url);\r\n}\r\n\r\nSee full example on GitHub\r\nOnly admin can set.\r\nUpdates the auto_badge_workshop_id and auto_badge_url.\r\nMint Badge\r\nManually mints a WorkshopBadge NFT to a recipient.\r\n\r\nAdmin Panel Manual Badge Minting Interface\r\n\r\nAdmin interface to manually mint Workshop Badge NFTs for specific recipients. It shows inputs for recipient address, workshop ID, and badge metadata link. Manual Badge Minting\r\n\r\nMove Package Code:\r\n\r\nworkshop-module-7/token_contract/sources/token_contract.move\r\npublic entry fun mint_badge(\r\n    faucet: &mut Faucet,\r\n    recipient: address,\r\n    workshop_id: vector<u8>,\r\n    url: vector<u8>,\r\n    ctx: &mut TxContext\r\n) {\r\n    assert!(tx_context::sender(ctx) == faucet.admin, ENotAdmin);\r\n\r\n    let badge = WorkshopBadge {\r\n        id: object::new(ctx),\r\n        recipient,\r\n        minted_at: ctx.epoch_timestamp_ms(),\r\n        workshop_id: string::utf8(workshop_id),\r\n        url: string::utf8(url)\r\n    };\r\n\r\n    let badge_id = object::id(&badge);\r\n    faucet.badge_counter = faucet.badge_counter + 1;\r\n    transfer::public_transfer(badge, recipient);\r\n\r\n    event::emit(BadgeMinted {\r\n        recipient,\r\n        badge_id,\r\n        workshop_id: string::utf8(workshop_id),\r\n        url: string::utf8(url)\r\n    });\r\n}\r\n\r\nSee full example on GitHub\r\nAuthorized admin only.\r\nCreates a new WorkshopBadge NFT object.\r\nIncrements badge count.\r\nTransfers the badge to the recipient.\r\nEmits BadgeMinted event with badge details.\r\nFrontend Admin Interaction:\r\n\r\nhook functions for Interaction\r\n\r\nworkshop-module-7/workshop-token-frontend/src/hooks/useWKTContract.ts\r\n// Check if user is admin\r\nconst checkIsAdmin = async (address: string): Promise<boolean> => {\r\n  if (!address) return false;\r\n\r\n  try {\r\n    const faucetData = await client.getObject({\r\n      id: faucetObject,\r\n      options: { showContent: true },\r\n    });\r\n\r\n    if (\r\n      faucetData.data?.content &&\r\n      faucetData.data.content.dataType === \"moveObject\"\r\n    ) {\r\n      const fields = (faucetData.data.content as any).fields;\r\n      return fields.admin === address;\r\n    }\r\n    return false;\r\n  } catch (error) {\r\n    console.error(\"Error checking admin status:\", error);\r\n    return false;\r\n  }\r\n};\r\n\r\nSee full example on GitHub\r\nworkshop-module-7/workshop-token-frontend/src/hooks/useWKTContract.ts\r\n// Admin functions\r\nconst addCouponCode = (code: string) => {\r\n  if (!account) {\r\n    return Promise.reject(parseWKTError(new Error(\"No account connected\")));\r\n  }\r\n\r\n  const tx = new Transaction();\r\n  tx.moveCall({\r\n    target: `${packageId}::wkt::add_coupon_code`,\r\n    arguments: [tx.object(faucetObject), tx.pure.string(code)],\r\n  });\r\n\r\n  return new Promise((resolve, reject) => {\r\n    signAndExecute(\r\n      { transaction: tx },\r\n      {\r\n        onSuccess: (result) => {\r\n          resolve(result);\r\n        },\r\n        onError: (error) => {\r\n          console.error(\"Failed to add coupon code\", error);\r\n          const parsedError = parseWKTError(error);\r\n          reject(parsedError);\r\n        },\r\n      },\r\n    );\r\n  });\r\n};\r\n\r\nconst removeCouponCode = (code: string) => {\r\n  if (!account) {\r\n    return Promise.reject(parseWKTError(new Error(\"No account connected\")));\r\n  }\r\n\r\n  const tx = new Transaction();\r\n  tx.moveCall({\r\n    target: `${packageId}::wkt::remove_coupon_code`,\r\n    arguments: [tx.object(faucetObject), tx.pure.string(code)],\r\n  });\r\n\r\n  return new Promise((resolve, reject) => {\r\n    signAndExecute(\r\n      { transaction: tx },\r\n      {\r\n        onSuccess: (result) => {\r\n          resolve(result);\r\n        },\r\n        onError: (error) => {\r\n          console.error(\"Failed to remove coupon code\", error);\r\n          const parsedError = parseWKTError(error);\r\n          reject(parsedError);\r\n        },\r\n      },\r\n    );\r\n  });\r\n};\r\n\r\nconst setAutoBadgeConfig = (workshopId: string, url: string) => {\r\n  if (!account) {\r\n    return Promise.reject(parseWKTError(new Error(\"No account connected\")));\r\n  }\r\n\r\n  const tx = new Transaction();\r\n  tx.moveCall({\r\n    target: `${packageId}::wkt::set_auto_badge_config`,\r\n    arguments: [\r\n      tx.object(faucetObject),\r\n      tx.pure.string(workshopId),\r\n      tx.pure.string(url),\r\n    ],\r\n  });\r\n\r\n  return new Promise((resolve, reject) => {\r\n    signAndExecute(\r\n      { transaction: tx },\r\n      {\r\n        onSuccess: (result) => {\r\n          resolve(result);\r\n        },\r\n        onError: (error) => {\r\n          console.error(\"Failed to set auto badge config\", error);\r\n          const parsedError = parseWKTError(error);\r\n          reject(parsedError);\r\n        },\r\n      },\r\n    );\r\n  });\r\n};\r\n\r\nconst mintBadge = (recipient: string, workshopId: string, url: string) => {\r\n  if (!account) {\r\n    return Promise.reject(parseWKTError(new Error(\"No account connected\")));\r\n  }\r\n\r\n  const tx = new Transaction();\r\n  tx.moveCall({\r\n    target: `${packageId}::wkt::mint_badge`,\r\n    arguments: [\r\n      tx.object(faucetObject),\r\n      tx.pure.address(recipient),\r\n      tx.pure.string(workshopId),\r\n      tx.pure.string(url),\r\n    ],\r\n  });\r\n\r\n  return new Promise((resolve, reject) => {\r\n    signAndExecute(\r\n      { transaction: tx },\r\n      {\r\n        onSuccess: (result) => {\r\n          resolve(result);\r\n        },\r\n        onError: (error) => {\r\n          console.error(\"Failed to mint badge\", error);\r\n          const parsedError = parseWKTError(error);\r\n          reject(parsedError);\r\n        },\r\n      },\r\n    );\r\n  });\r\n};\r\n\r\nSee full example on GitHub\r\nAdmin Dashboard components/AdminPanel.tsx\r\n\r\nAccessible only to admin wallet addresses.\r\nManage coupon codes (add/remove).\r\nConfigure and update auto badge settings.\r\nMint badges to users manually.\r\nShows feedback on action outcomes.\r\nworkshop-module-7/workshop-token-frontend/src/components/AdminPanel.tsx\r\nimport {\r\n  Flex,\r\n  Card,\r\n  Text,\r\n  TextField,\r\n  Box,\r\n  Heading,\r\n  Tabs,\r\n} from \"@radix-ui/themes\";\r\nimport { useWKTContract } from \"../hooks/useWKTContract\";\r\nimport Button from \"./molecules/Button\";\r\nimport { useState, useEffect } from \"react\";\r\nimport {\r\n  FiKey,\r\n  FiGift,\r\n  FiAward,\r\n  FiSettings,\r\n  FiUsers,\r\n  FiXCircle,\r\n  FiCheckCircle,\r\n} from \"react-icons/fi\";\r\nimport Tooltip from \"./molecules/Tooltip\";\r\n\r\nexport default function AdminPanel() {\r\n  const {\r\n    account,\r\n    addCouponCode,\r\n    removeCouponCode,\r\n    setAutoBadgeConfig,\r\n    mintBadge,\r\n    checkIsAdmin,\r\n    getAvailableCoupons,\r\n  } = useWKTContract();\r\n  const [isAdmin, setIsAdmin] = useState(false);\r\n  const [couponCode, setCouponCode] = useState(\"\");\r\n  const [removeCode, setRemoveCode] = useState(\"\");\r\n  const [workshopId, setWorkshopId] = useState(\"\");\r\n  const [badgeUrl, setBadgeUrl] = useState(\"\");\r\n  const [mintRecipient, setMintRecipient] = useState(\"\");\r\n  const [mintWorkshopId, setMintWorkshopId] = useState(\"\");\r\n  const [mintUrl, setMintUrl] = useState(\"\");\r\n  const [coupons, setCoupons] = useState<string[]>([]);\r\n  const [loading, setLoading] = useState(false);\r\n  const [message, setMessage] = useState(\"\");\r\n\r\nSee full example on GitHub\r\nPackage Test code:\r\n\r\nworkshop-module-7/token_contract/tests/token_contract_tests.move\r\n#[test]\r\nfun test_admin_actions() {\r\n    let mut scenario = test_scenario::begin(ADMIN);\r\n    let test = &mut scenario;\r\n    initialize(test);\r\n\r\n    test_scenario::next_tx(test, ADMIN);\r\n    let mut faucet = test_scenario::take_shared<Faucet>(test);\r\n    \r\n    // --- Add and Remove a Coupon ---\r\n    add_coupon_code(&mut faucet, b\"WELCOME10\", test_scenario::ctx(test));\r\n    assert!(is_valid_coupon_for_user(&faucet, b\"WELCOME10\", USER1), 0);\r\n    test_scenario::next_tx(test, ADMIN);\r\n    remove_coupon_code(&mut faucet, b\"WELCOME10\", test_scenario::ctx(test));\r\n    assert!(!is_valid_coupon_for_user(&faucet, b\"WELCOME10\", USER1), 1);\r\n    \r\n    // --- Transfer Admin ---\r\n    test_scenario::next_tx(test, ADMIN);\r\n    transfer_admin(&mut faucet, USER1, test_scenario::ctx(test));\r\n\r\n    // --- New Admin (USER1) performs an action ---\r\n    test_scenario::next_tx(test, USER1);\r\n    add_coupon_code(&mut faucet, b\"NEWADMIN\", test_scenario::ctx(test));\r\n    assert!(is_valid_coupon_for_user(&faucet, b\"NEWADMIN\", USER2), 2);\r\n\r\n    test_scenario::return_shared(faucet);\r\n    test_scenario::end(scenario);\r\n}\r\n\r\n#[test]\r\n#[expected_failure(abort_code = ENotAdmin)]\r\nfun test_fail_non_admin_action() {\r\n    let mut scenario = test_scenario::begin(ADMIN);\r\n    let test = &mut scenario;\r\n    initialize(test);\r\n\r\n    test_scenario::next_tx(test, ADMIN);\r\n    let mut faucet = test_scenario::take_shared<Faucet>(test);\r\n\r\n    // USER1 (not admin) tries to add a coupon\r\n    test_scenario::next_tx(test, USER1);\r\n    add_coupon_code(&mut faucet, b\"FAIL_COUPON\", test_scenario::ctx(test));\r\n\r\n    test_scenario::return_shared(faucet);\r\n    test_scenario::end(scenario);\r\n}\r\n\r\nSee full example on GitHub\r\nSo by now we have completed the admin functions and their frontend interaction and added all these functionality to our dapp admin panel as shown in the ui images above.\r\n\r\nAdd Coupon Code\r\nRemove Coupon Code\r\nTransfer Admin Rights\r\nSet Auto Badge Configuration\r\nMint Badge\r\nUser Functions\r\nUsers are the core participants of our token ecosystem. In this section, we explain how daily token claims, coupon redemption, badge redemption, and peer-to-peer payments are implemented both in the Move contract and in the frontend interface.\r\n\r\nUser functions form the core engagement layer of our dApp, enabling participants to acquire tokens, earn badges, and interact with each other. These functions create the vibrant token economy that drives user participation and community growth.\r\n\r\nUsers interact with the contract primarily through token claims, coupon redemption, badge redemption, and payments.\r\n\r\nToken Claim System\r\nThe token claim system provides two pathways for users to acquire WKT tokens: daily claims for regular engagement and coupon-based claims for targeted distribution. This dual approach balances consistent rewards with flexible promotional opportunities.\r\n\r\nSo now we will be adding to our dapp the claim daily tokens and claim coupon functions in the frontend as shown in the ui images below:-\r\n\r\nDaily Token Claim Faucet Interface\r\nFaucet Daily Token Claim Interface\r\n\r\nUser interface to claim 10 WKT tokens once per day. The button is active when the user hasn’t claimed tokens yet for the current UTC day. Faucet Daily Token Claim\r\n\r\nFaucet Daily Claim Disabled Interface\r\n\r\nInterface showing the daily claim button disabled after a successful token claim, indicating the cooldown until the next day. Faucet Daily Claim Disabled\r\n\r\nCoupon Token Claim Interface\r\n\r\nUI where users can enter a valid coupon code distributed by the admin to claim bonus WKT tokens. Coupon Token Claim\r\n\r\nClaim Daily Tokens\r\nAllows users to claim 10 WKT tokens once per UTC day.\r\n\r\nMove Package Code:\r\n\r\nworkshop-module-7/token_contract/sources/token_contract.move\r\npublic entry fun claim_tokens(\r\n    faucet: &mut Faucet,\r\n    ctx: &mut TxContext\r\n) {\r\n    let sender = tx_context::sender(ctx);\r\n    let now_ms = ctx.epoch_timestamp_ms();\r\n    let today: u64 = now_ms / 86400000u64;\r\n\r\n    if (table::contains(&faucet.claimed, sender)) {\r\n        let last_day_ref = table::borrow_mut(&mut faucet.claimed, sender);\r\n        let last_day = *last_day_ref;\r\n        assert!(last_day != today, EAlreadyClaimed);\r\n        *last_day_ref = today;\r\n    } else {\r\n        table::add(&mut faucet.claimed, sender, today);\r\n    };\r\n\r\n    let coins = coin::mint(&mut faucet.treasury_cap, 10, ctx);\r\n    transfer::public_transfer(coins, sender);\r\n\r\n    event::emit(TokensClaimed {\r\n        claimer: sender,\r\n        amount: 10,\r\n        is_coupon: false\r\n    });\r\n}\r\n\r\nSee full example on GitHub\r\nVerifies the user has not claimed today, enforcing once daily claims.\r\nMints 10 WKT tokens and transfers to the caller.\r\nEmits a TokensClaimed event with claim details.\r\nClaim Tokens with Coupon\r\nEnables users to claim tokens using an admin-issued coupon code.\r\n\r\nMove Package Code:\r\n\r\nworkshop-module-7/token_contract/sources/token_contract.move\r\npublic entry fun claim_with_coupon(\r\n    faucet: &mut Faucet,\r\n    code: vector<u8>,\r\n    ctx: &mut TxContext\r\n) {\r\n    let sender = tx_context::sender(ctx);\r\n    let code_str = string::utf8(code);\r\n\r\n    // Validate coupon code exists\r\n    assert!(vec_map::contains(&faucet.coupon_codes, &code_str), EInvalidCoupon);\r\n\r\n    // Check if user has already used this coupon\r\n    if (table::contains(&faucet.user_coupons, sender)) {\r\n        let user_coupons = table::borrow_mut(&mut faucet.user_coupons, sender);\r\n        assert!(!vec_map::contains(user_coupons, &code_str), ECouponAlreadyUsed);\r\n        vec_map::insert(user_coupons, code_str, true);\r\n    } else {\r\n        let mut user_coupons = vec_map::empty();\r\n        vec_map::insert(&mut user_coupons, code_str, true);\r\n        table::add(&mut faucet.user_coupons, sender, user_coupons);\r\n    };\r\n\r\n    let coins = coin::mint(&mut faucet.treasury_cap, 10, ctx);\r\n    transfer::public_transfer(coins, sender);\r\n\r\n    event::emit(TokensClaimed {\r\n        claimer: sender,\r\n        amount: 10,\r\n        is_coupon: true\r\n    });\r\n}\r\n\r\nSee full example on GitHub\r\nValidates provided coupon exists and is unused by caller.\r\nRecords coupon usage for the user to prevent reuse.\r\nMints 10 WKT tokens and transfers them to the caller.\r\nEmits a TokensClaimed event marking the claim as coupon-based.\r\nFrontend User Interaction:\r\n\r\nhook functions for Interaction\r\n\r\nClaim Daily Tokens\r\n\r\nhook functions for Interaction\r\n\r\nworkshop-module-7/workshop-token-frontend/src/hooks/useWKTContract.ts\r\n// Check if user has claimed today\r\nconst checkHasClaimed = async (address: string): Promise<boolean> => {\r\n  if (!address) return false;\r\n\r\n  try {\r\n    const tx = new Transaction();\r\n    tx.moveCall({\r\n      target: `${packageId}::wkt::view_claim_status`,\r\n      arguments: [tx.object(faucetObject)],\r\n    });\r\n\r\n    const result = await client.devInspectTransactionBlock({\r\n      transactionBlock: tx,\r\n      sender: address,\r\n    });\r\n\r\n    if (result.events && result.events.length > 0) {\r\n      const claimStatusEvent = result.events.find((e) =>\r\n        e.type.endsWith(\"::wkt::ClaimStatus\"),\r\n      );\r\n\r\n      if (claimStatusEvent) {\r\n        const hasClaimed =\r\n          (claimStatusEvent.parsedJson as any)?.has_claimed_today || false;\r\n        return hasClaimed;\r\n      }\r\n    }\r\n\r\n    return false;\r\n  } catch (error) {\r\n    console.error(\"Error checking claim status:\", error);\r\n    return false;\r\n  }\r\n};\r\n\r\nSee full example on GitHub\r\nworkshop-module-7/workshop-token-frontend/src/hooks/useWKTContract.ts\r\n// Claim daily tokens\r\nconst claimTokens = (): Promise<any | WKTError> => {\r\n  if (!account) {\r\n    return Promise.reject(parseWKTError(new Error(\"No account connected\")));\r\n  }\r\n\r\n  const tx = new Transaction();\r\n  tx.moveCall({\r\n    target: `${packageId}::wkt::claim_tokens`,\r\n    arguments: [tx.object(faucetObject)],\r\n  });\r\n\r\n  return new Promise((resolve, reject) => {\r\n    signAndExecute(\r\n      { transaction: tx },\r\n      {\r\n        onSuccess: (result) => {\r\n          resolve(result);\r\n        },\r\n        onError: (error) => {\r\n          console.error(\"Failed to claim tokens\", error);\r\n          const parsedError = parseWKTError(error);\r\n          reject(parsedError);\r\n        },\r\n      },\r\n    );\r\n  });\r\n};\r\n\r\nSee full example on GitHub\r\nClaim Tokens with Coupon\r\n\r\nhook functions for Interaction\r\n\r\nworkshop-module-7/workshop-token-frontend/src/hooks/useWKTContract.ts\r\n// Claim with coupon\r\nconst claimWithCoupon = (code: string) => {\r\n  if (!account) {\r\n    return Promise.reject(parseWKTError(new Error(\"No account connected\")));\r\n  }\r\n\r\n  const tx = new Transaction();\r\n  tx.moveCall({\r\n    target: `${packageId}::wkt::claim_with_coupon`,\r\n    arguments: [tx.object(faucetObject), tx.pure.string(code)],\r\n  });\r\n\r\n  return new Promise((resolve, reject) => {\r\n    signAndExecute(\r\n      { transaction: tx },\r\n      {\r\n        onSuccess: (result) => {\r\n          resolve(result);\r\n        },\r\n        onError: (error) => {\r\n          console.error(\"Failed to claim with coupon\", error);\r\n          const parsedError = parseWKTError(error);\r\n          reject(parsedError);\r\n        },\r\n      },\r\n    );\r\n  });\r\n};\r\n\r\nSee full example on GitHub\r\nClaim Interfaces components/ClaimTokens.tsx and components/ClaimCoupon.tsx\r\n\r\nUI forms for claiming daily tokens and redeeming coupons.\r\nInput validation, connection checks, and error/success message feedback.\r\nUtilizes useWKTContract hook functions for blockchain operations.\r\nworkshop-module-7/workshop-token-frontend/src/components/ClaimTokens.tsx\r\nimport { useState } from \"react\";\r\nimport { Flex, Card, Text, Box } from \"@radix-ui/themes\";\r\nimport { useWKTContract } from \"../hooks/useWKTContract\";\r\nimport Button from \"./molecules/Button\";\r\nimport { Link } from \"react-router-dom\";\r\nimport { FiArrowLeft, FiCheckCircle, FiAlertCircle } from \"react-icons/fi\";\r\nimport Tooltip from \"./molecules/Tooltip\";\r\n\r\nexport default function ClaimTokens() {\r\n  const { account, claimTokens, checkHasClaimed } = useWKTContract();\r\n  const [loading, setLoading] = useState(false);\r\n  const [hasClaimed, setHasClaimed] = useState(false);\r\n  const [message, setMessage] = useState(\"\");\r\n\r\n  const handleClaim = async () => {\r\n    if (!account) return;\r\n\r\n    setLoading(true);\r\n    setMessage(\"\");\r\n    try {\r\n      const claimedStatus = await checkHasClaimed(account.address);\r\n\r\n      if (claimedStatus) {\r\n        setHasClaimed(true);\r\n        setMessage(\"You've already claimed your tokens today.\");\r\n        setLoading(false);\r\n        return;\r\n      }\r\n\r\n      await claimTokens();\r\n      setHasClaimed(true);\r\n      setMessage(\"🎉 Successfully claimed 10 WKT tokens!\");\r\n    } catch (error) {\r\n      console.error(\"Failed to claim tokens:\", error);\r\n      setMessage(\"⚠️ Failed to claim tokens. Please try again later.\");\r\n    } finally {\r\n      setLoading(false);\r\n    }\r\n  };\r\n\r\n  return (\r\n    <Flex\r\n      direction=\"column\"\r\n      align=\"center\"\r\n      gap=\"6\"\r\n      style={{ padding: 20, minHeight: \"100vh\" }}\r\n    >\r\n      <Card\r\n        style={{\r\n          padding: 32,\r\n          background: \"#1a1a1a\",\r\n          minWidth: 320,\r\n          maxWidth: 460,\r\n          borderRadius: 12,\r\n          textAlign: \"center\",\r\n          boxShadow: \"0 4px 12px rgba(0, 0, 0, 0.4)\",\r\n        }}\r\n        aria-live=\"polite\"\r\n      >\r\n        <Flex\r\n\r\nSee full example on GitHub\r\nworkshop-module-7/workshop-token-frontend/src/components/ClaimCoupon.tsx\r\nimport { useState } from \"react\";\r\nimport { Flex, Card, Text, Box } from \"@radix-ui/themes\";\r\nimport { useWKTContract } from \"../hooks/useWKTContract\";\r\nimport Button from \"./molecules/Button\";\r\nimport { Link } from \"react-router-dom\";\r\nimport {\r\n  FiGift,\r\n  FiAlertCircle,\r\n  FiArrowLeft,\r\n  FiCheckCircle,\r\n} from \"react-icons/fi\";\r\nimport Tooltip from \"./molecules/Tooltip\";\r\n\r\nexport default function ClaimCoupon() {\r\n  const { account, claimWithCoupon, checkCouponValidity } = useWKTContract();\r\n  const [couponCode, setCouponCode] = useState(\"\");\r\n  const [loading, setLoading] = useState(false);\r\n  const [message, setMessage] = useState(\"\");\r\n\r\n  const handleClaim = async () => {\r\n    if (!account || !couponCode) return;\r\n\r\n    setLoading(true);\r\n    setMessage(\"\");\r\n    try {\r\n      const isValid = await checkCouponValidity(couponCode, account.address);\r\n      if (!isValid) {\r\n        setMessage(\"⚠️ Invalid or already used coupon code.\");\r\n        setLoading(false);\r\n        return;\r\n      }\r\n\r\n      await claimWithCoupon(couponCode);\r\n      setMessage(\"🎉 Successfully claimed tokens with coupon!\");\r\n      setCouponCode(\"\");\r\n    } catch (error) {\r\n      console.error(\"Failed to claim with coupon:\", error);\r\n      setMessage(\"⚠️ Failed to claim with coupon. Please try again later.\");\r\n    } finally {\r\n      setLoading(false);\r\n    }\r\n  };\r\n\r\n  return (\r\n    <Flex\r\n      direction=\"column\"\r\n      align=\"center\"\r\n      gap=\"6\"\r\n      style={{ padding: 24, minHeight: \"100vh\" }}\r\n    >\r\n      <Card\r\n        style={{\r\n          padding: 32,\r\n          background: \"#1a1a1a\",\r\n          minWidth: 320,\r\n          maxWidth: 460,\r\n          borderRadius: 12,\r\n          textAlign: \"center\",\r\n          boxShadow: \"0 4px 12px rgba(0, 0, 0, 0.4)\",\r\n        }}\r\n\r\nSee full example on GitHub\r\nPackage Test code:\r\n\r\nClaim Daily Tokens\r\n\r\nworkshop-module-7/token_contract/tests/token_contract_tests.move\r\n#[test]\r\nfun test_successful_claims() {\r\n    let mut scenario = test_scenario::begin(ADMIN);\r\n    let test = &mut scenario;\r\n    initialize(test);\r\n\r\n    test_scenario::next_tx(test, ADMIN);\r\n    let mut faucet = test_scenario::take_shared<Faucet>(test);\r\n    add_coupon_code(&mut faucet, b\"COUPON1\", test_scenario::ctx(test));\r\n\r\n    // USER1 claims daily tokens\r\n    test_scenario::next_tx(test, USER1);\r\n    claim_tokens(&mut faucet, test_scenario::ctx(test));\r\n    \r\n    // USER2 claims with a valid coupon\r\n    test_scenario::next_tx(test, USER2);\r\n    claim_with_coupon(&mut faucet, b\"COUPON1\", test_scenario::ctx(test));\r\n    \r\n    // --- Cleanup minted coins ---\r\n    test_scenario::next_tx(test, USER1);\r\n    let coins1 = test_scenario::take_from_sender<Coin<WKT>>(test);\r\n    coin::burn_for_testing(coins1);\r\n    \r\n    test_scenario::next_tx(test, USER2);\r\n    let coins2 = test_scenario::take_from_sender<Coin<WKT>>(test);\r\n    coin::burn_for_testing(coins2);\r\n    \r\n    test_scenario::return_shared(faucet);\r\n    test_scenario::end(scenario);\r\n}\r\n\r\n#[test]\r\n#[expected_failure(abort_code = EAlreadyClaimed)]\r\nfun test_fail_claim_tokens_twice_daily() {\r\n    let mut scenario = test_scenario::begin(ADMIN);\r\n    let test = &mut scenario;\r\n    initialize(test);\r\n    \r\n    test_scenario::next_tx(test, ADMIN);\r\n    let mut faucet = test_scenario::take_shared<Faucet>(test);\r\n\r\n    // USER1 claims successfully\r\n    test_scenario::next_tx(test, USER1);\r\n    claim_tokens(&mut faucet, test_scenario::ctx(test));\r\n    \r\n    // USER1 tries to claim again in the same transaction block (simulates same day)\r\n    claim_tokens(&mut faucet, test_scenario::ctx(test));\r\n\r\n    test_scenario::return_shared(faucet);\r\n    test_scenario::end(scenario);\r\n}\r\n\r\nSee full example on GitHub\r\nClaim Tokens with Coupon\r\n\r\nworkshop-module-7/token_contract/tests/token_contract_tests.move\r\n#[test]\r\n#[expected_failure(abort_code = ECouponAlreadyUsed)]\r\nfun test_fail_claim_with_used_coupon() {\r\n    let mut scenario = test_scenario::begin(ADMIN);\r\n    let test = &mut scenario;\r\n    initialize(test);\r\n    \r\n    test_scenario::next_tx(test, ADMIN);\r\n    let mut faucet = test_scenario::take_shared<Faucet>(test);\r\n    add_coupon_code(&mut faucet, b\"ONETIME\", test_scenario::ctx(test));\r\n    \r\n    // USER1 uses the coupon successfully\r\n    test_scenario::next_tx(test, USER1);\r\n    claim_with_coupon(&mut faucet, b\"ONETIME\", test_scenario::ctx(test));\r\n    \r\n    // USER1 tries to use it again\r\n    claim_with_coupon(&mut faucet, b\"ONETIME\", test_scenario::ctx(test));\r\n\r\n    test_scenario::return_shared(faucet);\r\n    test_scenario::end(scenario);\r\n}\r\n\r\n#[test]\r\n#[expected_failure(abort_code = EInvalidCoupon)]\r\nfun test_fail_claim_with_invalid_coupon() {\r\n    let mut scenario = test_scenario::begin(ADMIN);\r\n    let test = &mut scenario;\r\n    initialize(test);\r\n    \r\n    test_scenario::next_tx(test, ADMIN);\r\n    let mut faucet = test_scenario::take_shared<Faucet>(test);\r\n\r\n    // USER1 tries to use a coupon that doesn't exist\r\n    test_scenario::next_tx(test, USER1);\r\n    claim_with_coupon(&mut faucet, b\"FAKE_COUPON\", test_scenario::ctx(test));\r\n\r\n    test_scenario::return_shared(faucet);\r\n    test_scenario::end(scenario);\r\n}\r\n\r\nSee full example on GitHub\r\nSo by now we have added the claim daily tokens and claim coupon functions to our dapp as shown in the ui images above.\r\n\r\nBadge Redemption System\r\nThe badge redemption system allows users to convert their earned WorkshopBadge NFTs back into utility tokens, creating a circular economy where achievements can be monetized. This feature enhances badge value and provides additional utility for user accomplishments.\r\n\r\nRedeem Badge\r\nUsers can burn a WorkshopBadge NFT to redeem 30 WKT tokens.\r\n\r\nSo now we will be adding to our dapp the redeem badge and badge gallery functionality in the frontend as shown in the ui images below:-\r\n\r\nRedeem Badge Interface\r\n\r\nInterface where users can select a badge ID they own and redeem it for WKT tokens. Redeem Badge Interface\r\n\r\nAlready Redeemed Badge Interface\r\n\r\nConfirmation screen indicating that a badge has already been redeemed and cannot be used again. Already Redeemed Badge Interface\r\n\r\nBadge Gallery Interface\r\n\r\nGallery displaying all Workshop Badges owned by the user, with options to view details or redeem eligible badges. Badge Gallery Interface\r\n\r\nMove Package Code:\r\n\r\nworkshop-module-7/token_contract/sources/token_contract.move\r\npublic entry fun redeem_badge(\r\n    faucet: &mut Faucet,\r\n    badge: WorkshopBadge,\r\n    ctx: &mut TxContext\r\n) {\r\n    let sender = tx_context::sender(ctx);\r\n    assert!(badge.recipient == sender, ENoBadge);\r\n    assert!(!table::contains(&faucet.nft_redeemed, sender), EAlreadyRedeemed);\r\n\r\n    let coins = coin::mint(&mut faucet.treasury_cap, 30, ctx);\r\n    transfer::public_transfer(coins, sender);\r\n\r\n    table::add(&mut faucet.nft_redeemed, sender, true);\r\n\r\n    let WorkshopBadge { id, recipient: _, minted_at: _, workshop_id: _, url: _ } = badge;\r\n    object::delete(id);\r\n\r\n    event::emit(BadgeRedeemed {\r\n        redeemer: sender,\r\n        amount: 30\r\n    });\r\n}\r\n\r\nSee full example on GitHub\r\nChecks badge ownership and ensures one-time redemption.\r\nMints and transfers 30 WKT tokens to the caller.\r\nMarks badge as redeemed and deletes the badge NFT from storage.\r\nEmits a BadgeRedeemed event.\r\nFrontend User Interaction:\r\n\r\nhook functions for Interaction\r\n\r\nworkshop-module-7/workshop-token-frontend/src/hooks/useWKTContract.ts\r\n// Check if user has redeemed badge\r\nconst checkHasRedeemedBadge = async (address: string): Promise<boolean> => {\r\n  if (!address) return false;\r\n\r\n  try {\r\n    const tx = new Transaction();\r\n    tx.moveCall({\r\n      target: `${packageId}::wkt::has_redeemed_badge`,\r\n      arguments: [tx.object(faucetObject), tx.pure.address(address)],\r\n    });\r\n\r\n    const result = await client.devInspectTransactionBlock({\r\n      transactionBlock: tx,\r\n      sender: address,\r\n    });\r\n\r\n    if (result.results && result.results.length > 0) {\r\n      const returnValues = result.results[0]?.returnValues;\r\n      if (returnValues && returnValues.length > 0) {\r\n        return returnValues[0][0][0] === 1;\r\n      }\r\n    }\r\n    return false;\r\n  } catch (error) {\r\n    console.error(\"Error checking badge redemption status:\", error);\r\n    return false;\r\n  }\r\n};\r\n\r\nSee full example on GitHub\r\nworkshop-module-7/workshop-token-frontend/src/hooks/useWKTContract.ts\r\n// Get user's workshop badges\r\nconst getWorkshopBadges = async (\r\n  address: string,\r\n): Promise<WorkshopBadge[]> => {\r\n  if (!address) return [];\r\n\r\n  try {\r\n    const objects = await client.getOwnedObjects({\r\n      owner: address,\r\n      filter: {\r\n        StructType: `${packageId}::wkt::WorkshopBadge`,\r\n      },\r\n      options: {\r\n        showContent: true,\r\n      },\r\n    });\r\n\r\n    return objects.data\r\n      .map((obj) => {\r\n        const fields = (obj.data?.content as any)?.fields;\r\n        return {\r\n          id: fields?.id?.id || \"\",\r\n          recipient: fields?.recipient || \"\",\r\n          minted_at: fields?.minted_at || \"\",\r\n          workshop_id: fields?.workshop_id || \"\",\r\n          url: fields?.url || \"\",\r\n        };\r\n      })\r\n      .filter((badge) => badge.id);\r\n  } catch (error) {\r\n    console.error(\"Error getting workshop badges:\", error);\r\n    return [];\r\n  }\r\n};\r\n\r\nSee full example on GitHub\r\nworkshop-module-7/workshop-token-frontend/src/hooks/useWKTContract.ts\r\n// Redeem badge for tokens\r\nconst redeemBadge = (badgeId: string) => {\r\n  if (!account) {\r\n    return Promise.reject(parseWKTError(new Error(\"No account connected\")));\r\n  }\r\n\r\n  const tx = new Transaction();\r\n  tx.moveCall({\r\n    target: `${packageId}::wkt::redeem_badge`,\r\n    arguments: [tx.object(faucetObject), tx.object(badgeId)],\r\n  });\r\n\r\n  return new Promise((resolve, reject) => {\r\n    signAndExecute(\r\n      { transaction: tx },\r\n      {\r\n        onSuccess: (result) => {\r\n          resolve(result);\r\n        },\r\n        onError: (error) => {\r\n          console.error(\"Failed to redeem badge\", error);\r\n          const parsedError = parseWKTError(error);\r\n          reject(parsedError);\r\n        },\r\n      },\r\n    );\r\n  });\r\n};\r\n\r\nSee full example on GitHub\r\nBadge Management components/BadgeGallery.tsx and components/RedeemBadge.tsx\r\n\r\nBadge Gallery displays all badges earned with images, minting dates, and badge IDs.\r\nBadge Redeem component allows redeeming badges for WKT tokens with one-time restriction.\r\nIncludes error and state messaging guiding the user.\r\nworkshop-module-7/workshop-token-frontend/src/components/RedeemBadge.tsx\r\nimport { useEffect, useState } from \"react\";\r\nimport { Flex, Card, Text, Box } from \"@radix-ui/themes\";\r\nimport { useWKTContract } from \"../hooks/useWKTContract\";\r\nimport Button from \"./molecules/Button\";\r\nimport { WorkshopBadge } from \"../types\";\r\nimport { Link } from \"react-router-dom\";\r\nimport {\r\n  FiShield,\r\n  FiArrowLeft,\r\n  FiCheckCircle,\r\n  FiAlertCircle,\r\n} from \"react-icons/fi\";\r\nimport Tooltip from \"./molecules/Tooltip\";\r\n\r\nexport default function RedeemBadge() {\r\n\r\nSee full example on GitHub\r\nworkshop-module-7/workshop-token-frontend/src/components/BadgeGallery.tsx\r\nimport { useEffect, useState } from \"react\";\r\nimport { Flex, Card, Text } from \"@radix-ui/themes\";\r\nimport { useWKTContract } from \"../hooks/useWKTContract\";\r\nimport { WorkshopBadge } from \"../types\";\r\nimport Loading from \"./molecules/Loading\";\r\nimport Tooltip from \"./molecules/Tooltip\";\r\nimport { FiArrowLeft, FiGift } from \"react-icons/fi\";\r\nimport Button from \"./molecules/Button\";\r\nimport { Link } from \"react-router-dom\";\r\n\r\nexport default function BadgeGallery() {\r\n\r\nSee full example on GitHub\r\nPackage Test code:\r\n\r\nworkshop-module-7/token_contract/tests/token_contract_tests.move\r\n#[test]\r\nfun test_mint_and_redeem_badge_successfully() {\r\n    let mut scenario = test_scenario::begin(ADMIN);\r\n    let test = &mut scenario;\r\n    initialize(test);\r\n    \r\n    test_scenario::next_tx(test, ADMIN);\r\n    let mut faucet = test_scenario::take_shared<Faucet>(test);\r\n\r\n    // Admin mints a badge for USER1\r\n    mint_badge(&mut faucet, USER1, b\"W-101\", b\"ipfs://hash1\", test_scenario::ctx(test));\r\n    assert!(get_badge_count(&faucet) == 1, 0);\r\n\r\n    // USER1 takes and redeems the badge\r\n    test_scenario::next_tx(test, USER1);\r\n    let badge = test_scenario::take_from_sender<WorkshopBadge>(test);\r\n    redeem_badge(&mut faucet, badge, test_scenario::ctx(test));\r\n\r\n    // Verify redeemed status and cleanup coins\r\n    assert!(has_redeemed_badge(&faucet, USER1), 1);\r\n    test_scenario::next_tx(test, USER1);\r\n    let coins = test_scenario::take_from_sender<Coin<WKT>>(test);\r\n    coin::burn_for_testing(coins);\r\n\r\n    test_scenario::return_shared(faucet);\r\n    test_scenario::end(scenario);\r\n}\r\n\r\n#[test]\r\n#[expected_failure(abort_code = ENoBadge)]\r\nfun test_fail_redeem_badge_not_owned_by_sender() {\r\n    let mut scenario = test_scenario::begin(ADMIN);\r\n    let test = &mut scenario;\r\n    initialize(test);\r\n    \r\n    test_scenario::next_tx(test, ADMIN);\r\n    let mut faucet = test_scenario::take_shared<Faucet>(test);\r\n    \r\n    // Admin mints a badge for USER1\r\n    mint_badge(&mut faucet, USER1, b\"W-101\", b\"ipfs://hash1\", test_scenario::ctx(test));\r\n    \r\n    // USER2 tries to redeem the badge (but doesn't have it)\r\n    // This will fail at `take_from_sender` but if they somehow got it,\r\n    // the contract would still fail with ENoBadge because badge.recipient is USER1\r\n    \r\n    // Let's simulate USER1 transferring the badge to USER2\r\n    test_scenario::next_tx(test, USER1);\r\n    let badge = test_scenario::take_from_sender<WorkshopBadge>(test);\r\n    transfer::public_transfer(badge, USER2);\r\n    \r\n    // Now USER2 owns the badge object, but its internal `recipient` field is still USER1\r\n    // USER2's attempt to redeem should fail the contract's internal check\r\n    test_scenario::next_tx(test, USER2);\r\n    let transferred_badge = test_scenario::take_from_sender<WorkshopBadge>(test);\r\n    redeem_badge(&mut faucet, transferred_badge, test_scenario::ctx(test));\r\n\r\n    test_scenario::return_shared(faucet);\r\n    test_scenario::end(scenario);\r\n}\r\n\r\n#[test]\r\n#[expected_failure(abort_code = EAlreadyRedeemed)]\r\nfun test_fail_redeem_badge_twice() {\r\n    let mut scenario = test_scenario::begin(ADMIN);\r\n    let test = &mut scenario;\r\n    initialize(test);\r\n    \r\n    test_scenario::next_tx(test, ADMIN);\r\n    let mut faucet = test_scenario::take_shared<Faucet>(test);\r\n    \r\n    // Admin mints two badges for USER1\r\n    mint_badge(&mut faucet, USER1, b\"W101\", b\"url1\", test_scenario::ctx(test));\r\n    test_scenario::next_tx(test, ADMIN);\r\n    mint_badge(&mut faucet, USER1, b\"W102\", b\"url2\", test_scenario::ctx(test));\r\n    \r\n    // USER1 redeems the first badge\r\n    test_scenario::next_tx(test, USER1);\r\n    let badge1 = test_scenario::take_from_sender<WorkshopBadge>(test);\r\n    redeem_badge(&mut faucet, badge1, test_scenario::ctx(test));\r\n\r\n    // USER1 tries to redeem the second badge\r\n    test_scenario::next_tx(test, USER1);\r\n    let badge2 = test_scenario::take_from_sender<WorkshopBadge>(test);\r\n    redeem_badge(&mut faucet, badge2, test_scenario::ctx(test));\r\n\r\n    test_scenario::return_shared(faucet);\r\n    test_scenario::end(scenario);\r\n}\r\n\r\nSee full example on GitHub\r\nPeer-to-Peer Payments System (with Auto Badge Minting on their First Payment)\r\nThe payment system enables direct token transfers between users, with optional automatic badge minting to reward first-time transactions. This creates a complete economic ecosystem where users can exchange value while earning recognition for their participation.\r\n\r\nSo now we will be adding to our dapp the make payment function in the frontend as shown in the ui images below:-\r\n\r\nMake Payment Interface and confetti on new badge mint\r\nMake Payment Interface\r\n\r\nPayment screen that allows users to transfer WKT tokens to another wallet address, with balance checks and confirmation feedback. Make Payment Interface\r\n\r\nConfetti Celebration on New Badge Mint\r\n\r\nCelebration modal with confetti animation that appears when a user earns their first Workshop Badge automatically after making a payment. Confetti Celebration on New Badge Mint\r\n\r\nMake Payment\r\nFacilitates peer-to-peer payments with WKT tokens and auto-badge minting on first payment if admin had configured the nft badge from there end.\r\n\r\nMove Package Code:\r\n\r\nworkshop-module-7/token_contract/sources/token_contract.move\r\npublic entry fun make_payment(\r\n    faucet: &mut Faucet,\r\n    coin: &mut Coin<WKT>,\r\n    recipient: address,\r\n    amount: u64,\r\n    ctx: &mut TxContext\r\n) {\r\n    let sender = tx_context::sender(ctx);\r\n    assert!(coin::value(coin) >= amount, EInsufficientBalance);\r\n\r\n    let payment = coin::split(coin, amount, ctx);\r\n    transfer::public_transfer(payment, recipient);\r\n\r\n    event::emit(PaymentMade {\r\n        from: sender,\r\n        to: recipient,\r\n        amount\r\n    });\r\n\r\n    // Auto-mint badge for the sender if this is their first outgoing payment\r\n    // AND if auto-badge configuration has been set\r\n    if (!table::contains(&faucet.badge_issued, sender) && \r\n        !string::is_empty(&faucet.auto_badge_workshop_id) && \r\n        !string::is_empty(&faucet.auto_badge_url)) {\r\n        \r\n        let badge = WorkshopBadge {\r\n            id: object::new(ctx),\r\n            recipient: sender,\r\n            minted_at: ctx.epoch_timestamp_ms(),\r\n            workshop_id: faucet.auto_badge_workshop_id,\r\n            url: faucet.auto_badge_url\r\n        };\r\n\r\n        let badge_id = object::id(&badge);\r\n        faucet.badge_counter = faucet.badge_counter + 1;\r\n\r\n        table::add(&mut faucet.badge_issued, sender, true);\r\n        transfer::public_transfer(badge, sender);\r\n\r\n        event::emit(BadgeMinted {\r\n            recipient: sender,\r\n            badge_id,\r\n            workshop_id: faucet.auto_badge_workshop_id,\r\n            url: faucet.auto_badge_url\r\n        });\r\n    };\r\n}\r\n\r\nSee full example on GitHub\r\nChecks the sender has sufficient balance.\r\nSplits the coin and transfers the payment to the recipient.\r\nEmits PaymentMade event.\r\nAuto-mints a WorkshopBadge if it is the sender's first payment and auto-badge config is set.\r\nRecords badge issuance and emits BadgeMinted event.\r\nFrontend User Interaction:\r\n\r\nhook functions for Interaction\r\n\r\nworkshop-module-7/workshop-token-frontend/src/hooks/useWKTContract.ts\r\n// Make payment\r\nconst makePayment = (coinId: string, recipient: string, amount: string) => {\r\n  if (!account) {\r\n    return Promise.reject(parseWKTError(new Error(\"No account connected\")));\r\n  }\r\n\r\n  const tx = new Transaction();\r\n  tx.moveCall({\r\n    target: `${packageId}::wkt::make_payment`,\r\n    arguments: [\r\n      tx.object(faucetObject),\r\n      tx.object(coinId),\r\n      tx.pure.address(recipient),\r\n      tx.pure.u64(amount),\r\n    ],\r\n  });\r\n\r\n  return new Promise((resolve, reject) => {\r\n    signAndExecute(\r\n      { transaction: tx },\r\n      {\r\n        onSuccess: (result) => {\r\n          resolve(result);\r\n        },\r\n        onError: (error) => {\r\n          console.error(\"Failed to make payment\", error);\r\n          const parsedError = parseWKTError(error);\r\n          reject(parsedError);\r\n        },\r\n      },\r\n    );\r\n  });\r\n};\r\n\r\nSee full example on GitHub\r\nPayment Component components/MakePayment.tsx\r\n\r\nForm for sending WKT tokens to other addresses.\r\nShows current token balance and processes payments.\r\nAfter payments, checks and displays newly minted badges if any.\r\nShows celebratory confetti modal on new badge mint.\r\nworkshop-module-7/workshop-token-frontend/src/components/MakePayment.tsx\r\nimport { useState, useEffect } from \"react\";\r\nimport { Flex, Card, Text, Box } from \"@radix-ui/themes\";\r\nimport { useWKTContract } from \"../hooks/useWKTContract\";\r\nimport Button from \"./molecules/Button\";\r\nimport { Link } from \"react-router-dom\";\r\nimport { TokenBalance, WorkshopBadge } from \"../types\";\r\nimport Tooltip from \"./molecules/Tooltip\";\r\nimport CelebrationModal from \"./CelebrationModal\";\r\n\r\nexport default function MakePayment() {\r\n  const { account, makePayment, getWKTBalance, getWorkshopBadges } =\r\n    useWKTContract();\r\n  const [recipient, setRecipient] = useState<string>(\"\");\r\n  const [amount, setAmount] = useState<string>(\"\");\r\n  const [coinId, setCoinId] = useState<string>(\"\");\r\n  const [loading, setLoading] = useState<boolean>(false);\r\n  const [balance, setBalance] = useState<TokenBalance[]>([]);\r\n  const [message, setMessage] = useState<string>(\"\");\r\n  const [showCelebration, setShowCelebration] = useState<boolean>(false);\r\n  const [newBadge, setNewBadge] = useState<WorkshopBadge | null>(null);\r\n\r\n  useEffect(() => {\r\n    const fetchBalance = async () => {\r\n      if (account?.address) {\r\n        const userBalance = await getWKTBalance(account.address);\r\n        setBalance(userBalance);\r\n        if (userBalance.length > 0) {\r\n          setCoinId(userBalance[0].coinObjectId);\r\n        }\r\n      }\r\n    };\r\n    fetchBalance();\r\n  }, [account?.address, getWKTBalance]);\r\n\r\n  const totalBalance = balance.reduce(\r\n    (sum, coin) => sum + BigInt(coin.balance),\r\n    BigInt(0),\r\n  );\r\n\r\n  const handlePayment = async () => {\r\n    if (!account || !recipient || !amount || !coinId) return;\r\n\r\n    setLoading(true);\r\n    setMessage(\"\");\r\n    try {\r\n      // 1. Get badge count before payment\r\n      const badgesBefore = await getWorkshopBadges(account.address);\r\n\r\n      await makePayment(coinId, recipient, amount);\r\n      setMessage(\"🎉 Payment successful!\");\r\n\r\n      // 2. Fetch updated balances and badges after success\r\n      const updatedBalance = await getWKTBalance(account.address);\r\n      setBalance(updatedBalance);\r\n      const badgesAfter = await getWorkshopBadges(account.address);\r\n\r\n      // 3. Check if a new badge was minted\r\n      if (badgesAfter.length > badgesBefore.length) {\r\n        // Find the newly added badge\r\n        const newlyMintedBadge = badgesAfter.find(\r\n          (bAfter) => !badgesBefore.some((bBefore) => bBefore.id === bAfter.id),\r\n        );\r\n\r\n        if (newlyMintedBadge) {\r\n          setNewBadge(newlyMintedBadge);\r\n          setShowCelebration(true); // Trigger the celebration!\r\n        }\r\n      }\r\n\r\n      setRecipient(\"\");\r\n      setAmount(\"\");\r\n    } catch (error) {\r\n      console.error(\"Failed to make payment:\", error);\r\n      setMessage(\"⚠️ Payment failed. Please check details and try again.\");\r\n    } finally {\r\n      setLoading(false);\r\n    }\r\n  };\r\n\r\n  return (\r\n\r\nSee full example on GitHub\r\nPackage Test code:\r\n\r\nworkshop-module-7/token_contract/tests/token_contract_tests.move\r\n#[test]\r\nfun test_payment_and_auto_badge() {\r\n    let mut scenario = test_scenario::begin(ADMIN);\r\n    let test = &mut scenario;\r\n    initialize(test);\r\n\r\n    test_scenario::next_tx(test, ADMIN);\r\n    let mut faucet = test_scenario::take_shared<Faucet>(test);\r\n\r\n    // Admin sets auto-badge config\r\n    set_auto_badge_config( &mut faucet, b\"First-Pay\", b\"ipfs://auto\", test_scenario::ctx(test));\r\n    // USER1 claims tokens\r\n    test_scenario::next_tx(test, USER1);\r\n    claim_tokens(&mut faucet, test_scenario::ctx(test));\r\n\r\n    // USER1 makes first payment, triggering auto-badge\r\n    test_scenario::next_tx(test, USER1);\r\n    let mut coins = test_scenario::take_from_sender<Coin<WKT>>(test);\r\n    make_payment(&mut faucet, &mut coins, USER2, 5, test_scenario::ctx(test));\r\n    \r\n    // Check badge count has increased\r\n    assert!(get_badge_count(&faucet) == 1, 0);\r\n\r\n    // USER1 makes a second payment, which should NOT mint another badge\r\n    make_payment(&mut faucet, &mut coins, USER2, 2, test_scenario::ctx(test));\r\n    assert!(get_badge_count(&faucet) == 1, 1);\r\n\r\n    test_scenario::return_to_sender(test, coins);\r\n    test_scenario::next_tx(test, USER1);\r\n    let badge = test_scenario::take_from_sender<WorkshopBadge>(test);\r\n    test_scenario::return_to_sender(test, badge);\r\n\r\n    test_scenario::return_shared(faucet);\r\n    test_scenario::end(scenario);\r\n}\r\n\r\n#[test]\r\n#[expected_failure(abort_code = EInsufficientBalance)]\r\nfun test_fail_payment_insufficient_funds() {\r\n    let mut scenario = test_scenario::begin(ADMIN);\r\n    let test = &mut scenario;\r\n    initialize(test);\r\n\r\n    test_scenario::next_tx(test, ADMIN);\r\n    let mut faucet = test_scenario::take_shared<Faucet>(test);\r\n    \r\n    // USER1 claims 10 tokens\r\n    test_scenario::next_tx(test, USER1);\r\n    claim_tokens(&mut faucet, test_scenario::ctx(test));\r\n\r\n    // USER1 tries to pay 20 tokens\r\n    test_scenario::next_tx(test, USER1);\r\n    let mut coins = test_scenario::take_from_sender<Coin<WKT>>(test);\r\n    make_payment(&mut faucet, &mut coins, USER2, 20, test_scenario::ctx(test));\r\n\r\n    // This part won't be reached, but is good practice for non-failing tests\r\n    test_scenario::return_to_sender(test, coins);\r\n    test_scenario::return_shared(faucet);\r\n    test_scenario::end(scenario);\r\n}\r\n\r\nSee full example on GitHub\r\nRun Unit Tests\r\nYou can use the following command in the package root to run any unit tests you have created.\r\n\r\niota move test\r\n\r\nPublish the Package\r\nPublish the package to the IOTA Network using the following command:\r\n\r\niota client publish\r\n\r\nComplete Source Code (Frontend and Move Package Contract + Tests)\r\nComplete Source Code\r\nFrontend Application\r\nSource Code Repository: workshop-token-frontend\r\n\r\nLive Demo: Workshop Token dApp Frontend\r\n\r\nMove Smart Contract\r\nContract Source Code: token_contract.move\r\n\r\nContract Tests: token_contract_tests.move\r\n\r\nSequence Diagram\r\nThis sequence diagram illustrates the flow of interactions within the WKT (Workshop Token) decentralized application involving the Admin, User, Blockchain, and the token_contract::wkt Move smart contract. The process begins with the Admin deploying the contract to the IOTA Network, which initializes the WKT token, metadata, and shared Faucet object for token distribution. Users can claim daily tokens, with the contract ensuring claims are limited to once per day, and claim tokens using unique coupons managed by the Admin through a coupon registry.\r\n\r\nUsers can make peer-to-peer payments with WKT tokens, where the contract validates balances and transfers coins to recipients. If configured, the contract automatically mints a WorkshopBadge NFT for the user on their first payment. Badge redemption allows users to burn their WorkshopBadge NFTs to receive 30 WKT tokens, with ownership and one-time redemption enforced by the contract.\r\n\r\nThe Admin manages coupon codes, configures auto-badge settings, and manually mints badges to recipients. Administrative controls also include transferring admin rights securely. Throughout these interactions, the contract emits events to signal token claims, payments, badge minting, and redemptions, ensuring transparency and synchronization with the front end. This diagram demonstrates how the system maintains secure token flows, proper validations, and flexible administrative oversight on the blockchain.\r\n\r\ntoken_contract::wkt\r\nIOTA Network\r\nUser\r\nAdmin\r\ntoken_contract::wkt\r\nIOTA Network\r\nUser\r\nAdmin\r\nalt\r\n[Admin Auto-badge already\r\nconfigured AND first\r\npayment]\r\nDeploy Contract\r\ninit(witness, ctx)\r\nCreate WKT currency and metadata\r\nShare Faucet object\r\nadd_coupon_code(faucet, code, ctx)\r\nInsert code into coupon_codes\r\nremove_coupon_code(faucet, code, ctx)\r\nRemove code from coupon_codes\r\nset_auto_badge_config(faucet, workshop_id, url, ctx)\r\nUpdate auto badge configuration\r\nmint_badge(faucet, recipient, workshop_id, url, ctx)\r\nCreate WorkshopBadge object\r\nIncrement badge_counter\r\nTransfer badge to recipient\r\nclaim_tokens(faucet, ctx)\r\nValidate not claimed today\r\nMint 10 WKT tokens\r\nTransfer tokens to user\r\nclaim_with_coupon(faucet, code, ctx)\r\nValidate coupon exists\r\nValidate user hasn't used coupon\r\nMint 10 WKT tokens\r\nTransfer tokens to user\r\nmake_payment(faucet, coin, recipient, amount, ctx)\r\nValidate sufficient balance\r\nTransfer tokens to recipient\r\nCreate WorkshopBadge\r\nTransfer badge to sender\r\nredeem_badge(faucet, badge, ctx)\r\nValidate user owns badge and not already redeemed\r\nMint 30 WKT tokens\r\nTransfer tokens to user\r\nBurn Badge\r\nConclusion\r\nThe Workshop Minting Managing Tokens (WKT) tutorial focuses on custom token management using the IOTA blockchain and the Move programming language. It guides developers through defining, minting, and managing fungible tokens and NFTs tailored for workshops and events. Key features include daily token claims, coupon-based distribution, peer-to-peer payments, and badge rewards as NFTs. The tutorial highlights secure admin controls, event-driven contract design, and robust error handling. Complemented by a modern frontend built with React and the IOTA dApp kit, it demonstrates seamless blockchain integration with user-friendly interfaces. This hands-on guide equips developers to create scalable, feeless token ecosystems fostering engagement and rewarding participation on the IOTA network.\r\n\r\nExtension Tasks\r\n🚀 Build a Token Management/Creator Platform\r\nTransform your token system into a platform where users can launch their own branded token ecosystems. Create a factory contract that lets anyone deploy custom workshop tokens with unique names, symbols, and economic models.\r\n\r\nBuild These Advanced Features:\r\n\r\nMulti-token factory system for custom currency creation\r\nDynamic badge tiers like (Bronze/Silver/Gold) with collection bonuses\r\nRecurring payments and scheduled token distributions\r\nCreator analytics dashboard with real-time metrics\r\nTechnical Challenges:\r\n\r\nFactory contract patterns for token deployment\r\nDynamic NFT metadata and tier systems\r\nTime-based payment schedulers\r\nMulti-token economic balancing\r\nThis extension transforms you from dApp builder to platform architect, teaching advanced Web3 patterns while creating real business value.\r\n\r\nNeed help or want to collaborate? Join the IOTA Builders Discord to share progress, get feedback on economic models, and solve technical challenges with the community. Share your factory designs and creator dashboards!"
+     ]
+    },
+    "create_time": 1771436090.243,
+    "id": "dddcc75e-3c69-4974-9aa2-c75053df0e3b",
+    "metadata": {
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "client-created-root"
+  }
+ },
+ "memory_scope": "global_enabled",
+ "pinned_time": null,
+ "plugin_ids": null,
+ "title": "005-03_04-2-workshops-25022026-2nd_capstone-minting-and-managing-tokens",
+ "update_time": 1771436155.415307,
+ "voice": null
+}

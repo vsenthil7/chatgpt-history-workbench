@@ -1,0 +1,2665 @@
+{
+ "conversation_id": "6ac644d3-8610-83ed-8ab3-2a98b9cc6a55",
+ "conversation_template_id": null,
+ "create_time": 1791378644.60168,
+ "current_node": "b0a65d00-7c43-4cfa-a78a-1f26238678dd",
+ "default_model_slug": "gpt-5-6",
+ "id": "6ac644d3-8610-83ed-8ab3-2a98b9cc6a55",
+ "is_archived": false,
+ "is_do_not_remember": false,
+ "is_read_only": null,
+ "is_starred": null,
+ "is_study_mode": false,
+ "mapping": {
+  "00bd3afe-d661-455c-a449-eae50a8771d3": {
+   "id": "00bd3afe-d661-455c-a449-eae50a8771d3",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "75d39756-ec56-4ed7-8ba9-44acc5325e27",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "I’m creating a reusable Python script that processes audio and video, makes a short Sarvam test clip, checks file size and duration, and splits larger files before transcription.",
+       "finished": true,
+       "summary": "Writing the script"
+      },
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Wrote the script"
+      }
+     ]
+    },
+    "create_time": 1791379250.967912,
+    "id": "00bd3afe-d661-455c-a449-eae50a8771d3",
+    "metadata": {
+     "content_references": [],
+     "model_slug": "gpt-5-6",
+     "parent_id": "75d39756-ec56-4ed7-8ba9-44acc5325e27",
+     "tool_icons": []
+    }
+   },
+   "parent": "c31b8975-2b9a-4d86-9980-e8cacfb300b7"
+  },
+  "093d3407-cd51-43ff-8f16-e8c7d93c1d75": {
+   "id": "093d3407-cd51-43ff-8f16-e8c7d93c1d75",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "are u ready to create script, step by step install and run and output"
+     ]
+    },
+    "create_time": 1791379208.55,
+    "id": "093d3407-cd51-43ff-8f16-e8c7d93c1d75"
+   },
+   "parent": "27c2ae9e-e09c-4c61-b0b7-4f45800f27c8"
+  },
+  "0fbb6db7-3718-4579-b863-76a509e71643": {
+   "id": "0fbb6db7-3718-4579-b863-76a509e71643",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "07/10/2026 14:20 — **Audio → Sarvam Script V1**\n\nDone, partner. I created the complete script:\n\n**[Download `audio_to_sarvam.py`](sandbox:/mnt/data/audio_to_sarvam.py)**\n\nI built it against Sarvam's current API pattern: REST is used only for the short compatibility test; the real recording uses Batch with `saaras:v4`, diarization, optional speaker count, and downloaded results. citeturn0search0turn0search12turn1view0\n\n## 1. Check Python\n\nOpen **PowerShell**:\n\n```powershell\npython --version\n```\n\nYou should already have Python 3.12, so this should be fine.\n\nThen:\n\n```powershell\npython -m pip --version\n```\n\n---\n\n## 2. Install FFmpeg\n\nFirst see whether you already have it:\n\n```powershell\nffmpeg -version\n```\n\nand:\n\n```powershell\nffprobe -version\n```\n\nIf both work, **don't install anything**.\n\nIf Windows says the command is not recognised, easiest installation on Windows 11 is:\n\n```powershell\nwinget install --id Gyan.FFmpeg -e\n```\n\nClose PowerShell and open a **new PowerShell**.\n\nTest again:\n\n```powershell\nffmpeg -version\nffprobe -version\n```\n\nBoth must work before proceeding.\n\n---\n\n## 3. Create a working folder\n\nFor example:\n\n```powershell\nmkdir C:\\SarvamAudio\ncd C:\\SarvamAudio\n```\n\nPut the downloaded script there:\n\n```text\nC:\\SarvamAudio\\\n    audio_to_sarvam.py\n```\n\nYour recording **does not need to be in this folder**.\n\n---\n\n## 4. Install Sarvam's Python SDK\n\nRun:\n\n```powershell\npython -m pip install -U sarvamai\n```\n\nThis is Sarvam's current official Python package installation command. citeturn0search8\n\nTest:\n\n```powershell\npython -c \"from sarvamai import SarvamAI; print('Sarvam SDK OK')\"\n```\n\nExpected:\n\n```text\nSarvam SDK OK\n```\n\n---\n\n# 5. Set your Sarvam API key\n\nDon't put the key inside the Python program.\n\nFor **this PowerShell window only**:\n\n```powershell\n$env:SARVAM_API_KEY=\"YOUR_REAL_SARVAM_API_KEY\"\n```\n\nCheck that Windows has it:\n\n```powershell\nif ($env:SARVAM_API_KEY) { \"Sarvam key is set\" }\n```\n\nExpected:\n\n```text\nSarvam key is set\n```\n\nThis follows Sarvam's recommendation to keep the API key outside source code. citeturn0search8\n\n### Make it permanent later\n\nOnce everything works:\n\n```powershell\nsetx SARVAM_API_KEY \"YOUR_REAL_SARVAM_API_KEY\"\n```\n\nThen close and reopen PowerShell.\n\n**Don't paste your API key into this chat.**\n\n---\n\n# 6. First run — use one of your OGG files\n\nSuppose your file is:\n\n```text\nC:\\Users\\Senthil\\Downloads\\Rivin talavar audio 1st meeting tech Tycoon digit marketing manager 2026-10-06 at 12.48.42.ogg\n```\n\nRun:\n\n```powershell\npython C:\\SarvamAudio\\audio_to_sarvam.py \"C:\\Users\\Senthil\\Downloads\\Rivin talavar audio 1st meeting tech Tycoon digit marketing manager 2026-10-06 at 12.48.42.ogg\"\n```\n\n**Quotes are important** because your filename contains spaces.\n\n---\n\n# 7. What happens first\n\nIt does **not immediately convert the whole OGG to WAV**.\n\nIt first inspects:\n\n```text\nContainer\nCodec\nDuration\nFile size\nSample rate\nChannels\nAudio/video\n```\n\nThen it makes approximately a **20-second OGG test file** and sends that small file to Sarvam REST.\n\nSarvam documents REST for recordings under 30 seconds and officially lists OGG among its supported formats. citeturn0search0\n\nYou'll see something like:\n\n```text\n[2/6] Testing source format with Sarvam REST\n\n      Test file : original_format_test.ogg\n      Duration  : 00:00:20\n      Size      : 0.18 MB\n\n      Calling Sarvam REST...\n\n      PASS: Sarvam returned a non-empty transcript.\n```\n\n### If OGG works\n\nIt reports:\n\n```text\nPASS: Sarvam returned a non-empty transcript.\n\nKeeping source format; full WAV conversion NOT required.\n```\n\nTherefore:\n\n**OGG → OGG → Sarvam**\n\nNo unnecessary WAV.\n\n---\n\n# 8. If your OGG problem happens\n\nThis is the important path we specifically designed for your observation.\n\nIf Sarvam rejects that OGG:\n\n```text\n[2/6] Testing source format with Sarvam REST\n\n      FAIL: <actual Sarvam error>\n      Activating WAV fallback.\n```\n\nIt then automatically performs:\n\n```text\nOriginal OGG\n     ↓\n16 kHz\nmono\nPCM 16-bit\n     ↓\nWAV\n```\n\nThen you'll see:\n\n```text\n[3/6] Preparing final audio format\n\n      Converting full recording to WAV...\n      Format   : PCM 16-bit\n      Rate     : 16000 Hz\n      Channels : mono\n\n      CREATED  : Rivin..._16k_mono_pcm16.wav\n      Duration : 01:15:42\n      Size     : 138.64 MB\n\n      Testing WAV sample with Sarvam REST...\n\n      PASS: WAV returned a non-empty transcript.\n```\n\nThat gives us useful evidence:\n\n```text\nSame recording\nOGG sample → FAIL\nWAV sample → PASS\n```\n\nThe script stores both results instead of hiding this information.\n\n---\n\n# 9. 90 MB default\n\nYou asked for file size to be configurable.\n\nDefault is:\n\n```text\nMaximum part : 90 MB (DEFAULT)\n```\n\nSo simply running:\n\n```powershell\npython audio_to_sarvam.py \"meeting.ogg\"\n```\n\nmeans:\n\n```text\n--max-mb 90\n```\n\nYou can change it:\n\n```powershell\npython audio_to_sarvam.py \"meeting.ogg\" --max-mb 70\n```\n\nor:\n\n```powershell\npython audio_to_sarvam.py \"meeting.ogg\" --max-mb 95\n```\n\n**90 MB is our local safety setting, not a claim that Sarvam documents a 90 MB Batch limit.**\n\nThe script also keeps each Batch audio file below Sarvam's documented **2-hour/file** limit. citeturn0search7\n\n---\n\n# 10. It tells you how many files before splitting\n\nFor example:\n\n```text\n[4/6] Checking size/duration and preparing Batch file(s)\n\n      Prepared size   : 138.64 MB\n      Prepared length : 01:15:42\n      Planned files   : 2\n      Approx length   : 00:37:51 per file\n\n      Expected files : 2\n```\n\nWhile processing:\n\n```text\nStarting part 001...\n\nCREATED  : meeting_part_001.wav\nDuration : 00:37:51\nSize     : 69.31 MB\n\nStarting part 002...\n\nCREATED  : meeting_part_002.wav\nDuration : 00:37:51\nSize     : 69.33 MB\n```\n\nSo it doesn't silently work in the background.\n\n---\n\n# 11. Sarvam transcription\n\nAfter preparation:\n\n```text\n[5/6] Starting Sarvam Batch transcription\n\n      Upload files : 2\n      Creating Batch job...\n      Uploading...\n      Starting...\n      Waiting for Sarvam to complete...\n```\n\nThe implementation follows Sarvam's documented Batch sequence:\n\n```text\ncreate_job\n→ upload_files\n→ start\n→ wait_until_complete\n→ get_file_results\n→ download_outputs\n```\n\nciteturn0search12\n\nSpeaker diarization is enabled automatically:\n\n```python\nwith_diarization=True\n```\n\nSarvam supports automatic speaker detection, so by default we **do not guess the number of people**. citeturn1view0\n\n---\n\n# 12. If you know there are exactly two speakers\n\nUse:\n\n```powershell\npython audio_to_sarvam.py \"meeting.ogg\" --speakers 2\n```\n\nSarvam supports `num_speakers` from 1–20; otherwise it can auto-detect. citeturn1view0\n\nFor your meetings where the number isn't certain, I would leave it automatic.\n\n---\n\n# 13. Tamil\n\nIf you know the recording is primarily Tamil:\n\n```powershell\npython audio_to_sarvam.py \"meeting.ogg\" --language ta-IN\n```\n\nSarvam recommends specifying the language when it is known because this can improve recognition accuracy. citeturn0search1\n\nFor mixed recordings where we're unsure, leave it off:\n\n```powershell\npython audio_to_sarvam.py \"meeting.ogg\"\n```\n\nThe script then uses automatic detection during the REST test and doesn't force a language on Batch.\n\n---\n\n# 14. Key terms\n\nFor one of your technical meetings:\n\n```powershell\npython audio_to_sarvam.py \"meeting.ogg\" --keyterms \"Rivin,TalkProof,Retell,Twilio,IPBS\"\n```\n\nSaaras v4 supports up to **50 keyterms** for names, brands and technical terms. citeturn0search4\n\nThis could become valuable for your recordings because unusual names and product names are exactly where speech recognition often makes mistakes.\n\n---\n\n# 15. Output structure\n\nFor:\n\n```text\nC:\\Meetings\\Rivin meeting.ogg\n```\n\nthe script creates beside it:\n\n```text\nC:\\Meetings\\\n│\n├── Rivin meeting.ogg\n│\n└── Rivin meeting_sarvam\\\n    │\n    ├── 01_audit\\\n    │   ├── source_info.json\n    │   ├── original_format_test.json\n    │   ├── wav_format_test.json\n    │   ├── prepared_files.json\n    │   ├── batch_file_results.json\n    │   └── run_audit.json\n    │\n    ├── 02_test\\\n    │   ├── original_format_test.ogg\n    │   └── wav_format_test.wav\n    │\n    ├── 03_prepared\\\n    │   └── meeting_16k_mono_pcm16.wav\n    │\n    ├── 04_chunks\\\n    │   ├── meeting_part_001.wav\n    │   └── meeting_part_002.wav\n    │\n    ├── 05_sarvam_raw\\\n    │   └── <Sarvam JSON results>\n    │\n    └── 06_transcript\\\n        ├── transcript.txt\n        └── transcript_with_speakers.txt\n```\n\nFolders/files that aren't required won't necessarily contain artifacts. For example, if OGG passes and doesn't require splitting, we don't create a giant WAV merely to fill the directory.\n\n---\n\n## Speaker transcript\n\nSarvam's diarization response provides entries containing `speaker_id`, transcript, start time and end time. citeturn1view0\n\nThe script converts those into a readable file such as:\n\n```text\n[00:00:02 - 00:00:08] Speaker 0: ...\n[00:00:09 - 00:00:15] Speaker 1: ...\n[00:00:16 - 00:00:27] Speaker 0: ...\n```\n\nThe **raw Sarvam JSON is also retained**, so our generated TXT is never the only evidence.\n\n---\n\n## First test I want you to run\n\nDon't start with lots of options.\n\nDownload:\n\n**[audio_to_sarvam.py](sandbox:/mnt/data/audio_to_sarvam.py)**\n\nComplete steps **1–5**, then run exactly:\n\n```powershell\npython C:\\SarvamAudio\\audio_to_sarvam.py \"FULL_PATH_TO_YOUR_OGG_FILE\"\n```\n\nFor your first execution, **don't add `--force-wav`**. We specifically want to discover whether Sarvam's API accepts the OGG that failed in its online interface.\n\nThat first run will tell us something useful: **OGG API works / OGG API fails → WAV succeeds / both fail**, with the actual Sarvam error retained in `01_audit`."
+     ]
+    },
+    "create_time": 1791379314.50443,
+    "id": "0fbb6db7-3718-4579-b863-76a509e71643",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "n3v2ex",
+       "preview_language": null,
+       "previewable": false
+      },
+      "1": {
+       "edited": false,
+       "id": "5jtcyo",
+       "preview_language": null,
+       "previewable": false
+      },
+      "10": {
+       "edited": false,
+       "id": "c9e75t",
+       "preview_language": null,
+       "previewable": false
+      },
+      "11": {
+       "edited": false,
+       "id": "p3cxtk",
+       "preview_language": null,
+       "previewable": false
+      },
+      "12": {
+       "edited": false,
+       "id": "7jbigi",
+       "preview_language": null,
+       "previewable": false
+      },
+      "13": {
+       "edited": false,
+       "id": "3qczz0",
+       "preview_language": null,
+       "previewable": false
+      },
+      "14": {
+       "edited": false,
+       "id": "enxa7t",
+       "preview_language": null,
+       "previewable": false
+      },
+      "15": {
+       "edited": false,
+       "id": "0mec0y",
+       "preview_language": null,
+       "previewable": false
+      },
+      "16": {
+       "edited": false,
+       "id": "iataa5",
+       "preview_language": null,
+       "previewable": false
+      },
+      "17": {
+       "edited": false,
+       "id": "6buv36",
+       "preview_language": null,
+       "previewable": false
+      },
+      "18": {
+       "edited": false,
+       "id": "070d8m",
+       "preview_language": null,
+       "previewable": false
+      },
+      "19": {
+       "edited": false,
+       "id": "7eh42v",
+       "preview_language": null,
+       "previewable": false
+      },
+      "2": {
+       "edited": false,
+       "id": "iy36vf",
+       "preview_language": null,
+       "previewable": false
+      },
+      "20": {
+       "edited": false,
+       "id": "wtysvk",
+       "preview_language": null,
+       "previewable": false
+      },
+      "21": {
+       "edited": false,
+       "id": "exh5cg",
+       "preview_language": null,
+       "previewable": false
+      },
+      "22": {
+       "edited": false,
+       "id": "zz5qex",
+       "preview_language": null,
+       "previewable": false
+      },
+      "23": {
+       "edited": false,
+       "id": "njzkg7",
+       "preview_language": null,
+       "previewable": false
+      },
+      "24": {
+       "edited": false,
+       "id": "tejesp",
+       "preview_language": null,
+       "previewable": false
+      },
+      "25": {
+       "edited": false,
+       "id": "ls3z2l",
+       "preview_language": null,
+       "previewable": false
+      },
+      "26": {
+       "edited": false,
+       "id": "b9hvlu",
+       "preview_language": null,
+       "previewable": false
+      },
+      "27": {
+       "edited": false,
+       "id": "6qrm1s",
+       "preview_language": null,
+       "previewable": false
+      },
+      "28": {
+       "edited": false,
+       "id": "jgfsky",
+       "preview_language": null,
+       "previewable": false
+      },
+      "29": {
+       "edited": false,
+       "id": "dq7hxu",
+       "preview_language": null,
+       "previewable": false
+      },
+      "3": {
+       "edited": false,
+       "id": "il07e9",
+       "preview_language": null,
+       "previewable": false
+      },
+      "30": {
+       "edited": false,
+       "id": "2xnt46",
+       "preview_language": null,
+       "previewable": false
+      },
+      "31": {
+       "edited": false,
+       "id": "1p4z8l",
+       "preview_language": null,
+       "previewable": false
+      },
+      "32": {
+       "edited": false,
+       "id": "gtim5x",
+       "preview_language": null,
+       "previewable": false
+      },
+      "33": {
+       "edited": false,
+       "id": "zds5ow",
+       "preview_language": null,
+       "previewable": false
+      },
+      "34": {
+       "edited": false,
+       "id": "w2fvl1",
+       "preview_language": null,
+       "previewable": false
+      },
+      "35": {
+       "edited": false,
+       "id": "jfqvay",
+       "preview_language": null,
+       "previewable": false
+      },
+      "36": {
+       "edited": false,
+       "id": "uu4gmy",
+       "preview_language": null,
+       "previewable": false
+      },
+      "37": {
+       "edited": false,
+       "id": "seno16",
+       "preview_language": null,
+       "previewable": false
+      },
+      "38": {
+       "edited": false,
+       "id": "u9ly38",
+       "preview_language": null,
+       "previewable": false
+      },
+      "39": {
+       "edited": false,
+       "id": "gfv7wh",
+       "preview_language": null,
+       "previewable": false
+      },
+      "4": {
+       "edited": false,
+       "id": "erlcr0",
+       "preview_language": null,
+       "previewable": false
+      },
+      "40": {
+       "edited": false,
+       "id": "cxfet1",
+       "preview_language": null,
+       "previewable": false
+      },
+      "41": {
+       "edited": false,
+       "id": "jm4xtu",
+       "preview_language": null,
+       "previewable": false
+      },
+      "5": {
+       "edited": false,
+       "id": "aulcoa",
+       "preview_language": null,
+       "previewable": false
+      },
+      "6": {
+       "edited": false,
+       "id": "j6irg6",
+       "preview_language": null,
+       "previewable": false
+      },
+      "7": {
+       "edited": false,
+       "id": "1qhwce",
+       "preview_language": null,
+       "previewable": false
+      },
+      "8": {
+       "edited": false,
+       "id": "06sog6",
+       "preview_language": null,
+       "previewable": false
+      },
+      "9": {
+       "edited": false,
+       "id": "7u42ko",
+       "preview_language": null,
+       "previewable": false
+      }
+     },
+     "content_references": [
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api-reference/speech-to-text/transcribe?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 12,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 1
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "Sarvam AI Developer Documentation",
+           "pub_date": null,
+           "snippet": "",
+           "title": "Batch Speech-to-Text API | Sarvam API Docs",
+           "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/batch-api?utm_source=chatgpt.com"
+          },
+          {
+           "attribution": "Sarvam AI Developer Documentation",
+           "pub_date": null,
+           "snippet": null,
+           "title": "How to enable speaker diarization | Sarvam API Docs",
+           "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/enable-speaker-diarization"
+          }
+         ],
+         "title": "REST | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/speech-to-text/transcribe?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api/getting-started/quickstart?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 8,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Developer Quickstart | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/getting-started/quickstart?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api/getting-started/quickstart?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 8,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Developer Quickstart | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/getting-started/quickstart?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api-reference/speech-to-text/transcribe?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "REST | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/speech-to-text/transcribe?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api/getting-started/models/saaras?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 7,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Saaras | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/getting-started/models/saaras?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/batch-api?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 12,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Batch Speech-to-Text API | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/batch-api?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/enable-speaker-diarization))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 1
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "How to enable speaker diarization | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/enable-speaker-diarization"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/enable-speaker-diarization))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 1
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "How to enable speaker diarization | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/enable-speaker-diarization"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/specify-language-codes?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "How to specify language codes | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/specify-language-codes?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/keyterms?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 4,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Keyterm Prompting | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/keyterms?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/enable-speaker-diarization))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 1
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "How to enable speaker diarization | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/enable-speaker-diarization"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "",
+       "has_images": false,
+       "prefix": null,
+       "prompt_text": null,
+       "sources": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "title": "REST | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/speech-to-text/transcribe?utm_source=chatgpt.com"
+        }
+       ],
+       "type": "sources_footnote"
+      }
+     ],
+     "model_slug": "gpt-5-6",
+     "parent_id": "7b1717b6-12a0-4d58-ba66-67530ec1f832",
+     "search_result_groups": [
+      {
+       "domain": "sarvam.ai",
+       "entries": [
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "REST  POST  /speech-to-text-translate  Python  from sarvamai import SarvamAI  client = SarvamAI(  api_subscription_key=\"YOUR_API_KEY_HERE\",  )  client.speech_to_text.translate(  file=\"example_file\",...",
+         "title": "REST | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/legacy/speech-to-text-translate/translate?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "REST  Ask a question|Copy page|View as Markdown|More actions  POST  /text-to-speech  Python  from sarvamai import SarvamAI  client = SarvamAI(  api_subscription_key=\"YOUR_API_KEY_HERE\",  )  client.te...",
+         "title": "REST | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/text-to-speech/convert?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "TEXT TRANSLATION  Ask a question|Copy page|View as Markdown|More actions  POST  /translate  Python  from sarvamai import SarvamAI  client = SarvamAI(  api_subscription_key=\"YOUR_API_KEY_HERE\",  )  cl...",
+         "title": "Text Translation | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/text/translate-text?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "SARVAM AI META PROMPT  This block is written for an LLM to read, not a human. Paste it as-is. It assumes Python and the official `sarvamai` SDK; tell the assistant explicitly if you want JavaScript/Ty...",
+         "title": "Meta Prompt Guide | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/metaprompt?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "Document Translation  | Document Translation API  | 23 (22 Indian + English); PDF, Office, and web formats Text translation  | Mayura v1 / Sarvam-Translate v1  | 11 (10 Indian + English) / 23 (22 Indi...",
+         "title": "Building for Indian Languages | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/getting-started/building-for-india?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "HOW TO SELECT OUTPUT MODE  Ask a question|Copy page|View as Markdown|More actions  This page is for Model APIs.  Saaras v3 and Saaras v4 support the same multiple output modes to handle different tra...",
+         "title": "How to select output mode | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/select-output-mode?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "This page is for API Reference.  REST STREAM  POST  /text-to-speech/stream  Python  from sarvamai import SarvamAI  client = SarvamAI(  api_subscription_key=\"YOUR_API_KEY_HERE\",  )  client.text_to_spe...",
+         "title": "REST Stream | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/text-to-speech/convert-stream?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "HOW TO ENABLE SPEAKER DIARIZATION  Ask a question|Copy page|View as Markdown|More actions  Batch API only: Speaker diarization is only available through the Batch API, not the REST or Streaming APIs....",
+         "title": "How to enable speaker diarization | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/enable-speaker-diarization?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "FAQS  Ask a question|Copy page|View as Markdown|More actions    Frequently Asked Questions  Find answers to common questions about our speech-to-text services  GENERAL QUESTIONS  WHAT AUDIO FORMATS A...",
+         "title": "FAQs | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/speech-to-text/faq?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "CALL ANALYTICS PIPELINE  Ask a question|Copy page|View as Markdown|More actions  This page is for Model APIs.  OVERVIEW  This cookbook builds a call analytics pipeline that turns raw call recordings...",
+         "title": "Call Analytics Pipeline | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/cookbook/guides/call-analytics-pipeline?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "This page is for API Reference.  BATCH - UPLOAD FILES  POST  https://api.sarvam.ai/speech-to-text/job/v1/upload-files  POST  /speech-to-text/job/v1/upload-files  Python  from sarvamai import SarvamAI...",
+         "title": "Batch - Upload Files | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/speech-to-text/stt/job/upload?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "BATCH - START JOB  POST  https://api.sarvam.ai/speech-to-text/job/v1/:job_id/start  POST  /speech-to-text/job/v1/:job_id/start  Python  from sarvamai import SarvamAI  client = SarvamAI(  api_subscrip...",
+         "title": "Batch - Start Job | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/speech-to-text/stt/job/start?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "Batch - Start Job  Ask a question|Copy page|View as Markdown|More actions  POST  https://api.sarvam.ai/speech-to-text-translate/job/v1/:job_id/start  POST  /speech-to-text-translate/job/v1/:job_id/...",
+         "title": "Batch - Start Job | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/legacy/speech-to-text-translate/stt-translate/job/start?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "WebSocket, Document AI, and LLM APIs have different limits from standard REST APIs. Check your specific API below.  PER-API RATE LIMITS BY PLAN  Rate limits vary significantly by API type and plan. Re...",
+         "title": "Credits & Rate Limits | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/getting-started/ratelimits?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "WHICH SPEECH-TO-TEXT API TO USE  Ask a question|Copy page|View as Markdown|More actions  This page is for Model APIs.  Sarvam gives you four ways to run speech recognition on its models: the REST, Re...",
+         "title": "Which Speech-to-Text API to Use | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/which-api-to-use?utm_source=chatgpt.com"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "parent": "9bf83f27-6a8a-4463-b675-5e4626499f25"
+  },
+  "1a09f90a-fc4c-40d4-8b4d-dabf0ef600a9": {
+   "id": "1a09f90a-fc4c-40d4-8b4d-dabf0ef600a9",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "07/10/2026 14:20 — **Set Sarvam API Key Hidden**\n\nYes. In **PowerShell**, use this so the API key is **not displayed while you type it**.\n\n```powershell\n$SecureKey = Read-Host \"Enter Sarvam API Key\" -AsSecureString\n$BSTR = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecureKey)\n$env:SARVAM_API_KEY = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($BSTR)\n[Runtime.InteropServices.Marshal]::ZeroFreeBSTR($BSTR)\nRemove-Variable SecureKey, BSTR\n```\n\nIt will show:\n\n```text\nEnter Sarvam API Key: ********\n```\n\nThen verify **without displaying the key**:\n\n```powershell\nif ($env:SARVAM_API_KEY) {\n    Write-Host \"SARVAM_API_KEY is set\"\n} else {\n    Write-Host \"SARVAM_API_KEY is NOT set\"\n}\n```\n\nExpected:\n\n```text\nSARVAM_API_KEY is set\n```\n\n### Important\n\nThis sets the key **only for the current PowerShell session**, which is what I recommend for now.\n\nThen run:\n\n```powershell\npython C:\\SarvamAudio\\audio_to_sarvam.py \"C:\\path\\to\\your\\audio.ogg\"\n```\n\nThe Python script automatically reads:\n\n```python\nos.environ[\"SARVAM_API_KEY\"]\n```\n\nSo **the key never needs to appear in the Python file or command line**."
+     ]
+    },
+    "create_time": 1791379870.201035,
+    "id": "1a09f90a-fc4c-40d4-8b4d-dabf0ef600a9",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "eenp9v",
+       "preview_language": null,
+       "previewable": false
+      },
+      "1": {
+       "edited": false,
+       "id": "0hsg34",
+       "preview_language": null,
+       "previewable": false
+      },
+      "2": {
+       "edited": false,
+       "id": "38d1bg",
+       "preview_language": null,
+       "previewable": false
+      },
+      "3": {
+       "edited": false,
+       "id": "ci4s4z",
+       "preview_language": null,
+       "previewable": false
+      },
+      "4": {
+       "edited": false,
+       "id": "xwtzcs",
+       "preview_language": null,
+       "previewable": false
+      },
+      "5": {
+       "edited": false,
+       "id": "3db6gx",
+       "preview_language": null,
+       "previewable": false
+      }
+     },
+     "content_references": [],
+     "model_slug": "gpt-5-6",
+     "parent_id": "dd1ccd83-1a5e-47a2-9530-60721417ef6e"
+    }
+   },
+   "parent": "c46c19cf-39b3-4a26-a615-4e71463aac65"
+  },
+  "27c2ae9e-e09c-4c61-b0b7-4f45800f27c8": {
+   "id": "27c2ae9e-e09c-4c61-b0b7-4f45800f27c8",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "07/10/2026 14:17 — **Test OGG Before WAV Conversion**\n\nYes. **That should be the design.** Your real observation matters: Sarvam's online uploader rejected your OGG, while the WAV conversion worked.\n\nThe docs say REST and Batch support OGG, but Sarvam also says a `Failed to read the file` error can happen when the container is malformed/truncated even though OGG itself is supported. Sarvam specifically recommends **16-bit PCM WAV** for best results. citeturn0search0turn0search2turn0search6\n\nSo I would **not blindly convert every file to WAV**.\n\n## Revised workflow\n\n```text\nINPUT FILE\n   │\n   ├── ffprobe inspection\n   │     duration / size / codec / container\n   │\n   ▼\nIs it already WAV?\n   │\n   ├── YES ───────────────────────────────┐\n   │                                      │\n   └── NO                                 │\n        │                                 │\n        ▼                                 │\nCreate SMALL TEST SAMPLE                  │\ne.g. first 20 seconds                     │\nin ORIGINAL FORMAT                        │\n        │                                 │\n        ▼                                 │\nSend sample to Sarvam REST API            │\n        │                                 │\n   ┌────┴─────┐                           │\n   │          │                           │\nSUCCESS     FAIL                          │\n   │          │                           │\n   │          ▼                           │\n   │      Convert original                │\n   │      → 16kHz mono                    │\n   │      → 16-bit PCM WAV                │\n   │          │                           │\n   └──────────┴───────────────────────────┘\n              │\n              ▼\n        PREPARED AUDIO\n              │\n              ▼\n       Sarvam Batch API\n       + diarization\n              │\n              ▼\n          TRANSCRIPT\n```\n\n### Why test only ~20 seconds?\n\nSarvam's synchronous REST API accepts audio **under 30 seconds**, while Batch is designed for recordings up to two hours. citeturn0search0turn0search3\n\nTherefore we can cheaply test:\n\n```text\nRivin_meeting.ogg\n       ↓\nextract first 20 sec WITHOUT changing format\n       ↓\n_test_original.ogg\n       ↓\nSarvam REST\n```\n\nSuppose Sarvam says:\n\n```text\nTESTING ORIGINAL FORMAT\n-----------------------\nContainer : OGG\nCodec     : Opus\nDuration  : 20 sec\nSize      : 312 KB\n\nTesting with Sarvam...\n✓ SUCCESS\n\nOriginal OGG is Sarvam-compatible.\nWAV conversion NOT required.\n```\n\nThen we preserve the OGG.\n\nBut if:\n\n```text\nTesting with Sarvam...\n✗ FAILED\n\nSarvam response:\nFailed to read the file\n\nFallback activated:\nOGG → WAV\n16 kHz / mono / PCM 16-bit\n\nTesting converted WAV...\n✓ SUCCESS\n```\n\nThen **WAV becomes the working format for that recording**.\n\nThis is particularly useful because Sarvam's documentation says OGG/Opus is supported, so your failure may be about the **particular OGG container/codec/encoding**, not `.ogg` universally. citeturn0search1turn0search2\n\nOne more distinction: if we were using Sarvam **streaming**, OGG would genuinely be unsupported because streaming accepts WAV/raw PCM only. But for REST/Batch, OGG is documented as supported. citeturn0search5\n\n## I would add one more safeguard\n\nDon't merely test whether Sarvam returns HTTP success. Check that it returns an **actual non-empty transcript**.\n\nSo:\n\n```text\nAPI success + transcript present\n              ↓\n           PASS\n\nAPI error\n   OR\nempty transcript\n              ↓\n           FAIL\n              ↓\n        WAV fallback\n```\n\nAnd we'll retain everything for diagnosis:\n\n```text\nRivin_meeting_prepared/\n│\n├── audit/\n│   ├── source_info.json\n│   ├── sarvam_original_test.json\n│   └── sarvam_wav_test.json       # only if fallback occurred\n│\n├── test/\n│   ├── original_test.ogg\n│   └── converted_test.wav         # only if required\n│\n├── prepared/\n│   └── Rivin_meeting.wav          # only if conversion required\n│\n├── chunks/\n│\n└── transcript/\n```\n\n**So the decision is: test original → preserve it if Sarvam genuinely accepts it → convert to WAV only on failure → test WAV → then proceed to the full Batch transcription.**\n\nThat avoids unnecessary huge WAV files while also respecting what you have already experimentally found with Sarvam."
+     ]
+    },
+    "create_time": 1791379069.798906,
+    "id": "27c2ae9e-e09c-4c61-b0b7-4f45800f27c8",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "m4435p",
+       "preview_language": null,
+       "previewable": false
+      },
+      "1": {
+       "edited": false,
+       "id": "lvnxoc",
+       "preview_language": null,
+       "previewable": false
+      },
+      "2": {
+       "edited": false,
+       "id": "cbc7f0",
+       "preview_language": null,
+       "previewable": false
+      },
+      "3": {
+       "edited": false,
+       "id": "kebzq8",
+       "preview_language": null,
+       "previewable": false
+      },
+      "4": {
+       "edited": false,
+       "id": "g2fqi6",
+       "preview_language": null,
+       "previewable": false
+      },
+      "5": {
+       "edited": false,
+       "id": "d32m61",
+       "preview_language": null,
+       "previewable": false
+      }
+     },
+     "content_references": [
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/overview?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 2,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 6,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "Sarvam AI Developer Documentation",
+           "pub_date": null,
+           "snippet": "",
+           "title": "FAQs | Sarvam API Docs",
+           "url": "https://docs.sarvam.ai/api/speech-to-text/faq?utm_source=chatgpt.com"
+          },
+          {
+           "attribution": "Sarvam AI Developer Documentation",
+           "pub_date": null,
+           "snippet": "",
+           "title": "Speech-to-Text Rest API | Sarvam API Docs",
+           "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/rest-api?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "Speech-to-Text APIs | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/overview?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/overview?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 3,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "Sarvam AI Developer Documentation",
+           "pub_date": null,
+           "snippet": "",
+           "title": "Batch Speech-to-Text API | Sarvam API Docs",
+           "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/batch-api?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "Speech-to-Text APIs | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/overview?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api-reference/speech-to-text/transcribe?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 2,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "Sarvam AI Developer Documentation",
+           "pub_date": null,
+           "snippet": "",
+           "title": "FAQs | Sarvam API Docs",
+           "url": "https://docs.sarvam.ai/api/speech-to-text/faq?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "REST | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/speech-to-text/transcribe?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/streaming-api?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 5,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Streaming Speech-to-Text API | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/streaming-api?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "",
+       "has_images": false,
+       "prefix": null,
+       "prompt_text": null,
+       "sources": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "title": "Speech-to-Text APIs | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/overview?utm_source=chatgpt.com"
+        }
+       ],
+       "type": "sources_footnote"
+      }
+     ],
+     "model_slug": "gpt-5-6",
+     "parent_id": "ee4d0a58-d437-4afd-b5ca-77e8df4290ad",
+     "search_result_groups": [
+      {
+       "domain": "sarvam.ai",
+       "entries": [
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "FAQS  Ask a question|Copy page|View as Markdown|More actions    Frequently Asked Questions  Find answers to common questions about our speech-to-text services  GENERAL QUESTIONS  WHAT AUDIO FORMATS A...",
+         "title": "FAQs | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/speech-to-text/faq?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "BATCH SPEECH-TO-TEXT API  Ask a question|Copy page|View as Markdown|More actions  This page is for Model APIs.  Process long audio files (up to 2 hours) using synchronous or asynchronous methods. Ide...",
+         "title": "Batch Speech-to-Text API | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/batch-api?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "SAARAS  Ask a question|Copy page|View as Markdown|More actions  Saaras is our state-of-the-art speech recognition family with flexible output formats. It supports multiple output modes including tran...",
+         "title": "Saaras | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/getting-started/models/saaras?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "SPEECH-TO-TEXT REST API  Ask a question|Copy page|View as Markdown|More actions  SYNCHRONOUS PROCESSING  Process short audio files with immediate response. Best for quick transcriptions and testing w...",
+         "title": "Speech-to-Text Rest API | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/rest-api?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "SPEECH TO TEXT  WHAT FILE TYPES AND SIZE LIMITS DOES SPEECH TO TEXT SUPPORT?  MP3, WAV, M4A, FLAC, OGG, and AAC, up to 500 MB per file. Video files work directly too - no need to extract the audio tra...",
+         "title": "Frequently Asked Questions | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/creative/resources/faq?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "This page is for API Reference.  BATCH - UPLOAD FILES  POST  https://api.sarvam.ai/speech-to-text/job/v1/upload-files  POST  /speech-to-text/job/v1/upload-files  Python  from sarvamai import SarvamAI...",
+         "title": "Batch - Upload Files | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/speech-to-text/stt/job/upload?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "On this page  * Supported Audio Formats & MIME Types * Saarika: Our Speech to Text Transcription Model * Speech to Text Features * Saaras Model: Our SOTA Speech to Text Translation Model * Translatio...",
+         "title": "Speech To Text Quickstart Guide | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference-docs/asr/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "REST  POST  /speech-to-text-translate  Python  from sarvamai import SarvamAI  client = SarvamAI(  api_subscription_key=\"YOUR_API_KEY_HERE\",  )  client.speech_to_text.translate(  file=\"example_file\",...",
+         "title": "REST | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/legacy/speech-to-text-translate/translate?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "Batch - Upload Files  Ask a question|Copy page|View as Markdown|More actions  POST  https://api.sarvam.ai/speech-to-text-translate/job/v1/upload-files  POST  /speech-to-text-translate/job/v1/upload-f...",
+         "title": "Batch - Upload Files | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference-docs/speech-to-text-translate/stt-translate/job/upload?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "CHANGE LOG  Ask a question|Copy page|View as Markdown|More actions  JUNE 2026  CHAT COMPLETION  Sarvam-M Deprecated: `sarvam-m` has been deprecated and is no longer accepted by the Chat Completions A...",
+         "title": "Change Log | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference-docs/changelog?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "TEXT-TO-SPEECH REST API  Ask a question|Copy page|View as Markdown|More actions  Provides a synchronous REST endpoint where a POST request with text returns base64-encoded audio as response.  The JSO...",
+         "title": "Text-to-Speech Rest API | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/text-to-speech/rest-api?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "KEYTERM PROMPTING  Ask a question|Copy page|View as Markdown|More actions  `saaras:v4` only. Keyterms are supported only with `model=\"saaras:v4\"`, on the REST, Batch, and WebSocket streaming APIs (bo...",
+         "title": "Keyterm Prompting | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/keyterms?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "SPEECH TO TEXT BEST PRACTICES  Ask a question|Copy page|View as Markdown|More actions  BEFORE YOU TRANSCRIBE  * Keep files within the supported formats (MP3, WAV, M4A, FLAC, OGG, AAC) and under 500 M...",
+         "title": "Speech to Text Best Practices | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/creative-stt-best-practices?utm_source=chatgpt.com"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "parent": "ee4d0a58-d437-4afd-b5ca-77e8df4290ad"
+  },
+  "28843434-3c94-4432-8219-642b79a714fc": {
+   "id": "28843434-3c94-4432-8219-642b79a714fc",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "d40f9141-6216-4b7f-8d1f-b2d3de0cf60f",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Searched 1 website"
+      }
+     ]
+    },
+    "create_time": 1791379252.392494,
+    "id": "28843434-3c94-4432-8219-642b79a714fc",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "dfb7bbdc-e243-453d-8ed3-fe66b23584c2",
+     "tool_icons": [
+      "https://www.google.com/s2/favicons?domain=docs.sarvam.ai&sz=128"
+     ]
+    }
+   },
+   "parent": "00bd3afe-d661-455c-a449-eae50a8771d3"
+  },
+  "36c1e910-d459-45cd-9529-2ba1ec4644b6": {
+   "id": "36c1e910-d459-45cd-9529-2ba1ec4644b6",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "9a332f79-34cd-4bbd-80fa-b0b2d13a2da8",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Searched 1 website"
+      }
+     ]
+    },
+    "create_time": 1791378955.681171,
+    "id": "36c1e910-d459-45cd-9529-2ba1ec4644b6",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "15ac8e33-41a3-450b-9c96-3af079211553",
+     "tool_icons": [
+      "https://www.google.com/s2/favicons?domain=docs.sarvam.ai&sz=128"
+     ]
+    }
+   },
+   "parent": "b144f4d0-2cba-47d1-94dc-3bf7fbe25dcd"
+  },
+  "4bcd4a1a-e286-4dfb-9282-b474268588e6": {
+   "id": "4bcd4a1a-e286-4dfb-9282-b474268588e6",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "run log setup and 1st run error 14:42"
+     ]
+    },
+    "create_time": 1791380569.027,
+    "id": "4bcd4a1a-e286-4dfb-9282-b474268588e6",
+    "metadata": {
+     "attachments": [
+      {
+       "id": "file_0000000075c481f5905fcd8904f10fe1",
+       "library_file_id": "libfile_41a62498b5e4819191b405fcf24b5fc0",
+       "mime_type": "text/plain",
+       "name": "001_initial_setup_202610071441.txt",
+       "size": 2230
+      },
+      {
+       "id": "file_00000000f1e881f4821c8be82678ee77",
+       "library_file_id": "libfile_e928db7368448191abb65795f79f2a29",
+       "mime_type": "text/plain",
+       "name": "002_initial_setup_1st_run_202610071441.txt",
+       "size": 308686
+      }
+     ]
+    }
+   },
+   "parent": "1a09f90a-fc4c-40d4-8b4d-dabf0ef600a9"
+  },
+  "691443f4-3892-46d7-9ab3-25d81c43f13d": {
+   "id": "691443f4-3892-46d7-9ab3-25d81c43f13d",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "07/10/2026 14:14 — **Sarvam STT API Check**\n\nPartner, I checked the **current official Sarvam documentation before we build the script**. There is an important correction to our earlier plan:\n\n**We should NOT design around a 100 MB WAV limit or automatically make 30-minute WAV chunks. For your recorded meetings/calls, Sarvam's Batch Speech-to-Text API is the correct API.**\n\n### What Sarvam currently supports\n\n| Feature | Sarvam Batch STT |\n|---|---|\n| Long recording | **Up to 2 hours per file** |\n| Files/job | **Up to 20** |\n| Speaker separation | ✅ Yes |\n| Speaker count | Auto-detect or specify **1–20** |\n| Timestamps | ✅ |\n| Tamil | ✅ |\n| English | ✅ |\n| Tamil + English / code mixing | Supported |\n| Current recommended model | **`saaras:v4`** |\n| WAV | ✅ |\n| OGG | ✅ |\n| AAC | ✅ |\n| MP3 | ✅ |\n| FLAC | ✅ |\n| MP4/M4A | ✅ |\n| WebM | ✅ |\n\nSarvam explicitly recommends **Batch API for long recordings such as meetings, interviews and call-centre recordings**. citeturn0search1turn0search3\n\nurlSarvam Batch Speech-to-Text documentationturn0search3\n\n### Most important: speaker split\n\nThis directly answers the issue you raised earlier about Sarvam showing different speakers.\n\nSpeaker diarization is available in the **Batch API**:\n\n```python\nwith_diarization=True\n```\n\nOptionally:\n\n```python\nnum_speakers=2\n```\n\nIf we don't specify `num_speakers`, Sarvam can automatically detect the number of speakers. It supports up to **20 speakers**. citeturn0search10\n\nSo for your Rivin/Subha/meeting recordings, we should enable diarization by default.\n\n### We don't necessarily need WAV conversion\n\nThis changes my previous design.\n\nSarvam already accepts:\n\n**WAV, MP3, AAC, AIFF, OGG, OPUS, FLAC, MP4/M4A, AMR, WMA and WebM.** citeturn0search0turn0search1\n\nTherefore, taking:\n\n```text\nRivin meeting.ogg\n        ↓\nconvert to huge WAV\n        ↓\nsplit WAV\n        ↓\nSarvam\n```\n\nis often **unnecessary work**.\n\nFor a valid `.ogg`, `.aac`, `.mp3`, etc., we should normally send the original compressed audio directly.\n\nFor video, Sarvam even supports MP4/WebM, although I'd still prefer extracting audio first because it reduces upload size and gives us a clean audio audit artifact.\n\n### Another important correction: duration matters more\n\nSarvam has two very different STT APIs:\n\n```text\nSHORT AUDIO ≤ 30 sec\n        ↓\nREST /speech-to-text\n        ↓\nimmediate result\n\n\nLONG AUDIO ≤ 2 hours\n        ↓\nBATCH API\n        ↓\nupload → process → wait → download result\n```\n\nThe ordinary REST endpoint has a **30-second maximum**. Batch handles **up to two hours per file**. citeturn0search7turn0search9\n\nSo our script should make the API decision based primarily on **duration**, not just MB.\n\n### Recommended architecture for our script\n\nI would now change the design to:\n\n```text\nINPUT\n .ogg / .aac / .mp3 / .wav\n .mp4 / .webm / etc.\n          │\n          ▼\n   FFPROBE INSPECTION\n   ├─ duration\n   ├─ size\n   ├─ codec\n   ├─ sample rate\n   └─ channels\n          │\n          ▼\n      AUDIO?\n     /      \\\n   YES      VIDEO\n    │         │\n    │      Extract audio\n    │         │\n    └────┬────┘\n         ▼\n   AUDIT ORIGINAL\n         │\n         ▼\n Duration ≤ 2 hours?\n      /       \\\n    YES        NO\n     │          │\n     │       Split into\n     │       <2-hour parts\n     │          │\n     └────┬─────┘\n          ▼\n    SARVAM BATCH\n    saaras:v4\n    transcribe\n    diarization=True\n          │\n          ▼\n   Wait for completion\n          │\n          ▼\n   DOWNLOAD JSON RESULTS\n          │\n          ▼\n   MERGE TRANSCRIPTS\n          │\n          ▼\nOUTPUT\n├── original/audit\n├── prepared_audio\n├── sarvam_raw_json\n└── transcript\n```\n\nThere is another useful v4 feature: **keyterms**. Sarvam allows up to **50 names/places/brands/technical terms** to bias recognition. That could be useful for names such as *IPBS, TalkProof, Retell, Twilio,* etc. citeturn0search0turn0search4\n\n### One thing I would **not** build yet\n\nI wouldn't use the earlier **90 MB = split** rule.\n\nThe official API documentation I checked clearly specifies the Batch constraint as **2 hours/file and 20 files/job**. The Sarvam Content Studio UI separately mentions a **500 MB upload limit**, but that is the Content Studio UI and shouldn't be assumed to be the Model API limit. citeturn0search3turn0search8\n\nSo our program should enforce the documented API duration limit and can have a configurable MB safety limit as an **extra local safeguard**, not pretend that Sarvam's Batch API has a documented 100 MB limit.\n\n**My proposed default:** preserve compressed supported audio where possible, extract audio from video, split only when needed for the **2-hour Batch limit**, enable diarization, keep Sarvam's raw JSON for audit, and generate a human-readable speaker transcript afterward.\n\nThat is the design I'd use for the Python script."
+     ]
+    },
+    "create_time": 1791378955.695768,
+    "id": "691443f4-3892-46d7-9ab3-25d81c43f13d",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "690m9t",
+       "preview_language": null,
+       "previewable": false
+      },
+      "1": {
+       "edited": false,
+       "id": "j1sjyz",
+       "preview_language": null,
+       "previewable": false
+      },
+      "2": {
+       "edited": false,
+       "id": "62s30l",
+       "preview_language": null,
+       "previewable": false
+      },
+      "3": {
+       "edited": false,
+       "id": "z84wtp",
+       "preview_language": null,
+       "previewable": false
+      },
+      "4": {
+       "edited": false,
+       "id": "mmkeld",
+       "preview_language": null,
+       "previewable": false
+      }
+     },
+     "content_references": [
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/overview?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 3,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "Sarvam AI Developer Documentation",
+           "pub_date": null,
+           "snippet": "",
+           "title": "Batch Speech-to-Text API | Sarvam API Docs",
+           "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/batch-api?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "Speech-to-Text APIs | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/overview?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "[Sarvam Batch Speech-to-Text documentation](https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/batch-api?utm_source=chatgpt.com)",
+       "logo": null,
+       "prefix": null,
+       "prompt_text": null,
+       "title": "Sarvam Batch Speech-to-Text documentation",
+       "type": "url"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/enable-speaker-diarization?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 10,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "How to enable speaker diarization | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/enable-speaker-diarization?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api-reference/speech-to-text/transcribe?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "Sarvam AI Developer Documentation",
+           "pub_date": null,
+           "snippet": "",
+           "title": "Speech-to-Text APIs | Sarvam API Docs",
+           "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/overview?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "REST | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/speech-to-text/transcribe?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api/speech-to-text/faq?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 7,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 9,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "Sarvam AI Developer Documentation",
+           "pub_date": null,
+           "snippet": "",
+           "title": "Which Speech-to-Text API to Use | Sarvam API Docs",
+           "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/which-api-to-use?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "FAQs | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/speech-to-text/faq?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api-reference/speech-to-text/transcribe?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 4,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "Sarvam AI Developer Documentation",
+           "pub_date": null,
+           "snippet": "",
+           "title": "Saaras | Sarvam API Docs",
+           "url": "https://docs.sarvam.ai/api/getting-started/models/saaras?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "REST | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/speech-to-text/transcribe?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/batch-api?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 3,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 8,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "Sarvam AI Developer Documentation",
+           "pub_date": null,
+           "snippet": "",
+           "title": "Transcribing a File | Sarvam API Docs",
+           "url": "https://docs.sarvam.ai/creative-stt-transcribe?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "Batch Speech-to-Text API | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/batch-api?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "",
+       "has_images": false,
+       "prefix": null,
+       "prompt_text": null,
+       "sources": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "title": "Speech-to-Text APIs | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/overview?utm_source=chatgpt.com"
+        }
+       ],
+       "type": "sources_footnote"
+      }
+     ],
+     "model_slug": "gpt-5-6",
+     "parent_id": "f745b50e-5de9-4cb1-b87a-f3746e2d21f1",
+     "search_result_groups": [
+      {
+       "domain": "sarvam.ai",
+       "entries": [
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "SPEECH-TO-TEXT REST API  Ask a question|Copy page|View as Markdown|More actions  SYNCHRONOUS PROCESSING  Process short audio files with immediate response. Best for quick transcriptions and testing w...",
+         "title": "Speech-to-Text Rest API | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/rest-api?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "SAARAS  Ask a question|Copy page|View as Markdown|More actions  Saaras is our state-of-the-art speech recognition family with flexible output formats. It supports multiple output modes including tran...",
+         "title": "Saaras | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/getting-started/models/saaras?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "DEVELOPER QUICKSTART  Ask a question|Copy page|View as Markdown|More actions  Get started with Sarvam APIs in 30 seconds: create a key, install the SDK, and make your first call with just a few lines...",
+         "title": "Developer Quickstart | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/getting-started/quickstart?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "CREDITS & RATE LIMITS  Ask a question|Copy page|View as Markdown|More actions  CREDITS  Sarvam offers ₹100 worth of free credits for every user on signup. These credits can be used across any of our...",
+         "title": "Credits & Rate Limits | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/getting-started/ratelimits?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "TRANSCRIBING A FILE  Ask a question|Copy page|View as Markdown|More actions  This page is for Content Studio.  Upload or record audio and get back a speaker-labeled transcript. For an overview of Spe...",
+         "title": "Transcribing a File | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/creative-stt-transcribe?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "WHICH SPEECH-TO-TEXT API TO USE  Ask a question|Copy page|View as Markdown|More actions  This page is for Model APIs.  Sarvam gives you four ways to run speech recognition on its models: the REST, Re...",
+         "title": "Which Speech-to-Text API to Use | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/which-api-to-use?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "This page is for API Reference.  BATCH - UPLOAD FILES  POST  https://api.sarvam.ai/speech-to-text/job/v1/upload-files  POST  /speech-to-text/job/v1/upload-files  Python  from sarvamai import SarvamAI...",
+         "title": "Batch - Upload Files | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/speech-to-text/stt/job/upload?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "KEYTERM PROMPTING  Ask a question|Copy page|View as Markdown|More actions  `saaras:v4` only. Keyterms are supported only with `model=\"saaras:v4\"`, on the REST, Batch, and WebSocket streaming APIs (bo...",
+         "title": "Keyterm Prompting | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/keyterms?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "HOW TO SPECIFY LANGUAGE CODES  Ask a question|Copy page|View as Markdown|More actions  The `language_code` parameter tells the STT model which language to expect in the audio. Using the correct langu...",
+         "title": "How to specify language codes | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/specify-language-codes?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "This page is for API Reference.  BATCH - DOWNLOAD RESULTS  POST  https://api.sarvam.ai/speech-to-text/job/v1/download-files  POST  /speech-to-text/job/v1/download-files  Python  from sarvamai import...",
+         "title": "Batch - Download Results | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/speech-to-text/stt/job/download?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "REST  Ask a question|Copy page|View as Markdown|More actions  POST  /text-to-speech  Python  from sarvamai import SarvamAI  client = SarvamAI(  api_subscription_key=\"YOUR_API_KEY_HERE\",  )  client.te...",
+         "title": "REST | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/text-to-speech/convert?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "MIGRATING SPEECH-TO-TEXT FROM ELEVENLABS TO SARVAM  Ask a question|Copy page|View as Markdown|More actions  Last updated: July 15, 2026  This guide covers migrating ElevenLabs speech-to-text (transcr...",
+         "title": "Migrating Speech-to-Text from ElevenLabs to Sarvam | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/migrations/from-elevenlabs/speech-to-text?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "API REFERENCE — SARVAM VISION  Ask a question|Copy page|View as Markdown|More actions  This page is for Model APIs.  The contract for invoking a self-hosted Sarvam Vision endpoint. You send the raw d...",
+         "title": "API reference — Sarvam Vision | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/self-hosted/sagemaker/api-vision?utm_source=chatgpt.com"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "parent": "f745b50e-5de9-4cb1-b87a-f3746e2d21f1"
+  },
+  "893fd17a-5b80-4c58-98cd-7ad7a4fa98cf": {
+   "id": "893fd17a-5b80-4c58-98cd-7ad7a4fa98cf",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "5ce347bf-4641-4626-b6a6-39199288b03c",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Searched 1 website"
+      }
+     ]
+    },
+    "create_time": 1791379069.770189,
+    "id": "893fd17a-5b80-4c58-98cd-7ad7a4fa98cf",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "182887fb-23cf-459d-988c-208ea8c3b563",
+     "tool_icons": [
+      "https://www.google.com/s2/favicons?domain=docs.sarvam.ai&sz=128"
+     ]
+    }
+   },
+   "parent": "e71e192b-e48f-498e-872d-bb62ee94c8bc"
+  },
+  "943ad680-889d-4a17-9794-745636f8fc00": {
+   "id": "943ad680-889d-4a17-9794-745636f8fc00",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "07/10/2026 14:17 — **Ready to Build Audio → Sarvam Script**\n\nYes, partner. **Ready.** I rechecked the current official Sarvam API before saying so.\n\nThe implementation will use **Saaras v4**, REST only for our ≤30-second compatibility test, and Batch for the actual recording. Batch supports files up to 2 hours, up to 20 files/job, and speaker diarization. citeturn0search0turn0search1turn0search2\n\n## What I will create\n\nOne Windows-friendly Python program:\n\n```text\naudio_to_sarvam.py\n```\n\nRun simply:\n\n```powershell\npython audio_to_sarvam.py \"C:\\Audio\\Rivin meeting.ogg\"\n```\n\nOptional controls:\n\n```powershell\npython audio_to_sarvam.py \"C:\\Audio\\Rivin meeting.ogg\" --max-mb 90\n```\n\n```powershell\npython audio_to_sarvam.py \"C:\\Audio\\Rivin meeting.ogg\" --speakers 2\n```\n\n```powershell\npython audio_to_sarvam.py \"C:\\Audio\\Rivin meeting.ogg\" --keyterms \"Rivin,IPBS,TalkProof,Retell,Twilio\"\n```\n\nSarvam v4 supports up to 50 keyterms. citeturn0search9\n\n## Exact processing logic\n\n```text\nINPUT\n  │\n  ├─ Check file exists\n  ├─ FFprobe duration\n  ├─ size\n  ├─ audio/video\n  ├─ codec\n  └─ channels\n       │\n       ▼\nVIDEO?\n  │\n YES ──→ Extract audio\n  │\n NO\n  ▼\nCreate ≤20-second TEST\nin original audio format\n       │\n       ▼\nTest with Sarvam REST\n       │\n    ┌──┴──┐\n   PASS   FAIL\n    │       │\n    │       ▼\n    │   Convert → WAV\n    │   PCM 16-bit\n    │   mono\n    │   16 kHz\n    │       │\n    │       ▼\n    │   Test WAV\n    │       │\n    └───┬───┘\n        ▼\nPREPARED AUDIO\n        │\n        ▼\nCheck duration / configured size\n        │\n        ▼\nSplit only if required\n        │\n        ▼\nSARVAM BATCH\nsaaras:v4\ntranscribe\ndiarization = TRUE\n        │\n        ▼\nwait_until_complete()\n        │\n        ▼\nDownload raw JSON\n        │\n        ▼\nCreate readable transcript\n```\n\nSarvam itself recommends WAV/16-bit PCM when preparing audio, although REST/Batch officially accept OGG and the other formats we discussed. citeturn0search7\n\n## Output will be auditable\n\nFor:\n\n```text\nRivin meeting.ogg\n```\n\nwe'll create something like:\n\n```text\nRivin meeting_sarvam/\n│\n├── 01_audit/\n│   ├── source_info.json\n│   ├── original_format_test.json\n│   └── wav_format_test.json\n│\n├── 02_test/\n│   ├── original_test.ogg\n│   └── converted_test.wav\n│\n├── 03_prepared/\n│   └── Rivin meeting.wav\n│\n├── 04_chunks/\n│   ├── Rivin meeting_part_001.wav\n│   └── Rivin meeting_part_002.wav\n│\n├── 05_sarvam_raw/\n│   └── *.json\n│\n└── 06_transcript/\n    ├── transcript.txt\n    └── transcript_with_speakers.txt\n```\n\nIf OGG passes Sarvam, **we won't unnecessarily create the full WAV**.\n\n## Screen output\n\nYou'll see exactly what it is doing:\n\n```text\n============================================================\nSARVAM AUDIO PREPARATION\n============================================================\n\nInput     : C:\\Audio\\Rivin meeting.ogg\nType      : AUDIO\nContainer : OGG\nCodec     : Opus\nSize      : 18.7 MB\nDuration  : 01:14:32\n\nMaximum size : 90 MB (DEFAULT)\nSarvam model : saaras:v4\nDiarization  : ENABLED\nSpeakers     : AUTO\n\n[1/6] Creating 20-second original-format test...\n      CREATED\n      Duration : 00:00:20\n      Size     : 84 KB\n\n[2/6] Testing OGG with Sarvam...\n      FAILED\n      Reason: <actual Sarvam error>\n\n[3/6] Converting to WAV...\n      PCM      : 16-bit\n      Rate     : 16000 Hz\n      Channels : mono\n\n      STARTED...\n      COMPLETE\n      Duration : 01:14:32\n      Size     : 136.5 MB\n\n[4/6] Testing WAV with Sarvam...\n      PASSED\n      Transcript returned: YES\n\n[5/6] Preparing chunks...\n\n      Expected files: 2\n\n      Creating part 001...\n      Duration : 00:48:40\n      Size     : 89.1 MB\n      COMPLETE\n\n      Creating part 002...\n      Duration : 00:25:52\n      Size     : 47.4 MB\n      COMPLETE\n\n[6/6] Sarvam Batch transcription...\n\n      Uploading part 001...\n      Uploading part 002...\n\n      Job ID : xxxxxxxxx\n\n      Processing...\n      COMPLETE\n\n============================================================\nRESULT\n============================================================\n\nSuccessful files : 2\nFailed files     : 0\n\nSpeaker diarization : YES\n\nTranscript:\nC:\\Audio\\Rivin meeting_sarvam\\06_transcript\\transcript_with_speakers.txt\n```\n\nSarvam's Batch SDK officially provides the upload → start → `wait_until_complete()` → results/download workflow we'll use. citeturn0search2\n\n## Installation instructions will start from zero\n\nI'll give you copy-paste steps for **Windows 11**, including:\n\n**Python check → FFmpeg install → FFmpeg PATH test → virtual environment → `pip install -U sarvamai` → Sarvam API key environment variable → script → small test → full recording.**\n\nThe official SDK installation is currently:\n\n```powershell\npip install -U sarvamai\n```\n\nand Sarvam recommends keeping the API key in an environment variable/secrets mechanism rather than putting it into source code. citeturn0search6\n\nOne important point: **I won't silently hide failures.** If original OGG fails, WAV succeeds, a chunk fails, Sarvam rejects something, or FFmpeg fails, the console/audit output will show that explicitly.\n\n**Plan is now complete. I am ready for the “do it” step.**"
+     ]
+    },
+    "create_time": 1791379213.38352,
+    "id": "943ad680-889d-4a17-9794-745636f8fc00",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "q4a882",
+       "preview_language": null,
+       "previewable": false
+      },
+      "1": {
+       "edited": false,
+       "id": "rvexr9",
+       "preview_language": null,
+       "previewable": false
+      },
+      "2": {
+       "edited": false,
+       "id": "i3uvoj",
+       "preview_language": null,
+       "previewable": false
+      },
+      "3": {
+       "edited": false,
+       "id": "8tbzki",
+       "preview_language": null,
+       "previewable": false
+      },
+      "4": {
+       "edited": false,
+       "id": "58phnn",
+       "preview_language": null,
+       "previewable": false
+      },
+      "5": {
+       "edited": false,
+       "id": "wuki0n",
+       "preview_language": null,
+       "previewable": false
+      },
+      "6": {
+       "edited": false,
+       "id": "o9v4xi",
+       "preview_language": null,
+       "previewable": false
+      },
+      "7": {
+       "edited": false,
+       "id": "krc9x0",
+       "preview_language": null,
+       "previewable": false
+      },
+      "8": {
+       "edited": false,
+       "id": "31kfa7",
+       "preview_language": null,
+       "previewable": false
+      },
+      "9": {
+       "edited": false,
+       "id": "jem3ub",
+       "preview_language": null,
+       "previewable": false
+      }
+     },
+     "content_references": [
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api-reference/speech-to-text/transcribe?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 2,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "Sarvam AI Developer Documentation",
+           "pub_date": null,
+           "snippet": "",
+           "title": "Speech-to-Text APIs | Sarvam API Docs",
+           "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/overview?utm_source=chatgpt.com"
+          },
+          {
+           "attribution": "Sarvam AI Developer Documentation",
+           "pub_date": null,
+           "snippet": "",
+           "title": "Batch Speech-to-Text API | Sarvam API Docs",
+           "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/batch-api?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "REST | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/speech-to-text/transcribe?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/keyterms?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 9,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Keyterm Prompting | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/keyterms?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/rest-api?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 7,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Speech-to-Text Rest API | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/rest-api?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/batch-api?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 2,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Batch Speech-to-Text API | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/batch-api?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sarvam AI Developer Documentation](https://docs.sarvam.ai/api/getting-started/quickstart?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 6,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Developer Quickstart | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/getting-started/quickstart?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "",
+       "has_images": false,
+       "prefix": null,
+       "prompt_text": null,
+       "sources": [
+        {
+         "attribution": "Sarvam AI Developer Documentation",
+         "title": "REST | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/speech-to-text/transcribe?utm_source=chatgpt.com"
+        }
+       ],
+       "type": "sources_footnote"
+      }
+     ],
+     "model_slug": "gpt-5-6",
+     "parent_id": "dff2cf24-ca18-464c-b15a-c3ea3b4871c7",
+     "search_result_groups": [
+      {
+       "domain": "sarvam.ai",
+       "entries": [
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "SPEECH-TO-TEXT APIS  Ask a question|Copy page|View as Markdown|More actions  Sarvam AI offers a powerful speech recognition model: Saaras, state-of-the-art ASR with flexible output modes: transcribe,...",
+         "title": "Speech-to-Text APIs | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/overview?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "This page is for API Reference.  BATCH - UPLOAD FILES  POST  https://api.sarvam.ai/speech-to-text/job/v1/upload-files  POST  /speech-to-text/job/v1/upload-files  Python  from sarvamai import SarvamAI...",
+         "title": "Batch - Upload Files | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/speech-to-text/stt/job/upload?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "FAQS  Ask a question|Copy page|View as Markdown|More actions    Frequently Asked Questions  Find answers to common questions about our speech-to-text services  GENERAL QUESTIONS  WHAT AUDIO FORMATS A...",
+         "title": "FAQs | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/speech-to-text/faq?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "BATCH - START JOB  POST  https://api.sarvam.ai/speech-to-text/job/v1/:job_id/start  POST  /speech-to-text/job/v1/:job_id/start  Python  from sarvamai import SarvamAI  client = SarvamAI(  api_subscrip...",
+         "title": "Batch - Start Job | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/speech-to-text/stt/job/start?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "HOW TO ENABLE SPEAKER DIARIZATION  Ask a question|Copy page|View as Markdown|More actions  Batch API only: Speaker diarization is only available through the Batch API, not the REST or Streaming APIs....",
+         "title": "How to enable speaker diarization | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/how-to/enable-speaker-diarization?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "BATCH - INITIATE JOB  POST  /speech-to-text/job/v1  from sarvamai import SarvamAI  client = SarvamAI(  api_subscription_key=\"YOUR_API_KEY_HERE\",  )  client.speech_to_text_job.initialise()  202 Accept...",
+         "title": "Batch - Initiate Job | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/speech-to-text/stt/job/initiate?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "BATCH - GET STATUS  GET  https://api.sarvam.ai/speech-to-text/job/v1/:job_id/status  GET  /speech-to-text/job/v1/:job_id/status  Python  from sarvamai import SarvamAI  client = SarvamAI(  api_subscri...",
+         "title": "Batch - Get Status | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/speech-to-text/stt/job/status?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "- mode: \"transcribe\" (default, same-language text) | \"translate\" (always English output) | \"verbatim\" (word-for-word, no normalization) | \"translit\" (Roman script) | \"codemix\" (English words in Latin...",
+         "title": "Meta Prompt Guide | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/metaprompt?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "On this page  * Supported Audio Formats & MIME Types * Saarika: Our Speech to Text Transcription Model * Speech to Text Features * Saaras Model: Our SOTA Speech to Text Translation Model * Translatio...",
+         "title": "Speech To Text Quickstart Guide | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference-docs/asr/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "SAARAS  Ask a question|Copy page|View as Markdown|More actions  Saaras is our state-of-the-art speech recognition family with flexible output formats. It supports multiple output modes including tran...",
+         "title": "Saaras | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/getting-started/models/saaras?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "Batch - Start Job  Ask a question|Copy page|View as Markdown|More actions  POST  https://api.sarvam.ai/speech-to-text/job/v1/:job_id/start  POST  /speech-to-text/job/v1/:job_id/start  cURL  $  | curl...",
+         "title": "Batch - Start Job | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference-docs/speech-to-text/stt/job/start?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "This page is for API Reference.  BATCH - INITIATE JOB  POST  https://api.sarvam.ai/speech-to-text-translate/job/v1  POST  /speech-to-text-translate/job/v1  Python  from sarvamai import SarvamAI  clie...",
+         "title": "Batch - Initiate Job | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/legacy/speech-to-text-translate/stt-translate/job/initiate?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "LIBRARIES & SDKS  Official Python and JavaScript clients for the Sarvam AI API: with async, retries, timeouts, streaming, and typed errors.  Ask a question|Copy page|View as Markdown|More actions  Th...",
+         "title": "Libraries & SDKs | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api/getting-started/sdks?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "Batch - Upload Files  Ask a question|Copy page|View as Markdown|More actions  POST  https://api.sarvam.ai/speech-to-text-translate/job/v1/upload-files  POST  /speech-to-text-translate/job/v1/upload-f...",
+         "title": "Batch - Upload Files | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference-docs/speech-to-text-translate/stt-translate/job/upload?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "sarvam.ai",
+         "snippet": "Batch - Start Job  Ask a question|Copy page|View as Markdown|More actions  POST  https://api.sarvam.ai/speech-to-text-translate/job/v1/:job_id/start  POST  /speech-to-text-translate/job/v1/:job_id/...",
+         "title": "Batch - Start Job | Sarvam API Docs",
+         "url": "https://docs.sarvam.ai/api-reference/legacy/speech-to-text-translate/stt-translate/job/start?utm_source=chatgpt.com"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "parent": "dff2cf24-ca18-464c-b15a-c3ea3b4871c7"
+  },
+  "9bf83f27-6a8a-4463-b675-5e4626499f25": {
+   "id": "9bf83f27-6a8a-4463-b675-5e4626499f25",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content": "Worked for 8s",
+     "content_type": "reasoning_recap"
+    },
+    "create_time": 1791379252.396359,
+    "id": "9bf83f27-6a8a-4463-b675-5e4626499f25",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "28843434-3c94-4432-8219-642b79a714fc"
+    }
+   },
+   "parent": "28843434-3c94-4432-8219-642b79a714fc"
+  },
+  "b0a65d00-7c43-4cfa-a78a-1f26238678dd": {
+   "id": "b0a65d00-7c43-4cfa-a78a-1f26238678dd",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "07/10/2026 14:42 — **First Run Diagnosed + V002 Fix**\n\nPartner, I checked both logs. **The setup is good. The first run actually proved most of our pipeline works. The final failure is a bug in my script, not Sarvam transcription.**\n\n### What worked\n\nFFmpeg initially wasn't visible because `winget` explicitly said the PATH change required restarting the shell. fileciteturn0file0L25-L29 After reopening PowerShell, both FFmpeg and FFprobe worked correctly. fileciteturn0file1L4-L18\n\nSarvam SDK `0.1.36` installed successfully, the import test passed, and your hidden environment-variable setup also worked. fileciteturn0file1L40-L58 fileciteturn0file1L62-L75\n\nMore importantly, the actual audio pipeline behaved exactly as intended:\n\n```text\nAAC source: 6:39 / 2.30 MB / 8 kHz mono\n        ↓\n20-second AAC API test\n        ↓\nFAIL\n        ↓\nautomatic WAV fallback\n        ↓\n16 kHz / mono / PCM16 WAV\n        ↓\nWAV Sarvam REST test\n        ↓\nPASS\n```\n\nYour AAC test was rejected because Windows/Python supplied MIME type `audio/vnd.dlna.adts`, which Sarvam rejected even though `audio/aac` is on its allowed list. fileciteturn0file1L81-L103\n\nThen our fallback produced a **12.17 MB, 6:39 WAV**, and **Sarvam successfully transcribed the WAV test**. No splitting was required. fileciteturn0file1L106-L120\n\nThat is valuable confirmation of your earlier observation: **conversion to WAV genuinely solves this class of Sarvam input problem.**\n\n## Why the program then crashed\n\nThe failure happened **after the Batch job was created**:\n\n```text\nCreating Batch job...\nRecursionError: maximum recursion depth exceeded\n```\n\nThe traceback identifies my line:\n\n```python\naudit[\"batch_job_create\"] = jsonable(job)\n```\n\nfileciteturn0file1L123-L140\n\nI attempted to serialize the complete Sarvam SDK `job` Python object into our audit JSON. That SDK object contains nested/circular object references, so my generic `jsonable()` function kept following:\n\n```text\nobject\n → __dict__\n   → object\n     → __dict__\n       → object\n         ...\n```\n\nuntil Python hit its recursion limit. fileciteturn0file1L140-L168\n\n**That audit code should never have been allowed to stop the actual transcription.**\n\nI've removed it.\n\n### Fixed V002\n\n[Download `audio_to_sarvam_v002.py`](sandbox:/mnt/data/audio_to_sarvam_v002.py)\n\nReplace your current file:\n\n```powershell\nCopy-Item \"YOUR_DOWNLOAD_PATH\\audio_to_sarvam_v002.py\" \"C:\\SarvamAudio\\audio_to_sarvam.py\" -Force\n```\n\nOr simply save the downloaded V002 directly as:\n\n```text\nC:\\SarvamAudio\\audio_to_sarvam.py\n```\n\n### Then rerun the exact same command\n\nYour API key should still be present **if this is the same PowerShell window**.\n\nCheck without revealing it:\n\n```powershell\nif ($env:SARVAM_API_KEY) { \"API KEY OK\" } else { \"API KEY MISSING\" }\n```\n\nThen:\n\n```powershell\npython C:\\SarvamAudio\\audio_to_sarvam.py \"C:\\Users\\v_sen\\Downloads\\SubhaSis-Methagu-ExitCall-IPBS-Audio 2026-10-07 at 10.52.34.aac\"\n```\n\n### One inefficiency on rerun\n\nIt will currently redo:\n\n```text\nAAC test\n→ AAC fails\n→ WAV conversion\n→ WAV test\n→ Batch\n```\n\neven though those artifacts already exist.\n\n**Don't change anything for this run.** First get one complete end-to-end successful transcript. After that, I recommend V003 add **resume/checkpoint behaviour**, so a Batch-stage failure doesn't force us to reconvert and retest the audio.\n\nFor this run, send me the console output from **V002** whether it succeeds or fails."
+     ]
+    },
+    "create_time": 1791380591.389391,
+    "id": "b0a65d00-7c43-4cfa-a78a-1f26238678dd",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "fe5z1c",
+       "preview_language": null,
+       "previewable": false
+      },
+      "1": {
+       "edited": false,
+       "id": "i9cele",
+       "preview_language": null,
+       "previewable": false
+      },
+      "2": {
+       "edited": false,
+       "id": "2tssr6",
+       "preview_language": null,
+       "previewable": false
+      },
+      "3": {
+       "edited": false,
+       "id": "5706se",
+       "preview_language": null,
+       "previewable": false
+      },
+      "4": {
+       "edited": false,
+       "id": "lml12j",
+       "preview_language": null,
+       "previewable": false
+      },
+      "5": {
+       "edited": false,
+       "id": "xwmubw",
+       "preview_language": null,
+       "previewable": false
+      },
+      "6": {
+       "edited": false,
+       "id": "e43z51",
+       "preview_language": null,
+       "previewable": false
+      },
+      "7": {
+       "edited": false,
+       "id": "c5ymhx",
+       "preview_language": null,
+       "previewable": false
+      },
+      "8": {
+       "edited": false,
+       "id": "6ckplk",
+       "preview_language": null,
+       "previewable": false
+      }
+     },
+     "content_references": [
+      {
+       "alt": null,
+       "cloud_doc_url": null,
+       "connector_id": null,
+       "drug_file_reference": null,
+       "fff_metadata": null,
+       "id": "file_0000000075c481f5905fcd8904f10fe1",
+       "input_pointer": {
+        "file_index": 0,
+        "line_range_end": 29,
+        "line_range_start": 25,
+        "message_id": "8bca5e5b-7d19-494f-b154-b2f70e0b62d6",
+        "message_index": 0
+       },
+       "library_artifact_type": null,
+       "library_file_id": "libfile_41a62498b5e4819191b405fcf24b5fc0",
+       "medical_file_reference": {
+        "authors_display": null,
+        "doi": null,
+        "journal_homepage_url": null,
+        "journal_name": null,
+        "publication_year": null,
+        "source_icon_url": null,
+        "source_label": null,
+        "source_url": null
+       },
+       "name": "001_initial_setup_202610071441.txt",
+       "page_range_end": null,
+       "page_range_start": null,
+       "snippet": "Path environment variable modified; restart your shell to use the new value.\nCommand line alias added: \"ffmpeg\"\nCommand line alias added: \"ffplay\"\n...",
+       "source": "my_files",
+       "type": "file"
+      },
+      {
+       "alt": null,
+       "cloud_doc_url": null,
+       "connector_id": null,
+       "drug_file_reference": null,
+       "fff_metadata": null,
+       "id": "file_00000000f1e881f4821c8be82678ee77",
+       "input_pointer": {
+        "file_index": 1,
+        "line_range_end": 18,
+        "line_range_start": 4,
+        "message_id": "be57e5fc-ed5c-4756-b28e-59d0961c2b06",
+        "message_index": 0
+       },
+       "library_artifact_type": null,
+       "library_file_id": "libfile_e928db7368448191abb65795f79f2a29",
+       "medical_file_reference": {
+        "authors_display": null,
+        "doi": null,
+        "journal_homepage_url": null,
+        "journal_name": null,
+        "publication_year": null,
+        "source_icon_url": null,
+        "source_label": null,
+        "source_url": null
+       },
+       "name": "002_initial_setup_1st_run_202610071441.txt",
+       "page_range_end": null,
+       "page_range_start": null,
+       "snippet": "PS C:\\Users\\v_sen> ffmpeg -version\nffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers\nbuilt with gcc 16.2.0 (Rev3, Built by MSYS2 project)\n...",
+       "source": "my_files",
+       "type": "file"
+      },
+      {
+       "alt": null,
+       "cloud_doc_url": null,
+       "connector_id": null,
+       "drug_file_reference": null,
+       "fff_metadata": null,
+       "id": "file_00000000f1e881f4821c8be82678ee77",
+       "input_pointer": {
+        "file_index": 1,
+        "line_range_end": 58,
+        "line_range_start": 40,
+        "message_id": "be57e5fc-ed5c-4756-b28e-59d0961c2b06",
+        "message_index": 0
+       },
+       "library_artifact_type": null,
+       "library_file_id": "libfile_e928db7368448191abb65795f79f2a29",
+       "medical_file_reference": {
+        "authors_display": null,
+        "doi": null,
+        "journal_homepage_url": null,
+        "journal_name": null,
+        "publication_year": null,
+        "source_icon_url": null,
+        "source_label": null,
+        "source_url": null
+       },
+       "name": "002_initial_setup_1st_run_202610071441.txt",
+       "page_range_end": null,
+       "page_range_start": null,
+       "snippet": "PS C:\\SarvamAudio> python -m pip install -U sarvamai\nDefaulting to user installation because normal site-packages is not writeable\nCollecting sarvamai",
+       "source": "my_files",
+       "type": "file"
+      },
+      {
+       "alt": null,
+       "cloud_doc_url": null,
+       "connector_id": null,
+       "drug_file_reference": null,
+       "fff_metadata": null,
+       "id": "file_00000000f1e881f4821c8be82678ee77",
+       "input_pointer": {
+        "file_index": 1,
+        "line_range_end": 75,
+        "line_range_start": 62,
+        "message_id": "be57e5fc-ed5c-4756-b28e-59d0961c2b06",
+        "message_index": 0
+       },
+       "library_artifact_type": null,
+       "library_file_id": "libfile_e928db7368448191abb65795f79f2a29",
+       "medical_file_reference": {
+        "authors_display": null,
+        "doi": null,
+        "journal_homepage_url": null,
+        "journal_name": null,
+        "publication_year": null,
+        "source_icon_url": null,
+        "source_label": null,
+        "source_url": null
+       },
+       "name": "002_initial_setup_1st_run_202610071441.txt",
+       "page_range_end": null,
+       "page_range_start": null,
+       "snippet": "PS C:\\SarvamAudio> python -c \"from sarvamai import SarvamAI; print('Sarvam SDK OK')\"\nSarvam SDK OK\nPS C:\\SarvamAudio> $SecureKey = Read-Host \"Enter Sarvam API Key\" -AsSecureString",
+       "source": "my_files",
+       "type": "file"
+      },
+      {
+       "alt": null,
+       "cloud_doc_url": null,
+       "connector_id": null,
+       "drug_file_reference": null,
+       "fff_metadata": null,
+       "id": "file_00000000f1e881f4821c8be82678ee77",
+       "input_pointer": {
+        "file_index": 1,
+        "line_range_end": 103,
+        "line_range_start": 81,
+        "message_id": "be57e5fc-ed5c-4756-b28e-59d0961c2b06",
+        "message_index": 0
+       },
+       "library_artifact_type": null,
+       "library_file_id": "libfile_e928db7368448191abb65795f79f2a29",
+       "medical_file_reference": {
+        "authors_display": null,
+        "doi": null,
+        "journal_homepage_url": null,
+        "journal_name": null,
+        "publication_year": null,
+        "source_icon_url": null,
+        "source_label": null,
+        "source_url": null
+       },
+       "name": "002_initial_setup_1st_run_202610071441.txt",
+       "page_range_end": null,
+       "page_range_start": null,
+       "snippet": "Input          : C:\\Users\\v_sen\\Downloads\\SubhaSis-Methagu-ExitCall-IPBS-Audio 2026-10-07 at 10.52.34.aac\nType           : AUDIO\nContainer      : aac",
+       "source": "my_files",
+       "type": "file"
+      },
+      {
+       "alt": null,
+       "cloud_doc_url": null,
+       "connector_id": null,
+       "drug_file_reference": null,
+       "fff_metadata": null,
+       "id": "file_00000000f1e881f4821c8be82678ee77",
+       "input_pointer": {
+        "file_index": 1,
+        "line_range_end": 120,
+        "line_range_start": 106,
+        "message_id": "be57e5fc-ed5c-4756-b28e-59d0961c2b06",
+        "message_index": 0
+       },
+       "library_artifact_type": null,
+       "library_file_id": "libfile_e928db7368448191abb65795f79f2a29",
+       "medical_file_reference": {
+        "authors_display": null,
+        "doi": null,
+        "journal_homepage_url": null,
+        "journal_name": null,
+        "publication_year": null,
+        "source_icon_url": null,
+        "source_label": null,
+        "source_url": null
+       },
+       "name": "002_initial_setup_1st_run_202610071441.txt",
+       "page_range_end": null,
+       "page_range_start": null,
+       "snippet": "[3/6] Preparing final audio format\n      Converting full recording to WAV...\n      Format   : PCM 16-bit",
+       "source": "my_files",
+       "type": "file"
+      },
+      {
+       "alt": null,
+       "cloud_doc_url": null,
+       "connector_id": null,
+       "drug_file_reference": null,
+       "fff_metadata": null,
+       "id": "file_00000000f1e881f4821c8be82678ee77",
+       "input_pointer": {
+        "file_index": 1,
+        "line_range_end": 140,
+        "line_range_start": 123,
+        "message_id": "be57e5fc-ed5c-4756-b28e-59d0961c2b06",
+        "message_index": 0
+       },
+       "library_artifact_type": null,
+       "library_file_id": "libfile_e928db7368448191abb65795f79f2a29",
+       "medical_file_reference": {
+        "authors_display": null,
+        "doi": null,
+        "journal_homepage_url": null,
+        "journal_name": null,
+        "publication_year": null,
+        "source_icon_url": null,
+        "source_label": null,
+        "source_url": null
+       },
+       "name": "002_initial_setup_1st_run_202610071441.txt",
+       "page_range_end": null,
+       "page_range_start": null,
+       "snippet": "[5/6] Starting Sarvam Batch transcription\n      Upload files : 1\n      Creating Batch job...",
+       "source": "my_files",
+       "type": "file"
+      },
+      {
+       "alt": null,
+       "cloud_doc_url": null,
+       "connector_id": null,
+       "drug_file_reference": null,
+       "fff_metadata": null,
+       "id": "file_00000000f1e881f4821c8be82678ee77",
+       "input_pointer": {
+        "file_index": 1,
+        "line_range_end": 168,
+        "line_range_start": 140,
+        "message_id": "be57e5fc-ed5c-4756-b28e-59d0961c2b06",
+        "message_index": 0
+       },
+       "library_artifact_type": null,
+       "library_file_id": "libfile_e928db7368448191abb65795f79f2a29",
+       "medical_file_reference": {
+        "authors_display": null,
+        "doi": null,
+        "journal_homepage_url": null,
+        "journal_name": null,
+        "publication_year": null,
+        "source_icon_url": null,
+        "source_label": null,
+        "source_url": null
+       },
+       "name": "002_initial_setup_1st_run_202610071441.txt",
+       "page_range_end": null,
+       "page_range_start": null,
+       "snippet": "  File \"C:\\SarvamAudio\\audio_to_sarvam.py\", line 147, in jsonable\n    return jsonable(vars(obj))\n           ^^^^^^^^^^^^^^^^^^^",
+       "source": "my_files",
+       "type": "file"
+      }
+     ],
+     "model_slug": "gpt-5-6",
+     "parent_id": "7706434c-cc96-4f3c-9ce8-45ca24195b32"
+    }
+   },
+   "parent": "4bcd4a1a-e286-4dfb-9282-b474268588e6"
+  },
+  "b144f4d0-2cba-47d1-94dc-3bf7fbe25dcd": {
+   "id": "b144f4d0-2cba-47d1-94dc-3bf7fbe25dcd",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "before doing check sarvam api documentation"
+     ]
+    },
+    "create_time": 1791378952.108,
+    "id": "b144f4d0-2cba-47d1-94dc-3bf7fbe25dcd"
+   },
+   "parent": "d53dfb7a-9333-4a27-98ea-42d9469da23e"
+  },
+  "b7b938e6-f6d7-43b9-935b-fb67d21cb74b": {
+   "id": "b7b938e6-f6d7-43b9-935b-fb67d21cb74b",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "you have given python script Python script for your Windows machine\n\nThis uses **FFmpeg through Python**. Put the script in the same folder as your `.ogg`, `.aac`, `.mp3`, etc.\n```javascript\nimport subprocessfrom pathlib import Path# ===== CHANGE THESE =====INPUT_FILE = r\"my_audio.ogg\"MAX_MINUTES_PER_PART = 30# ========================input_path = Path(INPUT_FILE)output_dir = input_path.parent / f\"{input_path.stem}_wav_parts\"output_dir.mkdir(exist_ok=True)# Get durationresult = subprocess.run(    [        \"ffprobe\",        \"-v\", \"error\",        \"-show_entries\", \"format=duration\",        \"-of\", \"default=noprint_wrappers=1:nokey=1\",        str(input_path),    ],    capture_output=True,    text=True,    check=True,)duration = float(result.stdout.strip())part_seconds = MAX_MINUTES_PER_PART * 60start = 0part = 1while start < duration:    output_file = output_dir / f\"{input_path.stem}_part_{part:02d}.wav\"    command = [\n```\n\nRun:\n```\npython convert_audio.py\n```\n\n### Why I suggest **30-minute chunks**\n\nAt **16 kHz mono PCM**, WAV consumes about **1.92 MB/minute**. So:\n\n- 30 min ≈ **58 MB**\n- 40 min ≈ **77 MB**\n- 50 min ≈ **96 MB**\n\nTherefore, **30-minute chunks are a safe default** when a transcription service has a 100 MB upload limit.\n\nYou only need to install **FFmpeg once** and have `ffmpeg` + `ffprobe` available on your Windows PATH.give step by step for running also change the script so that taken input file with path if path not specified then run path will local in the input paht create outpu folder with file name and put the files also keep the size of the file as parameter if not provide took as defualt but show what is the diffualt and how many files wil eb created and each file created show in the screen file started what size and lenght of audio also if the file given is video then convert that to audio first then stor will audit then split the audio next we will need to call the sarvam with the file 07/10/2026 14:14"
+     ]
+    },
+    "create_time": 1791378870.308,
+    "id": "b7b938e6-f6d7-43b9-935b-fb67d21cb74b",
+    "metadata": {
+     "serialization_metadata": {
+      "render_format": "markdown"
+     }
+    }
+   },
+   "parent": "client-created-root"
+  },
+  "c31b8975-2b9a-4d86-9980-e8cacfb300b7": {
+   "id": "c31b8975-2b9a-4d86-9980-e8cacfb300b7",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "do it 14:20"
+     ]
+    },
+    "create_time": 1791379242.477,
+    "id": "c31b8975-2b9a-4d86-9980-e8cacfb300b7"
+   },
+   "parent": "943ad680-889d-4a17-9794-745636f8fc00"
+  },
+  "c46c19cf-39b3-4a26-a615-4e71463aac65": {
+   "id": "c46c19cf-39b3-4a26-a615-4e71463aac65",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "setting API key give sommand get as hidden ans set in the env"
+     ]
+    },
+    "create_time": 1791379868.183,
+    "id": "c46c19cf-39b3-4a26-a615-4e71463aac65"
+   },
+   "parent": "0fbb6db7-3718-4579-b863-76a509e71643"
+  },
+  "client-created-root": {
+   "id": "client-created-root",
+   "message": null,
+   "parent": null
+  },
+  "d53dfb7a-9333-4a27-98ea-42d9469da23e": {
+   "id": "d53dfb7a-9333-4a27-98ea-42d9469da23e",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "07/10/2026 14:14 — **Audio → WAV Splitter Plan**\n\nYes, partner. I understand the next pipeline:\n\n**Input audio/video → extract/convert audio → WAV → size-safe chunks → Sarvam transcription.**\n\nI’ll change the script so you **do not edit `INPUT_FILE` inside Python**.\n\n### Proposed usage\n\n```powershell\npython audio_prepare.py \"C:\\Users\\Senthil\\Downloads\\meeting.ogg\"\n```\n\nOr video:\n\n```powershell\npython audio_prepare.py \"C:\\Users\\Senthil\\Downloads\\meeting.mp4\"\n```\n\nOptional maximum output size:\n\n```powershell\npython audio_prepare.py \"C:\\Users\\Senthil\\Downloads\\meeting.mp4\" --max-mb 90\n```\n\nIf you don't provide `--max-mb`, it will clearly report:\n\n```text\nMaximum chunk size : 90 MB (DEFAULT)\n```\n\nI recommend **90 MB rather than exactly 100 MB** to leave safety margin for Sarvam's upload limit.\n\n### Behaviour\n\nThe script will:\n\n1. Accept the **full input path** or just a filename.\n2. If you give only `meeting.ogg`, look for it in the **current folder where you run the command**.\n3. Detect whether the input is **audio or video**.\n4. For video, extract the audio first.\n5. Convert to **16-kHz, mono, PCM WAV** suitable for speech transcription.\n6. Calculate the duration and expected WAV size **before splitting**.\n7. Calculate how many files are required to remain below `--max-mb`.\n8. Create an output folder beside the input file:\n\n```text\nC:\\...\\meeting\\\n```\n\n9. Keep the intermediate converted full audio for audit, for example:\n\n```text\nmeeting\\\n    audit\\\n        meeting_full.wav\n    chunks\\\n        meeting_part_001.wav\n        meeting_part_002.wav\n        meeting_part_003.wav\n```\n\n10. Print progress such as:\n\n```text\n============================================================\nINPUT\n============================================================\nFile             : meeting.mp4\nType             : VIDEO\nDuration         : 01:17:42\nInput size       : 426.3 MB\n\nSETTINGS\n============================================================\nAudio format     : WAV\nSample rate      : 16000 Hz\nChannels         : Mono\nMaximum part     : 90 MB (DEFAULT)\n\nPLAN\n============================================================\nExpected WAV     : ~149.2 MB\nParts required   : 2\n\n[1/2] Extracting/converting audio...\n      Output: audit\\meeting_full.wav\n      Duration: 01:17:42\n      Size: 149.2 MB\n      DONE\n\n[2/2] Splitting...\n\nStarting part 001...\n      Duration: 00:46:30\n      File: meeting_part_001.wav\n\nCreated part 001\n      Size: 89.3 MB\n      Duration: 00:46:30\n\nStarting part 002...\n      Duration: 00:31:12\n      File: meeting_part_002.wav\n\nCreated part 002\n      Size: 59.9 MB\n      Duration: 00:31:12\n\n============================================================\nCOMPLETE\n============================================================\nFiles created : 2\nOutput folder : C:\\...\\meeting\\chunks\n```\n\nI will also make it handle spaces in filenames and paths correctly and give readable errors when **FFmpeg/FFprobe isn't installed or isn't on PATH**.\n\n**Next step after this:** extend the same program with a Sarvam stage, but I suggest keeping this first version purely **conversion + audit + splitting** so we can verify it independently before adding API calls.\n\nIf this plan is correct, say **“do it”** and I’ll give you the complete `audio_prepare.py` plus **Windows installation and run instructions from zero**."
+     ]
+    },
+    "create_time": 1791378873.290619,
+    "id": "d53dfb7a-9333-4a27-98ea-42d9469da23e",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "t61iic",
+       "preview_language": null,
+       "previewable": false
+      },
+      "1": {
+       "edited": false,
+       "id": "dv6cl9",
+       "preview_language": null,
+       "previewable": false
+      },
+      "2": {
+       "edited": false,
+       "id": "r7aqdn",
+       "preview_language": null,
+       "previewable": false
+      },
+      "3": {
+       "edited": false,
+       "id": "z356pt",
+       "preview_language": null,
+       "previewable": false
+      },
+      "4": {
+       "edited": false,
+       "id": "jl9d2w",
+       "preview_language": null,
+       "previewable": false
+      },
+      "5": {
+       "edited": false,
+       "id": "6b8nxx",
+       "preview_language": null,
+       "previewable": false
+      },
+      "6": {
+       "edited": false,
+       "id": "ar07q3",
+       "preview_language": null,
+       "previewable": false
+      }
+     },
+     "content_references": [],
+     "model_slug": "gpt-5-6",
+     "parent_id": "99275379-b4d5-4a04-b696-b72f9c2d0e0a"
+    }
+   },
+   "parent": "b7b938e6-f6d7-43b9-935b-fb67d21cb74b"
+  },
+  "d6945fd0-260b-40bb-ad68-d52b4300114e": {
+   "id": "d6945fd0-260b-40bb-ad68-d52b4300114e",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "96746276-3405-4bf8-a4c1-ee39e36089b7",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Searched 1 website"
+      }
+     ]
+    },
+    "create_time": 1791379213.365387,
+    "id": "d6945fd0-260b-40bb-ad68-d52b4300114e",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "66516834-cf61-43a9-a7d1-a95748856168",
+     "tool_icons": [
+      "https://www.google.com/s2/favicons?domain=docs.sarvam.ai&sz=128"
+     ]
+    }
+   },
+   "parent": "093d3407-cd51-43ff-8f16-e8c7d93c1d75"
+  },
+  "dff2cf24-ca18-464c-b15a-c3ea3b4871c7": {
+   "id": "dff2cf24-ca18-464c-b15a-c3ea3b4871c7",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content": "Worked for a few seconds",
+     "content_type": "reasoning_recap"
+    },
+    "create_time": 1791379213.37198,
+    "id": "dff2cf24-ca18-464c-b15a-c3ea3b4871c7",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "d6945fd0-260b-40bb-ad68-d52b4300114e"
+    }
+   },
+   "parent": "d6945fd0-260b-40bb-ad68-d52b4300114e"
+  },
+  "e71e192b-e48f-498e-872d-bb62ee94c8bc": {
+   "id": "e71e192b-e48f-498e-872d-bb62ee94c8bc",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "before converting the format to WAV check sarvam with small size file since ogg in online not working then when change to wave its working 14:17"
+     ]
+    },
+    "create_time": 1791379065.759,
+    "id": "e71e192b-e48f-498e-872d-bb62ee94c8bc"
+   },
+   "parent": "691443f4-3892-46d7-9ab3-25d81c43f13d"
+  },
+  "ee4d0a58-d437-4afd-b5ca-77e8df4290ad": {
+   "id": "ee4d0a58-d437-4afd-b5ca-77e8df4290ad",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content": "Worked for a couple of seconds",
+     "content_type": "reasoning_recap"
+    },
+    "create_time": 1791379069.786733,
+    "id": "ee4d0a58-d437-4afd-b5ca-77e8df4290ad",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "893fd17a-5b80-4c58-98cd-7ad7a4fa98cf"
+    }
+   },
+   "parent": "893fd17a-5b80-4c58-98cd-7ad7a4fa98cf"
+  },
+  "f745b50e-5de9-4cb1-b87a-f3746e2d21f1": {
+   "id": "f745b50e-5de9-4cb1-b87a-f3746e2d21f1",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content": "Worked for a couple of seconds",
+     "content_type": "reasoning_recap"
+    },
+    "create_time": 1791378955.692422,
+    "id": "f745b50e-5de9-4cb1-b87a-f3746e2d21f1",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "36c1e910-d459-45cd-9529-2ba1ec4644b6"
+    }
+   },
+   "parent": "36c1e910-d459-45cd-9529-2ba1ec4644b6"
+  }
+ },
+ "memory_scope": "global_enabled",
+ "pinned_time": null,
+ "plugin_ids": null,
+ "title": "Python audio splitter setup",
+ "update_time": 1791380947.935279,
+ "voice": null
+}

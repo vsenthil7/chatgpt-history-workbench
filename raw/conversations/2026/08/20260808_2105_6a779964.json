@@ -1,0 +1,1635 @@
+{
+ "conversation_id": "6a779964-2a08-83eb-80c6-0dc3d948957d",
+ "conversation_template_id": "g-p-6a7799620ed88191b8d9232f1d3af922",
+ "create_time": 1786223114.131526,
+ "current_node": "31cc83ab-19a2-44eb-a388-385de42a1dca",
+ "default_model_slug": "gpt-5-6",
+ "id": "6a779964-2a08-83eb-80c6-0dc3d948957d",
+ "is_archived": false,
+ "is_do_not_remember": false,
+ "is_read_only": null,
+ "is_starred": null,
+ "is_study_mode": false,
+ "mapping": {
+  "01f1a05f-e1f1-487b-9602-d0dd06e649ab": {
+   "id": "01f1a05f-e1f1-487b-9602-d0dd06e649ab",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content": "Worked for a couple of seconds",
+     "content_type": "reasoning_recap"
+    },
+    "create_time": 1786223117.593727,
+    "id": "01f1a05f-e1f1-487b-9602-d0dd06e649ab",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "fc9c8c4f-e1e3-4f18-83fe-0fdf0602294d"
+    }
+   },
+   "parent": "07222fcd-7b8f-45e6-b4c2-226c774bc091"
+  },
+  "07222fcd-7b8f-45e6-b4c2-226c774bc091": {
+   "id": "07222fcd-7b8f-45e6-b4c2-226c774bc091",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "00001-CGWO-SaaS-Build-Baseline   08/08/2026 22:03 why claude not created any zip in the name AUMNITY-CGWO-SaaS\\_Claude\\_V002\\_YYYYMMDD\\_HHMI.zip CLaude Response - Assessed project scope and foundational requirements\n\nAssessed project scope and foundational requirements\n\nBaseline noted. Here's my read of the scope boundaries so we're aligned before build work starts:\n\n**CGWO owns** the orchestration layer: knowing who's available and with what capacity, understanding what skills the work demands, matching resources to work, planning at overall/weekly/daily horizons, replanning when reality shifts, allocating, coordinating execution, surfacing capacity conflicts, bridging plans into timesheets/trackers, and closing the loop with review and learning feedback.\n\n**CGWO does not own**: universal primitives (identity, tenancy, work items, base entities, etc.) — those stay with the AUMNITY Work Platform and CGWO consumes them. Audio, transcription, and conversation extraction stay with UraiFlow.\n\n**IPBS is a source of requirements, not a source of code or product-specific features.** Anything IPBS needs that has general value gets abstracted into CGWO with tenant-neutral naming and policy-driven configuration, so IPBS becomes just one tenant/configuration of the generic capability.\n\nA few things worth pinning down early, since they sit right on the boundaries you've drawn:\n\n1. **The contract with the Work Platform** — which primitives CGWO reads vs. writes (e.g., does CGWO write allocations back to platform work items, or hold its own allocation records referencing platform IDs?).\n2. **The timesheet/tracker bridge direction** — whether CGWO pushes planned work into trackers, pulls actuals back, or both, and whether the tracker itself is platform-owned or external.\n3. **Where \"capability/skill\" master data lives** — skill taxonomies feel like they could be claimed by either CGWO or the platform, so worth an explicit ownership call.\n4. **Replanning triggers** — which events (absence, overrun, priority change, conflict detection) are CGWO-internal vs. subscribed from platform events.\n\nWhat's the first artifact you want from this baseline — domain model, capability map, service boundaries/API contracts, or something else?\n\n### AUMNITY-CGWO-SaaS\\_ChatGPT\\_V001\\_20260808\\_1318.zip\n\nzip\n\n21:56 prev prompt attachment\n\nReconciled architectural contradictions and mapped domain ownership boundaries\n\nReconciled architectural contradictions and mapped domain ownership boundaries\n\nStarter pack ingested and validated. `scripts/validate_starter.py` passes, and both package manifests check out — all 26 root entries and all 12 baseline entries match their SHA-256 hashes, no missing files. That covers G01 for acceptance purposes.\n\nPer **B001**, here's the contradiction/duplicate/stale-name inventory before anything gets normalised or deleted:\n\n**1. Tracker ownership is contradictory — needs an ADR.** The starter contract (PROJECT-START, PRODUCT-BOUNDARY) says CGWO owns \"tracker/timesheet **domain bridges**\". The preserved baseline's Scope-and-Module-Boundary lists \"**tracker**; timesheet bridge\" as in-scope, and Phase 0 has IPBS running a \"linked tracker/timesheet\" workbook. These aren't the same claim. The clean resolution candidate: CGWO owns **Execution Session** domain records (start/pause/resume/stop — already in the ubiquitous language and the Plan Item state machine via STARTED/PAUSED/INTERRUPTED), while external trackers/timesheets are systems of record reached through bridge adapters; the IPBS workbook tracker is Phase-0 pilot evidence, never product code. Since PROJECT-START says the starter contract wins over the baseline on conflict, that's the direction I'd record — but it should be an explicit ADR, not silent normalisation.\n\n**2. \"TEE Capacity\" / founder body-mind-energy concepts need generalisation.** The baseline's Portfolio/Founder/TEE Capacity Model and D006 encode a real constraint (supervision/decision capacity as a planning gate), but \"TEE\", \"founder\" and \"body/mind\" read as origin-specific vocabulary, and TeeFlow was a rejected product name — stale-adjacent. The generic capability is something like **Supervisory/Review Capacity** as a first-class capacity type alongside execution capacity, configurable per tenant. ADR candidate.\n\n**3. Scope-list drift between the three statements of the boundary.** Your project baseline lists \"allocation; execution coordination; capacity conflicts; review and learning feedback\"; the starter says \"idea/opportunity intake … tracker/timesheet domain bridges and review feedback\"; the baseline adds \"service/product readiness\" and \"change reasons\". These are unions, not conflicts — Capacity Allocation has its own state machine (PROPOSED→…→OVERRUN), so allocation and conflict detection are clearly in-domain — but the canonical boundary sentence should be written once and referenced everywhere, per the one-source-of-truth rule. Idea/opportunity intake is in both zip documents, so I treat it as in-scope even though your page-level list omitted it.\n\n**4. Recruitment/training boundary is consistent but implicit.** The charter's \"generate recruitment/training work\" is satisfied by the `TrainingNeedRaised`/`RecruitmentNeedRaised` events; ATS/LMS stay external via adapters. Worth one line in the contracts doc so nobody later reads the charter as licensing an ATS.\n\n**5. My earlier open question on skill master data is answered by the baseline**: Capability is a Platform-owned primitive (reuse list), CGWO owns Capability *Demand* and capability observation events. No conflict.\n\n**6. Minor/no-action items:** the two PACKAGE-MANIFEST.json files use different schemas (`schema/project/files` vs `package/version/files`) — historical, fine; \"AUMNITY\" vs \"AUMNITY Work Platform\" naming varies — pick one in the canonical docs; RTM rows ARC/SaaS/QA are DECLARED with TBD evidence, which is the expected red state before B002/B003.\n\n**One genuine gap: no technology stack is declared anywhere** in the starter or baseline — no language, framework, persistence, or test tooling. B002 (\"testable domain core\") can't start without it, and the mutation/coverage gates (G04, G07) imply concrete tooling choices (e.g., Python + pytest + coverage + mutmut, or TypeScript + vitest + Stryker). This is the first decision I'd raise rather than assume.\n\nSo the proposed next moves are: record ADR-001 (tracker/execution-session ownership), ADR-002 (supervisory capacity generalisation), ADR-003 (stack selection), then declare the B002 slice — capacity/availability + plan-item state transitions, with Platform contracts (tenant/org context, Actor, Work Object, Capability references) and the UraiFlow record-proposal contract stubbed — with RTM rows and red tests before implementation.\n\nDo you want to make the stack call now, or shall I propose one with rationale as part of the ADR set?"
+     ]
+    },
+    "create_time": 1786223111.994,
+    "id": "07222fcd-7b8f-45e6-b4c2-226c774bc091",
+    "metadata": {
+     "serialization_metadata": {
+      "custom_symbol_offsets": [],
+      "render_format": "markdown"
+     }
+    }
+   },
+   "parent": "client-created-root"
+  },
+  "09b52115-c32c-480e-b35b-912d2b66deb5": {
+   "id": "09b52115-c32c-480e-b35b-912d2b66deb5",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "a670338a-3fc4-482d-ac63-108344e519ef",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "I’m assessing the repository contents and correcting an earlier file-count interpretation: the archive contains entries, not necessarily files. I’m also checking tenant isolation, especially whether cross-tenant comparisons should deny access rather than quietly return false.",
+       "finished": true,
+       "summary": "Reviewing implementation concerns"
+      },
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Reviewed implementation concerns"
+      }
+     ]
+    },
+    "create_time": 1786224258.863101,
+    "id": "09b52115-c32c-480e-b35b-912d2b66deb5",
+    "metadata": {
+     "content_references": [],
+     "model_slug": "gpt-5-6-thinking",
+     "parent_id": "a670338a-3fc4-482d-ac63-108344e519ef",
+     "tool_icons": []
+    }
+   },
+   "parent": "df0c7e5d-ad6a-4299-b7a4-92ea70e98474"
+  },
+  "0ad66c3f-f92c-44e7-913f-30374e297c6c": {
+   "id": "0ad66c3f-f92c-44e7-913f-30374e297c6c",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "93205a40-aeab-4754-97ea-05775d82dafe",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Tested mutation evidence, enum validation bypasses, and allocation states"
+      }
+     ]
+    },
+    "create_time": 1786226463.580452,
+    "id": "0ad66c3f-f92c-44e7-913f-30374e297c6c",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "95b39aa6-9dac-4c0e-afdd-ddff44cdfe0c",
+     "tool_icons": [
+      "code"
+     ]
+    }
+   },
+   "parent": "95b39aa6-9dac-4c0e-afdd-ddff44cdfe0c"
+  },
+  "0c4892e4-c34c-4927-ad33-8e32d6f82b5b": {
+   "id": "0c4892e4-c34c-4927-ad33-8e32d6f82b5b",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "I’ll review the **actual V002 ZIP**, not Claude’s summary: file inventory, manifests/hashes, architecture/ADR consistency, domain code, tests/gates, RTM/evidence, and any hidden drift or release blockers."
+     ]
+    },
+    "create_time": 1786224191.441324,
+    "id": "0c4892e4-c34c-4927-ad33-8e32d6f82b5b",
+    "metadata": {
+     "model_slug": "gpt-5-6-thinking",
+     "parent_id": "4c4d8e0a-982f-4b49-8c65-f8f8ea223d81"
+    }
+   },
+   "parent": "4c4d8e0a-982f-4b49-8c65-f8f8ea223d81"
+  },
+  "109254ff-30a7-4066-83ec-1415d3370b80": {
+   "id": "109254ff-30a7-4066-83ec-1415d3370b80",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "30d4f18c-8ce1-41a3-bf4a-51c39abd0530",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Inspected project archive, validation code, tests, and documentation"
+      }
+     ]
+    },
+    "create_time": 1786228590.342013,
+    "id": "109254ff-30a7-4066-83ec-1415d3370b80",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "7c7db2cb-c5f7-4a76-8831-df5a958a4151",
+     "tool_icons": [
+      "code"
+     ]
+    }
+   },
+   "parent": "7c7db2cb-c5f7-4a76-8831-df5a958a4151"
+  },
+  "12c21ef3-e298-42e1-b235-8e99aa7d9435": {
+   "id": "12c21ef3-e298-42e1-b235-8e99aa7d9435",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content": "Stopped thinking",
+     "content_type": "reasoning_recap"
+    },
+    "create_time": 1786255247.247363,
+    "id": "12c21ef3-e298-42e1-b235-8e99aa7d9435",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "ccae95b8-6c75-4313-9220-7235bc49be5a"
+    }
+   },
+   "parent": "ccae95b8-6c75-4313-9220-7235bc49be5a"
+  },
+  "12d3ca03-b206-4f17-b21e-224ddabb7d9b": {
+   "id": "12d3ca03-b206-4f17-b21e-224ddabb7d9b",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "454440bb-8fa6-4d2c-b30c-c03506d172d0",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Tested EvilInt bypasses and reviewed verification artifacts and documentation consistency"
+      }
+     ]
+    },
+    "create_time": 1786228715.284431,
+    "id": "12d3ca03-b206-4f17-b21e-224ddabb7d9b",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "b3024ba7-c975-494b-b589-37041b56b2e1",
+     "tool_icons": [
+      "code"
+     ]
+    }
+   },
+   "parent": "6b98895a-5e84-47ff-8cf2-906b70a1e510"
+  },
+  "15e73bab-fe72-43dd-b346-6a294198a9cd": {
+   "id": "15e73bab-fe72-43dd-b346-6a294198a9cd",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "The “90 files” issue is mostly a wording/counting error: the ZIP has **90 ZIP entries including directories, 63 regular files**; before my own local test artefact, that corresponds to 61 manifest-managed files + manifests. So I would not call the package incomplete on that basis.\n\nThe deeper review is finding more important issues: some gates/RTM statuses are **stronger than the implementation actually proves**, especially tenant/organisation isolation, capacity-conflict semantics, reproducible packaging, and static/type quality."
+     ]
+    },
+    "create_time": 1786224251.344299,
+    "id": "15e73bab-fe72-43dd-b346-6a294198a9cd",
+    "metadata": {
+     "model_slug": "gpt-5-6-thinking",
+     "parent_id": "3f732ab5-4f5a-417e-8972-ae13752211f7"
+    }
+   },
+   "parent": "3f732ab5-4f5a-417e-8972-ae13752211f7"
+  },
+  "1dc97290-5843-47a9-8ffa-73a34d1167f8": {
+   "id": "1dc97290-5843-47a9-8ffa-73a34d1167f8",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "## 08/08/2026 22:05 — 00001-CGWO-SaaS-Build-Baseline\n\nPartner, the reason is visible in Claude’s own response: **Claude treated the attachment as a baseline to analyse, not as an instruction to produce the next release ZIP.**\n\nYour earlier package was:\n\n`AUMNITY-CGWO-SaaS_ChatGPT_V001_20260808_1318.zip`\n\nClaude correctly ingested it, validated manifests, found contradictions, proposed ADR-001/002/003, and then **stopped at a decision point**:\n\n> “Do you want to make the stack call now, or shall I propose one with rationale as part of the ADR set?”\n\nThat is the key problem. It behaved as a reviewer/architect awaiting permission rather than as the **next-version builder**.\n\n### What should have happened\n\nFor our multi-AI build workflow, Claude should have understood:\n\n**Input**\n`AUMNITY-CGWO-SaaS_ChatGPT_V001_20260808_1318.zip`\n\n→ inspect every file  \n→ preserve evidence  \n→ resolve what can safely be resolved  \n→ create ADRs for architectural decisions  \n→ add tests/RTM/gates where appropriate  \n→ run validation  \n→ package **the entire resulting project**, not merely describe changes\n\n**Output**\n`AUMNITY-CGWO-SaaS_Claude_V002_20260808_HHMI.zip`\n\nIt should **not** ask which first artefact you want when the whole purpose of this page is `CGWO-SaaS-Build-Baseline`.\n\nAlso, its identification of the missing technology stack is valid, but that is **not a reason to stop the release**. It can create ADR-003 as `PROPOSED`, document alternatives and recommendation/rationale, and continue everything that doesn't depend on the final stack decision. If implementation genuinely depends on it, the package can leave the affected acceptance gates red/TBD. That is much better than producing no artefact at all.\n\n### Send this to Claude now\n\n:::writing{variant=\"chat_message\" id=\"58341\"}\nDo not stop at analysis or ask me which artefact to create.\n\nThis page is the CGWO SaaS build baseline, and the attached:\n\n`AUMNITY-CGWO-SaaS_ChatGPT_V001_20260808_1318.zip`\n\nis the input baseline for your next version.\n\nYour previous analysis identified useful issues, but you did not create the required next-version package.\n\nNow continue from that work and produce the complete next release.\n\nRequired output filename:\n\n`AUMNITY-CGWO-SaaS_Claude_V002_YYYYMMDD_HHMI.zip`\n\nRequirements:\n\n1. Deeply inspect every file in the V001 ZIP. Do not work only from summaries or selected documents.\n2. Preserve the existing baseline, traceability, manifests, decisions and evidence unless there is an explicit reason to supersede something.\n3. Resolve the contradictions you identified using explicit ADRs rather than silent rewriting.\n4. At minimum address:\n   - tracker / Execution Session / timesheet bridge ownership;\n   - supervisory/review-capacity generalisation and removal of origin-specific vocabulary where inappropriate;\n   - canonical CGWO scope/boundary wording;\n   - recruitment/training integration boundary;\n   - AUMNITY Work Platform primitive ownership;\n   - technology-stack decision/status.\n5. Do not invent IPBS-specific product code. IPBS is a tenant/pilot/evidence source only. CGWO must remain reusable multi-tenant SaaS.\n6. CGWO must consume shared AUMNITY Work Platform primitives rather than duplicate universal identity, tenancy, actor, organisation, capability or work-object primitives.\n7. UraiFlow continues to own audio/transcription/conversation extraction. CGWO only consumes the relevant contracts/events/proposals.\n8. If a technology-stack decision is genuinely required, create the ADR with alternatives, rationale and status. Do not stop the whole package merely to ask me the stack question.\n9. Update architecture/domain/contracts/RTM/test strategy/acceptance gates and other affected artefacts consistently.\n10. Add automated consistency/validation checks wherever a contradiction can reasonably be machine-detected rather than relying only on review.\n11. Run all validation/tests/gates that are executable at this stage.\n12. Clearly record:\n   - attempted;\n   - completed;\n   - failed;\n   - deferred;\n   - assumptions;\n   - decisions;\n   - unresolved blockers.\n13. Regenerate manifests/hashes after all changes.\n14. Re-open/recheck the final package and ensure the ZIP is internally complete and self-consistent.\n15. Do not merely give me code snippets, patches, recommendations, or a list of files that should be created.\n16. The final deliverable of this turn must be the actual downloadable ZIP:\n\n`AUMNITY-CGWO-SaaS_Claude_V002_YYYYMMDD_HHMI.zip`\n\nAlso provide a concise release report explaining exactly what changed from ChatGPT V001 → Claude V002, the gate status, and anything deliberately left unresolved.\n\nProceed with the build using best engineering judgement. Do not ask me to choose the next artefact unless there is a genuinely irreversible business decision that cannot safely be represented as an ADR/proposal.\n:::\n\nThat should restore the same discipline we established in LOS: **each AI receives the previous version, deeply reviews it, improves it, tests it, and hands over a concretely versioned package to the next AI**—rather than turning every identified design question back into a user decision. memcite"
+     ]
+    },
+    "create_time": 1786223114.835015,
+    "id": "1dc97290-5843-47a9-8ffa-73a34d1167f8",
+    "metadata": {
+     "content_references": [
+      {
+       "alt": null,
+       "prefix": null,
+       "prompt_text": null,
+       "type": "hidden"
+      }
+     ],
+     "model_slug": "gpt-5-6-thinking",
+     "parent_id": "01f1a05f-e1f1-487b-9602-d0dd06e649ab"
+    }
+   },
+   "parent": "01f1a05f-e1f1-487b-9602-d0dd06e649ab"
+  },
+  "2933dc00-f0a7-4b7d-b2c3-e14ea7b83265": {
+   "id": "2933dc00-f0a7-4b7d-b2c3-e14ea7b83265",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "01cf80a9-4e2f-415e-9d44-52790c495777",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Assessed validation bugs, mutation evidence, and tenant isolation bypasses"
+      }
+     ]
+    },
+    "create_time": 1786228623.696274,
+    "id": "2933dc00-f0a7-4b7d-b2c3-e14ea7b83265",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "4c50e62c-90d4-4c5d-a6d4-ea8a0d807c1c",
+     "tool_icons": [
+      "code"
+     ]
+    }
+   },
+   "parent": "44fbb29a-2cfc-41dd-8a7e-d2bbc335f54e"
+  },
+  "31cc83ab-19a2-44eb-a388-385de42a1dca": {
+   "id": "31cc83ab-19a2-44eb-a388-385de42a1dca",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "09/08/2026 07:08 V5 attached go through the zip and deeply review all the files in it Claude Response -All accepted — F20 is a genuine cross-tenant bypass and the root cause is the `isinstance` trust model. Building V005 with canonical exact-type primitives:# Release Report — V005 trust-boundary correction\n\n**Deliverable:** `AUMNITY-CGWO-SaaS_Claude_V005_20260809_0646.zip` (above). Generated counts: **126 ZIP entries, 99 regular files, 97 manifest-managed files.** Clean-extracted and re-verified from the extraction: both validators, ruff check+format, mypy strict, full suite at 100% line+branch, and the adversarial subtype suite all pass inside the unpacked ZIP. `10-baseline/` byte-for-byte preserved; no feature expansion.\n\n## The root fix: canonical primitives (ADR-012)\n\nRather than patching each bypass, the trust model itself changed: the domain now stores **only canonical primitives**, enforced with exact type checks — `type(value) is str / int / date / <EnumClass>` — which read the real type slot. That closes all four attack classes at once: no subclasses (so no hostile `__eq__`, `__lt__` or `strip()`), no spoofed `__class__` (which `isinstance` consults but `type()` ignores), `bool` excluded from `int` by construction, and `datetime.datetime` excluded from `date` by design. ADR-010 carries a transparent amendment note; ADR-012 records the superseding rule.\n\n**F20** — Your `EqualEverything` attack is a named regression, verbatim: it can no longer construct a `TenantContext` at all, so the equality comparison it subverted is unreachable. Also proven rejected directly on aggregates. **F21** — `FakeNonBlank(\"\")` rejected across tenant/work-object/plan-item/resource refs via the root rule, no `.strip()` special-casing. **F22** — Your `EvilInt(-50)` window and `EvilInt(-10)` allocation constructions are named failing regressions, including `consume(EvilInt(10))`. **F23** — All five requested cases tested (datetime as start, as end, mixed, double-datetime, `declared_on`): each fails with a controlled structured `DomainError` *before* any comparison runs, so the uncontrolled `TypeError` path is unreachable and time-of-day semantics cannot smuggle into date-only fields.\n\n**F24** — `cgwo-consumer-v1` now has an explicit wire-integer grammar: exact `int` or ASCII `[0-9]+` only, published as `WIRE_INT_GRAMMAR` and documented in INTEGRATION-BOUNDARIES. Your probe values — `\"１２３\"`, `\"١٢٣\"`, `\"+12\"`, `\" 12 \"` — are all in the reject matrix alongside signs, separators, decimals and hex; Python's incidental `int()` permissiveness is no longer the contract. **F25** — Origin language corrected everywhere: DOM-009 now reads **\"ENFORCED (validation) / CONVENTION (origin)\"**, with docstrings and ADR wording aligned — nothing claims machine enforcement that is call-site intent. **F26** — CANONICAL-SCOPE is version-neutral (points at RTM DOM-006), AI-001 references the current cycle, and the validator gained a stale-version rule — which promptly caught and forced a fix to one more instance during this build, proving it bites. Your `🧙` observation is confirmed and documented in the gate module: unrecognised categories break tally reconciliation and fail the gate.\n\n## Verification\n\n349 tests, 100% line+branch (432 statements, 88 branches); strict mutation gate: **648/648 killed, zero anomalies, empty acceptance list**; mypy strict; ruff clean. New RTM rows DOM-010/DOM-011/INT-005/DOC-002 map F20–F26 with named evidence. Gates: G01–G04, G06, G07, G09, G10 **GREEN** · G05/G11 **PARTIAL** (unchanged halves stated plainly) · G08 **GREEN domain / RED service layer** · G12 **PENDING — this is the review submission**.\n\nThe handoff's suggested attack surface for this round: C-extension types, weakref proxies, `__getattribute__` liars, surrogate/astral wire strings, digit-string length DoS, and `fromisoformat` edge forms (week/ordinal dates)."
+     ]
+    },
+    "create_time": 1786255706.394,
+    "id": "31cc83ab-19a2-44eb-a388-385de42a1dca",
+    "metadata": {
+     "attachments": [
+      {
+       "id": "file_00000000f45881f4a95f3c7ebdd5181d",
+       "is_big_paste": false,
+       "library_file_id": "libfile_55c799f739648191af42847cec090a66",
+       "mime_type": "application/zip",
+       "name": "AUMNITY-CGWO-SaaS_Claude_V005_20260809_0646(1).zip",
+       "size": 147363,
+       "source": "local"
+      }
+     ],
+     "serialization_metadata": {
+      "custom_symbol_offsets": [],
+      "render_format": "markdown"
+     }
+    }
+   },
+   "parent": "fa05e6d0-36bf-46cd-8bed-7a6d2ce0ee90"
+  },
+  "3d68af8d-f907-45e7-b557-ff0a31133116": {
+   "id": "3d68af8d-f907-45e7-b557-ff0a31133116",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "I’m checking the **actual V005 ZIP** end-to-end again. I’ll verify every file, counts and hashes, then attack the new exact-type/canonicalisation rules, wire parsers, ADR/RTM/gate consistency, and whether the new stale-version and mutation protections are themselves trustworthy."
+     ]
+    },
+    "create_time": 1786255107.760755,
+    "id": "3d68af8d-f907-45e7-b557-ff0a31133116",
+    "metadata": {
+     "model_slug": "gpt-5-6-thinking",
+     "parent_id": "5497fc7c-0391-4174-b9dd-976db4b096f8"
+    }
+   },
+   "parent": "7f64ef9c-eec2-415c-8ed0-ab4377612b59"
+  },
+  "3f732ab5-4f5a-417e-8972-ae13752211f7": {
+   "id": "3f732ab5-4f5a-417e-8972-ae13752211f7",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "8b102ded-dcf4-47f8-be80-e6dbff2bddad",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Reviewed project architecture, code, contracts, tests, and archive consistency"
+      }
+     ]
+    },
+    "create_time": 1786224265.836147,
+    "id": "3f732ab5-4f5a-417e-8972-ae13752211f7",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "09b52115-c32c-480e-b35b-912d2b66deb5",
+     "tool_icons": [
+      "code"
+     ]
+    }
+   },
+   "parent": "09b52115-c32c-480e-b35b-912d2b66deb5"
+  },
+  "44fbb29a-2cfc-41dd-8a7e-d2bbc335f54e": {
+   "id": "44fbb29a-2cfc-41dd-8a7e-d2bbc335f54e",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "The V004 fixes are real: raw string enum injection is now rejected, `create()` versus `rehydrate()` is explicit, the consumer boundary has named `from_wire()` parsing, and the mutation decision is unit-tested rather than just procedural.\n\nI’ve now found a new **runtime-type edge that is more consequential than the spoofed-class examples**: `require_date()` explicitly accepts `datetime.datetime` because it is a `date` subclass. That can allow construction with a time-bearing value and can produce an incidental `TypeError` when mixed with a normal `date`, violating V004’s own promise that malformed runtime input fails through controlled domain errors. I’m probing all date/int/string subclass cases before deciding severity."
+     ]
+    },
+    "create_time": 1786228581.996751,
+    "id": "44fbb29a-2cfc-41dd-8a7e-d2bbc335f54e",
+    "metadata": {
+     "model_slug": "gpt-5-6-thinking",
+     "parent_id": "109254ff-30a7-4066-83ec-1415d3370b80"
+    }
+   },
+   "parent": "109254ff-30a7-4066-83ec-1415d3370b80"
+  },
+  "4c4d8e0a-982f-4b49-8c65-f8f8ea223d81": {
+   "id": "4c4d8e0a-982f-4b49-8c65-f8f8ea223d81",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "08/08/2026 22:22 V2 attached go through the zip and deeply review all the files in it Claude Response -On it — building the V002 release now, not just describing it.100% line and branch coverage, 110 tests green. Attempting the mutation gate before deciding its status:# Release Report — ChatGPT V001 → Claude V002\n\n**Deliverable:** `AUMNITY-CGWO-SaaS_Claude_V002_20260808_2208.zip` (above) — 90 files, self-verified by clean re-extraction: both validators pass and the full suite runs green inside the unpacked ZIP.\n\n## What changed\n\n**Contradictions → ADRs (****`11-decisions/`****), no silent rewriting.** ADR-001 resolves tracker ownership: CGWO owns Execution Session/Plan Item/Allocation domain state; trackers and timesheets are external systems of record reached via bridges; the IPBS workbook is pilot evidence only. ADR-002 generalises supervisory/review capacity into a first-class `CapacityType` alongside execution capacity, retiring origin-specific vocabulary outside the preserved baseline. ADR-004 creates the canonical boundary (`CGWO-SCOPE-1`/`CGWO-NOTOWNED-1` in `01-product/CANONICAL-SCOPE.md`); PROJECT-START, PRODUCT-BOUNDARY and MODULARITY now reference the IDs. ADR-005 pins recruitment/training to outbound need events — no ATS/LMS entities ever. ADR-006 makes Platform consumption concrete: opaque ID references only, enforced by an architecture guard test. **ADR-003 (stack) is PROPOSED, not blocking**: Python 3.12 recommended with alternatives and rationale; the domain core is deliberately stdlib-pure so it doubles as a portable behavioural spec if you decide otherwise.\n\n**First executable domain core** (`src/cgwo_core/`): explicit `TenantContext` with cross-tenant denial on every protected operation; capacity windows/availability declarations with invariants and overlap detection; the full baseline Plan Item state machine (all 10 states) with change-reason enforcement on replanning transitions and event mapping (`WeeklyPlanChanged`, `DailyPlanChanged`, `WorkInterrupted`); the full Capacity Allocation state machine with consumption arithmetic and `CapacityOverrunDetected`.\n\n**Evidence, not narrative:** 110 tests, 100% line **and** branch coverage (`evidence/test-summary.json`, `coverage.json` — gate docs point at evidence files, never hand-typed counts, and the validator enforces that). New `scripts/validate_consistency.py` machine-detects the contradiction classes found in V001: scope-wording drift, ADR status headers, superseded/pilot vocabulary leaking outside baseline/ADRs, manifest hash mismatches. Manifest regenerated with SHA-256 for all files; V001 manifest preserved under `evidence/provenance/`; `10-baseline/` untouched.\n\n## Gate status\n\nG01, G02 (lint), G03, G04, G06, G08 (domain scope), G09, G10, G11 — **GREEN**. G12 — pending your ChatGPT review. Two honest **REDs**: **G05** (Platform/UraiFlow contracts are declared only; no published schemas to test against) and **G07** (mutmut mutated only module-level functions, not dataclass methods, so most domain logic escaped mutation; the 3 survivors are message-string equivalents, all classified in `evidence/mutation-summary.json`; tooling fix is named next-release work).\n\n## Deliberately unresolved / flagged\n\nADR-003 awaits your confirmation or counter-decision; persistence/API/messaging ADRs, matching, cross-window conflict detection, the ExecutionSession entity and tenant-configurable capacity types are declared but unbuilt. One process deviation is self-reported in `08-ai/CLAUDE-V002-HANDOFF.md`: tests and implementation were built in the same session, so no captured red-state run exists for this slice — flagged for the reviewer rather than hidden.\n\nThe ZIP is ready for the independent ChatGPT review leg of the loop."
+     ]
+    },
+    "create_time": 1786224188.319,
+    "id": "4c4d8e0a-982f-4b49-8c65-f8f8ea223d81",
+    "metadata": {
+     "attachments": [
+      {
+       "id": "file_000000004a6481f48cce369e93de5f19",
+       "is_big_paste": false,
+       "library_file_id": "libfile_03ab732024c481919d47206dc99b29bd",
+       "mime_type": "application/zip",
+       "name": "AUMNITY-CGWO-SaaS_Claude_V002_20260808_2208.zip",
+       "size": 72780,
+       "source": "local"
+      }
+     ],
+     "serialization_metadata": {
+      "custom_symbol_offsets": [],
+      "render_format": "markdown"
+     }
+    }
+   },
+   "parent": "1dc97290-5843-47a9-8ffa-73a34d1167f8"
+  },
+  "575d8774-5a6f-43f2-b688-896286f17d5b": {
+   "id": "575d8774-5a6f-43f2-b688-896286f17d5b",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "9b4cc88f-2aa3-419b-8efc-3a59cdfc9331",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Inspected ZIP contents and validated package tests, quality, and manifest"
+      }
+     ]
+    },
+    "create_time": 1786226402.844769,
+    "id": "575d8774-5a6f-43f2-b688-896286f17d5b",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "c271c243-3aa2-402b-980a-739709513e8f",
+     "tool_icons": [
+      "code"
+     ]
+    }
+   },
+   "parent": "652af812-c689-4837-9639-edba0355d280"
+  },
+  "652af812-c689-4837-9639-edba0355d280": {
+   "id": "652af812-c689-4837-9639-edba0355d280",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "I’m reviewing the **actual V003 ZIP** end-to-end again, with extra attention on the exact areas Claude called out: constructor/`replace()` invariant bypasses, event/change-record fidelity, mutation evidence reproducibility, gate-status honesty, consumer contracts, manifests, and whether any V002 claims were merely shifted rather than fixed."
+     ]
+    },
+    "create_time": 1786226380.308847,
+    "id": "652af812-c689-4837-9639-edba0355d280",
+    "metadata": {
+     "model_slug": "gpt-5-6-thinking",
+     "parent_id": "f3b5c383-3703-40bd-a54c-25fbc7836f2c"
+    }
+   },
+   "parent": "f3b5c383-3703-40bd-a54c-25fbc7836f2c"
+  },
+  "6b98895a-5e84-47ff-8cf2-906b70a1e510": {
+   "id": "6b98895a-5e84-47ff-8cf2-906b70a1e510",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "The subclass probe found a **real tenant-isolation bypass**, not just a theoretical purity issue. Because `require_str()` accepts arbitrary `str` subclasses, a crafted tenant ID can override equality; I independently constructed a `TenantContext(\"attacker\")` subclass whose `__eq__` always returns true, and `assert_same_tenant(ctx, \"victim\")` **allowed access**. A separate `str` subclass also made an actually blank tenant ID pass the non-blank guard by overriding `.strip()`.\n\nThat elevates V004 from “minor edge cleanup” to another genuine trust-boundary correction: the runtime guards need **exact built-in/value-type semantics or canonicalisation**, especially for security identifiers."
+     ]
+    },
+    "create_time": 1786228621.550121,
+    "id": "6b98895a-5e84-47ff-8cf2-906b70a1e510",
+    "metadata": {
+     "model_slug": "gpt-5-6-thinking",
+     "parent_id": "2933dc00-f0a7-4b7d-b2c3-e14ea7b83265"
+    }
+   },
+   "parent": "2933dc00-f0a7-4b7d-b2c3-e14ea7b83265"
+  },
+  "6c64747d-216d-4bef-acb9-01b6e0ac178c": {
+   "id": "6c64747d-216d-4bef-acb9-01b6e0ac178c",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "35fb6414-22b7-470c-807d-80334d051b65",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Tested malformed state transitions and crashes"
+      }
+     ]
+    },
+    "create_time": 1786226474.556401,
+    "id": "6c64747d-216d-4bef-acb9-01b6e0ac178c",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "871c1e62-79af-434c-906d-ac26221f44d4",
+     "tool_icons": [
+      "code"
+     ]
+    }
+   },
+   "parent": "0ad66c3f-f92c-44e7-913f-30374e297c6c"
+  },
+  "6cd77e8a-6f93-480b-a0ab-85642d12ba84": {
+   "id": "6cd77e8a-6f93-480b-a0ab-85642d12ba84",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "264923cf-861a-438d-a006-33b95937d663",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Inspected allocation code, documentation, governance tests, and state transition bugs"
+      }
+     ]
+    },
+    "create_time": 1786226425.677445,
+    "id": "6cd77e8a-6f93-480b-a0ab-85642d12ba84",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "d38b4acd-e5d8-4763-bae7-b71412c3b8cc",
+     "tool_icons": [
+      "code"
+     ]
+    }
+   },
+   "parent": "d551cadc-7b57-4513-9084-52f188646570"
+  },
+  "70447519-178e-4fea-a4b2-25316feff5fa": {
+   "id": "70447519-178e-4fea-a4b2-25316feff5fa",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "what ahpen why secrutity issue"
+     ]
+    },
+    "create_time": 1786255628.245,
+    "id": "70447519-178e-4fea-a4b2-25316feff5fa",
+    "metadata": {
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "12c21ef3-e298-42e1-b235-8e99aa7d9435"
+  },
+  "72b18689-49a3-4a4f-9fa4-941fc26ab785": {
+   "id": "72b18689-49a3-4a4f-9fa4-941fc26ab785",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "I’ll inspect the **actual V004 ZIP** from the mounted file, not rely on Claude’s summary. I’m going to verify package counts/manifests, all changed docs/ADRs/RTM/gates, runtime validation and wire parsers, mutation-gate logic/evidence, and then adversarially probe the new “spoofed class / subclasses / locale digit” attack surface Claude itself flagged."
+     ]
+    },
+    "create_time": 1786228556.07305,
+    "id": "72b18689-49a3-4a4f-9fa4-941fc26ab785",
+    "metadata": {
+     "model_slug": "gpt-5-6-thinking",
+     "parent_id": "7af652a6-1c76-486c-bf10-eb10db3fcf7f"
+    }
+   },
+   "parent": "7af652a6-1c76-486c-bf10-eb10db3fcf7f"
+  },
+  "7af652a6-1c76-486c-bf10-eb10db3fcf7f": {
+   "id": "7af652a6-1c76-486c-bf10-eb10db3fcf7f",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "08/08/2026 23:35 V4 attached go through the zip and deeply review all the files in it Claude Response -Architected comprehensive validation overhaul across domain layers\n\nArchitected comprehensive validation overhaul across domain layers\n\nAccepting all findings — F13/F14 are genuine trust-boundary holes my adversarial tests missed. Building V004. First, checking the exact mutmut deprecation guidance (F18) before restructuring:\n\nDiagnosed mutation detection gaps and architected comprehensive validation framework\n\nDiagnosed mutation detection gaps and architected comprehensive validation framework\n\nContinue\n\nValidated comprehensive test coverage and advanced progression\n\nValidated comprehensive test coverage and advanced progression\n\n## Release Report — V004 hardening release\n\n**Deliverable:** `AUMNITY-CGWO-SaaS_Claude_V004_20260808_2330.zip` (above). Generated counts: **121 ZIP entries, 94 regular files, 92 manifest-managed files.** Clean-extracted and re-verified from the extraction: both validators, ruff check+format, mypy strict, and the full suite at 100% line+branch all pass inside the unpacked ZIP. `10-baseline/` byte-for-byte preserved; no feature expansion attempted, per instruction.\n\n### Findings F13–F19 — fixed, tested, gated\n\n**F13/F14 — runtime type integrity (ADR-010).** Every field and every operation argument across the domain — enum states, capacity types, dates, ints, refs, tenant contexts, transition targets, consume minutes, change reasons — is now runtime-validated on every construction path. Your three payloads are named regression tests and all raise controlled `DomainError`s with `WRONG_RUNTIME_TYPE` identity: `PlanItem(state=\"COMPLETED\")`, `CapacityWindow(capacity_type=\"EXECUTION\")`, and `CapacityAllocation(..., consumed_minutes=999, state=\"X\")` are unconstructible. The str-vs-enum overlap-dodging bug is structurally impossible since mixed representations can't exist. `bool` is rejected where `int` belongs; string dates rejected. Beyond the adversarial suite, a **guard-site matrix** (\\~70 rows) asserts the full structured identity — type + code + exact fields payload — of every raise site in the core.\n\n**F15 — explicit wire decoding.** Strict constructors reject raw values; `from_wire` factories and `parse_wire_capacity_type/date/int` decode supported representations and deterministically reject unknown enum strings, malformed ISO dates, garbage integers, wrong types and blanks — with tests proving resulting domain objects always hold proper enum instances. Incidental dataclass construction is no longer the wire contract.\n\n**F16 — construction semantics.** `create()` starts new aggregates in declared initial states (CANDIDATE; PROPOSED/zero-consumed); `rehydrate()` is the named trusted-reload path, deliberately sharing the fully-validated construction path so rehydrated objects can't violate invariants either.\n\n**F17 — the gate can no longer lie (ADR-011).** Decision logic extracted to `scripts/mutation_gate.py` as pure functions; GREEN now requires zero tool exit codes, a parseable tally reconciling *exactly* to a positive total, zero timeout/suspicious/skipped/no-tests mutants, listing/tally agreement, and zero unaccepted survivors. Your false-green scenario — 70 killed, 30 no-tests, 0 survivors — is a failing synthetic fixture in `tests/test_mutation_gate.py`, alongside missing-tally, unreconciled-total and failed-run cases. **F18**: config migrated to `source_paths`/`pytest_add_cli_args_test_selection`; deprecation warnings absent from the packaged raw output. **F19**: errors carry stable type + `code` + structured `fields`; prose renders from a module-level registry and evolves freely — tests anchor identity, not wording. Honest note: the first F19 pass re-exposed \\~170 diagnostic-argument mutants; they were killed properly via the guard-site matrix and data-hoisting, not bulk acceptance. One genuinely equivalent mutant (`int(s, 10)`) was removed by simplifying code. The acceptance list is **empty**, and the final strict-gated run killed the entire, much larger mutant population with zero anomalies.\n\n### Gates\n\nG01–G04, G06, **G07 (strict)**, G09, G10 **GREEN** · G05 **PARTIAL** (wire decoding done; provider schemas pending) · G08 **GREEN domain / RED service layer** · G11 **PARTIAL** (no CI/container) · G12 **PENDING — this is the review submission**. The consistency validator now includes your requested overclaim heuristic: RTM immunity claims fail the build if the adversarial payloads disappear.\n\nSuggested attack surface for the review is in `08-ai/CLAUDE-V004-HANDOFF.md` — including spoofed-`__class__` objects, str/int/enum subclasses, and locale-digit wire decodings.\n\nAumnity cgwo saas claude v004 20260808 2330\n\nZIP "
+     ]
+    },
+    "create_time": 1786228554.41,
+    "id": "7af652a6-1c76-486c-bf10-eb10db3fcf7f",
+    "metadata": {
+     "attachments": [
+      {
+       "id": "file_00000000794081f486f0b5cbcc4d36f1",
+       "is_big_paste": false,
+       "library_file_id": "libfile_95a63b6f16b8819192d279cd4584565a",
+       "mime_type": "application/zip",
+       "name": "AUMNITY-CGWO-SaaS_Claude_V004_20260808_2330.zip",
+       "size": 134639,
+       "source": "local"
+      }
+     ],
+     "serialization_metadata": {
+      "custom_symbol_offsets": [],
+      "render_format": "markdown"
+     }
+    }
+   },
+   "parent": "ea1222d5-371a-4c59-804b-aee04f2cbcef"
+  },
+  "7c7db2cb-c5f7-4a76-8831-df5a958a4151": {
+   "id": "7c7db2cb-c5f7-4a76-8831-df5a958a4151",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "70133a2c-2a84-42a6-9cf1-d858ca30de69",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "I’m checking whether runtime type checks accept unintended subclasses or unusual numeric strings. The main concern is that datetimes may pass date validation, potentially causing mixed date/datetime comparisons to fail unexpectedly.",
+       "finished": true,
+       "summary": "Assessing validation edge cases"
+      },
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Assessed validation edge cases"
+      }
+     ]
+    },
+    "create_time": 1786228588.722876,
+    "id": "7c7db2cb-c5f7-4a76-8831-df5a958a4151",
+    "metadata": {
+     "content_references": [],
+     "model_slug": "gpt-5-6-thinking",
+     "parent_id": "70133a2c-2a84-42a6-9cf1-d858ca30de69",
+     "tool_icons": []
+    }
+   },
+   "parent": "72b18689-49a3-4a4f-9fa4-941fc26ab785"
+  },
+  "7f64ef9c-eec2-415c-8ed0-ab4377612b59": {
+   "id": "7f64ef9c-eec2-415c-8ed0-ab4377612b59",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "09/08/2026 06:58 V5 attached go through the zip and deeply review all the files in it Claude Response -All accepted — F20 is a genuine cross-tenant bypass and the root cause is the `isinstance` trust model. Building V005 with canonical exact-type primitives:# Release Report — V005 trust-boundary correction\n\n**Deliverable:** `AUMNITY-CGWO-SaaS_Claude_V005_20260809_0646.zip` (above). Generated counts: **126 ZIP entries, 99 regular files, 97 manifest-managed files.** Clean-extracted and re-verified from the extraction: both validators, ruff check+format, mypy strict, full suite at 100% line+branch, and the adversarial subtype suite all pass inside the unpacked ZIP. `10-baseline/` byte-for-byte preserved; no feature expansion.\n\n## The root fix: canonical primitives (ADR-012)\n\nRather than patching each bypass, the trust model itself changed: the domain now stores **only canonical primitives**, enforced with exact type checks — `type(value) is str / int / date / <EnumClass>` — which read the real type slot. That closes all four attack classes at once: no subclasses (so no hostile `__eq__`, `__lt__` or `strip()`), no spoofed `__class__` (which `isinstance` consults but `type()` ignores), `bool` excluded from `int` by construction, and `datetime.datetime` excluded from `date` by design. ADR-010 carries a transparent amendment note; ADR-012 records the superseding rule.\n\n**F20** — Your `EqualEverything` attack is a named regression, verbatim: it can no longer construct a `TenantContext` at all, so the equality comparison it subverted is unreachable. Also proven rejected directly on aggregates. **F21** — `FakeNonBlank(\"\")` rejected across tenant/work-object/plan-item/resource refs via the root rule, no `.strip()` special-casing. **F22** — Your `EvilInt(-50)` window and `EvilInt(-10)` allocation constructions are named failing regressions, including `consume(EvilInt(10))`. **F23** — All five requested cases tested (datetime as start, as end, mixed, double-datetime, `declared_on`): each fails with a controlled structured `DomainError` *before* any comparison runs, so the uncontrolled `TypeError` path is unreachable and time-of-day semantics cannot smuggle into date-only fields.\n\n**F24** — `cgwo-consumer-v1` now has an explicit wire-integer grammar: exact `int` or ASCII `[0-9]+` only, published as `WIRE_INT_GRAMMAR` and documented in INTEGRATION-BOUNDARIES. Your probe values — `\"１２３\"`, `\"١٢٣\"`, `\"+12\"`, `\" 12 \"` — are all in the reject matrix alongside signs, separators, decimals and hex; Python's incidental `int()` permissiveness is no longer the contract. **F25** — Origin language corrected everywhere: DOM-009 now reads **\"ENFORCED (validation) / CONVENTION (origin)\"**, with docstrings and ADR wording aligned — nothing claims machine enforcement that is call-site intent. **F26** — CANONICAL-SCOPE is version-neutral (points at RTM DOM-006), AI-001 references the current cycle, and the validator gained a stale-version rule — which promptly caught and forced a fix to one more instance during this build, proving it bites. Your `🧙` observation is confirmed and documented in the gate module: unrecognised categories break tally reconciliation and fail the gate.\n\n## Verification\n\n349 tests, 100% line+branch (432 statements, 88 branches); strict mutation gate: **648/648 killed, zero anomalies, empty acceptance list**; mypy strict; ruff clean. New RTM rows DOM-010/DOM-011/INT-005/DOC-002 map F20–F26 with named evidence. Gates: G01–G04, G06, G07, G09, G10 **GREEN** · G05/G11 **PARTIAL** (unchanged halves stated plainly) · G08 **GREEN domain / RED service layer** · G12 **PENDING — this is the review submission**.\n\nThe handoff's suggested attack surface for this round: C-extension types, weakref proxies, `__getattribute__` liars, surrogate/astral wire strings, digit-string length DoS, and `fromisoformat` edge forms (week/ordinal dates)."
+     ]
+    },
+    "create_time": 1786255104.88,
+    "id": "7f64ef9c-eec2-415c-8ed0-ab4377612b59",
+    "metadata": {
+     "attachments": [
+      {
+       "id": "file_00000000edb0820aaecafb880be75fb8",
+       "is_big_paste": false,
+       "library_file_id": "libfile_8f25e669e5f08191853f74e78cbe0911",
+       "mime_type": "application/zip",
+       "name": "AUMNITY-CGWO-SaaS_Claude_V005_20260809_0646.zip",
+       "size": 147363,
+       "source": "local"
+      }
+     ],
+     "serialization_metadata": {
+      "custom_symbol_offsets": [],
+      "render_format": "markdown"
+     }
+    }
+   },
+   "parent": "de54f6ec-8305-4826-adfd-d6ba2a4d22fb"
+  },
+  "80b43c92-9be9-4d1e-9ca0-d5c3ba0f0145": {
+   "id": "80b43c92-9be9-4d1e-9ca0-d5c3ba0f0145",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "2fcfdcd3-84d2-424f-bb9c-2c417dbd8b13",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Inspected archive contents and ran file validators"
+      }
+     ]
+    },
+    "create_time": 1786224221.458083,
+    "id": "80b43c92-9be9-4d1e-9ca0-d5c3ba0f0145",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "653778ad-fdfe-4bc3-9e2b-5b3840983713",
+     "tool_icons": [
+      "code"
+     ]
+    }
+   },
+   "parent": "0c4892e4-c34c-4927-ad33-8e32d6f82b5b"
+  },
+  "95b39aa6-9dac-4c0e-afdd-ddff44cdfe0c": {
+   "id": "95b39aa6-9dac-4c0e-afdd-ddff44cdfe0c",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "39e32e83-56ff-4bbc-b370-77a6dfb2d988",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "I’m identifying the most important remaining risks: weak enum validation at input boundaries, possible state-machine bypass through direct construction, and mutation-gate semantics that may produce false-green results.",
+       "finished": true,
+       "summary": "Reviewing the package"
+      },
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Reviewed the package"
+      }
+     ]
+    },
+    "create_time": 1786226459.699808,
+    "id": "95b39aa6-9dac-4c0e-afdd-ddff44cdfe0c",
+    "metadata": {
+     "content_references": [],
+     "model_slug": "gpt-5-6-thinking",
+     "parent_id": "39e32e83-56ff-4bbc-b370-77a6dfb2d988",
+     "tool_icons": []
+    }
+   },
+   "parent": "c1e30d5c-f536-4d68-83fc-ae723c8bed51"
+  },
+  "c1e30d5c-f536-4d68-83fc-ae723c8bed51": {
+   "id": "c1e30d5c-f536-4d68-83fc-ae723c8bed51",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "V003 genuinely fixes the major V002 domain defects: direct `CapacityAllocation`/`replace()` construction is now invariant-checked, a single allocation cannot exceed its window, replanning reasons survive, and transitions return typed change records. I’ve found a **new quality-gate defect**, however: the mutation runner can return success even when mutants are `no tests`, timed out, suspicious, or the underlying mutation command failed; it only fails on unaccepted *survivors*. I’m checking whether that flaw affected this particular run or is presently latent."
+     ]
+    },
+    "create_time": 1786226422.563955,
+    "id": "c1e30d5c-f536-4d68-83fc-ae723c8bed51",
+    "metadata": {
+     "model_slug": "gpt-5-6-thinking",
+     "parent_id": "6cd77e8a-6f93-480b-a0ab-85642d12ba84"
+    }
+   },
+   "parent": "6cd77e8a-6f93-480b-a0ab-85642d12ba84"
+  },
+  "ccae95b8-6c75-4313-9220-7235bc49be5a": {
+   "id": "ccae95b8-6c75-4313-9220-7235bc49be5a",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "d5de4f6f-4e11-485d-a791-a4f3cd83560d",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Inspected package archives, documentation, manifests, and trust-boundary spoofing"
+      }
+     ]
+    },
+    "create_time": 1786255151.651443,
+    "id": "ccae95b8-6c75-4313-9220-7235bc49be5a",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "14c15ef1-6f66-40bc-b2b2-31a0084e9059",
+     "tool_icons": [
+      "code"
+     ]
+    }
+   },
+   "parent": "3d68af8d-f907-45e7-b557-ff0a31133116"
+  },
+  "client-created-root": {
+   "id": "client-created-root",
+   "message": null,
+   "parent": null
+  },
+  "d551cadc-7b57-4513-9084-52f188646570": {
+   "id": "d551cadc-7b57-4513-9084-52f188646570",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "The basic package claims check out: **82 regular files, 109 ZIP entries, 80 manifest-managed files**, both validators pass, all tests pass, and all manifest hashes match. In this independent environment Ruff/mypy are not installed, so I’m treating their packaged outputs as evidence but separately checking whether the config and gate definitions are sound rather than blindly accepting the GREEN status."
+     ]
+    },
+    "create_time": 1786226401.915499,
+    "id": "d551cadc-7b57-4513-9084-52f188646570",
+    "metadata": {
+     "model_slug": "gpt-5-6-thinking",
+     "parent_id": "575d8774-5a6f-43f2-b688-896286f17d5b"
+    }
+   },
+   "parent": "575d8774-5a6f-43f2-b688-896286f17d5b"
+  },
+  "de54f6ec-8305-4826-adfd-d6ba2a4d22fb": {
+   "id": "de54f6ec-8305-4826-adfd-d6ba2a4d22fb",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "## 08/08/2026 23:43 — 00001-CGWO-SaaS-Build-Baseline\n\nPartner, I completed another independent review of the **actual V004 ZIP**:\n\n`AUMNITY-CGWO-SaaS_Claude_V004_20260808_2330.zip`\n\nThis time the review went beyond the previous malformed-string cases and attacked Python's subclass behaviour, mixed date types, wire decoding and the verification machinery itself.\n\n## Verdict\n\n**V004 is again materially better, but I still cannot accept it as the frozen baseline.**\n\nThe important difference is that the remaining defect is now very specific:\n\n> Claude's runtime guards use `isinstance()`, which is too permissive for untrusted primitive/security values.\n\nThat permits a **real cross-tenant isolation bypass** using a crafted `str` subclass, plus numeric/domain invariant bypasses using crafted `int` subclasses.\n\nThere is also a `datetime`/`date` inconsistency that can cause an uncontrolled `TypeError`.\n\nSo my recommendation is:\n\n> **V004 → REVIEW FAILED → V005 trust-boundary correction**\n>\n> No new CGWO features yet.\n\n---\n\n# Independent package verification\n\nClaude's package/count claims are correct:\n\n| Check | Result |\n|---|---|\n| ZIP entries | ✅ **121** |\n| Regular files | ✅ **94** |\n| Manifest-managed files | ✅ **92** |\n| SHA-256 manifest | ✅ all entries match |\n| `validate_starter.py` | ✅ PASS |\n| `validate_consistency.py` | ✅ PASS |\n| pytest | ✅ **318 passed** |\n| packaged line coverage | ✅ 100% |\n| packaged branch coverage | ✅ 100% |\n| mutation evidence | ✅ **639/639 killed** |\n| baseline preservation | ✅ intact |\n| G05 | appropriately PARTIAL |\n| G11 | appropriately PARTIAL |\n| G12 | ❌ independent review finds blockers |\n\nThe V004 mutation result itself looks legitimate:\n\n```text\n639 killed\n0 survived\n0 no-tests\n0 timeout\n0 suspicious\n0 skipped\n```\n\nThe corrected mutation gate is also **much stronger** than V003.\n\n---\n\n# What V004 genuinely fixed\n\nClaude did not fake the previous fixes.\n\n### ✅ Raw enum strings are blocked\n\nThese now correctly fail through structured domain errors:\n\n```python\nPlanItem(..., state=\"COMPLETED\")\nCapacityWindow(..., capacity_type=\"EXECUTION\")\nCapacityAllocation(..., state=\"X\")\n```\n\nGood.\n\n### ✅ Wire decoding is now explicit\n\n`from_wire()` / `parse_wire_*()` establishes the correct architectural direction:\n\n```text\nexternal data\n    ↓\ndecoder\n    ↓\nvalidated domain object\n```\n\nThat should remain.\n\n### ✅ `create()` / `rehydrate()` distinction exists\n\nThis improves intent and makes future persistence clearer.\n\n### ✅ Structured errors are better than exact message contracts\n\nError:\n\n- type\n- code\n- structured fields\n\nis now the stable contract rather than prose/punctuation.\n\nGood correction.\n\n### ✅ Mutation gate false-green path was substantially fixed\n\nThe new gate checks:\n\n- command exit statuses\n- tally parseability\n- positive mutant count\n- tally reconciliation\n- timeout\n- suspicious\n- skipped\n- no-tests\n- survivor listing\n- acceptance list\n\nThis is good engineering.\n\n---\n\n# 🔴 F20 — Real cross-tenant isolation bypass via `str` subclass\n\nThis is the most important V004 finding.\n\n`require_str()` currently does:\n\n```python\nif not isinstance(value, str):\n    ...\n```\n\nThat accepts arbitrary subclasses of `str`.\n\nA subclass can override equality.\n\nI independently tested the actual V004 code with essentially:\n\n```python\nclass EqualEverything(str):\n    def __eq__(self, other):\n        return True\n\n    def __ne__(self, other):\n        return False\n```\n\nThen:\n\n```python\nctx = TenantContext(EqualEverything(\"attacker\"))\n\nassert_same_tenant(ctx, \"victim\")\n```\n\n### Actual V004 result\n\n**ACCESS ALLOWED.**\n\nThat defeats the core SaaS isolation check:\n\n```python\nif ctx.tenant_id != owner_tenant_id:\n    ...\n```\n\nbecause the hostile string controls comparison semantics.\n\nThis is not merely an exotic Python curiosity.\n\nThe RTM currently claims:\n\n> SaaS-002 — tenant context explicitly enforced at protected boundaries\n\nUnder V004's runtime model, that claim is false for adversarial runtime objects.\n\n---\n\n# 🔴 F21 — Blank identifiers can bypass validation\n\nA `str` subclass can also override `.strip()`.\n\nExample:\n\n```python\nclass FakeNonBlank(str):\n    def strip(self):\n        return \"notblank\"\n```\n\nwith underlying value:\n\n```python\nFakeNonBlank(\"\")\n```\n\nThe actual V004 accepted this as a tenant ID.\n\nI also independently created a:\n\n```text\nPlanItem\ntenant_id = genuinely empty string subclass\n```\n\nthat passed the non-blank check.\n\nSo this pattern:\n\n```python\nchecked_tenant.strip()\n```\n\nis unsafe while hostile subclasses remain accepted.\n\nThe same issue potentially applies to every identifier validated using `require_str()`.\n\n---\n\n# 🔴 F22 — `int` subclasses bypass quantity invariants\n\n`require_int()` similarly uses:\n\n```python\nisinstance(value, int)\n```\n\nexcept for bool.\n\nBut arbitrary `int` subclasses can override comparisons.\n\nI tested:\n\n```python\nclass EvilInt(int):\n    def __lt__(self, other):\n        return False\n\n    def __le__(self, other):\n        return False\n```\n\nUsing the actual V004 package, I successfully constructed:\n\n```text\nCapacityWindow.available_minutes = -50\n```\n\neven though negative capacity is supposedly impossible.\n\nMore seriously, I successfully constructed a:\n\n```text\nCapacityAllocation\nallocated_minutes = -10\nstate = PROPOSED\n```\n\ndespite the explicit invariant:\n\n```text\nallocated_minutes > 0\n```\n\nTherefore these V004 claims are still too strong:\n\n- DOM-005\n- DOM-008\n- ADR-010 wording\n- handoff statement that allocation is “truly unbypassable”\n\nThe problem is no longer raw strings.\n\nIt is **non-canonical primitive values carrying hostile behaviour**.\n\n---\n\n# Required fix: canonical primitives\n\nFor fields like:\n\n- tenant ID\n- organisation ID\n- resource ref\n- work-object ref\n- plan-item ref\n- integer quantities\n- dates\n\nI recommend **canonicalisation**, rather than merely piling on more subclass tests.\n\nFor example, for externally supplied IDs:\n\n```python\nif type(value) is not str:\n    reject\n```\n\nand for quantities:\n\n```python\nif type(value) is not int:\n    reject\n```\n\nnot:\n\n```python\nisinstance(...)\n```\n\nAlternatively explicitly convert to a trusted base primitive **only at a wire boundary** and store the resulting canonical value.\n\nFor security-sensitive domain constructors, exact built-in type checking is the safer and simpler rule.\n\n---\n\n# 🔴 F23 — `datetime.datetime` is deliberately accepted as `date`, but breaks the model\n\nADR-010 and `validation.py` explicitly state:\n\n> `datetime.datetime` is accepted where `date` is required.\n\nThat decision is problematic.\n\nPython's `datetime` is a subclass of `date`, so this passes:\n\n```python\nisinstance(datetime(...), date)\n```\n\nBut I independently tested:\n\n```python\nCapacityWindow(\n    period_start=date(2026, 1, 1),\n    period_end=datetime(2026, 1, 2, 12, 0),\n    ...\n)\n```\n\n### Actual result\n\n```text\nTypeError:\n'<' not supported between instances of\n'datetime.datetime' and 'datetime.date'\n```\n\nThat violates ADR-010's own goal:\n\n> malformed runtime values produce controlled DomainErrors, never incidental runtime exceptions.\n\nEven when both ends are `datetime`, V004 accepts a **time-bearing object** into a domain field declared as a date-only planning period.\n\nThat introduces hidden semantics:\n\n```text\n2026-01-01 08:00\n2026-01-01 09:00\n```\n\ninside something designed as a date window.\n\n### Recommendation\n\nFor this model:\n\n```python\ntype(value) is date\n```\n\nshould be required.\n\nIf CGWO later needs intra-day timestamp windows, introduce a deliberate separate type/model.\n\nDo not smuggle time semantics through inheritance.\n\n---\n\n# 🟠 F24 — Wire integer grammar is underspecified\n\nClaude explicitly asked us to probe locale digits, whitespace and signs.\n\nI did.\n\nThe current parser accepts:\n\n```text\n\"１２３\"     → 123\n\"١٢٣\"      → 123\n\"+12\"      → 12\n\" 12 \"     → 12\n```\n\nbecause Python's:\n\n```python\nint(value)\n```\n\naccepts them.\n\nThis is not automatically wrong.\n\nBut the contract documentation currently calls these:\n\n> decimal strings\n\nwithout defining the accepted wire grammar.\n\nFor a versioned integration contract, that is too implicit.\n\nChoose one consciously.\n\nFor example, if canonical wire integers are intended:\n\n```regex\n^[0-9]+$\n```\n\nthen reject:\n\n- whitespace\n- `+`\n- Unicode digits\n- separators\n- decimal notation\n\nOr explicitly document that Python-compatible Unicode integer strings are accepted.\n\nI recommend **ASCII canonical wire values** for deterministic cross-language compatibility.\n\nThis is P1, not the security blocker.\n\n---\n\n# 🟠 F25 — `create()` semantics are documented but not actually enforced\n\nV004 says:\n\n> `PlanItem.create` is the only way to obtain a genuinely new item.\n\nBut the public dataclass constructor still allows:\n\n```python\nPlanItem(\n    tenant_id=\"t\",\n    work_object_ref=\"wo\",\n    state=PlanItemState.COMPLETED,\n)\n```\n\nThe implementation calls this equivalent to trusted rehydration.\n\nTechnically the domain cannot distinguish whether that call came from:\n\n- a persistence adapter\n- ordinary application code\n- a test\n- malicious code\n\nSo DOM-009 is better described as:\n\n> explicit recommended construction APIs exist\n\nrather than fully “ENFORCED”.\n\nTwo acceptable directions:\n\n1. **Keep public construction**, but lower the RTM claim to convention/governance; or\n2. hide/guard rehydration behind a separate persistence-facing factory.\n\nI don't think this needs elaborate Python privacy machinery yet. Accurate traceability language is enough unless Claude has a clean design.\n\n---\n\n# 🟠 F26 — Minor document drift remains\n\n`01-product/CANONICAL-SCOPE.md` still says:\n\n> aggregate/cross-allocation capacity conflict detection is DECLARED but not implemented **as of V003**\n\nWe're reviewing V004.\n\nThis should say V004 or, better, avoid embedding a version entirely:\n\n> remains DECLARED and is tracked in RTM DOM-006.\n\nThat prevents recurrence.\n\nAlso:\n\n`AI-001` in the RTM still points primarily to the V003 handoff/V002 findings even though V004 is the current review cycle.\n\nMinor, but exactly the kind of version drift the consistency checker is supposed to eliminate.\n\n---\n\n# Mutation gate assessment\n\nUnlike V003, I do **not** currently see a compelling false-GREEN path in the gate logic from ordinary mutmut outputs.\n\nThe specific V003 problem appears fixed.\n\nThere is an extra `🧙` category in mutmut's raw progress output which the parser does not name, but because the gate reconciles parsed categories against total mutants, a non-zero unrecognised category should cause a sum mismatch and fail.\n\nSo I would **keep G07 GREEN for V004's submitted mutation run**.\n\nThe source-code trust-boundary bugs are not evidence that mutation itself lied—they simply weren't mutant forms generated by the tool.\n\nThat's an important distinction.\n\n---\n\n# Current release assessment\n\n| Area | Status |\n|---|---|\n| Package integrity | ✅ PASS |\n| Baseline preservation | ✅ PASS |\n| Architecture direction | ✅ PASS |\n| Typed state validation | ✅ PASS for ordinary values |\n| Wire-boundary architecture | ✅ PASS |\n| Allocation ordinary invariants | ✅ PASS |\n| Mutation infrastructure | ✅ PASS |\n| Mutation submitted run | ✅ PASS |\n| Tenant isolation against canonical strings | ✅ PASS |\n| Tenant isolation against runtime adversaries | 🔴 **FAIL** |\n| Numeric invariant security | 🔴 **FAIL** |\n| Date runtime integrity | 🔴 **FAIL** |\n| Wire numeric grammar | 🟠 underspecified |\n| Creation/rehydration enforcement claim | 🟠 overstated |\n| Documentation consistency | 🟠 small drift |\n| G12 | 🔴 **RED** |\n\nSo V004 should **not** become the accepted baseline.\n\n---\n\n## Send this to Claude for V005\n\n:::writing{variant=\"chat_message\" id=\"68217\"}\nIndependent review of the actual:\n\n`AUMNITY-CGWO-SaaS_Claude_V004_20260808_2330.zip`\n\nis complete.\n\nV004 genuinely fixes the V003 raw-string/type issues and the mutation-gate defect, but it is still NOT accepted as the clean CGWO baseline.\n\nThe new findings come from adversarial Python subtype behaviour. These are real runtime/security-domain failures, including a demonstrated cross-tenant bypass.\n\nProduce:\n\n`AUMNITY-CGWO-SaaS_Claude_V005_YYYYMMDD_HHMI.zip`\n\nThis remains a trust-boundary correction release. Do NOT start persistence, API, matching, CapacityLedger, ExecutionSession or other feature expansion yet.\n\nP0 — F20: cross-tenant isolation can be bypassed with a str subclass\n\nCurrent `require_str()` uses `isinstance(value, str)`.\n\nA hostile `str` subclass can override equality:\n\n```python\nclass EqualEverything(str):\n    def __eq__(self, other):\n        return True\n    def __ne__(self, other):\n        return False\n```\n\nThe actual V004 permits:\n\n```python\nctx = TenantContext(EqualEverything(\"attacker\"))\nassert_same_tenant(ctx, \"victim\")\n```\n\nand access is ALLOWED.\n\nThis breaks SaaS-002.\n\nSecurity identifiers must not retain attacker-controlled subclass behaviour.\n\nUse canonical trusted primitives at the domain/security boundary.\n\nFor security-sensitive string identifiers, strongly prefer exact built-in type enforcement (`type(value) is str`) or a deliberate canonicalisation mechanism that stores a real base `str`, not an arbitrary subclass.\n\nAdd a named regression proving a tenant-id subclass with hostile equality cannot bypass cross-tenant denial.\n\nP0 — F21: blank identifier guard bypass through str subclass\n\nA str subclass can override `.strip()`:\n\n```python\nclass FakeNonBlank(str):\n    def strip(self):\n        return \"notblank\"\n```\n\nwith an underlying empty value.\n\nThe actual V004 then accepts an actually blank tenant ID, including in PlanItem construction.\n\nFix the root primitive-validation rule rather than special-casing `.strip()`.\n\nAdd adversarial tests for hostile str subclasses on all important ID/ref fields.\n\nP0 — F22: int subclasses bypass capacity/allocation invariants\n\nCurrent `require_int()` accepts arbitrary int subclasses.\n\nA hostile int subclass can override comparisons.\n\nUsing the actual V004 code, independent review successfully constructed:\n\n- `CapacityWindow.available_minutes = -50`\n- `CapacityAllocation.allocated_minutes = -10`\n\nwhile bypassing the negative/non-positive guards.\n\nUse canonical exact integers for domain quantities (`type(value) is int`), or convert only at explicit external decoding boundaries and ensure the stored domain value is a real base int.\n\nContinue rejecting bool.\n\nAdd adversarial regression tests for int subclasses overriding comparison operators.\n\nDOM-005 / DOM-008 must not claim “every construction path” until these pass.\n\nP0 — F23: datetime.datetime acceptance violates the date-only domain and causes uncontrolled TypeError\n\nADR-010 currently deliberately accepts `datetime.datetime` wherever `datetime.date` is expected because datetime is a date subclass.\n\nThis is unsafe/inconsistent.\n\nConfirmed against actual V004:\n\n```python\nCapacityWindow(\n    period_start=date(...),\n    period_end=datetime(...),\n    ...\n)\n```\n\ncan raise the incidental Python error:\n\n`TypeError: '<' not supported between instances of 'datetime.datetime' and 'datetime.date'`\n\nrather than a controlled DomainError.\n\nTwo datetime values are also accepted into date-only fields, introducing hidden time-of-day semantics.\n\nFor current CGWO date-window semantics require exact `datetime.date` values, excluding `datetime.datetime`.\n\nIf CGWO later needs timestamp/intra-day windows, model them explicitly as a separate deliberate concept.\n\nAdd tests for:\n- datetime as period_start;\n- datetime as period_end;\n- mixed date/datetime;\n- datetime in AvailabilityDeclaration.declared_on;\n- resulting failures are controlled structured DomainErrors.\n\nP1 — F24: define canonical wire-integer grammar\n\nCurrent `parse_wire_int()` accepts, among other things:\n\n- full-width digits `\"１２３\"`\n- Arabic-Indic digits `\"١٢٣\"`\n- signed `\"+12\"`\n- surrounding whitespace `\" 12 \"`\n\nbecause it delegates to Python `int()`.\n\nChoose and document the wire grammar explicitly.\n\nRecommended for cross-language provider compatibility:\nASCII decimal integer text only, e.g. `^[0-9]+$`, with domain-level positivity/range rules applied afterwards.\n\nIf another grammar is intentionally chosen, make it explicit and test it.\n\nDo not let Python's incidental parsing behaviour define `cgwo-consumer-v1`.\n\nP1 — F25: correct create()/rehydrate() enforcement language\n\nV004 says `create()` is the only way to obtain a genuinely new PlanItem, but direct public dataclass construction can still create:\n\n`PlanItem(..., state=PlanItemState.COMPLETED)`\n\nThe code cannot know whether that is legitimate persistence rehydration or application-level state-machine bypass.\n\nEither:\n1. introduce a clean enforceable construction boundary; or\n2. retain direct validated construction for rehydration but reduce RTM/ADR wording from ENFORCED lifecycle-origin semantics to explicit API convention/governance.\n\nDo not claim something machine-enforced if it is only call-site intent.\n\nP1 — F26: remove remaining version drift\n\n`01-product/CANONICAL-SCOPE.md` still says aggregate/cross-allocation governance is unimplemented “as of V003”.\n\nThis is V004.\n\nPrefer version-neutral wording referencing RTM DOM-006 rather than embedding release numbers.\n\nAlso update AI-001/current review evidence so it does not primarily reference V003/V002 when V005 becomes the current cycle.\n\nStrengthen the consistency validator so current canonical docs cannot retain stale “as of V00N” implementation-status references from a prior release unless explicitly historical.\n\nV005 implementation guidance:\n\n- Fix the primitive trust model at the root; do not add one-off patches.\n- Strict domain constructors should store only canonical built-in primitives / declared enums / exact date values.\n- External wire factories may decode/canonicalise supported wire representations, but once values enter the domain, hostile subclass behaviour must be gone.\n- Consider exact-type helpers such as:\n  - exact str\n  - exact int excluding bool by construction\n  - exact date excluding datetime\n  rather than broad `isinstance`.\n- Enum checks should remain deliberate; Python Enum classes themselves cannot normally be freely subclassed once members exist, but add any useful adversarial coverage.\n- Test objects with spoofed `__class__` as previously suggested and prove they cannot defeat the chosen checks.\n- Preserve the structured DomainError type/code/fields pattern.\n- Preserve explicit from_wire parsing.\n- Preserve the corrected strict mutation gate.\n\nVerification requirements:\n\n- Preserve `10-baseline/` byte-for-byte.\n- Preserve provenance/history; append decisions, do not silently rewrite historical ADR facts.\n- Add/extend ADR-010 or create a superseding ADR for canonical primitive semantics.\n- Add RTM rows for F20–F26.\n- Add named independent-review regressions.\n- Add subtype/adversarial tests across tenant/ref/int/date fields.\n- Run full pytest.\n- Maintain 100% line+branch coverage.\n- Run strict mutation gate.\n- Run ruff + mypy.\n- Run starter + consistency validators.\n- Regenerate evidence from the final code.\n- Regenerate SHA-256 manifest last.\n- Clean-extract the final ZIP and rerun all applicable gates from that extraction.\n- G05 remains PARTIAL unless provider schemas appear.\n- G11 remains PARTIAL unless CI/container half is actually implemented.\n- G12 remains PENDING until the actual V005 ZIP is independently reviewed.\n\nDo not ask for ADR-003 stack confirmation.\n\nFinal deliverable must be:\n\n`AUMNITY-CGWO-SaaS_Claude_V005_YYYYMMDD_HHMI.zip`\n:::\n\nThis round found exactly why the repeated independent review is useful: the normal tests, 100% branch coverage **and 639/639 mutation score were all green**, yet a separate adversarial test still exposed a tenant-isolation bypass. That is the kind of defect we want to eliminate **before** this domain core becomes the foundation for the other AUMNITY SaaS products. memcite"
+     ]
+    },
+    "create_time": 1786228649.452,
+    "id": "de54f6ec-8305-4826-adfd-d6ba2a4d22fb",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "g0eadp",
+       "preview_language": null,
+       "previewable": false
+      },
+      "1": {
+       "edited": false,
+       "id": "fcnljc",
+       "preview_language": null,
+       "previewable": false
+      },
+      "10": {
+       "edited": false,
+       "id": "jsm994",
+       "preview_language": null,
+       "previewable": false
+      },
+      "11": {
+       "edited": false,
+       "id": "x03dtg",
+       "preview_language": null,
+       "previewable": false
+      },
+      "12": {
+       "edited": false,
+       "id": "kto30q",
+       "preview_language": null,
+       "previewable": false
+      },
+      "13": {
+       "edited": false,
+       "id": "kpf3l2",
+       "preview_language": null,
+       "previewable": false
+      },
+      "14": {
+       "edited": false,
+       "id": "f9ugla",
+       "preview_language": null,
+       "previewable": false
+      },
+      "15": {
+       "edited": false,
+       "id": "zuqoad",
+       "preview_language": null,
+       "previewable": false
+      },
+      "16": {
+       "edited": false,
+       "id": "y2iwc6",
+       "preview_language": null,
+       "previewable": false
+      },
+      "17": {
+       "edited": false,
+       "id": "dhlao2",
+       "preview_language": null,
+       "previewable": false
+      },
+      "18": {
+       "edited": false,
+       "id": "2h57mq",
+       "preview_language": null,
+       "previewable": false
+      },
+      "19": {
+       "edited": false,
+       "id": "0ntnbg",
+       "preview_language": null,
+       "previewable": false
+      },
+      "2": {
+       "edited": false,
+       "id": "pv7i54",
+       "preview_language": null,
+       "previewable": false
+      },
+      "20": {
+       "edited": false,
+       "id": "3gktdg",
+       "preview_language": null,
+       "previewable": false
+      },
+      "21": {
+       "edited": false,
+       "id": "puyi0i",
+       "preview_language": null,
+       "previewable": false
+      },
+      "22": {
+       "edited": false,
+       "id": "0rddyf",
+       "preview_language": null,
+       "previewable": false
+      },
+      "23": {
+       "edited": false,
+       "id": "mcg2ol",
+       "preview_language": null,
+       "previewable": false
+      },
+      "24": {
+       "edited": false,
+       "id": "wh7gst",
+       "preview_language": null,
+       "previewable": false
+      },
+      "25": {
+       "edited": false,
+       "id": "wqyhhv",
+       "preview_language": null,
+       "previewable": false
+      },
+      "26": {
+       "edited": false,
+       "id": "p5cwtm",
+       "preview_language": null,
+       "previewable": false
+      },
+      "27": {
+       "edited": false,
+       "id": "4y189i",
+       "preview_language": null,
+       "previewable": false
+      },
+      "28": {
+       "edited": false,
+       "id": "hlwn3b",
+       "preview_language": null,
+       "previewable": false
+      },
+      "29": {
+       "edited": false,
+       "id": "5j1quu",
+       "preview_language": null,
+       "previewable": false
+      },
+      "3": {
+       "edited": false,
+       "id": "g0l2om",
+       "preview_language": null,
+       "previewable": false
+      },
+      "30": {
+       "edited": false,
+       "id": "ivax97",
+       "preview_language": null,
+       "previewable": false
+      },
+      "31": {
+       "edited": false,
+       "id": "ayim6q",
+       "preview_language": null,
+       "previewable": false
+      },
+      "4": {
+       "edited": false,
+       "id": "2wqt57",
+       "preview_language": null,
+       "previewable": false
+      },
+      "5": {
+       "edited": false,
+       "id": "98opqa",
+       "preview_language": null,
+       "previewable": false
+      },
+      "6": {
+       "edited": false,
+       "id": "6s4hb2",
+       "preview_language": null,
+       "previewable": false
+      },
+      "7": {
+       "edited": false,
+       "id": "ywxmxi",
+       "preview_language": null,
+       "previewable": false
+      },
+      "8": {
+       "edited": false,
+       "id": "6rb8wu",
+       "preview_language": null,
+       "previewable": false
+      },
+      "9": {
+       "edited": false,
+       "id": "t22eux",
+       "preview_language": null,
+       "previewable": false
+      }
+     },
+     "content_references": [
+      {
+       "alt": null,
+       "prefix": null,
+       "prompt_text": null,
+       "type": "hidden"
+      }
+     ],
+     "model_slug": "gpt-5-6-thinking",
+     "parent_id": "efac34b2-edee-46bd-8666-172b57b2c919"
+    }
+   },
+   "parent": "efac34b2-edee-46bd-8666-172b57b2c919"
+  },
+  "df0c7e5d-ad6a-4299-b7a4-92ea70e98474": {
+   "id": "df0c7e5d-ad6a-4299-b7a4-92ea70e98474",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "First independent checks are in: the ZIP extracts cleanly, both supplied validators pass, and the 110 tests do run green. I’ve already found one release-report discrepancy, though: **the ZIP contains 63 files on extraction, not the claimed 90**; its root manifest records 61 managed entries. I’m checking whether that is only a reporting mistake or evidence of missing artefacts."
+     ]
+    },
+    "create_time": 1786224218.404588,
+    "id": "df0c7e5d-ad6a-4299-b7a4-92ea70e98474",
+    "metadata": {
+     "model_slug": "gpt-5-6-thinking",
+     "parent_id": "80b43c92-9be9-4d1e-9ca0-d5c3ba0f0145"
+    }
+   },
+   "parent": "80b43c92-9be9-4d1e-9ca0-d5c3ba0f0145"
+  },
+  "e000992f-8ce2-4909-95fa-5e095a8642f4": {
+   "id": "e000992f-8ce2-4909-95fa-5e095a8642f4",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "954a35cf-aee5-4551-9306-17e65df46daa",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Inspected capacity tests, verified provenance hashes, and reviewed V003 invariants"
+      }
+     ]
+    },
+    "create_time": 1786224299.636353,
+    "id": "e000992f-8ce2-4909-95fa-5e095a8642f4",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "b5f7669d-fc17-4e89-bafa-66b8e84df2aa",
+     "tool_icons": [
+      "code"
+     ]
+    }
+   },
+   "parent": "15e73bab-fe72-43dd-b346-6a294198a9cd"
+  },
+  "e045d62f-880e-4e31-bb85-d6e82a9ba141": {
+   "id": "e045d62f-880e-4e31-bb85-d6e82a9ba141",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content": "Worked for 4s",
+     "content_type": "reasoning_recap"
+    },
+    "create_time": 1786255635.090556,
+    "id": "e045d62f-880e-4e31-bb85-d6e82a9ba141",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "32e37ef6-f52a-4b02-8ea5-8f304c64958f"
+    }
+   },
+   "parent": "70447519-178e-4fea-a4b2-25316feff5fa"
+  },
+  "e776f134-b4ec-4aae-8785-a891db4adddd": {
+   "id": "e776f134-b4ec-4aae-8785-a891db4adddd",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content": "Worked for 1m 34s",
+     "content_type": "reasoning_recap"
+    },
+    "create_time": 1786226474.561978,
+    "id": "e776f134-b4ec-4aae-8785-a891db4adddd",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "6c64747d-216d-4bef-acb9-01b6e0ac178c"
+    }
+   },
+   "parent": "6c64747d-216d-4bef-acb9-01b6e0ac178c"
+  },
+  "ea1222d5-371a-4c59-804b-aee04f2cbcef": {
+   "id": "ea1222d5-371a-4c59-804b-aee04f2cbcef",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "## 08/08/2026 23:06 — 00001-CGWO-SaaS-Build-Baseline\n\nI reviewed the **actual V003 ZIP**:\n\n`AUMNITY-CGWO-SaaS_Claude_V003_20260808_2252.zip`\n\nI went through the package structure, source, tests, ADRs, architecture/boundary docs, RTM, quality gates, evidence, mutation tooling, packaging scripts, manifests, release notes, preserved baseline and handoff material. I also independently executed the package wherever this environment allowed it and then attacked the domain model with constructions that are **not in Claude's tests**.\n\n## Verdict\n\n**V003 is substantially better than V002, but I still would not freeze it as the accepted CGWO baseline.**\n\nClaude genuinely fixed almost all of our V002 findings. This is not another V002-level rejection.\n\nHowever, I found **one important P0 domain/input-integrity hole** and a **mutation-gate false-green defect**.\n\nMy classification is therefore:\n\n> **V003 = REVIEW FAILED — SMALLER CORRECTION RELEASE REQUIRED → V004**\n\nDo **not** start persistence/API/matching yet.\n\n---\n\n# Independent verification\n\n| Area | Independent result |\n|---|---|\n| ZIP structure | ✅ |\n| ZIP entries | ✅ **109** |\n| Regular files | ✅ **82** |\n| Manifest-managed files | ✅ **80** |\n| Manifest SHA-256 | ✅ all 80 match |\n| Starter validator | ✅ PASS |\n| Consistency validator | ✅ PASS |\n| pytest | ✅ all tests pass |\n| V001 baseline preservation | ✅ preserved |\n| Allocation V002 invariants | ✅ materially fixed |\n| Single-allocation/window bound | ✅ fixed |\n| Typed domain changes | ✅ fixed |\n| Change-reason preservation | ✅ fixed |\n| Tenant/org wording | ✅ corrected |\n| Consumer contracts | ✅ added |\n| Mutation evidence for this run | ✅ reports **239/239 killed** |\n| Mutation **gate implementation** | ❌ false-green path |\n| Runtime boundary/type integrity | ❌ P0 |\n\nI could not rerun Ruff/mypy in my environment because those packages are not installed here. That alone is **not a V003 defect**; Claude has packaged evidence and exact pinned versions.\n\n---\n\n# What Claude fixed correctly\n\n### ✅ F01/F02 allocation invariants\n\nThe V002 examples are now properly blocked when real enum values are used.\n\nThe design:\n\n```text\nPROPOSED / RESERVED -> consumed = 0\nPARTIALLY_CONSUMED -> 0 < consumed < allocated\nCONSUMED -> consumed = allocated\nOVERRUN -> consumed > allocated\n```\n\nis sensible.\n\nA single allocation is also correctly constrained by:\n\n```text\nallocated_minutes <= window.available_minutes\n```\n\nAggregate allocation governance remains explicitly deferred.\n\nGood.\n\n### ✅ F03 change reason\n\nThe reason now survives on `PlanItemChange`.\n\nThis is a real fix, not just documentation.\n\n### ✅ F04 event/change records\n\n`PlanItemChange` and `AllocationChange` are much better than event-name strings alone.\n\nDeferring:\n\n- actor\n- timestamp\n- correlation\n- causation\n\nuntil Platform/clock contracts exist is reasonable.\n\n### ✅ F05/F06 tenancy wording\n\nADR-009 is much clearer:\n\n**tenant_id = enforced security boundary**\n\nwhile:\n\n**organisation_id = optional sub-scope metadata**\n\nThat removes V002's organisation-isolation overclaim.\n\n### ✅ F07/F08\n\nThere is now:\n\n- `pyproject.toml`\n- `requirements-dev.txt`\n- mypy strict config\n- Ruff config\n- `run_gates.sh`\n\nG11 remaining **PARTIAL** instead of pretending CI/container reproducibility exists is correct.\n\n### ✅ F10 architecture guard\n\nThe AST primitive-name check is useful in addition to dependency purity.\n\nIt is not a mathematical proof of semantic ownership, but the docs now acknowledge that.\n\n### ✅ F12 consumer contracts\n\nThe new `cgwo-consumer-v1` direction is correct.\n\n---\n\n# 🔴 NEW F13 — Runtime enum/type validation is missing\n\nThis is the main V003 blocker.\n\nPython type annotations are **not runtime constraints**.\n\nThe current domain assumes callers always pass:\n\n```python\nPlanItemState.COMPLETED\n```\n\ninstead of:\n\n```python\n\"COMPLETED\"\n```\n\nBut APIs, JSON, queues, databases and external adapters will normally begin with strings.\n\nI independently tested the actual V003 code.\n\nThis constructs successfully:\n\n```python\nPlanItem(\n    tenant_id=\"t1\",\n    work_object_ref=\"wo1\",\n    state=\"COMPLETED\",\n)\n```\n\nThat means this invalid object exists:\n\n```text\nPlanItem.state = ordinary string\n```\n\nIt is **not** `PlanItemState.COMPLETED`.\n\nAttempting a transition later crashes with:\n\n```text\nAttributeError: 'str' object has no attribute 'value'\n```\n\nrather than a controlled domain validation failure.\n\n---\n\n## It also affects CapacityWindow\n\nThis is accepted:\n\n```python\nCapacityWindow(\n    ...,\n    capacity_type=\"EXECUTION\"\n)\n```\n\ninstead of requiring:\n\n```python\nCapacityType.EXECUTION\n```\n\nAnd that causes a particularly nasty semantic bug.\n\nI created:\n\n```text\nwindow A capacity_type = \"EXECUTION\"          # str\nwindow B capacity_type = CapacityType.EXECUTION\n```\n\nThey represent the **same conceptual capacity type**.\n\nYet:\n\n```python\nwindow_a.overlaps(window_b)\n```\n\nreturned:\n\n```text\nFalse\n```\n\nbecause V003 uses:\n\n```python\none.capacity_type is not other.capacity_type\n```\n\nA string and enum are different objects.\n\nSo malformed input can make two competing capacity windows appear not to conflict.\n\nThat matters directly to **CGWO's core purpose**.\n\n---\n\n# 🔴 F14 — Allocation “cannot be bypassed” is still false\n\nThe RTM says:\n\n> Allocation state/data invariants hold on every construction path; the state machine cannot be bypassed by direct construction.\n\nThat is currently incorrect.\n\nI created this against the actual V003 code:\n\n```python\nCapacityAllocation(\n    tenant_id=\"t1\",\n    window=window,\n    plan_item_ref=\"p\",\n    allocated_minutes=30,\n    consumed_minutes=999,\n    state=\"X\",\n)\n```\n\n### Result\n\n**Object created successfully.**\n\nSo we can have:\n\n```text\nallocated = 30\nconsumed = 999\nstate = \"X\"\n```\n\nwithout `AllocationInvariantError`.\n\nThen later domain operations crash because `\"X\"` has no `.value`.\n\nThis means ADR-007/DOM-005 currently prove:\n\n> invariants hold when callers already provide a valid `AllocationState`\n\nThey do **not** prove:\n\n> every construction path is safe.\n\nThat distinction is important.\n\n---\n\n# 🔴 F15 — Consumer contract accepts malformed enum boundary input\n\nThis is closely related but deserves its own contract finding.\n\nThis currently succeeds:\n\n```python\nAvailabilityProposal(\n    ...,\n    capacity_type=\"SUPERVISORY\",\n)\n```\n\nThe proposal then creates a `CapacityWindow` containing the raw string.\n\nBut `AvailabilityProposal` is specifically meant to represent an **external inbound boundary contract**.\n\nThis is exactly where we should either:\n\n1. **strictly reject raw values**, requiring already-decoded enum instances; or preferably\n\n2. provide explicit parsing such as:\n\n```text\nAvailabilityProposal.from_wire(...)\n```\n\nthat validates/converts external values into domain enums.\n\nDo not allow incidental Python dataclass construction to become the wire contract.\n\n---\n\n# Recommended design for V004\n\nI don't want Claude to “fix” this by sprinkling `isinstance()` checks randomly.\n\nWe need a deliberate boundary pattern.\n\nSomething like:\n\n```text\nWIRE / external representation\n        ↓\nparser / factory\n        ↓\nvalidated domain representation\n```\n\nFor example:\n\n```python\nPlanItemState(raw_state)\n```\n\nand:\n\n```python\nCapacityType(raw_capacity_type)\n```\n\ninside controlled parser/factory functions.\n\nThen the domain itself can either:\n\n- reject non-enum runtime values in `__post_init__`, or\n- keep constructors internal and expose validated factories.\n\nFor this early pure-domain implementation, **runtime `isinstance()` enforcement in the domain + explicit wire parsing** is probably simplest.\n\n---\n\n# 🟠 F16 — PlanItem can be created directly in any valid state\n\nThere is another design decision hiding here.\n\nToday this is valid:\n\n```python\nPlanItem(\n    tenant_id=\"t1\",\n    work_object_ref=\"wo1\",\n    state=PlanItemState.COMPLETED,\n)\n```\n\nSo although transitions are controlled, a caller can create a brand-new PlanItem directly as COMPLETED.\n\nThat may be intentional for **rehydration**.\n\nIf so, say so explicitly.\n\nWe need to distinguish:\n\n```text\ncreate_new_plan_item()\n```\n\nfrom:\n\n```text\nrehydrate_plan_item()\n```\n\nOtherwise DOM-001's “state machine” can still be bypassed operationally even with correct enum types.\n\nI don't necessarily require blocking rehydration. I require the construction semantics to become explicit.\n\nThe same issue applies conceptually to `CapacityAllocation`, although its state-dependent invariants now at least constrain rehydrated objects.\n\n---\n\n# 🔴 F17 — Mutation runner can incorrectly return GREEN\n\nThis is a tooling defect.\n\n`scripts/run_mutation.py` ends with effectively:\n\n```python\nsys.exit(0 if not unresolved else 1)\n```\n\nwhere `unresolved` means only:\n\n```text\nsurviving mutants not in acceptance file\n```\n\nBut it does **not** fail when there are:\n\n- `no tests`\n- timeouts\n- suspicious mutants\n- skipped mutants\n- mutation command failure\n- `mutmut results` failure\n\nTherefore this could happen:\n\n```text\n100 mutants\n70 killed\n30 \"no tests\"\n0 survivors\n```\n\nand the script could still return **0**.\n\nOr mutmut itself could fail before a legitimate complete mutation run and the summary logic could potentially misclassify the result.\n\nThat's a gate implementation flaw.\n\n---\n\n## Did it invalidate V003's 239/239 result?\n\nApparently **no**.\n\nThe packaged current evidence says:\n\n```text\nkilled: 239\nsurvived: 0\ntimeout: 0\nsuspicious: 0\nskipped: 0\nno_tests: 0\n```\n\nSo the current mutation result itself looks good.\n\nBut the **gate cannot be trusted for future releases until this is fixed**.\n\nG07 therefore should not be considered permanently hardened yet.\n\n---\n\n# 🟠 F18 — Deprecated mutmut configuration\n\nThe captured mutation output contains warnings that:\n\n```text\npaths_to_mutate is deprecated\ntests_dir is deprecated\n```\n\nThis doesn't invalidate V003.\n\nBut since V004 is already required, update the configuration now.\n\nWe shouldn't knowingly establish a baseline with already-deprecated mutation configuration.\n\n---\n\n# 🟠 F19 — Error-message mutations have been turned into API contract\n\nClaude says the 79 string-literal survivors were killed by anchoring exact error messages.\n\nThat gets mutation scores up, but be careful.\n\nIt means wording such as:\n\n```text\nallocated_minutes must be > 0\n```\n\nhas effectively become a tested contract.\n\nFor human-readable diagnostic text, exact full-string mutation killing can create brittle tests without protecting much business behaviour.\n\nI'd rather have structured error identity, for example:\n\n```text\ncode = ALLOCATION_MINUTES_NON_POSITIVE\n```\n\nplus a human message.\n\nThen mutation tests can strongly anchor:\n\n- error type\n- error code\n- relevant data\n\nwithout making punctuation/wording part of the product contract.\n\nThis is not a V004 P0, but it is worth cleaning now because the domain is still tiny.\n\n---\n\n# One thing I would NOT change\n\nDo **not** implement the `CapacityLedger` yet simply to get more functionality.\n\nThe V003 package correctly says aggregate governance is deferred.\n\nFirst close the **input/domain trust boundary**.\n\nOtherwise a ledger will be built on top of malformed state/capacity objects.\n\n---\n\n# V003 release decision\n\n| Area | Status |\n|---|---|\n| Architecture direction | ✅ PASS |\n| Preserved baseline | ✅ PASS |\n| ADR discipline | ✅ PASS |\n| Allocation numeric invariants | ✅ PASS |\n| Change-reason fidelity | ✅ PASS |\n| Change records | ✅ PASS |\n| Tenant isolation semantics | ✅ PASS |\n| Consumer-contract direction | ✅ PASS |\n| Runtime domain type safety | 🔴 FAIL |\n| Inbound enum decoding | 🔴 FAIL |\n| PlanItem construction semantics | 🟠 NEEDS DECISION |\n| Mutation result this release | ✅ PASS |\n| Mutation gate implementation | 🔴 FAIL |\n| Gate honesty | 🟠 requires correction |\n| Independent review G12 | 🔴 RED |\n\nTherefore:\n\n> **V004 should be another hardening/correction release, not the next feature release.**\n\n---\n\n## Send this to Claude\n\n:::writing{variant=\"chat_message\" id=\"31584\"}\nIndependent ChatGPT review of the actual:\n\n`AUMNITY-CGWO-SaaS_Claude_V003_20260808_2252.zip`\n\nis complete.\n\nV003 materially fixes the V002 findings and is substantially stronger. However, it is NOT yet accepted as the clean CGWO baseline. A new P0 input/domain-integrity hole and a mutation-gate false-green defect were found through adversarial construction not covered by the V003 tests.\n\nProduce:\n\n`AUMNITY-CGWO-SaaS_Claude_V004_YYYYMMDD_HHMI.zip`\n\nThis is another correction/hardening release. Do NOT start persistence, APIs, matching, CapacityLedger or other feature expansion yet.\n\nP0 — F13/F14: runtime enum/type integrity\n\nPython type annotations are not runtime validation.\n\nThe actual V003 currently permits malformed domain objects.\n\nConfirmed examples:\n\n1.\n\n`PlanItem(tenant_id=\"t1\", work_object_ref=\"wo1\", state=\"COMPLETED\")`\n\nconstructs successfully with a raw string instead of `PlanItemState.COMPLETED`.\n\nA subsequent transition crashes with AttributeError rather than producing a controlled domain validation error.\n\n2.\n\n`CapacityWindow(..., capacity_type=\"EXECUTION\")`\n\nconstructs successfully with a raw string.\n\nA window containing `\"EXECUTION\"` and another containing `CapacityType.EXECUTION` can incorrectly report no overlap because `windows_overlap()` compares capacity types by identity.\n\n3.\n\nMost seriously:\n\n`CapacityAllocation(\n    tenant_id=\"t1\",\n    window=window,\n    plan_item_ref=\"p\",\n    allocated_minutes=30,\n    consumed_minutes=999,\n    state=\"X\"\n)`\n\nconstructs successfully.\n\nTherefore ADR-007 / RTM DOM-005's claim that allocation invariants hold on every construction path and cannot be bypassed by direct construction is still false.\n\nFix this systematically.\n\nRequirements:\n\n- Domain enum-bearing fields must reject invalid runtime types/values.\n- Decide and document whether domain constructors require enum instances only or whether they normalise supported raw values.\n- Prefer a clear boundary pattern:\n  external/wire values -> explicit parser/factory -> validated domain values.\n- Do not rely on static type checking as runtime protection.\n- Add adversarial regression tests for raw strings, arbitrary strings and wrong enum types.\n- Domain operations must fail with controlled domain/contract validation errors, never incidental AttributeError/KeyError caused by malformed accepted state.\n\nAffected minimum:\n- `PlanItem.state`\n- `CapacityAllocation.state`\n- `CapacityWindow.capacity_type`\n- `AvailabilityProposal.capacity_type`\n- any other enum/value fields with the same exposure.\n\nP0 — F15: inbound consumer contracts need explicit decoding/validation\n\n`AvailabilityProposal` is an external consumer-side contract yet currently accepts raw malformed capacity types and can inject them into CapacityWindow.\n\nDefine explicit inbound/wire parsing semantics.\n\nFor example, a wire parser/factory may convert a valid string such as `\"SUPERVISORY\"` to `CapacityType.SUPERVISORY`, while rejecting unknown values deterministically.\n\nDo not make incidental dataclass constructor behaviour the external serialization contract.\n\nAdd contract tests for:\n- valid enum wire values;\n- unknown enum strings;\n- wrong value types;\n- blank/malformed values;\n- resulting domain object always containing the proper enum instance.\n\nP1 — F16: distinguish new creation from rehydration\n\nEven after runtime enum validation, this currently permits:\n\n`PlanItem(..., state=PlanItemState.COMPLETED)`\n\nwhich creates a PlanItem directly in a terminal state without following the transition state machine.\n\nDecide explicitly whether this is:\n- legal rehydration; or\n- an unintended state-machine bypass.\n\nIf rehydration is required, distinguish APIs/factories for:\n- new aggregate creation; and\n- trusted persistence rehydration.\n\nA normal new PlanItem should begin in the defined initial state unless an explicit domain rule says otherwise.\n\nDocument and test the same principle anywhere else it applies.\n\nP0/P1 — F17: mutation gate has a false-green path\n\n`scripts/run_mutation.py` currently exits successfully based only on whether there are unaccepted surviving mutants.\n\nIt does NOT reliably fail the gate for:\n- no-tests mutants;\n- timeouts;\n- suspicious mutants;\n- skipped mutants;\n- non-zero `mutmut run` failure;\n- non-zero `mutmut results` failure;\n- incomplete/unparseable mutation output.\n\nThe current V003 evidence itself reports 239 killed / zero in all other categories, so the run result appears valid. The defect is in the gate implementation.\n\nFix the gate so GREEN requires an explicitly complete successful mutation run.\n\nAt minimum verify:\n- mutation command return status;\n- results command return status;\n- total mutant count > 0;\n- killed + survived + timeout + suspicious + skipped/no-tests/etc reconcile to total;\n- unresolved survivors == 0;\n- no-tests == 0 unless formally governed;\n- timeouts/suspicious/error categories fail unless an explicit documented policy says otherwise;\n- malformed/missing tally cannot silently become zeros.\n\nAdd unit tests for the mutation-summary/gate decision logic using synthetic result fixtures so the gate itself is tested.\n\nF18 — update deprecated mutmut configuration\n\nThe V003 raw output warns:\n- `paths_to_mutate` is deprecated;\n- `tests_dir` is deprecated.\n\nMove to the current mutmut configuration names supported by the pinned version and prove the warning is gone, unless an upstream issue makes that impossible and it is documented.\n\nF19 — review exact error-message anchoring\n\nV003 killed many string-literal mutants by making exact human-readable error messages part of the test contract.\n\nAvoid turning incidental wording/punctuation into a permanent domain API merely to improve mutation score.\n\nPrefer structured domain errors where useful:\n- stable error type;\n- stable error code/reason identifier;\n- relevant structured fields;\n- human-readable message allowed to evolve.\n\nMutation tests should primarily protect behaviour and stable error identity, not prose.\n\nDo not rewrite every exception unnecessarily, but establish the pattern now while the codebase is small.\n\nAdditional V004 requirements:\n\n- Preserve `10-baseline/` byte-for-byte.\n- Preserve V001 provenance.\n- Do not silently rewrite previous ADR/history; add/amend/supersede through explicit decisions.\n- Add RTM rows for F13–F19 where appropriate.\n- Add regression tests named/mapped to the independent-review findings.\n- Re-run line and branch coverage.\n- Re-run mutation with the corrected gate.\n- Re-run ruff and mypy.\n- Validate the mutation runner itself with tests.\n- Update consistency rules if they can machine-detect overclaims such as \"every construction path\".\n- Keep G05 PARTIAL and G11 PARTIAL unless their actual missing halves are implemented.\n- G12 remains PENDING until the final V004 ZIP is independently reviewed.\n- Regenerate manifest after every final artefact/evidence change.\n- Clean-extract the final package and rerun gates from that extraction.\n- Report attempted/completed/failed/deferred/assumptions/decisions/unresolved blockers.\n\nDo not ask for ADR-003 stack confirmation. Keep the current reference implementation reversible.\n\nFinal deliverable must be the actual downloadable:\n\n`AUMNITY-CGWO-SaaS_Claude_V004_YYYYMMDD_HHMI.zip`\n:::\n\nThis round is actually encouraging: V002 had several architectural/domain defects; **V003 has narrowed the problem to hardening trust boundaries and the gate machinery**. Once V004 closes these correctly, we should reconsider whether the first executable domain baseline can finally be accepted before moving into the next feature slice."
+     ]
+    },
+    "create_time": 1786226471.373385,
+    "id": "ea1222d5-371a-4c59-804b-aee04f2cbcef",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "krmo9h",
+       "preview_language": null,
+       "previewable": false
+      },
+      "1": {
+       "edited": false,
+       "id": "o50389",
+       "preview_language": null,
+       "previewable": false
+      },
+      "10": {
+       "edited": false,
+       "id": "ivgom6",
+       "preview_language": null,
+       "previewable": false
+      },
+      "11": {
+       "edited": false,
+       "id": "jsfa5d",
+       "preview_language": null,
+       "previewable": false
+      },
+      "12": {
+       "edited": false,
+       "id": "lp0nym",
+       "preview_language": null,
+       "previewable": false
+      },
+      "13": {
+       "edited": false,
+       "id": "lg85qw",
+       "preview_language": null,
+       "previewable": false
+      },
+      "14": {
+       "edited": false,
+       "id": "vp5nha",
+       "preview_language": null,
+       "previewable": false
+      },
+      "15": {
+       "edited": false,
+       "id": "sc6rkp",
+       "preview_language": null,
+       "previewable": false
+      },
+      "16": {
+       "edited": false,
+       "id": "7jr44c",
+       "preview_language": null,
+       "previewable": false
+      },
+      "17": {
+       "edited": false,
+       "id": "mn1cso",
+       "preview_language": null,
+       "previewable": false
+      },
+      "18": {
+       "edited": false,
+       "id": "fq0knv",
+       "preview_language": null,
+       "previewable": false
+      },
+      "19": {
+       "edited": false,
+       "id": "27oep1",
+       "preview_language": null,
+       "previewable": false
+      },
+      "2": {
+       "edited": false,
+       "id": "v441o3",
+       "preview_language": null,
+       "previewable": false
+      },
+      "20": {
+       "edited": false,
+       "id": "sbpuo0",
+       "preview_language": null,
+       "previewable": false
+      },
+      "21": {
+       "edited": false,
+       "id": "1hmslx",
+       "preview_language": null,
+       "previewable": false
+      },
+      "22": {
+       "edited": false,
+       "id": "asm8wz",
+       "preview_language": null,
+       "previewable": false
+      },
+      "23": {
+       "edited": false,
+       "id": "hcg9x4",
+       "preview_language": null,
+       "previewable": false
+      },
+      "24": {
+       "edited": false,
+       "id": "vs0ch2",
+       "preview_language": null,
+       "previewable": false
+      },
+      "25": {
+       "edited": false,
+       "id": "dxe60g",
+       "preview_language": null,
+       "previewable": false
+      },
+      "26": {
+       "edited": false,
+       "id": "apmeoi",
+       "preview_language": null,
+       "previewable": false
+      },
+      "27": {
+       "edited": false,
+       "id": "dzhnsl",
+       "preview_language": null,
+       "previewable": false
+      },
+      "28": {
+       "edited": false,
+       "id": "11mbfd",
+       "preview_language": null,
+       "previewable": false
+      },
+      "29": {
+       "edited": false,
+       "id": "w66i2y",
+       "preview_language": null,
+       "previewable": false
+      },
+      "3": {
+       "edited": false,
+       "id": "10zs1l",
+       "preview_language": null,
+       "previewable": false
+      },
+      "4": {
+       "edited": false,
+       "id": "8chr8j",
+       "preview_language": null,
+       "previewable": false
+      },
+      "5": {
+       "edited": false,
+       "id": "oi0op8",
+       "preview_language": null,
+       "previewable": false
+      },
+      "6": {
+       "edited": false,
+       "id": "zzsjvw",
+       "preview_language": null,
+       "previewable": false
+      },
+      "7": {
+       "edited": false,
+       "id": "vicjgq",
+       "preview_language": null,
+       "previewable": false
+      },
+      "8": {
+       "edited": false,
+       "id": "jtrk4e",
+       "preview_language": null,
+       "previewable": false
+      },
+      "9": {
+       "edited": false,
+       "id": "2l1vnf",
+       "preview_language": null,
+       "previewable": false
+      }
+     },
+     "content_references": [],
+     "model_slug": "gpt-5-6-thinking",
+     "parent_id": "e776f134-b4ec-4aae-8785-a891db4adddd"
+    }
+   },
+   "parent": "e776f134-b4ec-4aae-8785-a891db4adddd"
+  },
+  "efac34b2-edee-46bd-8666-172b57b2c919": {
+   "id": "efac34b2-edee-46bd-8666-172b57b2c919",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content": "Worked for 1m 33s",
+     "content_type": "reasoning_recap"
+    },
+    "create_time": 1786228715.2855,
+    "id": "efac34b2-edee-46bd-8666-172b57b2c919",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "12d3ca03-b206-4f17-b21e-224ddabb7d9b"
+    }
+   },
+   "parent": "12d3ca03-b206-4f17-b21e-224ddabb7d9b"
+  },
+  "f0485bc0-342f-4c93-9eb5-63bf0be7e013": {
+   "id": "f0485bc0-342f-4c93-9eb5-63bf0be7e013",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "## 08/08/2026 22:23 — 00001-CGWO-SaaS-Build-Baseline\n\nPartner, I reviewed the **actual `AUMNITY-CGWO-SaaS_Claude_V002_20260808_2208.zip`**, not just Claude’s release report.\n\nI extracted and inspected the complete package: **63 regular files**, including the preserved 12-file baseline, all six ADRs, architecture/product/governance documents, source code, tests, validators, manifests, RTM, evidence and handoff material. I also independently ran the executable checks.\n\n### Overall verdict\n\n**V002 is a strong improvement over V001, but I would NOT accept it as the clean build baseline yet.**\n\nThe architectural direction is mostly good. The first executable core is useful. But there are several **real domain-integrity and gate-integrity defects** that Claude’s 110-green-tests / 100%-coverage headline does not expose.\n\nMy recommendation:\n\n**V002 → REVIEW FAILED / CORRECTION REQUIRED → Claude V003**\n\nNot because the build is fundamentally wrong, but because this is exactly the stage where we should harden the contracts before adding persistence/API/matching.\n\n---\n\n## Independent verification\n\nI independently confirmed:\n\n| Check | Result |\n|---|---|\n| ZIP extraction | ✅ PASS |\n| Text/file readability | ✅ 63 files readable, no empty artefacts |\n| Root manifest SHA-256 | ✅ PASS |\n| Preserved baseline manifest | ✅ PASS |\n| V001 provenance comparison | ✅ preserved baseline unchanged |\n| `validate_starter.py` | ✅ PASS |\n| `validate_consistency.py` | ✅ PASS |\n| Python compile | ✅ PASS |\n| pytest | ✅ **110 passed** |\n| Product-code line coverage | ✅ **100%** |\n| Product-code branch coverage | ✅ **100%** |\n| Mutation gate | ❌ RED, as Claude reported |\n| Type checking | ❌ not configured |\n| Contract/integration | ❌ RED |\n| Independent review | ❌ this review finds blockers |\n\nOne minor correction to Claude’s report: **“90 files” is wrong terminology**.\n\nThe ZIP has:\n\n- **90 ZIP entries**, including directories\n- **63 regular files**\n- root manifest manages **61 files**\n\nThat is not evidence of missing contents, only an inaccurate release-report count.\n\n---\n\n# Findings\n\n## 🔴 F01 — Allocation invariants allow impossible states\n\nThis is the most important code defect.\n\n`src/cgwo_core/allocation.py:68-76`\n\nThe constructor checks:\n\n- tenant matches window\n- `plan_item_ref`\n- allocated > 0\n- consumed >= 0\n\nBut it does **not** enforce consistency between:\n\n`allocated_minutes`  \n`consumed_minutes`  \n`state`\n\nSo all of these invalid domain objects are currently constructible:\n\n```text\nallocated = 120\nconsumed = 500\nstate = RESERVED\n```\n\n```text\nallocated = 120\nconsumed = 0\nstate = CONSUMED\n```\n\n```text\nallocated = 120\nconsumed = 50\nstate = OVERRUN\n```\n\n```text\nallocated = 120\nconsumed = 25\nstate = PROPOSED\n```\n\nThat means the state machine can be bypassed simply by constructing the dataclass directly.\n\nThe tests never attack this.\n\n### Required V003 fix\n\nDefine state-dependent invariants such as:\n\n- PROPOSED / RESERVED: consumed = 0\n- PARTIALLY_CONSUMED: `0 < consumed < allocated`\n- CONSUMED: `consumed == allocated`\n- OVERRUN: `consumed > allocated`\n\nAnd decide valid semantics for CONSUMING / RELEASED.\n\nAdd negative construction tests.\n\nThis should become a regression/invariant requirement in RTM.\n\n---\n\n## 🔴 F02 — An allocation can exceed its Capacity Window\n\n`src/cgwo_core/allocation.py:58-76`\n\nNothing prevents:\n\n```text\nCapacityWindow.available_minutes = 60\nCapacityAllocation.allocated_minutes = 600\n```\n\nThat directly contradicts the meaning of a capacity-governed orchestration system.\n\nEven worse, there is currently no aggregate reservation logic preventing:\n\n```text\nwindow capacity = 600 minutes\n\nallocation A = 500\nallocation B = 500\nallocation C = 500\n```\n\nAll three can individually exist.\n\nSo Claude’s release language around **“capacity conflict detection”** must be carefully limited.\n\nCurrent implementation provides:\n\n- window overlap detection\n- single-allocation consumption overrun detection\n\nIt does **not** yet provide:\n\n- reservation capacity protection\n- aggregate allocated-capacity conflict\n- cross-allocation contention\n- cross-window capacity resolution\n\nClaude does acknowledge “cross-window conflict detection” as deferred, but the canonical product scope and some release language make the executable slice sound stronger than it is.\n\n### V003\n\nEither introduce a `CapacityLedger` / reservation policy / allocation aggregate now, or explicitly keep it deferred and prevent a single allocation from exceeding the window at minimum.\n\n---\n\n## 🔴 F03 — Change reasons are validated and then thrown away\n\n`src/cgwo_core/plan_item.py:93-113`\n\nThis is a significant semantic loss.\n\nClaude correctly enforces:\n\n```python\nchange_reason\n```\n\nfor replanning transitions.\n\nBut after verifying it, the code returns only:\n\n```python\nTransitionResult(\n    item=...,\n    event=...\n)\n```\n\nThe reason itself disappears.\n\nThat defeats one of the baseline requirements:\n\n**adaptive replanning with change reasons**\n\nand weakens future:\n\n- audit\n- learning\n- review\n- explanation\n- plan-vs-actual analysis\n- event persistence\n\nThe product can prove a reason existed at transition time, but cannot later tell you **what the reason was**.\n\n### V003\n\nThe result/event must carry the reason, for example conceptually:\n\n```text\nPlanItemChange\n- previous_state\n- new_state\n- change_reason\n- event_type\n```\n\nDo not merely keep the reason as a method parameter.\n\n---\n\n## 🔴 F04 — Domain events are strings, not meaningful event records\n\nSeveral places do this:\n\n`plan_item.py`\n\n```python\nevent = \"WeeklyPlanChanged\"\n```\n\n`allocation.py`\n\n```python\nevent = \"CapacityReserved\"\n```\n\nBut ADR-006 says:\n\n> all state transitions are auditable events\n\nRight now these aren't auditable events. They are **event names**.\n\nMissing information includes:\n\n- tenant\n- aggregate/reference\n- prior state\n- target state\n- reason\n- occurred-at\n- correlation/causation\n- actor\n- relevant quantities\n\nThis becomes particularly problematic because F03 discards the change reason.\n\nI do **not** think V003 needs an enterprise event bus yet. But the domain result should contain a proper immutable domain-event record or typed change object.\n\n---\n\n## 🔴 F05 — SaaS-002 / organisation isolation is overstated\n\n`src/cgwo_core/tenancy.py`\n\n```python\n@dataclass\nclass TenantContext:\n    tenant_id: str\n    organisation_id: str | None = None\n```\n\n`organisation_id` is:\n\n- optional\n- never validated\n- never used\n- not stored on current aggregates\n- not checked in `assert_same_tenant()`\n\nYet RTM says:\n\n`SaaS-002 | Tenant/org context is explicit at protected boundaries | ENFORCED`\n\nThat is too strong.\n\nWhat V002 proves is:\n\n> **tenant ID equality is enforced on selected domain operations**\n\nIt does **not** prove organisation-level isolation.\n\nSo either:\n\n1. organisation is not an independent isolation boundary → document that tenancy subsumes it;\n\nor\n\n2. organisation matters → model and test it.\n\nUntil then SaaS-002 should not claim tenant/**org** enforcement.\n\n---\n\n## 🟠 F06 — `CapacityWindow.overlaps()` bypasses the explicit-context rule\n\n`capacity.py:43-54`\n\nThis method performs domain comparison without `TenantContext`.\n\nIt deliberately returns `False` when tenant IDs differ.\n\nThat may be perfectly acceptable **if this is defined as a pure value comparison on already-authorised objects**.\n\nBut the architecture currently states broadly:\n\n> protected operations must carry explicit tenant context\n\nThe distinction between:\n\n- protected service/aggregate operation\n- pure local value-object calculation\n\nneeds to be documented.\n\nOtherwise future developers will not know which methods require tenant guards and which do not.\n\nThis needs a security/architecture rule rather than necessarily changing this method.\n\n---\n\n## 🟠 F07 — G02 should not be GREEN\n\n`05-quality/GATE-STATUS-V002.md`\n\nClaude says:\n\n> G02 Formatting/lint/type — GREEN (lint)\n\nbut immediately states:\n\n> type-checking (mypy) not yet configured\n\nThe parent gate itself is defined as:\n\n**Formatting/lint/type**\n\nTherefore the gate should be something like:\n\n**PARTIAL / RED**\n\nnot GREEN.\n\nEspecially because ADR-003 explicitly cites:\n\n> dataclasses + mypy\n\nas part of the Python option.\n\nAlso, my environment could not independently rerun Ruff because Ruff is not packaged as a dependency and there is no reproducible environment declaration. The stored Ruff evidence may be valid, but that leads directly to F08.\n\n---\n\n## 🟠 F08 — G11 “reproducible build” is not actually demonstrated\n\nQuality gate G11 says:\n\n> clean checkout/reproducible build/package smoke test\n\nV002 has no:\n\n- `pyproject.toml`\n- requirements lock\n- requirements file\n- reproducible dev/test environment\n- CI workflow\n- package build configuration\n- one-command release script\n\nThe evidence proves:\n\n**clean extracted source can run in an environment where the required tools already exist.**\n\nThat is useful.\n\nBut it does not prove a reproducible build.\n\nFor example, this review environment had pytest/coverage but did **not** have:\n\n- Ruff\n- mutmut\n\nSo G11 should be reduced to:\n\n**package integrity / clean-extract smoke = GREEN**\n\nwhile **environment/build reproducibility = RED/PARTIAL**.\n\n---\n\n## 🟠 F09 — Mutation evidence isn't reproducible enough\n\nClaude correctly kept G07 RED, which is good.\n\nBut `evidence/mutation-summary.json` is basically a summary document.\n\nThere is no packaged:\n\n- raw mutation command output\n- exact command used\n- mutmut version evidence\n- environment dependency definition\n- mutant source/report\n- script that regenerates the JSON\n\nThis violates the stronger meaning of:\n\n**evidence over narrative confidence**\n\nThe JSON may be accurate, but another reviewer cannot reproduce it from the ZIP alone.\n\nV003 should either fix mutmut or switch mutation tools, but in either case capture raw evidence and generation command.\n\n---\n\n## 🟠 F10 — Architecture guard is much narrower than ARC-001/002 wording\n\n`tests/test_architecture_guard.py`\n\nThe main architectural test currently proves:\n\n> `src/cgwo_core/*.py` imports only stdlib and itself.\n\nThat is useful, but ARC-001 says:\n\n> Product code remains within declared bounded ownership\n\nand ARC-002 says:\n\n> reuse occurs through published contracts, not copied logic\n\nAn import allow-list cannot prove either claim completely.\n\nFor example someone could implement:\n\n```python\nclass Actor:\n    ...\n```\n\ninside `cgwo_core`\n\nwithout importing another package.\n\nThat would duplicate Platform semantics but pass the dependency test.\n\nThe vocabulary checker catches a few literal strings, but not semantic duplication.\n\n### V003\n\nAdd forbidden type/entity declarations for Platform primitives such as:\n\n- Actor\n- Organisation\n- Identity/User\n- Capability master\n- generic WorkObject\n\nand/or AST-based architecture rules.\n\nRTM ARC-001/002 statuses should distinguish between:\n\n**import purity enforcement**\n\nand\n\n**semantic ownership review**.\n\n---\n\n## 🟠 F11 — “all files” manifest statement is technically inaccurate\n\n`08-ai/CLAUDE-V002-HANDOFF.md:13`\n\nsays:\n\n> PACKAGE-MANIFEST.json (SHA-256, all files)\n\nThe manifest deliberately excludes:\n\n- `PACKAGE-MANIFEST.json` itself\n- hidden artefacts\n- `.coverage`\n\nExcluding the manifest itself is normal and sensible.\n\nBut describe it as:\n\n**all package-managed files**\n\nrather than “all files.”\n\nMinor, but this project is specifically trying to eliminate evidence-language drift.\n\n---\n\n## 🟠 F12 — Contract gate should not simply wait for external schemas\n\nI agree that real Platform compatibility cannot become GREEN until Platform contracts exist.\n\nBut V003 can already establish **CGWO-side consumer contracts**.\n\nFor example:\n\n```text\nPlatformActorRef\nPlatformWorkObjectRef\nUraiFlowRecordProposal\nTimeRecordProposal\nAvailabilityProposal\n```\n\nas versioned ports/protocols/schemas owned by CGWO as its **expected boundary**, without claiming ownership of Platform entities.\n\nThen when the Platform publishes its side, provider compatibility testing can attach to those contracts.\n\nOtherwise CGWO risks letting external implementation define its domain interface later.\n\nSo G05 stays RED, but there is more work CGWO itself can do before claiming “blocked.”\n\n---\n\n# Important positive findings\n\nI would keep these parts.\n\n### ✅ Baseline preservation is excellent\n\nI compared the V001 provenance hashes with V002.\n\nThe whole preserved baseline under:\n\n`10-baseline/`\n\nis byte-for-byte unchanged.\n\nThat is exactly the right pattern.\n\n### ✅ ADR strategy is much better than silent normalisation\n\nADR-001 through ADR-006 are worthwhile.\n\nParticularly:\n\n- tracker vs execution ownership\n- generic supervisory capacity\n- canonical scope\n- ATS/LMS boundary\n- Platform primitive ownership\n\nThese should remain.\n\n### ✅ ADR-003 staying PROPOSED was the right decision\n\nClaude did not let the unresolved stack decision stop the package.\n\nGood.\n\nI would **not ask you to decide Python vs TypeScript yet**.\n\nThe domain defects above are more important first.\n\n### ✅ 100% domain line/branch coverage is genuine\n\nThe packaged `coverage.json` reports:\n\n- 175/175 product statements\n- 48/48 product branches\n\nSo Claude's 100% claim for `src/cgwo_core` is legitimate.\n\nThe lesson is simply:\n\n> **100% coverage does not mean the model is complete.**\n\nF01–F05 are exactly why mutation/property/invariant testing matters.\n\n---\n\n# Release decision\n\n### V002 status\n\n**REJECT AS FINAL BASELINE — CORRECTABLE**\n\nI would classify:\n\n- Architecture direction: **PASS**\n- Baseline preservation: **PASS**\n- Domain implementation: **FAIL — invariants incomplete**\n- SaaS isolation claims: **PARTIAL**\n- Test coverage: **PASS**\n- Mutation: **FAIL**\n- Contract integration: **FAIL**\n- Gate accuracy: **FAIL/PARTIAL**\n- Packaging integrity: **PASS**\n- Reproducibility: **PARTIAL**\n- Independent review G12: **RED with findings**\n\nV003 should fix these **before** persistence, APIs or sophisticated matching are introduced.\n\n---\n\n## Send this to Claude for V003\n\n:::writing{variant=\"chat_message\" id=\"74621\"}\nChatGPT has independently reviewed the complete actual ZIP:\n\n`AUMNITY-CGWO-SaaS_Claude_V002_20260808_2208.zip`\n\nV002 is architecturally promising and the baseline preservation/ADR work is good, but it is NOT accepted as the clean build baseline yet.\n\nProduce the correction release:\n\n`AUMNITY-CGWO-SaaS_Claude_V003_YYYYMMDD_HHMI.zip`\n\nDo not merely respond to the findings. Fix them, test them, regenerate evidence/manifests, clean-extract the result and provide the complete ZIP.\n\nTreat the following as independent-review findings.\n\nP0 / release blockers:\n\n1. CapacityAllocation permits impossible state/data combinations.\n\n`src/cgwo_core/allocation.py`\n\nCurrent constructor allows examples such as:\n- RESERVED with consumed_minutes > allocated_minutes;\n- CONSUMED with consumed_minutes != allocated_minutes;\n- OVERRUN with consumed_minutes <= allocated_minutes;\n- PROPOSED with non-zero consumed_minutes.\n\nDefine and enforce state-dependent invariants. Add negative tests proving direct object construction cannot bypass the state machine.\n\n2. Allocation is not governed by CapacityWindow capacity.\n\nA CapacityAllocation may currently request more minutes than its window's available_minutes.\n\nAt minimum reject a single allocation exceeding its window. Also explicitly distinguish this from the still-deferred aggregate/cross-allocation capacity-conflict model.\n\nDo not claim aggregate capacity conflict detection until multiple allocations against one capacity pool are actually governed.\n\n3. Replanning change_reason is validated and discarded.\n\n`PlanItem.transition()` requires a reason for replanning transitions but TransitionResult contains only item + event name.\n\nPreserve the reason as domain evidence. The transition/change result must retain enough information for audit, review, learning and plan-vs-actual analysis.\n\nAdd tests proving the exact supplied reason survives the transition.\n\n4. Domain events are currently only strings.\n\n`WeeklyPlanChanged`, `CapacityReserved`, etc. are event names, not auditable event records.\n\nIntroduce a small framework-neutral typed domain-change/event representation carrying the appropriate domain facts such as tenant/reference, previous state, new state, reason and relevant quantities.\n\nDo NOT introduce messaging infrastructure yet. Keep this as pure domain data.\n\n5. SaaS-002 overclaims organisation isolation.\n\nTenantContext has optional organisation_id, but organisation_id is neither validated nor checked by domain operations.\n\nMake an explicit architecture decision:\n- either tenant is the isolation boundary and organisation is metadata/sub-scope governed later;\n- or organisation is independently security-significant and must be modelled/tested.\n\nThen correct RTM/gate language. Do not claim \"tenant/org isolation ENFORCED\" when only tenant equality is enforced.\n\nP1 findings:\n\n6. Explicitly document which operations require TenantContext versus pure value-object functions such as CapacityWindow.overlaps(). Avoid an ambiguous statement that every method is a protected operation.\n\n7. G02 cannot be GREEN while type checking is not configured if the gate is defined as Formatting/lint/type. Configure the selected type checker and make it pass, or mark the gate PARTIAL/RED accurately.\n\n8. G11 currently overclaims reproducible build/package.\n\nA clean extraction was smoke-tested, but the ZIP does not define a reproducible development/test environment. Add a minimal, pinned/reproducible Python project/tool configuration suitable for the still-PROPOSED ADR-003 reference implementation.\n\nThe package should allow a reviewer to know/install the required test/lint/type/mutation tooling deterministically.\n\nDo not force ADR-003 to ACCEPTED merely to do this; keep the implementation reversible.\n\n9. Mutation evidence needs to become reproducible.\n\nFix or replace the mutation harness so critical dataclass/domain methods are mutated.\n\nPackage:\n- exact tool/version;\n- exact command/config;\n- raw mutation output;\n- machine-readable summary generated from the run;\n- classification of every survivor.\n\nG07 remains RED unless the agreed mutation threshold for the critical domain slice is actually met.\n\n10. Strengthen architecture ownership guards.\n\nThe current import guard proves dependency purity but does not prove that Platform primitives were not reimplemented locally.\n\nAdd tests/guards capable of catching obvious forbidden primitive/entity declarations or semantics in CGWO, including Actor, Organisation/Tenant master, Identity/User, Capability taxonomy/master and generic Work Object.\n\nKeep opaque references only.\n\nARC-001 and ARC-002 status language must accurately distinguish import enforcement from semantic ownership governance.\n\n11. Correct package-count terminology.\n\nThe V002 ZIP has 90 ZIP entries including directories, not 90 regular files. It contains 63 regular files; the root manifest manages 61 files.\n\nDo not hand-write ambiguous counts. Generate counts or say \"ZIP entries\", \"regular files\", and \"manifest-managed files\" precisely.\n\n12. Advance G05 even while external schemas remain unavailable.\n\nG05 correctly remains RED until real AUMNITY Work Platform/UraiFlow compatibility can be tested, but CGWO can define its own versioned consumer-side ports/contracts now.\n\nDefine framework-neutral CGWO expected boundary contracts for the first slice, particularly Platform primitive references and UraiFlow record proposals, without duplicating Platform-owned domain entities.\n\nThen future provider contracts can be compatibility-tested against these consumer expectations.\n\nAdditional requirements for V003:\n\n- Preserve `10-baseline/` byte-for-byte.\n- Preserve useful ADR-001..006; supersede/amend through explicit ADRs if necessary, never silently rewrite architectural decisions.\n- Add new RTM rows for every defect/invariant above.\n- Add regression tests for every review finding that can be machine tested.\n- Add property/parameterised invariant tests where appropriate rather than only happy-path examples.\n- Run starter validator, consistency validator, lint, type checks, pytest, line+branch coverage, mutation and package verification.\n- Gate statuses must be conservative: PARTIAL/RED rather than GREEN when only part of a gate is proven.\n- Do not start persistence/API/messaging/matching expansion until these V002 domain-contract defects are corrected.\n- Regenerate SHA-256 manifest only after all final changes.\n- Clean-extract the final ZIP and rerun the executable gates from the extracted copy.\n- Report attempted/completed/failed/deferred/assumptions/decisions/unresolved blockers.\n\nFinal deliverable must be the actual downloadable:\n\n`AUMNITY-CGWO-SaaS_Claude_V003_YYYYMMDD_HHMI.zip`\n\nDo not stop to ask for technology-stack confirmation. ADR-003 may remain PROPOSED while the pure reference implementation is hardened.\n:::\n\nThis is the right moment to be strict. If we allow F01–F05 through now, later persistence/API layers will preserve those bad invariants and make them much more expensive to undo. memcite"
+     ]
+    },
+    "create_time": 1786224298.366388,
+    "id": "f0485bc0-342f-4c93-9eb5-63bf0be7e013",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "fx6xpa",
+       "preview_language": null,
+       "previewable": false
+      },
+      "1": {
+       "edited": false,
+       "id": "px4kr0",
+       "preview_language": null,
+       "previewable": false
+      },
+      "10": {
+       "edited": false,
+       "id": "t1b2cn",
+       "preview_language": null,
+       "previewable": false
+      },
+      "11": {
+       "edited": false,
+       "id": "56uqr8",
+       "preview_language": null,
+       "previewable": false
+      },
+      "12": {
+       "edited": false,
+       "id": "nnxm7n",
+       "preview_language": null,
+       "previewable": false
+      },
+      "13": {
+       "edited": false,
+       "id": "v6zcbh",
+       "preview_language": null,
+       "previewable": false
+      },
+      "2": {
+       "edited": false,
+       "id": "jt3g2h",
+       "preview_language": null,
+       "previewable": false
+      },
+      "3": {
+       "edited": false,
+       "id": "sxrwda",
+       "preview_language": null,
+       "previewable": false
+      },
+      "4": {
+       "edited": false,
+       "id": "2tamr2",
+       "preview_language": null,
+       "previewable": false
+      },
+      "5": {
+       "edited": false,
+       "id": "0ysqrh",
+       "preview_language": null,
+       "previewable": false
+      },
+      "6": {
+       "edited": false,
+       "id": "99fapf",
+       "preview_language": null,
+       "previewable": false
+      },
+      "7": {
+       "edited": false,
+       "id": "41jj76",
+       "preview_language": null,
+       "previewable": false
+      },
+      "8": {
+       "edited": false,
+       "id": "onr7o0",
+       "preview_language": null,
+       "previewable": false
+      },
+      "9": {
+       "edited": false,
+       "id": "fo7itq",
+       "preview_language": null,
+       "previewable": false
+      }
+     },
+     "content_references": [
+      {
+       "alt": null,
+       "prefix": null,
+       "prompt_text": null,
+       "type": "hidden"
+      }
+     ],
+     "model_slug": "gpt-5-6-thinking",
+     "parent_id": "f600fe17-0d4b-4816-b375-0f81281cca35"
+    }
+   },
+   "parent": "f600fe17-0d4b-4816-b375-0f81281cca35"
+  },
+  "f3b5c383-3703-40bd-a54c-25fbc7836f2c": {
+   "id": "f3b5c383-3703-40bd-a54c-25fbc7836f2c",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "08/08/2026 22:59 V3 attached go through the zip and deeply review all the files in it Claude Response - Architected comprehensive fixes spanning allocation invariants, state machines, and domain events\n\nArchitected comprehensive fixes spanning allocation invariants, state machines, and domain events\n\nReview accepted — all findings are legitimate, F01–F05 especially. Building the V003 correction release now: domain invariants first, then evidence machinery, then packaging.\n\nRefactored test suite to accommodate API structural modifications\n\nRefactored test suite to accommodate API structural modifications\n\nNow the test suite — updating for the new change-record API and adding invariant/regression tests:\n\nIdentified and resolved string-literal mutation issues systematically\n\nIdentified and resolved string-literal mutation issues systematically\n\nDown to 5 survivors — inspecting each:\n\nIdentified mutation testing gap in boundary condition coverage\n\nIdentified mutation testing gap in boundary condition coverage\n\nAll five are genuine test gaps (boundary values and unasserted change-record fields) — exactly what the gate is for. Killing them with real tests, not acceptances:\n\nOrchestrated comprehensive documentation updates and version reconciliation procedures\n\nOrchestrated comprehensive documentation updates and version reconciliation procedures\n\n## Release Report — V003 correction release\n\n**Deliverable:** `AUMNITY-CGWO-SaaS_Claude_V003_20260808_2252.zip` (above). Precise counts, generated not hand-written (F11): **109 ZIP entries, 82 regular files, 80 manifest-managed files.** Clean-extracted and re-verified from the extraction: both validators, ruff check+format, mypy strict, and the full suite with 100% line+branch all pass inside the unpacked ZIP. `10-baseline/` byte-for-byte preserved; V001 provenance retained.\n\n### Findings F01–F12 — all addressed, none merely \"responded to\"\n\n**P0 domain defects (F01–F05):** Allocation now enforces state-dependent invariants on *every* construction path — your four impossible-object examples are all unconstructible, proven by an invariant matrix plus named `test_f01_*` regressions, and the lifecycle table was reduced so CONSUMED/OVERRUN are reachable only via `consume_allocation()` (ADR-007). A single allocation can no longer exceed its window; aggregate governance stays honestly DECLARED (RTM DOM-006) with a guard test that *fails the build* if a `CapacityLedger` API ever appears without real contract tests. Change reasons are normalised, preserved, and asserted verbatim on the new typed change records — `PlanItemChange` and `AllocationChange` carry tenant, references, previous/new state, reason and quantities as pure domain data; timestamps/actor/correlation are explicitly deferred pending clock/identity contracts (ADR-008). ADR-009 settles tenancy: `tenant_id` is THE enforced boundary, `organisation_id` is validated sub-scope metadata, RTM SaaS-002 corrected and SaaS-004 added — no more org-isolation overclaim.\n\n**P1 (F06–F12):** Protected-operation vs pure-value-calculation classes documented (ADR-009). mypy strict passes on src, so G02 is GREEN on evidence. Pinned `requirements-dev.txt` + `pyproject.toml` + one-command `scripts/run_gates.sh` (G11 stays PARTIAL — no CI yet, said plainly). The mutation gate is now real: domain logic was delegated to module-level functions so mutmut actually mutates it — **239/239 mutants killed, zero unresolved, zero accepted survivors**, with tool version, exact command, raw output and results listing packaged, regenerable via `scripts/run_mutation.py` with an acceptance-list governance file. Notably, the five genuine survivors of the first hardened run exposed real test gaps (boundary values, unasserted change-record fields) — fixed with real tests, and the 79 string-literal mutants were killed by making error messages part of the anchored, tested contract rather than bulk-accepted. The new AST guard forbids re-declaring Platform primitive names (F10). Consumer-side contracts `cgwo-consumer-v1` (`TimeRecordProposal`, `AvailabilityProposal`) are implemented and tested, moving G05 RED→PARTIAL (F12). The V002 handoff carries an appended correction note rather than a rewritten history (F11).\n\n### Gate ladder (conservative)\n\nG01–G04, G06, G07, G09, G10 **GREEN** · G05 **PARTIAL** (consumer side done; provider schemas pending) · G08 **GREEN domain / RED service layer** · G11 **PARTIAL** (integrity+smoke green; no CI/container) · G12 **PENDING — this is the review submission**.\n\n### Deliberately unresolved\n\nADR-003 remains PROPOSED as instructed. CapacityLedger, proposal-confirmation workflow, event persistence fields, ExecutionSession, matching, CI, provider contract tests: all DECLARED, none claimed. Suggested review attack surface is in `08-ai/CLAUDE-V003-HANDOFF.md` — including whether `replace()`-based transitions can still smuggle inconsistent data past the invariants."
+     ]
+    },
+    "create_time": 1786226378.724,
+    "id": "f3b5c383-3703-40bd-a54c-25fbc7836f2c",
+    "metadata": {
+     "attachments": [
+      {
+       "id": "file_0000000072d481f4a10366429faec06a",
+       "is_big_paste": false,
+       "library_file_id": "libfile_0447e9fa3a9c819183eed74a2737e369",
+       "mime_type": "application/zip",
+       "name": "AUMNITY-CGWO-SaaS_Claude_V003_20260808_2252.zip",
+       "size": 102627,
+       "source": "local"
+      }
+     ],
+     "serialization_metadata": {
+      "custom_symbol_offsets": [],
+      "render_format": "markdown"
+     }
+    }
+   },
+   "parent": "f0485bc0-342f-4c93-9eb5-63bf0be7e013"
+  },
+  "f600fe17-0d4b-4816-b375-0f81281cca35": {
+   "id": "f600fe17-0d4b-4816-b375-0f81281cca35",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content": "Worked for 1m 48s",
+     "content_type": "reasoning_recap"
+    },
+    "create_time": 1786224299.642034,
+    "id": "f600fe17-0d4b-4816-b375-0f81281cca35",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "e000992f-8ce2-4909-95fa-5e095a8642f4"
+    }
+   },
+   "parent": "e000992f-8ce2-4909-95fa-5e095a8642f4"
+  },
+  "fa05e6d0-36bf-46cd-8bed-7a6d2ce0ee90": {
+   "id": "fa05e6d0-36bf-46cd-8bed-7a6d2ce0ee90",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "09/08/2026 — Security issue explanation\n\nPartner, **this does not mean your ZIP had a security problem**.\n\nWhat happened is more likely this:\n\n- Several of my earlier replies were **automatically blocked/redacted by the platform safety filter**.\n- That can happen when a response contains wording that looks like:\n  - security exploitation,\n  - bypassing protections,\n  - attack techniques,\n  - credential handling,\n  - malware-like behaviour,\n  - or sometimes even normal software-review terms that accidentally resemble those topics.\n- So the system replaced my answer with:\n  **“This response was redacted by content policy.”**\n\n### Important\nThere is **no evidence from that message alone that your uploaded file is malicious or unsafe**.\n\nAlso, the developer message saying:\n\n> “This file is NOT accessible with the myfiles_browser tool.”\n\nis **not a security warning**. It only means that particular file-browsing tool cannot open the ZIP directly.\n\nI can still inspect the ZIP using the local file path with Python and review the files normally.\n\nYour latest uploaded file is:\n\n`/mnt/data/AUMNITY-CGWO-SaaS_Claude_V005_20260809_0646.zip`\n\nIf you want, I can now continue exactly as before and **deep-review every file in V005**, checking:\n- architecture,\n- code,\n- tests,\n- docs,\n- manifests,\n- release evidence,\n- SaaS boundaries,\n- AUMNITY/UraiFlow/CGWO separation,\n- tenancy,\n- integrity,\n- regressions,\n- and whether Claude’s claims are actually true."
+     ]
+    },
+    "create_time": 1786255630.851852,
+    "id": "fa05e6d0-36bf-46cd-8bed-7a6d2ce0ee90",
+    "metadata": {
+     "content_references": [],
+     "model_slug": "gpt-5-6-thinking",
+     "parent_id": "e045d62f-880e-4e31-bb85-d6e82a9ba141"
+    }
+   },
+   "parent": "e045d62f-880e-4e31-bb85-d6e82a9ba141"
+  }
+ },
+ "memory_scope": "global_enabled",
+ "pinned_time": null,
+ "plugin_ids": null,
+ "title": "00001-CGWO-Review",
+ "update_time": 1786287140.065671,
+ "voice": null
+}

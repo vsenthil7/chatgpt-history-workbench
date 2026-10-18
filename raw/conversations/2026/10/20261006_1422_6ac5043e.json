@@ -1,0 +1,472 @@
+{
+ "conversation_id": "6ac5043e-f464-83eb-9ecc-0280432eb7b9",
+ "conversation_template_id": null,
+ "create_time": 1791296576.630526,
+ "current_node": "4fb775ae-1700-494c-a5ef-46e7f6260384",
+ "default_model_slug": "gpt-5-6",
+ "id": "6ac5043e-f464-83eb-9ecc-0280432eb7b9",
+ "is_archived": false,
+ "is_do_not_remember": false,
+ "is_read_only": null,
+ "is_starred": null,
+ "is_study_mode": false,
+ "mapping": {
+  "220b1836-a6bf-43d9-b9bf-7eeac735a9d6": {
+   "id": "220b1836-a6bf-43d9-b9bf-7eeac735a9d6",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "check?"
+     ]
+    },
+    "create_time": 1791296665.657,
+    "id": "220b1836-a6bf-43d9-b9bf-7eeac735a9d6"
+   },
+   "parent": "c1c18e0f-4278-4f43-91d9-ba22a09003ab"
+  },
+  "4fb775ae-1700-494c-a5ef-46e7f6260384": {
+   "id": "4fb775ae-1700-494c-a5ef-46e7f6260384",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "06/10/2026 15:25 — WhatsApp Calling API Checked\n\n**Yes, partner. I checked the current documentation. It is real, and my previous answer was directionally correct.** Meta explicitly says the **WhatsApp Calling API lets businesses initiate and receive voice calls through the WhatsApp Business Platform**. Meta published a Calling API implementation video in June 2026. citeturn1search0turn1search7\n\n### What is actually possible\n\n| Requirement | WhatsApp Calling API |\n|---|---|\n| Customer calls business on WhatsApp | ✅ Yes |\n| Business answers programmatically | ✅ Yes |\n| Business calls customer on WhatsApp | ✅ Yes, with permission |\n| Customer grants ongoing call permission | ✅ Supported |\n| Real-time audio | ✅ WebRTC/VoIP |\n| SIP integration | ✅ Supported |\n| IVR / keypad DTMF | ✅ Supported |\n| AI voice agent | **✅ Yes — architecture supports it** |\n| Normal PSTN phone call | ❌ Different thing |\n| WhatsApp → normal telephone number | ❌ Not directly |\n| Recording | ⚠️ Your voice infrastructure/application layer |\n| Call analytics | ✅ |\n| User-initiated call cost | **Free at Meta calling layer** |\n| Business-initiated calls | 💰 Charged based on duration/country |\n\nMeta specifically describes businesses using **AI assistants with WhatsApp voice calling** for scaled customer support. citeturn1search1\n\n### Most important point for TalkProof\n\nThis is more interesting than I initially thought.\n\nYou **do not necessarily need Retell AI just to get the WhatsApp audio**.\n\nThe direct architecture can be:\n\n```text\nCUSTOMER\n   │\n   │ WhatsApp Voice Call\n   ▼\nWHATSAPP\n   │\n   │ Calling API\n   │ WebRTC / SIP\n   ▼\nTALKPROOF VOICE GATEWAY\n   │\n   ├──► STT\n   │\n   ├──► TalkProof conversation/orchestration\n   │       │\n   │       ├── RAG / Knowledge Base\n   │       ├── LLM\n   │       ├── Lead qualification\n   │       ├── CRM\n   │       ├── Scheduling\n   │       └── Escalation\n   │\n   ├──► TTS\n   │\n   ▼\nWhatsApp Calling API\n   │\n   ▼\nCUSTOMER\n```\n\nMeta's underlying media connection uses **WebRTC**. For an outbound call, for example, the business supplies a WebRTC offer and receives the SDP answer through the calling flow. citeturn1search4\n\nAnd there is another significant option:\n\n```text\nWhatsApp\n    │\n    ▼\n   SIP\n    │\n    ├───────────────┐\n    ▼               ▼\nTalkProof       Voice provider\nVoice Engine    / Contact centre\n```\n\nMeta documentation supports **SIP as an alternative signalling integration**. citeturn1search3\n\n### Outbound has an important restriction\n\nYou **cannot simply take 10,000 mobile numbers and start WhatsApp-calling them.**\n\nThe WhatsApp user must first give the business permission to call. Meta supports several permission mechanisms, including a permission-request message and callback permission after the customer has called the business. citeturn1search4\n\nSo:\n\n```text\nWhatsApp message\n      ↓\n\"Allow this business to call me?\"\n      ↓\nCustomer allows\n      ↓\nTalkProof can initiate WhatsApp call\n      ↓\nAI / human conversation\n```\n\nThat's very different from ordinary outbound PSTN dialling.\n\n### And Twilio already supports this\n\nInterestingly, urlTwilio's WhatsApp Business Calling documentationturn1search2 confirms both inbound and outbound WhatsApp calling.\n\nBut there's a major boundary: **Twilio says WhatsApp endpoints cannot be bridged to PSTN endpoints.** citeturn1search2\n\nSo we shouldn't model WhatsApp as merely another telephone carrier.\n\nI would model it in TalkProof as:\n\n```text\n                  TALKPROOF\n                      │\n          ┌───────────┼────────────┐\n          │           │            │\n        PSTN       WhatsApp      Future\n          │           │          channels\n     Twilio/       Meta\n      Exotel     Calling API\n          │           │\n          └─────┬─────┘\n                ▼\n          VOICE ENGINE\n                │\n        ┌───────┼────────┐\n       STT     Agent     TTS\n                │\n              RAG/LLM\n```\n\nThis fits extremely well with the carrier abstraction work you've already been doing in TalkProof: **WhatsApp Calling should be investigated as a first-class voice channel, not bolted onto the existing WhatsApp messaging adapter.** memcite"
+     ]
+    },
+    "create_time": 1791296673.449939,
+    "id": "4fb775ae-1700-494c-a5ef-46e7f6260384",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "htsc12",
+       "preview_language": null,
+       "previewable": false
+      },
+      "1": {
+       "edited": false,
+       "id": "z9vnpu",
+       "preview_language": null,
+       "previewable": false
+      },
+      "2": {
+       "edited": false,
+       "id": "1wzeco",
+       "preview_language": null,
+       "previewable": false
+      },
+      "3": {
+       "edited": false,
+       "id": "svfheu",
+       "preview_language": null,
+       "previewable": false
+      }
+     },
+     "content_references": [
+      {
+       "alt": "([Meta Developers](https://developers.meta.com/resources/videos/whatsapp-calling-api/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Meta Developers",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1781568000.0,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 1
+          },
+          {
+           "ref_index": 7,
+           "ref_type": "search",
+           "turn_index": 1
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "WhatsApp for Business",
+           "pub_date": 1752537600.0,
+           "snippet": "",
+           "title": "Drive even better outcomes with the WhatsApp Business Calling API | WhatsApp for Business",
+           "url": "https://whatsappbusiness.com/blog/whatsapp-business-calling-api/?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "Blog | Meta Horizon OS Developers",
+         "url": "https://developers.meta.com/resources/videos/whatsapp-calling-api/?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([About Facebook](https://about.fb.com/news/2025/09/bringing-new-tools-to-help-businesses-boost-engagement-customer-support-and-discoverability/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "About Facebook",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1758153600.0,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 1
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Bringing New tools To Help Businesses Boost Engagement, Customer Support and Discoverability",
+         "url": "https://about.fb.com/news/2025/09/bringing-new-tools-to-help-businesses-boost-engagement-customer-support-and-discoverability/?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([ChatArchitect](https://support.chatarchitect.com/books/meta-whatsapp/page/business-initiated-calls-developer-documentation?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "ChatArchitect",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 4,
+           "ref_type": "search",
+           "turn_index": 1
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Business-Initiated Calls | Developer Documentation | Calling | Meta WhatsApp | ChatArchitect.com for WhatsApp",
+         "url": "https://support.chatarchitect.com/books/meta-whatsapp/page/business-initiated-calls-developer-documentation?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([ChatArchitect](https://support.chatarchitect.com/books/meta-whatsapp/page/configure-call-settings-developer-documentation?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "ChatArchitect",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 3,
+           "ref_type": "search",
+           "turn_index": 1
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Configure Call Settings | Developer Documentation | Calling | Meta WhatsApp | ChatArchitect.com for WhatsApp",
+         "url": "https://support.chatarchitect.com/books/meta-whatsapp/page/configure-call-settings-developer-documentation?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([ChatArchitect](https://support.chatarchitect.com/books/meta-whatsapp/page/business-initiated-calls-developer-documentation?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "ChatArchitect",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 4,
+           "ref_type": "search",
+           "turn_index": 1
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Business-Initiated Calls | Developer Documentation | Calling | Meta WhatsApp | ChatArchitect.com for WhatsApp",
+         "url": "https://support.chatarchitect.com/books/meta-whatsapp/page/business-initiated-calls-developer-documentation?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "[Twilio's WhatsApp Business Calling documentation](https://www.twilio.com/docs/voice/whatsapp-business-calling?utm_source=chatgpt.com)",
+       "logo": null,
+       "prefix": null,
+       "prompt_text": null,
+       "title": "Twilio's WhatsApp Business Calling documentation",
+       "type": "url"
+      },
+      {
+       "alt": "([Twilio](https://www.twilio.com/docs/voice/whatsapp-business-calling?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Twilio",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 2,
+           "ref_type": "search",
+           "turn_index": 1
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "WhatsApp Business Calling | Twilio",
+         "url": "https://www.twilio.com/docs/voice/whatsapp-business-calling?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": null,
+       "prefix": null,
+       "prompt_text": null,
+       "type": "hidden"
+      },
+      {
+       "alt": "",
+       "has_images": false,
+       "prefix": null,
+       "prompt_text": null,
+       "sources": [
+        {
+         "attribution": "Meta Developers",
+         "title": "Blog | Meta Horizon OS Developers",
+         "url": "https://developers.meta.com/resources/videos/whatsapp-calling-api/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "About Facebook",
+         "title": "Bringing New tools To Help Businesses Boost Engagement, Customer Support and Discoverability",
+         "url": "https://about.fb.com/news/2025/09/bringing-new-tools-to-help-businesses-boost-engagement-customer-support-and-discoverability/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "ChatArchitect",
+         "title": "Business-Initiated Calls | Developer Documentation | Calling | Meta WhatsApp | ChatArchitect.com for WhatsApp",
+         "url": "https://support.chatarchitect.com/books/meta-whatsapp/page/business-initiated-calls-developer-documentation?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "Twilio",
+         "title": "WhatsApp Business Calling | Twilio",
+         "url": "https://www.twilio.com/docs/voice/whatsapp-business-calling?utm_source=chatgpt.com"
+        }
+       ],
+       "type": "sources_footnote"
+      }
+     ],
+     "model_slug": "gpt-5-6",
+     "parent_id": "b353cb95-f9f7-4856-93ba-54d13ce31a52",
+     "search_result_groups": [
+      {
+       "domain": "chatarchitect.com",
+       "entries": [
+        {
+         "attribution": "chatarchitect.com",
+         "snippet": "CALLING API PRICING | DEVELOPER DOCUMENTATION  CALLING API PRICING  Updated: Mar 30, 2026  All user-initiated calls are free.  OVERVIEW  Businesses are charged for calls based on:  Duration of the ca...",
+         "title": "Calling API Pricing | Developer Documentation | Calling | Meta WhatsApp | ChatArchitect.com for WhatsApp",
+         "url": "https://support.chatarchitect.com/books/meta-whatsapp/page/calling-api-pricing-developer-documentation?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "chatarchitect.com",
+         "snippet": "USER-INITIATED CALLS | DEVELOPER DOCUMENTATION  USER-INITIATED CALLS  Updated: Nov 13, 2025  OVERVIEW  The Calling API supports receiving calls made by WhatsApp users to your business.  Your business...",
+         "title": "User-initiated calls | Developer Documentation | Calling | Meta WhatsApp | ChatArchitect.com for WhatsApp",
+         "url": "https://support.chatarchitect.com/books/meta-whatsapp/page/user-initiated-calls-developer-documentation?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "chatarchitect.com",
+         "snippet": "ChatArchitect.com for WhatsApp  SEARCH RESULTS  [Input: Search]  15 TOTAL RESULTS FOUND  Cloud API Calling | Developer Documentation Meta WhatsApp Calling Cloud API CallingUpdated: Mar 10, 2026Overvi...",
+         "title": "Search for [legacy_chapter=Calling] | ChatArchitect.com for WhatsApp",
+         "url": "https://support.chatarchitect.com/search?term=%5Blegacy_chapter%3DCalling%5D&utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "postman.com",
+       "entries": [
+        {
+         "attribution": "postman.com",
+         "snippet": "BUSINESS PORTFOLIO ID  You can get your business portfolio ID by signing into the Meta Business Suite. The ID appears in the URL as the `business_id` query string parameter value. Once you save this a...",
+         "title": "WhatsApp Cloud API | Documentation | Postman API Network",
+         "url": "https://www.postman.com/meta/whatsapp-business-platform/documentation/wlk6lh4/whatsapp-cloud-api?entity=request-13382743-096a2bc6-1247-4711-a74d-1f74b0cb2bda&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "postman.com",
+         "snippet": "WHATSAPP CLOUD API  Anonymous User  ﻿WhatsApp Cloud API, hosted by Meta, is the official WhatsApp Business Platform API used for business messaging. This collection contains common queries, sample re...",
+         "title": "WhatsApp Cloud API | Get Started | Postman API Network",
+         "url": "https://www.postman.com/meta/whatsapp-business-platform/collection/wlk6lh4/whatsapp-cloud-api?trk=article-ssr-frontend-pulse_little-text-block&utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "whatsappbusiness.com",
+       "entries": [
+        {
+         "attribution": "whatsappbusiness.com",
+         "snippet": "Business Messaging  ANNOUNCING LAUNCH OF THE WHATSAPP BUSINESS CALLING API  July 15, 2025  Image: A woman sitting at her table on the phone  BUILD AN END-TO-END JOURNEY ON WHATSAPP BUSINESS PLATFORM...",
+         "title": "Drive even better outcomes with the WhatsApp Business Calling API | WhatsApp for Business",
+         "url": "https://whatsappbusiness.com/blog/whatsapp-business-calling-api/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "pywa.readthedocs.io",
+       "entries": [
+        {
+         "attribution": "pywa.readthedocs.io",
+         "snippet": "📞 CALLS  📞 CALLS#  The WhatsApp Business Calling API enables you to initiate and receive calls with users on WhatsApp using voice-over-internet protocol (VoIP).  It provides a way to manage call perm...",
+         "title": "📞 Calls — pywa 3.2.0 documentation",
+         "url": "https://pywa.readthedocs.io/en/3.2.0/content/calls/overview.html?utm_source=chatgpt.com"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "parent": "b353cb95-f9f7-4856-93ba-54d13ce31a52"
+  },
+  "b353cb95-f9f7-4856-93ba-54d13ce31a52": {
+   "id": "b353cb95-f9f7-4856-93ba-54d13ce31a52",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content": "Worked for 5s",
+     "content_type": "reasoning_recap"
+    },
+    "create_time": 1791296673.445501,
+    "id": "b353cb95-f9f7-4856-93ba-54d13ce31a52",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "d01a042e-831e-43c8-94c3-df4c58321600"
+    }
+   },
+   "parent": "d01a042e-831e-43c8-94c3-df4c58321600"
+  },
+  "bfc017c0-606c-409d-b64a-a8a3b5dca1e1": {
+   "id": "bfc017c0-606c-409d-b64a-a8a3b5dca1e1",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "using whatsapp api can we make call"
+     ]
+    },
+    "create_time": 1791296588.886,
+    "id": "bfc017c0-606c-409d-b64a-a8a3b5dca1e1"
+   },
+   "parent": "client-created-root"
+  },
+  "c1c18e0f-4278-4f43-91d9-ba22a09003ab": {
+   "id": "c1c18e0f-4278-4f43-91d9-ba22a09003ab",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "06/10/2026 15:23 — WhatsApp API Voice Calls\n\n**Yes — but with an important distinction.**\n\nIf you mean the official **WhatsApp Business Platform / Cloud API**, Meta now supports **WhatsApp Business Calling**, so a business can support voice calls with customers through WhatsApp. It isn't simply the same as sending a WhatsApp message via an API.\n\nFor something like **TalkProof**, the architecture could potentially become:\n\n**Customer WhatsApp → WhatsApp Business Calling → your voice backend → AI voice agent → STT → LLM/RAG → TTS → customer**\n\nSo potentially, instead of:\n\n**Phone → Twilio/Exotel/Retell → TalkProof**\n\nyou could have another channel:\n\n**WhatsApp Call → Meta calling infrastructure → TalkProof voice/AI layer**\n\nThere are restrictions around **who can initiate calls, user permission/consent, account eligibility, supported countries, and how the calling API is integrated**. These details have changed over time.\n\nIf you're considering this for TalkProof, I can check the **current October 2026 Meta WhatsApp Calling API documentation** and determine exactly:\n\n**Inbound call | Outbound call | AI agent | WebRTC/SIP | recording | India/UK availability | pricing | Retell/Vapi integration | direct TalkProof integration**\n\nThat would tell us whether WhatsApp can become a real **additional TalkProof carrier/channel**, rather than assuming it works like Twilio."
+     ]
+    },
+    "create_time": 1791296591.511617,
+    "id": "c1c18e0f-4278-4f43-91d9-ba22a09003ab",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "457989b6-6ecf-4ac0-bff4-96d06228e367"
+    }
+   },
+   "parent": "bfc017c0-606c-409d-b64a-a8a3b5dca1e1"
+  },
+  "client-created-root": {
+   "id": "client-created-root",
+   "message": null,
+   "parent": null
+  },
+  "d01a042e-831e-43c8-94c3-df4c58321600": {
+   "id": "d01a042e-831e-43c8-94c3-df4c58321600",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "51441349-6d74-4a23-a740-7d5f122a64d7",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Searched 8 websites"
+      }
+     ]
+    },
+    "create_time": 1791296673.439945,
+    "id": "d01a042e-831e-43c8-94c3-df4c58321600",
+    "metadata": {
+     "model_slug": "gpt-5-6",
+     "parent_id": "73b82a13-c4e1-4f98-b3c5-11819310d46e",
+     "tool_icons": [
+      "https://www.google.com/s2/favicons?domain=developers.meta.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=about.fb.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=www.twilio.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=support.chatarchitect.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=whatsappbusiness.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=pywa.readthedocs.io&sz=128"
+     ]
+    }
+   },
+   "parent": "220b1836-a6bf-43d9-b9bf-7eeac735a9d6"
+  }
+ },
+ "memory_scope": "global_enabled",
+ "pinned_time": null,
+ "plugin_ids": null,
+ "title": "WhatsApp API Calls",
+ "update_time": 1791296687.039036,
+ "voice": null
+}

@@ -1,0 +1,1400 @@
+{
+ "conversation_id": "6aceae76-bb34-83ed-a5ed-cffbbca2c158",
+ "conversation_template_id": null,
+ "create_time": 1791929975.117642,
+ "current_node": "0c139052-3cb5-4178-acd1-f6728467dd7d",
+ "default_model_slug": "gpt-6",
+ "id": "6aceae76-bb34-83ed-a5ed-cffbbca2c158",
+ "is_archived": false,
+ "is_do_not_remember": false,
+ "is_read_only": null,
+ "is_starred": null,
+ "is_study_mode": false,
+ "mapping": {
+  "0c139052-3cb5-4178-acd1-f6728467dd7d": {
+   "id": "0c139052-3cb5-4178-acd1-f6728467dd7d",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Yes. **This should become a reusable system, not something you keep typing.** Your Git Turn Protocol already says every project turn belongs in Git and v1.2 already handles parallel pages and multi-repo work. fileciteturn12file0L2-L2 What is missing is the layer **above** it: automatically deciding *which repo* owns the conversation and *which reusable skills* apply.\n\nI would separate it into **two composable capabilities**, rather than one enormous prompt.\n\n### 1. `Git Context Router` — almost always on\n\nOn the **first meaningful prompt of a new page**, it should inspect your accessible repos, their `AGENTS.md`, protocol pin, current state and handover. It proposes something like:\n\n> **Detected topic:** AI-tool/LLM workflow research  \n> **Proposed home:** `ai-tool-support-kb`  \n> **Protocol:** Git Turn v1.2  \n> **Apply Git-TURN automatically for the rest of this page?** Yes/No\n\nYou confirm **once**.\n\nAfter that, you should **never have to write “do Git turn protocol” again on that page**.\n\nBefore every subsequent turn it silently asks:\n\n**Does this still belong to the current repo?**\n\nIf yes → continue and Git-TURN automatically.\n\nIf the discussion changes from, say, AI-tool research to TalkProof development → **don't pollute `ai-tool-support-kb`**. Search your repos again, identify the TalkProof repo, and route the new work there. If uncertain between two repos, ask you once rather than guessing.\n\nAnd if one message genuinely belongs to several repos, v1.2 already gives us P8: one home record and small pointer records in the other repos, with usage counted only once. fileciteturn12file0L2-L2\n\nThat is the architectural piece we were missing.\n\n### 2. `Comprehension / Artifact Ladder` — invoked when useful\n\nThis is what today's Short triggered.\n\nIt shouldn't blindly make a video or HTML page every time. It chooses the **cheapest representation that substantially improves understanding**:\n\n**Clear controlled prose → Diagram → Interactive artifact → Bespoke explainer video**\n\nThis can be used far beyond learning.\n\n| Situation | Likely level |\n|---|---|\n| Quick explanation | Clear prose |\n| Architecture / workflow / data flow | Diagram |\n| ML model explanation | Prose + diagram |\n| SIP/loan/pricing/cost simulator | Interactive |\n| Product prototype | Interactive UI |\n| API/system architecture | Diagram + interactive demo where useful |\n| Debugging complicated execution | Sequence/flow diagram |\n| Product requirements | Prose + workflow |\n| Training/onboarding | Diagram → video |\n| Important concept you repeatedly struggle with | Bespoke explainer |\n| Demo to customers/investors | Interactive prototype + video |\n| Comparing alternatives | Interactive comparison where worthwhile |\n\nI **wouldn't** invoke the heavier levels for trivial questions, one-use answers, uncertain facts that first require verification, privacy-sensitive material that would cross a data boundary, or cases where fancy visuals could make a weak conclusion *look* authoritative.\n\nASD-STE100 itself should remain an **optional writing technique**, not become our universal writing style.\n\n## And yes — the same architecture should span the other AIs\n\nThis is where it becomes particularly interesting.\n\n**Claude is currently the cleanest implementation.** Claude custom Skills are directories containing `SKILL.md`; Claude can automatically discover and invoke an appropriate skill when the task matches it. Project-level skills can live at `.claude/skills/<skill>/SKILL.md`, meaning the skill itself can be version-controlled in Git. citeturn0search1turn0search5turn0search9\n\nurlClaude Agent Skills documentationturn0search9\n\nSo Claude could have:\n\n```text\ngit-context-router\ncomprehension-ladder\ndeep-research\nproduct-builder\nlearning-coach\nevidence-verifier\npage-handover\n```\n\nand Claude selects among them.\n\n**Gemini has Gems**, specifically designed to save repeatable detailed instructions so you don't repeatedly prompt the same behaviour. Files can also provide persistent context. citeturn0search0turn0search4\n\nurlGoogle Gemini Gems guideturn0search0\n\n**Perplexity Spaces** support custom instructions plus files, links and web sources. That's particularly useful for our *research/evidence* component, although I would not pretend it has committed something to Git unless its environment actually has Git write capability. citeturn0search7\n\nFor **ChatGPT**, we should implement the same logical router using persistent/custom instructions/workflows plus the GitHub connection when available. The important thing is that the canonical logic shouldn't live *only* inside ChatGPT.\n\nFor **Grok**, I want to verify its current supported customization/project mechanism before telling you exactly how we'll implement it. I don't want to invent feature parity.\n\n### The more important design decision\n\nDon't create five independently maintained prompts:\n\n```text\nChatGPT prompt\nClaude prompt\nGemini prompt\nPerplexity prompt\nGrok prompt\n```\n\nThey'll drift.\n\nInstead:\n\n```text\n                    CANONICAL GIT SPEC\n                          │\n             ┌────────────┴────────────┐\n             │                         │\n       Git Context Router       Reusable Skills\n             │                         │\n      ┌──────┼──────┬──────┐     ┌────┼────────┐\n      ▼      ▼      ▼      ▼     ▼    ▼        ▼\n   ChatGPT Claude Gemini Perplexity Learning Product Research\n      │      │      │      │\n   adapter SKILL   Gem    Space\n```\n\n**Git becomes the source of truth.**\n\nEach AI gets only a thin adapter explaining how that AI should consume the canonical specification.\n\n---\n\n## Your criticism is valid: why did none of us suggest this?\n\nThere are two different things here.\n\nWe *did* progressively discover pieces of it. Your repo history shows the system moving from multiple incompatible Git-turn mechanisms to one master protocol, then adding research rules and finally parallel-work safety. fileciteturn14file0L2-L2\n\nBut we remained focused **one abstraction level too low**.\n\nWe solved:\n\n> “How should a turn be stored?”\n\nThen:\n\n> “How do several AIs safely write turns?”\n\nWe should also have asked:\n\n> **“Why is Senthil repeatedly telling us to activate this mechanism at all?”**\n\nThat repetition itself was the signal.\n\nYou shouldn't need to find a YouTube Short before we recognize a reusable abstraction. The Short can teach us a new external technique like ASD-STE100. But things such as:\n\n- you repeatedly saying “Git turn protocol”;\n- repeatedly identifying `_kb`;\n- repeatedly telling us not to lose source data;\n- repeatedly asking us to check whether the topic belongs elsewhere;\n\nare **our own workflow evidence**.\n\nA rule I want in this system is therefore:\n\n> **Repeated instruction → candidate skill.  \n> Repeated manual coordination → candidate automation/router.  \n> Repeated correction → candidate guardrail/test.**\n\nThat would make the system learn operationally from how you use it instead of waiting for you to discover another Short.\n\nAnd I have **not silently changed Git Turn v1.2**, because its own governance says protocol changes require your approval and a new version. fileciteturn12file0L2-L2\n\nI have instead written the architecture proposal into `ai-tool-support-kb` and created **T042**. If you say **go ahead**, the next step should be to build the canonical **Git Context Router + reusable skill architecture**, then make the Claude/ChatGPT/Gemini/Perplexity adapters from that single source rather than separately inventing them.\n\n**Git Evidence**\n- Repo: `vsenthil7/ai-tool-support-kb` · `main`\n- Turn: T042\n- Turn commit: `ffc1444`\n- Proposal commit: `0d84d9c`\n- Research: Claude official Skills docs; Google Gemini Gems docs; Perplexity Spaces; existing Git Turn v1.2\n- Usage: ESTIMATE — exact ChatGPT telemetry unavailable\n- Gap: separate `usage/T042.md` write was blocked by the write safety layer; I am explicitly **not** claiming that part completed."
+     ]
+    },
+    "create_time": 1791930594.220418,
+    "id": "0c139052-3cb5-4178-acd1-f6728467dd7d",
+    "metadata": {
+     "code_blocks": {
+      "0": {
+       "edited": false,
+       "id": "grrn46",
+       "preview_language": null,
+       "previewable": false
+      },
+      "1": {
+       "edited": false,
+       "id": "tcatgq",
+       "preview_language": null,
+       "previewable": false
+      },
+      "2": {
+       "edited": false,
+       "id": "vevi8y",
+       "preview_language": null,
+       "previewable": false
+      }
+     },
+     "content_references": [
+      {
+       "alt": null,
+       "prefix": null,
+       "prompt_text": null,
+       "type": "hidden"
+      },
+      {
+       "alt": null,
+       "prefix": null,
+       "prompt_text": null,
+       "type": "hidden"
+      },
+      {
+       "alt": "([Claude Platform](https://platform.claude.com/docs/en/managed-agents/skills?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Claude Platform",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 5,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 9,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "Anthropic",
+           "pub_date": 1760572800.0,
+           "snippet": "",
+           "title": "Claude Skills: Customize AI for your workflows",
+           "url": "https://www.anthropic.com/research/skills?utm_source=chatgpt.com"
+          },
+          {
+           "attribution": "Claude Platform",
+           "pub_date": null,
+           "snippet": "",
+           "title": "Agent Skills - Claude Platform Docs",
+           "url": "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "Skills - Claude Platform Docs",
+         "url": "https://platform.claude.com/docs/en/managed-agents/skills?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "[Claude Agent Skills documentation](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview?utm_source=chatgpt.com)",
+       "logo": null,
+       "prefix": null,
+       "prompt_text": null,
+       "title": "Claude Agent Skills documentation",
+       "type": "url"
+      },
+      {
+       "alt": "([Google Help](https://support.google.com/gemini/answer/15236405?hl=en&utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Google Help",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 4,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "Gemini",
+           "pub_date": null,
+           "snippet": "",
+           "title": "Gemini Gems — build custom AI experts from Gemini",
+           "url": "https://gemini.google/mm/overview/gems/?hl=en-GB&utm_source=chatgpt.com"
+          }
+         ],
+         "title": "How to use Gems - Gemini Apps Help",
+         "url": "https://support.google.com/gemini/answer/15236405?hl=en&utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "[Google Gemini Gems guide](https://support.google.com/gemini/answer/15236405?hl=en&utm_source=chatgpt.com)",
+       "logo": null,
+       "prefix": null,
+       "prompt_text": null,
+       "title": "Google Gemini Gems guide",
+       "type": "url"
+      },
+      {
+       "alt": "([Perplexity](https://hub-prod.perplexity.ai/hub/faq/what-are-spaces?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Perplexity",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 7,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "What are Spaces?",
+         "url": "https://hub-prod.perplexity.ai/hub/faq/what-are-spaces?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": null,
+       "prefix": null,
+       "prompt_text": null,
+       "type": "hidden"
+      },
+      {
+       "alt": null,
+       "prefix": null,
+       "prompt_text": null,
+       "type": "hidden"
+      },
+      {
+       "alt": "",
+       "has_images": false,
+       "prefix": null,
+       "prompt_text": null,
+       "sources": [
+        {
+         "attribution": "Claude Platform",
+         "title": "Skills - Claude Platform Docs",
+         "url": "https://platform.claude.com/docs/en/managed-agents/skills?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "Google Help",
+         "title": "How to use Gems - Gemini Apps Help",
+         "url": "https://support.google.com/gemini/answer/15236405?hl=en&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "Perplexity",
+         "title": "What are Spaces?",
+         "url": "https://hub-prod.perplexity.ai/hub/faq/what-are-spaces?utm_source=chatgpt.com"
+        }
+       ],
+       "type": "sources_footnote"
+      }
+     ],
+     "model_slug": "gpt-6",
+     "parent_id": "8f2d4c35-527a-4587-aff5-0a705224499e",
+     "search_result_groups": [
+      {
+       "domain": "google.com",
+       "entries": [
+        {
+         "attribution": "google.com",
+         "snippet": "GET STARTED WITH GEMS IN GEMINI APPS  Image  Welcome to the getting started guide for Gems. Here you'll find tips on how to customise Gemini Apps responses with Gems.  WHAT ARE GEMS?  Gems are custom...",
+         "title": "Get started with Gems in Gemini Apps - Gemini Apps Help",
+         "url": "https://support.google.com/gemini/answer/15236321?hl=en-GB&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "google.com",
+         "snippet": "BUILD PERSONALIZED AI EXPERTS FOR FITNESS, HEALTH, CODING, STUDYING, OR ANYTHING  Google Pixel  Gemini Gems are your personal AI assistants.  Takeaways  * Gems help you unlock personalized AI experie...",
+         "title": "Build personalized AI experts for fitness, health, coding, studying, or anything",
+         "url": "https://store.google.com/us/magazine/gemini-gems?hl=en-US&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "google.com",
+         "snippet": "GET STARTED WITH GEMS IN GEMINI APPS  Image  Welcome to the getting started guide for Gems. Here you'll find tips to customize Gemini Apps responses with Gems.  WHAT ARE GEMS?  Gems are customized ve...",
+         "title": "Get started with Gems in Gemini Apps - Gemini Apps Help",
+         "url": "https://support.google.com/gemini/answer/15236321?hl=en-UM&utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "claude.com",
+       "entries": [
+        {
+         "attribution": "claude.com",
+         "snippet": "ADD AND USE CUSTOM SKILLS  You can also create and upload your own skills to teach Claude your specific workflows:  1. Create a skill following the skill structure (see How to create custom skills for...",
+         "title": "Use skills in Claude | Claude Help Center",
+         "url": "https://support.claude.com/en/articles/12512180-use-skills-in-claude?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "claude.com",
+         "snippet": "HOW TO CREATE CUSTOM SKILLS  July 22, 2026  Copy for LLM  Skills are available for users on Free, Pro, Max, Team, and Enterprise plans. This feature requires code execution to be enabled. Skills are...",
+         "title": "How to create custom skills | Claude Help Center",
+         "url": "https://support.claude.com/en/articles/12512198-how-to-create-custom-skills?trk=public_post_comment-text&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "claude.com",
+         "snippet": "AGENT SKILLS  Agent Skills are modular capabilities that extend Claude's functionality. Each Skill packages instructions, metadata, and optional resources (scripts, templates) that Claude uses automa...",
+         "title": "Agent Skills - Claude Platform Docs",
+         "url": "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "claude.com",
+         "snippet": "INTRODUCING AGENT SKILLS  * CategoryAnnouncements  * Product Claude Platform  * Date October 16, 2025  * Reading time 4 min  Update: We've added organization-wide management for skills, a directory f...",
+         "title": "Introducing Agent Skills | Claude by Anthropic",
+         "url": "https://claude.com/resources/articles/skills?Sid=1&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "claude.com",
+         "snippet": "INTRODUCING AGENT SKILLS  * Category  Product announcements  * Product  Claude Platform  * Date  October 16, 2025  * Reading time  5  min  * Share  Copy link  https://claude.com/blog/skills  Update:...",
+         "title": "Introducing Agent Skills | Claude by Anthropic",
+         "url": "https://claude.com/blog/skills?t=n&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "claude.com",
+         "snippet": "HOW TO CREATE SKILLS: KEY STEPS, LIMITATIONS, AND EXAMPLES  Learn how to write tailored skills that deliver stronger, more effective outputs from Claude.  * CategoryBest practices  * Product Claude a...",
+         "title": "How to create Skills for Claude: steps and examples | Claude by Anthropic",
+         "url": "https://claude.com/resources/articles/how-to-create-skills-key-steps-limitations-and-examples?f80ce999_sort_date=desc&fcdaa149_sort_date=desc&vid=127&utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "gemini.google",
+       "entries": [
+        {
+         "attribution": "gemini.google",
+         "snippet": "BUILD CUSTOM EXPERTS WITH GEMS  Gems are your custom AI experts for help on any topic. Gems can be anything from a career coach or brainstorm partner to a coding helper. Get started with our suite of...",
+         "title": "Gemini Gems — build custom AI experts from Gemini",
+         "url": "https://gemini.google/mm/overview/gems/?hl=en-GB&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "gemini.google",
+         "snippet": "BUILD CUSTOM EXPERTS WITH GEMS  Gems are your custom AI experts for help on any topic. Gems can be anything from a career coach or brainstorm partner to a coding helper. Get started with our suite of...",
+         "title": "Gemini Gems — build custom AI experts from Gemini",
+         "url": "https://gemini.google/mt/overview/gems/?hl=en-GB&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "gemini.google",
+         "snippet": "BUILD CUSTOM EXPERTS WITH GEMS  Gems are your custom AI experts for help on any topic. Gems can be anything from a career coach or brainstorm partner to a coding helper. Get started with our suite of...",
+         "title": "Gemini Gems — build custom AI experts from Gemini",
+         "url": "https://gemini.google/mv/overview/gems/?hl=en&utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "anthropic.com",
+       "entries": [
+        {
+         "attribution": "anthropic.com",
+         "snippet": "INTRODUCING AGENT SKILLS  Oct 16, 2025  Image: Introducing Agent Skills  Claude can now use Skills to improve how it performs specific tasks. Skills are folders that include instructions, scripts, an...",
+         "title": "Claude Skills: Customize AI for your workflows",
+         "url": "https://www.anthropic.com/research/skills?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "anthropic.com",
+         "snippet": "EQUIPPING AGENTS FOR THE REAL WORLD WITH AGENT SKILLS  Published Oct 16, 2025  Claude is powerful, but real work requires procedural knowledge and organizational context. Introducing Agent Skills, a...",
+         "title": "Equipping agents for the real world with Agent Skills \\ Anthropic",
+         "url": "https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills?_bhlid=fb54f3ffd4d8cdcde5a43e105d8980dbb53abb65&utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "serverhump.com",
+       "entries": [
+        {
+         "attribution": "serverhump.com",
+         "snippet": "USE GEMS IN GEMINI APPS  You can create and save Gems to customize responses in Gemini Apps to your specific needs.  GEMS WILL SOON TRANSITION TO SKILLS  Starting in November 2026, Gems will go away...",
+         "title": "Use Gems in Gemini Apps - Computer - Gemini Apps Help",
+         "url": "https://googlesupport.serverhump.com/gemini/answer/15146780?co=GENIE.Platform%3DDesktop&hl=en&ref_topic=16505260&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "serverhump.com",
+         "snippet": "USE GEMS IN GEMINI APPS  You can create and save Gems to customize responses in Gemini Apps to your specific needs.  GEMS WILL SOON TRANSITION TO SKILLS  Starting in November 2026, Gems will go away...",
+         "title": "Use Gems in Gemini Apps - iPhone & iPad - Gemini Apps Help",
+         "url": "https://googlesupport.serverhump.com/gemini/answer/15146780?co=GENIE.Platform%3DiOS&hl=en&ref_topic=16505260&utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "github.com",
+       "entries": [
+        {
+         "attribution": "github.com",
+         "snippet": "anthropics / skills Public  * Notifications You must be signed in to change notification settings * Fork 20.8k * Star  * Code * Issues 349 * Pull requests 877 * Discussions * Actions * Security and q...",
+         "title": "GitHub - anthropics/skills: Public repository for Agent Skills · GitHub",
+         "url": "https://github.com/anthropics/skills?pubDate=20260514&utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "SANDBOX MODE  Sandbox mode restricts what the agent process and its spawned commands can access on your filesystem and network using OS-level kernel primitives (Landlock on Linux, Seatbelt on macOS)....",
+         "title": "grok-build/crates/codegen/xai-grok-pager/docs/user-guide/18-sandbox.md at main · xai-org/grok-build · GitHub",
+         "url": "https://github.com/xai-org/grok-build/blob/main/crates/codegen/xai-grok-pager/docs/user-guide/18-sandbox.md?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "blog.google",
+       "entries": [
+        {
+         "attribution": "blog.google",
+         "snippet": "5 tips on getting started with Gems, your custom AI experts  []  Preferences  * [Select]  Links  * Images * RSS feed  5 TIPS ON GETTING STARTED WITH GEMS, YOUR CUSTOM AI EXPERTS  Sep 05, 2024  |  A G...",
+         "title": "How to use Gems, Google's custom AI tools",
+         "url": "https://blog.google/products-and-platforms/products/gemini/google-gems-tips/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "proxynsfw.com",
+       "entries": [
+        {
+         "attribution": "proxynsfw.com",
+         "snippet": "ABOUT THE TRANSITION FROM GEMS TO SKILLS  Starting in November 2026, Gems will transition to skills in Gemini Apps for personal Google Accounts, and in 2027, for work and school accounts. Check when...",
+         "title": "About the transition from Gems to skills - Gemini Apps Help",
+         "url": "https://site-2645cdc70146.proxynsfw.com/support-google-com/gemini/answer/18560919?hl=en&ref_topic=16505260&utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "easiiodev.ai",
+       "entries": [
+        {
+         "attribution": "easiiodev.ai",
+         "snippet": "USE GEMS IN GEMINI APPS  You can create and save Gems to customize responses in Gemini Apps to your specific needs.  GEMS WILL SOON TRANSITION TO SKILLS  Starting in November 2026, Gems will go away...",
+         "title": "Use Gems in Gemini Apps - Android phone & tablet - Gemini Apps Help",
+         "url": "https://sitelet.easiiodev.ai/sitelet?url=https%3A%2F%2Fsupport.google.com%2Fgemini%2Fanswer%2F15146780%3Fco%3DGENIE.Platform%253DAndroid&utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "usingclaude.com",
+       "entries": [
+        {
+         "attribution": "usingclaude.com",
+         "snippet": "HOW TO CREATE A CUSTOM CLAUDE SKILL: FROM SKILL.MD TO INSTALL  A hands-on guide to building your own custom Claude Skill from a single folder and SKILL.md. Covers the name/description frontmatter rul...",
+         "title": "How to Create a Custom Claude Skill: From SKILL.md to Install | Using Claude",
+         "url": "https://usingclaude.com/en/claude-code/skills/create-custom-skill?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "t.co",
+       "entries": [
+        {
+         "attribution": "t.co",
+         "snippet": "1. anthropics 2. skills  REPOSITORY NAVIGATION  *   * Code * Issues398 (398) * Pull requests996 (996) * Discussions * Actions * Security and quality * Insights  More items  Image: anthropics  skills...",
+         "title": "GitHub - anthropics/skills: Public repository for Agent Skills · GitHub",
+         "url": "https://t.co/i1JN7tpEev?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "perplexity.ai",
+       "entries": [
+        {
+         "attribution": "perplexity.ai",
+         "snippet": "SKILLS  What exactly is a Skill? Skills are reusable instruction sets that teach Computer how to perform specific tasks, think of them as specialised playbooks. When a skill is active, Computer follow...",
+         "title": "Perplexity Computer for Buyside Professionals | Perplexity",
+         "url": "https://www.perplexity.ai/en-GB/hub/workshops/perplexity-computer-for-buyside-professionals?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "perplexity.ai",
+         "snippet": "HOW TO USE/CREATE SPACES  ImageYoutube Video  This video introduces Perplexity Spaces within Perplexity Enterprise, demonstrating how to create a new Space, connect files, and run queries using the p...",
+         "title": "How to Use/Create Spaces - Perplexity Enterprise",
+         "url": "https://www.perplexity.ai/enterprise/videos/how-to-use-create-spaces?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "perplexity.ai",
+         "snippet": "HOW TO SET CUSTOM FILES AND LINKS IN SPACES  ImageYoutube Video  This video walks through how to add custom files within Perplexity Enterprise Spaces, guiding users through creating a Space, connecti...",
+         "title": "How to Set Custom Files and Links in Spaces - Perplexity Enterprise",
+         "url": "https://www.perplexity.ai/enterprise/videos/how-to-set-custom-files-and-links?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "perplexity.ai",
+         "snippet": "CUSTOM SKILLS IN COMPUTER, MODEL COUNCIL IN COMPUTER, AND VOICE MODE IN COMPUTER  05/03/26Image  CUSTOM SKILLS IN COMPUTER  Teach Perplexity Computer how to handle any task once, and it remembers for...",
+         "title": "Custom Skills, Model Council, and Voice Mode in Computer",
+         "url": "https://www.perplexity.ai/en-GB/changelog/what-we-shipped---march-6-2026?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "perplexity.ai",
+         "snippet": "EFFORT MODE, GPT-6 ASTRA, AND SKILLS MARKETPLACE  09/21/26Image: Computer’s High effort setting with GPT-6 Astra and the effort-level slider.  EFFORT MODE: BALANCE INTELLIGENCE AND COST WITH ONE SLID...",
+         "title": "Effort Mode, GPT-6 Astra & Skills Marketplace | Perplexity",
+         "url": "https://www.perplexity.ai/changelog/effort-mode-gpt-6-astra-and-skills-marketplace?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "perplexity.ai",
+         "snippet": "PROFILE, SETTINGS AND LANGUAGES  PROFILE, SETTINGS AND LANGUAGES  INTERFACE SETTINGS  INCOGNITO MODE  Yes, you can use incognito mode by clicking on your profile name in the bottom left corner of the...",
+         "title": "Profile, settings and languages",
+         "url": "https://hub-prod.perplexity.ai/hub/faq/ai-profile?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "x.ai",
+       "entries": [
+        {
+         "attribution": "x.ai",
+         "snippet": "GROK  CONNECTORS  Copy for LLMView as Markdown  Meet grok-4.7  Connectors are available to all Grok users and let Grok access your external tools and data sources directly within a conversation. Sear...",
+         "title": "Connectors | SpaceXSI Docs",
+         "url": "https://docs.x.ai/grok/connectors?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "x.ai",
+         "snippet": "Back to newsMay 18, 2026  SKILLS IN WEB, IOS, AND ANDROID  Persistent expertise for Grok. Generate documents, decks, and spreadsheets. Automate workflows. Build and share your own skills.  Today, we'...",
+         "title": "Skills in web, iOS, and Android | SpaceXAI",
+         "url": "https://x.ai/news/grok-skills?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "x.ai",
+         "snippet": "Back to newsJul 16, 2026  AUTOMATIONS IN GROK  Describe a job once and Grok runs it on a schedule or when an email arrives, then reports back.  Today, we're introducing Automations: jobs Grok runs on...",
+         "title": "Automations in Grok | SpaceXAI",
+         "url": "https://x.ai/news/grok-automations?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "x.ai",
+         "snippet": "New Meet Grok 4.6 • Now powering Grok Build  BRING GROK TO your computer.  A powerful coding agent for complex work, now powered by Grok 4.6, our newest model.  `$ curl -fsSL https://x.ai/cli/install...",
+         "title": "Grok Build | SpaceXAI",
+         "url": "https://x.ai/build?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "x.ai",
+         "snippet": "GROK  WELCOME TO GROK  Copy for LLMView as Markdown  Meet grok-4.7  Grok is SpaceXSI's assistant, available on the web at grok.com and in the iOS and Android apps. Sign in once and your conversations...",
+         "title": "Welcome to Grok | SpaceXSI Docs",
+         "url": "https://docs.x.ai/grok/overview?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "aitoolsrecap.com",
+       "entries": [
+        {
+         "attribution": "aitoolsrecap.com",
+         "snippet": "✎ AI Agents  GROK AGENT SETTINGS EXPLAINED 2026 — EVERY CUSTOMISATION OPTION AND WHAT IT ACTUALLY DOES  Grok has four customisation layers: Custom Instructions (global, 4,000 chars), Custom Agents (4...",
+         "title": "Grok Agent Settings: Memory, Tools and Triggers Explained | AIToolsRecap",
+         "url": "https://aitoolsrecap.com/Blog/grok-agent-settings-explained-2026?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "scult.in",
+       "entries": [
+        {
+         "attribution": "scult.in",
+         "snippet": "Verified against Perplexity Pro · 2026-07-20  GIVE A PERPLEXITY SPACE PERSISTENT INSTRUCTIONS SO EVERY NEW THREAD DOESN'T START FROM ZERO  A custom-instructions document you paste into a Perplexity S...",
+         "title": "Give a Perplexity Space persistent instructions so every new thread doesn't start from zero — Free Prompt | Scult Tools",
+         "url": "https://tools.scult.in/prompts/perplexity/perplexity-space-project-instructions?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "grokindex.dev",
+       "entries": [
+        {
+         "attribution": "grokindex.dev",
+         "snippet": "GROK BOT VS. CUSTOM GPTS VS. CLAUDE PROJECTS: WHICH CUSTOMIZATION MODEL WINS?  A technical comparison of Grok Bot, custom GPTs, and Claude Projects: how customization, memory, automation, and sharing...",
+         "title": "Grok Bot vs. Custom GPTs vs. Claude Projects: Which Customization Model Wins? · GrokIndex.dev",
+         "url": "https://grokindex.dev/blog/grok-vs-chatgpt-custom-instructions?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "creativeainews.com",
+       "entries": [
+        {
+         "attribution": "creativeainews.com",
+         "snippet": "GROK SKILLS VS CLAUDE PROJECTS, GPTS, GEMS: TESTED  xAI shipped Skills for Grok 4.3 on May 18, 2026, closing the last persistent-workspace gap with Claude Projects, Custom GPTs, and Gemini Gems. We t...",
+         "title": "Grok Skills vs Claude Projects, Custom GPTs, Gems",
+         "url": "https://www.creativeainews.com/articles/grok-skills-persistent-custom-expertise-2026/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "theinformed.org",
+       "entries": [
+        {
+         "attribution": "theinformed.org",
+         "snippet": "Beginner — Use AI tools at work  PROJECTS AND LIBRARIES, TOOL BY TOOL  Lesson 10 of 16≈4 min  Each tool now has two places to keep things. A project is a desk for one job: files, standing instruction...",
+         "title": "Projects and libraries, tool by tool · AI Tools Field Guide",
+         "url": "https://sean.theinformed.org/ai-tools/projects-across-tools.html?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "danielcomp.com",
+       "entries": [
+        {
+         "attribution": "danielcomp.com",
+         "snippet": "Ask Daniel's CODEX  MA5 - CUSTOM AGENT INSTRUCTIONS  [1] DANIEL:  Tell me how setting up a custom AGENT differs from using project instructions?  * * *  [2] GROK:  Setting up a custom AGENT in Grok (...",
+         "title": "MA5 - Custom Agent Instructions | Ask Daniel's CODEX",
+         "url": "https://danielcomp.com/a/thread-2026-03-08-0730_ma5_-_custom_agent_instructions.html?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "prompt-architects.com",
+       "entries": [
+        {
+         "attribution": "prompt-architects.com",
+         "snippet": "Library September 19, 2026 13 min read  BEST PROMPT TOOLS FOR GROK USERS (2026)  The best Grok prompt tools in 2026: what xAI's own Custom Instructions covers, which extensions actually verify Grok s...",
+         "title": "Best Prompt Tools for Grok Users (2026) | Prompt Architects",
+         "url": "https://www.prompt-architects.com/blog/651-best-prompt-tools-for-grok-users-2026?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "note.com",
+       "entries": [
+        {
+         "attribution": "note.com",
+         "snippet": "[OFFICIAL FEATURE COMPLIANCE] CONCRETE STEPS TO BUILD YOUR OWN RESEARCH AGENT WITH PERPLEXITY SPACES  sane-design  2026年5月16日 11:09  Good evening, this is Sane Design.  🔍 Are you using Perplexity onl...",
+         "title": "[Official Feature Compliance] Concrete Steps to Build Your Own Research Agent with Perplexity Spaces｜sane-design",
+         "url": "https://note.com/sane_design2026/n/na1f39bb7bfa4?hl=en-US&utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "reupload.io",
+       "entries": [
+        {
+         "attribution": "reupload.io",
+         "snippet": "Skill October 5, 2026 · Perplexity AI Official Spaces Documentation & User Guides  BUILD TEAM KNOWLEDGE HUBS WITH PERPLEXITY SPACES  Image: Build Team Knowledge Hubs with Perplexity Spaces  Photo: UX...",
+         "title": "Build Team Knowledge Hubs with Perplexity Spaces - Reupload",
+         "url": "https://www.reupload.io/en/articles/2026-10-05-build-team-knowledge-hubs-with-perplexity-spaces?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "perplexityaimagazine.com",
+       "entries": [
+        {
+         "attribution": "perplexityaimagazine.com",
+         "snippet": "HOW TO USE PERPLEXITY AI: THE COMPLETE 2026 GUIDE  Perplexity Hub  Sami Ullah Khan  April 1, 2026  Image: How to Use Perplexity AI  I have used Perplexity AI every single day for the better part of a...",
+         "title": "How to Use Perplexity AI: Complete Beginner to Advanced Guide (2026)",
+         "url": "https://perplexityaimagazine.com/perplexity-hub/how-to-use-perplexity-ai-2/?utm_source=chatgpt.com"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "parent": "8f2d4c35-527a-4587-aff5-0a705224499e"
+  },
+  "0f57868d-00a0-4ed5-8681-14f26959281d": {
+   "id": "0f57868d-00a0-4ed5-8681-14f26959281d",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "dd9e8ee8-5b73-408e-b1b7-bfc1544e9c1c",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Fetched Git protocol and timeline documentation, documenting routing skills and usage metadata"
+      }
+     ]
+    },
+    "create_time": 1791930594.214267,
+    "id": "0f57868d-00a0-4ed5-8681-14f26959281d",
+    "metadata": {
+     "model_slug": "gpt-6",
+     "parent_id": "d50ab718-feb7-44b8-b98b-2083eb848c5c",
+     "tool_icons": [
+      "/images/ecosystem/apps/github/icon.png"
+     ]
+    }
+   },
+   "parent": "dc3120f1-70d3-44cf-905b-6ef7fc485755"
+  },
+  "3c65e8b1-79c9-4ebc-a2a4-072262b2611e": {
+   "id": "3c65e8b1-79c9-4ebc-a2a4-072262b2611e",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content": "Worked for 1m 15s",
+     "content_type": "reasoning_recap"
+    },
+    "create_time": 1791930103.686402,
+    "id": "3c65e8b1-79c9-4ebc-a2a4-072262b2611e",
+    "metadata": {
+     "model_slug": "gpt-6",
+     "parent_id": "8f5b9a62-5e66-4dfd-bd4f-01abef21cecf"
+    }
+   },
+   "parent": "8f5b9a62-5e66-4dfd-bd4f-01abef21cecf"
+  },
+  "5d2bc26d-5800-4413-bde3-2b69700ca0b0": {
+   "id": "5d2bc26d-5800-4413-bde3-2b69700ca0b0",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "1d04c99a-fca9-4872-8917-3f8f461f6673",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Searched 7 websites"
+      }
+     ]
+    },
+    "create_time": 1791930042.692279,
+    "id": "5d2bc26d-5800-4413-bde3-2b69700ca0b0",
+    "metadata": {
+     "model_slug": "gpt-6",
+     "parent_id": "3a8541e0-54a8-4998-aa8c-8752bc4cb222",
+     "tool_icons": [
+      "https://www.google.com/s2/favicons?domain=github.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=munderdiffl.in&sz=128",
+      "https://www.google.com/s2/favicons?domain=adhx.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=mindpattern.ai&sz=128",
+      "https://www.google.com/s2/favicons?domain=digg.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=www.explainx.ai&sz=128",
+      "https://www.google.com/s2/favicons?domain=zolotube.com&sz=128"
+     ]
+    }
+   },
+   "parent": "bbb21d4b-e734-4111-acd7-617f8fe75d03"
+  },
+  "8f2d4c35-527a-4587-aff5-0a705224499e": {
+   "id": "8f2d4c35-527a-4587-aff5-0a705224499e",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content": "Worked for 32s",
+     "content_type": "reasoning_recap"
+    },
+    "create_time": 1791930594.218691,
+    "id": "8f2d4c35-527a-4587-aff5-0a705224499e",
+    "metadata": {
+     "model_slug": "gpt-6",
+     "parent_id": "0f57868d-00a0-4ed5-8681-14f26959281d"
+    }
+   },
+   "parent": "0f57868d-00a0-4ed5-8681-14f26959281d"
+  },
+  "8f5b9a62-5e66-4dfd-bd4f-01abef21cecf": {
+   "id": "8f5b9a62-5e66-4dfd-bd4f-01abef21cecf",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "f1e62708-92d9-452c-8b82-48dd729b4ed2",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Creating the tree base tree"
+      }
+     ]
+    },
+    "create_time": 1791930103.68275,
+    "id": "8f5b9a62-5e66-4dfd-bd4f-01abef21cecf",
+    "metadata": {
+     "model_slug": "gpt-6",
+     "parent_id": "8963c559-033c-4043-968a-9dcf716df5ff",
+     "tool_icons": [
+      "/images/ecosystem/apps/github/icon.png"
+     ]
+    }
+   },
+   "parent": "5d2bc26d-5800-4413-bde3-2b69700ca0b0"
+  },
+  "98ffc486-0ac5-44a3-abb9-54c3b0155583": {
+   "id": "98ffc486-0ac5-44a3-abb9-54c3b0155583",
+   "message": null,
+   "parent": null
+  },
+  "bbb219eb-3ad6-45f4-bbdc-4d11102bd659": {
+   "id": "bbb219eb-3ad6-45f4-bbdc-4d11102bd659",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Ok can your a customise gpt or skill or whatever so that we can use this for any product building, learning,  where else we can use and we should not use..\n\nHow to the same in claude perplexity Gemini grok whatelse??\n\nAlso why not have something like that so that i don't need to right every time git turn protocol.. first time analyse repo and find which one to use then confirm with first prompt then on everything turn it should do that also if topic changed then need to analyse and use different repo so that information store in proper. Git why u all 3 never say abt this kind of prompt theor and the plan I g why I need to push and share all this shorts.. when will they happen?? 23:29"
+     ]
+    },
+    "create_time": 1791930560.995451,
+    "id": "bbb219eb-3ad6-45f4-bbdc-4d11102bd659",
+    "metadata": {
+     "image_results": [],
+     "model_slug": "gpt-6"
+    }
+   },
+   "parent": "d6f8f6a6-9e07-4f48-9580-72ca9158433b"
+  },
+  "bbb21d4b-e734-4111-acd7-617f8fe75d03": {
+   "id": "bbb21d4b-e734-4111-acd7-617f8fe75d03",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "multimodal_text",
+     "parts": [
+      {
+       "asset_pointer": "sediment://file_00000000f4c0820a9518899c93de7c35",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 1536,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "mime_type": "image/jpeg",
+       "size_bytes": 257853,
+       "width": 709
+      },
+      "He says LLMs are getting really good at front end. Ask for an SIP calculator that shows compounding year by year, and you get a working page with sliders and animations. Fourth, explainer videos. The format he's most bullish on is bespoke explainer videos. Try create a three blue one brown style video explainer on X. Use your Eleven Labs API key for narration. LLMs will do more of the legwork autonomously, and airwork rises into oversight and understanding. Intelligence and code are now abundant, so you can ask for large, custom, discardable software artifacts that never made sense before. Push the boundaries and you'll be surprised. What's your favorite prompting trick? Comment below. There's a weird prompting trick called ASD-STE100, borrowed from aerospace manuals, and once you try it, you'll never prompt AI the same way again. First, writing. Ask your LLM to explain something in SD-STE100. It's a controlled language spec from aerospace maintenance docs. LLMs know it well, and its constraints make answers far more readable. But every rule can sound robotic. So add, follow ASD-STE100 about 80% of the way. You get clarity without losing a natural tone. This comes from Andre Karpathy, who trains Claude at Anthropic. It's the first of four tricks he shared. Second, diagrams. Even clean writing has to be read. Instead, ask your LLM to create a diagram, easier to process and understand. Third, web pages. Ask for output in HTML. Karpathy says LLMs are getting really good at front end. Ask for an SIP calculator that shows compounding year by year, and you get a working page with sliders and animations. Fourth, explainer videos. The format he's most bullish on is bespoke explainer videos. Try create a three blue one brown style video explainer on X.https://youtube.com/shorts/g_pnwXpvzI8?is=z3l-Enslgdg0WyDM23:19 13/10/2026 use repo ai tool support kb for git turn protocol"
+     ]
+    },
+    "create_time": 1791930023.119712,
+    "id": "bbb21d4b-e734-4111-acd7-617f8fe75d03",
+    "metadata": {
+     "attachments": [
+      {
+       "access_kind": "owned",
+       "id": "file_00000000f4c0820a9518899c93de7c35",
+       "mime_type": "image/jpeg",
+       "name": "1000285482.jpg",
+       "size": 257853
+      }
+     ],
+     "image_results": [],
+     "model_slug": "gpt-6"
+    }
+   },
+   "parent": "98ffc486-0ac5-44a3-abb9-54c3b0155583"
+  },
+  "d6f8f6a6-9e07-4f48-9580-72ca9158433b": {
+   "id": "d6f8f6a6-9e07-4f48-9580-72ca9158433b",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Yes — this one is worth keeping. I checked the claim rather than treating the Short as authority. The core idea is real and traces to Andrej Karpathy's 2 Oct 2026 post: **writing → diagrams → interactive HTML → bespoke explainer video**. He specifically suggested ASD-STE100, sometimes softened to “80% of the way,” then diagrams, HTML, and finally 3Blue1Brown-style video with ElevenLabs or local TTS. citeturn0search1turn0search6 The broader point is more important than the individual tricks: as AI does more implementation work, the human bottleneck shifts toward **understanding, verification and oversight**.\n\nFor us, this connects directly to what we have been building. I would not treat these as four isolated prompts. I would treat them as a **comprehension ladder**:\n\n1. **80% ASD-STE100** — default when I need to explain a difficult technical result clearly without making the prose robotic.\n2. **Diagram** — when relationships, architecture, flow, sequence or causality matter more than prose.\n3. **Interactive artifact** — when the user should manipulate assumptions. The SIP example is exactly right: sliders + year-by-year values + chart are better than a static explanation.\n4. **Bespoke explainer video** — when a concept is important enough to learn deeply or communicate repeatedly. The model can generate the script, scenes, animation/code and narration pipeline; the human reviews the facts and teaching quality.\n\nThere is an important correction to the Short's framing: “80% ASD-STE100” is a **style heuristic**, not a measurable certification that the answer complies with 80% of the official aerospace standard. citeturn0search2 Also, a beautiful diagram, webpage or video can still contain a wrong explanation. Moving up the ladder improves comprehension; it does **not** replace source verification.\n\nThis is especially relevant to our AI learning system. We should test the same difficult concept at all four levels and measure which one actually helps you understand and recall it. I have therefore saved this as a reusable KB concept, not merely as a YouTube-tip note.\n\n**Git Evidence**\n- Repo: `vsenthil7/ai-tool-support-kb` · `main`\n- Turn: T041\n- Commit: `5fa0f0c`\n- Verified: remote `main` checked after an expected-head protected update\n- Usage: ESTIMATE; exact ChatGPT model/tool telemetry unavailable\n- Gaps: attached screenshot itself was not written as a binary Git artifact by this connector; its relevant text and the user-provided transcript are preserved in this turn"
+     ]
+    },
+    "create_time": 1791930103.691392,
+    "id": "d6f8f6a6-9e07-4f48-9580-72ca9158433b",
+    "metadata": {
+     "content_references": [
+      {
+       "alt": "([GitHub](https://github.com/prithivrajmu/asd-ste100?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 6,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "ADHX",
+           "pub_date": 1791014039.0,
+           "snippet": "",
+           "title": "Stop reading walls of AI text. Andrej Karpathy gets his AI… | ADHX",
+           "url": "https://adhx.com/alex_prompter/status/2106291659109720442?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "GitHub - prithivrajmu/asd-ste100: Agent skill: explain things in ASD-STE100 Simplified Technical English (Karpathy's 80% mode by default) · GitHub",
+         "url": "https://github.com/prithivrajmu/asd-ste100?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([GitHub](https://github.com/ashryaagr/karpathy-output-style?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "GitHub",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 2,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "GitHub - ashryaagr/karpathy-output-style: Concise skills for ASD-STE100-inspired writing, Excalidraw diagrams, interactive HTML, and narrated explainer videos · GitHub",
+         "url": "https://github.com/ashryaagr/karpathy-output-style?utm_source=chatgpt.com"
+        }
+       ],
+       "prefix": null,
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "",
+       "has_images": false,
+       "prefix": null,
+       "prompt_text": null,
+       "sources": [
+        {
+         "attribution": "GitHub",
+         "title": "GitHub - prithivrajmu/asd-ste100: Agent skill: explain things in ASD-STE100 Simplified Technical English (Karpathy's 80% mode by default) · GitHub",
+         "url": "https://github.com/prithivrajmu/asd-ste100?utm_source=chatgpt.com"
+        }
+       ],
+       "type": "sources_footnote"
+      }
+     ],
+     "model_slug": "gpt-6",
+     "parent_id": "3c65e8b1-79c9-4ebc-a2a4-072262b2611e",
+     "search_result_groups": [
+      {
+       "domain": "github.com",
+       "entries": [
+        {
+         "attribution": "github.com",
+         "snippet": "1. JordanBelfort1 2. explaining-in-asd-ste100  REPOSITORY NAVIGATION  *   * Code * Issues * Pull requests * Actions * Projects * Security and quality * Insights  More items  Image: JordanBelfort1  ex...",
+         "title": "GitHub - JordanBelfort1/explaining-in-asd-ste100: Agent skill: explain in ASD-STE100 text, diagrams, HTML pages or explainer videos (after Karpathy) · GitHub",
+         "url": "https://github.com/JordanBelfort1/explaining-in-asd-ste100?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "name  | asd-ste100 description  | Explain or rewrite text in ASD-STE100 Simplified Technical English so a human can read it fast. Default is Karpathy's '80% of the way to ASD-STE100'. Also makes the...",
+         "title": "asd-ste100/SKILL.md at main · prithivrajmu/asd-ste100 · GitHub",
+         "url": "https://github.com/prithivrajmu/asd-ste100/blob/main/SKILL.md?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "1. bowen31337 2. comprehension-ladder  REPOSITORY NAVIGATION  *   * Code * Issues * Pull requests * Actions * Projects * Security and quality * Insights  More items  Image: bowen31337  comprehension-...",
+         "title": "GitHub - bowen31337/comprehension-ladder: Claude Code skill that explains anything on Karpathy's comprehension ladder: ASD-STE100 prose (80% strictness), blueprint SVG diagrams, interactive HTML explainers, and narrated 3Blue1Brown-style videos. Keeps hedges, adds no facts. · GitHub",
+         "url": "https://github.com/bowen31337/comprehension-ladder?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "subhams07 / explain-for-understanding-skill Public  * Notifications You must be signed in to change notification settings * Fork 0 * Star  * Code * Issues 0 * Pull requests 0 * Actions * Projects * S...",
+         "title": "GitHub - subhams07/explain-for-understanding-skill: Agent skill (Claude Code + Codex): pick the most digestible output format - ASD-STE100 text, diagrams, HTML pages, explainer videos - based on Karpathy's post · GitHub",
+         "url": "https://github.com/subhams07/explain-for-understanding-skill?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "1. JAICHANGPARK 2. ASD-STE100  REPOSITORY NAVIGATION  *   * Code * Issues * Pull requests * Actions * Projects * Security and quality * Insights  More items  Image: JAICHANGPARK  ASD-STE100  Public...",
+         "title": "GitHub - JAICHANGPARK/ASD-STE100: ASD-STE100 (Simplified Technical English, Issue 9) for Claude Code: /asd mod with an STE pane, agent skill, and linter. Inspired by Karpathy's \"80% ASD-STE100\" tip. · GitHub",
+         "url": "https://github.com/JAICHANGPARK/ASD-STE100?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "github.com",
+         "snippet": "ASD-STE100 REFERENCE  Sources checked 2026-10-02. This note paraphrases selected requirements and provides original examples. It does not replace the official standard or dictionary.  WHICH STANDARD?...",
+         "title": "karpathy-output-style/skills/clear-writing/references/asd-ste100.md at main · ashryaagr/karpathy-output-style · GitHub",
+         "url": "https://github.com/ashryaagr/karpathy-output-style/blob/main/skills/clear-writing/references/asd-ste100.md?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "munderdiffl.in",
+       "entries": [
+        {
+         "attribution": "munderdiffl.in",
+         "snippet": "ASD-STE100 PROMPTING: KARPATHY'S 4 TRICKS FOR CLEARER AI ANSWERS  Ask your AI to answer in ASD-STE100, the aerospace manual standard, about 80% of the way. Plus Karpathy's three other tricks: diagram...",
+         "title": "ASD-STE100 Prompting: Karpathy's 4 Tricks for Clearer AI Answers",
+         "url": "https://munderdiffl.in/blog/asd-ste100-prompting/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "adhx.com",
+       "entries": [
+        {
+         "attribution": "adhx.com",
+         "snippet": "Alex Prompter@alex_prompterYesterday  Stop reading walls of AI text. Andrej Karpathy gets his AI answers as plain English, diagrams, web pages and videos instead. I turned it into 6 prompts. Warning:...",
+         "title": "Stop reading walls of AI text. Andrej Karpathy gets his AI… | ADHX",
+         "url": "https://adhx.com/alex_prompter/status/2106291659109720442?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "mindpattern.ai",
+       "entries": [
+        {
+         "attribution": "mindpattern.ai",
+         "snippet": "Tools 2026-10-02 · source-backed  KARPATHY'S LADDER FOR READING LLM OUTPUT: CONTROLLED ENGLISH, THEN DIAGRAMS, THEN HTML PAGES, THEN EXPLAINER VIDEOS.  Issue  2026-10-02  Confidence  source-backed  S...",
+         "title": "Karpathy's ladder for reading LLM output: controlled English, then diagrams, then HTML pages, then explainer videos. | MindPattern",
+         "url": "https://mindpattern.ai/s/2026-10-02-karpathy-s-ladder-for-reading-llm-output-controlled-english-then-diagrams-then-html-p?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "digg.com",
+       "entries": [
+        {
+         "attribution": "digg.com",
+         "snippet": "A few thoughts, tips & tricks: Writing. Something I've had success with: Ask your LLM to explain something in ASD-STE100, it's a controlled language specification originally developed for aerospace ma...",
+         "title": "Karpathy highlights diagrams and HTML as ways to present language-model output · Digg",
+         "url": "https://digg.com/ai/el508q1v?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "explainx.ai",
+       "entries": [
+        {
+         "attribution": "explainx.ai",
+         "snippet": "← Back to blog  explainx / blog  KARPATHY: STOP READING LLM OUTPUT AS PLAIN TEXT — ASK FOR A VIDEO INSTEAD  Andrej Karpathy, Prompt Engineering, AI Writing, Claude Code, Reflections  Part of Prompt E...",
+         "title": "Karpathy on Understanding LLM Output: 4 Formats Ranked | explainx.ai Blog | explainx.ai",
+         "url": "https://www.explainx.ai/blog/karpathy-understand-llm-outputs-ste100-diagrams-html-video-2026?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "zolotube.com",
+       "entries": [
+        {
+         "attribution": "zolotube.com",
+         "snippet": "AI responses are IMPOSSIBLE TO READ! Karpathy's method (here's how to fix it) in Claude Code and ...  Эдвард Гришин | AI и автоматизация бизнеса  10.2K subscribers  6,441 views  148  * About * #### P...",
+         "title": "AI responses are IMPOSSIBLE TO READ! Karpathy's method (here's how to fix it) in Claude Code and ... - Zolotube.com",
+         "url": "https://zolotube.com/watch?v=ZEX6hxwmdWE&utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "topicdigg.com",
+       "entries": [
+        {
+         "attribution": "topicdigg.com",
+         "snippet": "ANDREJ KARPATHY (@KARPATHY)  @karpathy  0 正在关注    0 粉丝  Andrej Karpathy@karpathy  2026.10.02 00:37  We'll be spending a lot more time trying to understand the outputs of language models. A few though...",
+         "title": "Andrej Karpathy (@karpathy) — TopicDigg",
+         "url": "https://topicdigg.com/x/karpathy?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "linkedin.com",
+       "entries": [
+        {
+         "attribution": "linkedin.com",
+         "snippet": "JAI GOPINATHAN’S POST  Jai Gopinathan  21h  Andrej Karpathy shared a writing tip this week, and I tried it on my own documents. Ask your LLM to write in ASD-STE100. That's Simplified Technical Englis...",
+         "title": "Andrej Karpathy shared a writing tip this week, and I tried it on my own documents. Ask your LLM to write in ASD-STE100. That's Simplified Technical English, a controlled language that aerospace… | Jai Gopinathan",
+         "url": "https://www.linkedin.com/posts/jaigopinathan_andrej-karpathy-shared-a-writing-tip-this-activity-7512905137942761472-0Rvw?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "linkedin.com",
+         "snippet": "Edgar Yan  2d  Andrej Karpathy wrote that understanding the output is becoming the job. The ladder below is his. I turned it into a skill any coding agent can install. He asks the model to explain th...",
+         "title": "Andrej Karpathy on Understanding Model Outputs in ASD-STE100 | Edgar Yan posted on the topic | LinkedIn",
+         "url": "https://www.linkedin.com/posts/edgar-yan_andrej-karpathy-wrote-that-understanding-activity-7512116796561432576-SR0i?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "linkedin.com",
+         "snippet": "Abdul Quayum Adekunle  2d  Andrej Karpathy shared a prompt trick on October 1. Ask your model to explain something in ASD-STE100. ASD-STE100 is Simplified Technical English. Airlines asked for it in...",
+         "title": "Karpathy on Simplified Technical English and Model Limitations | Abdul Quayum Adekunle posted on the topic | LinkedIn",
+         "url": "https://www.linkedin.com/posts/abdul-quayum-adekunle-66b9a61a3_andrej-karpathy-shared-a-prompt-trick-on-activity-7512594147606749187-noY8?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "linkedin.com",
+         "snippet": "Shrashti Singhal  4d  We spend so much time trying to write the “perfect prompt.”Andrej Karpathy has a much simpler suggestion:Maybe the problem isn’t the prompt. Maybe you’re asking for the answer i...",
+         "title": "Simplify Prompts with Andrej Karpathy's 4 Tricks | Shrashti Singhal posted on the topic | LinkedIn",
+         "url": "https://www.linkedin.com/videos/shrashti-singhal-1869166b_ai-promptengineering-generativeai-activity-7512788105121132544-3027?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "linkedin.com",
+         "snippet": "유통민님의 업데이트  유통민  1일  [OpenAI 창업멤버의 팁] AI가 내놓는 결과가 길어질수록 리뷰에 시간이 오래 걸립니다. 그렇다고 리뷰 없이 넘기면 의도와 다르게 나오는 경우도 있어요. OpenAI 창업 멤버 Andrej Karpathy가 이 문제에 대한 방법을 제안했습니다. 답변을 plain text로만 받지 말고, 내용에 맞는 output f...",
+         "title": "Andrej Karpathy (@karpathy) on X | 유통민",
+         "url": "https://kr.linkedin.com/posts/tongmin_andrej-karpathy-karpathy-on-x-activity-7513006400894156800-IhTh?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "linkedin.com",
+         "snippet": "ROB PALUMBO’S POST  Rob Palumbo  9h  As more white-collar work shifts to LLMs we all need to get better at reading, editing, and generally verifying LLM outputs. Andrej Karpathy provides some excelle...",
+         "title": "As more white-collar work shifts to LLMs we all need to get better at reading, editing, and generally verifying LLM outputs. Andrej Karpathy provides some excellent tips here: “We'll be spending a… | Rob Palumbo",
+         "url": "https://www.linkedin.com/posts/rob-palumbo-canada_as-more-white-collar-work-shifts-to-llms-activity-7511865358086164481-KD88?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "rdrama.net",
+       "entries": [
+        {
+         "attribution": "rdrama.net",
+         "snippet": "Andrej Karpathy  @karpathy  Oct 10  I had some amount of journalistic inbound way back as a PhD student but the only person I consistently replied to was Jack because he actually put in effort, read a...",
+         "title": "Andrej Karpathy (@karpathy) | nitter",
+         "url": "https://nitter.rdrama.net/karpathy/with_replies?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "spke.com",
+       "entries": [
+        {
+         "attribution": "spke.com",
+         "snippet": "A Andrej Karpathy · X 2026-10-02 08:37 UTC+8 Updated 2026-10-03 08:31 UTC+8 Original · English  WE'LL BE SPENDING A LOT MORE TIME TRYING TO UNDERSTAND THE OUTPUTS OF LANGUAGE MODELS. A FEW THOUGHTS,...",
+         "title": "We'll be spending a lot more time trying to understand the outputs of language models. A few thoughts, tips & tricks — 哲见 · WISE AI",
+         "url": "https://www.spke.com/en/ai/article/1021?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "xput.app",
+       "entries": [
+        {
+         "attribution": "xput.app",
+         "snippet": "Image  云辰 CYAN ON X  @smk7z  我把 @karpathy 大神的最新理念做成了 Skill 🔥！ 一句话，让你 agent 给你可视化结论！ answer-me-with-html：https://github.com/QingYunA/answer-me-with-html 1. 超级快速： 比正常输出 HTML，token 少 7.4 倍！快 3.6 倍 2. AS...",
+         "title": "我把 @karpathy 大神的最新理念做成了 Skill 🔥！ | XPut",
+         "url": "https://xput.app/PPuMSO?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "hqman.me",
+       "entries": [
+        {
+         "attribution": "hqman.me",
+         "snippet": "MAKE AI EXPLANATIONS EASIER TO READ WITH ASD-STE100  Use Simplified Technical English to make AI explanations clearer: short sentences, consistent names, explicit actions, and a prompt you can copy....",
+         "title": "Make AI Explanations Easier to Read with ASD-STE100 | AI Kai",
+         "url": "https://hqman.me/blog/asd-ste100-ai-explanations/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "kgolubic.com",
+       "entries": [
+        {
+         "attribution": "kgolubic.com",
+         "snippet": "ASD-STE100: WHAT IT IS AND WHAT IT HAS TO DO WITH LLMS  2 Oct, 2026  Kruno Golubić  If you are following what happens around AI and LLMs, you have probably heard about Andrej Karpathy. If you didn’t,...",
+         "title": "ASD-STE100: What It Is and What It Has to Do with LLMs | Kruno Golubić",
+         "url": "https://kgolubic.com/posts/asd-ste100-and-llms/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "searchenginejournal.com",
+       "entries": [
+        {
+         "attribution": "searchenginejournal.com",
+         "snippet": "OPENAI FOUNDING MEMBER: MAKE LLMS WRITE LIKE AN AIRCRAFT MANUAL  * Karpathy suggests asking LLMs to explain topics in controlled English built for aircraft manuals. * He also points to diagrams, HTML...",
+         "title": "OpenAI Founding Member: Make LLMs Write Like An Aircraft Manual",
+         "url": "https://www.searchenginejournal.com/karpathy-llm-aircraft-manual-writing/591813/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "etuai.com",
+       "entries": [
+        {
+         "attribution": "etuai.com",
+         "snippet": "MAKING $ SELLING TO AI AGENT…–THE STARTUP IDEAS PODCAST – APPLE PODCASTS  88  Greg Isenberg 解读 Cloudflare 的 AI Agent 基础设施公告，提出互联网正从「人类浏览页面」转向「Agent 消费资源」的新范式，并基于此提出三个创业方向：垂直数据精炼厂、企业 Agent 就绪度评估、专家知识库转...",
+         "title": "移动应用 (Mobile App) — QT Intel",
+         "url": "https://intel.etuai.com/topic/mobile-app/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "zgeo.com.cn",
+       "entries": [
+        {
+         "attribution": "zgeo.com.cn",
+         "snippet": "KARPATHY 力荐 ASD-STE100：用 40 年前航空规范破解大模型输出优化难题，GEO 内容结构化迎来新范式  💡AI 极简速读：ASD-STE100 受控英语规范可提升大模型输出清晰度，开源 Skill 已落地。  Karpathy 分享用 40 年前航空规范 ASD-STE100 优化大模型输出，通过限制句长、单一术语、主动语态，显著提升复杂技术内容可读性。结合生成 diagra...",
+         "title": "Karpathy 用 ASD-STE100 优化大模型输出：GEO 结构化新范式 | 智脑时代 ZGEO",
+         "url": "https://www.zgeo.com.cn/news/karpathy-asd-ste100-llm-output-geo-optimization?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "runtimewire.com",
+       "entries": [
+        {
+         "attribution": "runtimewire.com",
+         "snippet": "ai  KARPATHY SAYS AI SHOULD EXPLAIN COMPLEX TOPICS WITH CUSTOM VIDEOS  In an October 2nd post, he recommended a progression from controlled English to diagrams, interactive HTML and bespoke explainer...",
+         "title": "Karpathy says AI should explain complex topics with custom videos",
+         "url": "https://runtimewire.com/article/karpathy-ai-explanations-custom-videos?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "vuink.com",
+       "entries": [
+        {
+         "attribution": "vuink.com",
+         "snippet": "KARPATHY OUTPUT STYLE  Image  Submitted by  Style Pass  Fri, Oct 2, 2026 11:00  Four short skills to make model outputs easier to understand. Inspired by Andrej Karpathy's post: clear writing → diagr...",
+         "title": "Karpathy Output Style | Vuink.com",
+         "url": "https://vuink.com/post/tvguho-d-dpbz/ashryaagr/karpathy-output-style?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "techcrunch.com",
+       "entries": [
+        {
+         "attribution": "techcrunch.com",
+         "snippet": "ImageImage Credits:Michael Macor / The San Francisco Chronicle / Getty Images  AI  OPENAI CO-FOUNDER ANDREJ KARPATHY JOINS ANTHROPIC’S PRE-TRAINING TEAM  Rebecca Bellan  Lorenzo Franceschi-Bicchierai...",
+         "title": "OpenAI co-founder Andrej Karpathy joins Anthropic's pre-training team | TechCrunch",
+         "url": "https://techcrunch.com/2026/05/19/openai-co-founder-andrej-karpathy-joins-anthropics-pre-training-team/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "investing.com",
+       "entries": [
+        {
+         "attribution": "investing.com",
+         "snippet": "OPENAI CO-FOUNDER AND FORMER TESLA AI EXECUTIVE KARPATHY JOINS ANTHROPIC  ByImage: Reuters  Published May 19, 2026, 11:31 AM  Updated May 19, 2026, 12:18 PM  Image: &copy; Reuters.  © Reuters.  May 1...",
+         "title": "OpenAI co-founder and former Tesla AI executive Karpathy joins Anthropic By Reuters",
+         "url": "https://www.investing.com/news/stock-market-news/former-tesla-ai-executive-openai-founding-member-andrej-karpathy-joins-anthropic-4699136?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "venturebeat.com",
+       "entries": [
+        {
+         "attribution": "venturebeat.com",
+         "snippet": "OPENAI CO-FOUNDER ANDREJ KARPATHY ANNOUNCES HE'S JOINING ANTHROPIC  Carl Franzen  9:20 am, PT, May 19, 2026  Image: Andrej Karpathy-like figure enters building with orange Claude-like logo atop it  C...",
+         "title": "OpenAI co-founder Andrej Karpathy announces he's joining Anthropic | VentureBeat",
+         "url": "https://venturebeat.com/technology/andrej-karpathy-announces-hes-joining-anthropic?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "toehanger.shop",
+       "entries": [
+        {
+         "attribution": "toehanger.shop",
+         "snippet": "ANDREJ KARPATHY  Follow  Researcher at Anthropic  Previously Founder and CEO at ImageEureka Labs  Google ScholarWebsiteLinkedInGitHubOpenReviewTwitter  ABOUT  Andrej Karpathy is a member of the pre-t...",
+         "title": "Andrej Karpathy | alphaXiv",
+         "url": "https://toehanger.shop/?_=%2F%40andrej-karpathy%23KGzYqmHwYljDj0X0coiWbyFgxaw8pT8Q&utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "axios.com",
+       "entries": [
+        {
+         "attribution": "axios.com",
+         "snippet": "May 19, 2026 - Technology  OPENAI CO-FOUNDER ANDREJ KARPATHY JOINS ANTHROPIC  Image: Illustration of a CEO at a desk in the middle of a computer circuit board  Illustration: Sarah Grillo/Axios. Stock...",
+         "title": "OpenAI co-founder Andrej Karpathy joins Anthropic",
+         "url": "https://www.axios.com/2026/05/19/anthropic-openai-karpathy-andrej-claude?trk=article-ssr-frontend-pulse_little-text-block&utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "crunchbase.com",
+       "entries": [
+        {
+         "attribution": "crunchbase.com",
+         "snippet": "Individual Investor  ANDREJ KARPATHY  Summary  OVERVIEW  Number of Portfolio Companies 21  Number of Exits  obfuscation  * Primary Job Title Pre-training Lead * Primary Organization  Anthropic  * Loc...",
+         "title": "Andrej Karpathy - Pre-training Lead @ Anthropic - Crunchbase Person Profile",
+         "url": "https://www.crunchbase.com/person/andrej-karpathy-7d6e?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "independent.co.uk",
+       "entries": [
+        {
+         "attribution": "independent.co.uk",
+         "snippet": "1. Tech  OPENAI CO-FOUNDER AND FORMER TESLA AI DIRECTOR ANDREJ KARPATHY JOINS ANTHROPIC    Karpathy, a highly influential member of the AI community, played a key role in developing Tesla's self-driv...",
+         "title": "OpenAI co-founder and former Tesla AI director Andrej Karpathy joins Anthropic | The Independent",
+         "url": "https://www.independent.co.uk/tech/anthropic-andrej-karpathy-openai-tesla-b2979779.html?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "daringfireball.net",
+       "entries": [
+        {
+         "attribution": "daringfireball.net",
+         "snippet": "Andrej Karpathy Joined Anthropic   Andrej Karpathy, on Twitter/X (XCancel link):  > Personal update: I’ve joined Anthropic. I think the next few years at the frontier of LLMs will be especially forma...",
+         "title": "Daring Fireball: Andrej Karpathy Joined Anthropic",
+         "url": "https://daringfireball.net/linked/2026/05/19/karpathy-anthropic?trk=article-ssr-frontend-pulse_little-text-block&utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "layer3labs.io",
+       "entries": [
+        {
+         "attribution": "layer3labs.io",
+         "snippet": "Reviewed by Jonathan West · Updated Oct 5, 2026  WHO IS ANDREJ KARPATHY?  The former Tesla AI director and OpenAI founding member now working on pre-training research at Anthropic.  Reviewed by Jonat...",
+         "title": "Who Is Andrej Karpathy? Career, Anthropic, and Projects",
+         "url": "https://www.layer3labs.io/guides/who-is-andrej-karpathy?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "undefined-labs.dev",
+       "entries": [
+        {
+         "attribution": "undefined-labs.dev",
+         "snippet": "$ cat wiki/people/karpathy.md  ANDREJ KARPATHY  person updated 2026-07-27 created 2026-05-16  OVERVIEW  Former Tesla AI director, founding member of OpenAI. Joined the Anthropic pretraining team on 2...",
+         "title": "Andrej Karpathy · AI Trend Notifier",
+         "url": "https://trend.undefined-labs.dev/wiki/people/karpathy?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "techradar.com",
+       "entries": [
+        {
+         "attribution": "techradar.com",
+         "snippet": "A FOUNDING MEMBER OF OPENAI HAS JOINED ANTHROPIC TO BOOST CLAUDE'S RESEARCH CAPABILITIES  News  By Rahim Amir  Published 22 May 2026  Claude's pretraining team gets a massive reputational boost  Imag...",
+         "title": "A founding member of OpenAI has joined Anthropic to boost Claude's research capabilities | TechRadar",
+         "url": "https://www.techradar.com/pro/a-founding-member-of-openai-has-joined-anthropic-to-boost-claudes-research-capabilities?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "fortune.com",
+       "entries": [
+        {
+         "attribution": "fortune.com",
+         "snippet": "AIAnthropic  ANDREJ KARPATHY, OPENAI FOUNDING MEMBER AND INVENTOR OF ‘VIBE CODING,’ DEFECTS TO ANTHROPIC  By Eva Roytburg  Fellow, News  Follow  May 19, 2026, 1:39 PM ET  Image: Photo of Andrej Karpa...",
+         "title": "Andrej Karpathy, OpenAI founding member and inventor of ‘vibe coding,’ defects to Anthropic | Fortune",
+         "url": "https://fortune.com/2026/05/19/who-is-andrej-karpathy-vibe-coding-anthropic-openai-rubiks-cube/?utm_source=chatgpt.com"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "parent": "3c65e8b1-79c9-4ebc-a2a4-072262b2611e"
+  },
+  "dc3120f1-70d3-44cf-905b-6ef7fc485755": {
+   "id": "dc3120f1-70d3-44cf-905b-6ef7fc485755",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "5da34cdd-3955-4937-941a-5b7622ed87ce",
+     "thoughts": [
+      {
+       "chunks": [],
+       "content": "",
+       "finished": true,
+       "summary": "Searched 11 websites"
+      }
+     ]
+    },
+    "create_time": 1791930565.314094,
+    "id": "dc3120f1-70d3-44cf-905b-6ef7fc485755",
+    "metadata": {
+     "model_slug": "gpt-6",
+     "parent_id": "866edbbc-6658-453f-95a3-5476203424f4",
+     "tool_icons": [
+      "https://www.google.com/s2/favicons?domain=support.google.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=platform.claude.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=support.claude.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=gemini.google&sz=128",
+      "https://www.google.com/s2/favicons?domain=www.anthropic.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=hub-prod.perplexity.ai&sz=128",
+      "https://www.google.com/s2/favicons?domain=googlesupport.serverhump.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=github.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=store.google.com&sz=128",
+      "https://www.google.com/s2/favicons?domain=blog.google&sz=128",
+      "https://www.google.com/s2/favicons?domain=services.google.com&sz=128"
+     ]
+    }
+   },
+   "parent": "bbb219eb-3ad6-45f4-bbdc-4d11102bd659"
+  }
+ },
+ "memory_scope": "global_enabled",
+ "pinned_time": null,
+ "plugin_ids": null,
+ "title": "Prompting tricks explained",
+ "update_time": 1791930613.897657,
+ "voice": null
+}
