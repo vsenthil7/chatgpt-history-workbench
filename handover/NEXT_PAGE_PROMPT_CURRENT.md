@@ -1,6 +1,6 @@
-# Next page prompt — 2026-10-18 21:45
+# Next page prompt — 2026-10-18 22:05
 
-Repo: vsenthil7/chatgpt-history-workbench. Read AGENTS.md first.
-State: export hashed + inventoried (T003). Plan v0.1 PROPOSED: docs/plans/chatgpt-history_claude_plan_import_v01_20261018_2145.md.
-On "go": T004 = slices S1–S3 on the PC (clone to C:\Users\v_sen\develop\chatgpt-history-workbench; read the zip in place at G:\My Drive\chatgpt-export\Chatgpt-export-20261014.zip).
-Open decisions: large files >95 MB (Drive pointer proposed vs LFS); memory export (not in the data export).
+Repo: vsenthil7/chatgpt-history-workbench. Read AGENTS.md, protocol/PROTOCOL_PIN.md, context/current-state.md.
+Next on "go": T005 = S4 (attachments → raw/files/<file_id>__<real name>, large-file pointers), then re-run redact (append-only log) + secret_scan + verify_raw extended to files.
+Run on the PC clone; long steps in the background with a log (bridge waits 60 s); commit messages via files (`git commit -F`); push in batches ≤ ~200 MB.
+Open: Senthil to export ChatGPT memory into My Drive/chatgpt-export/; rotate any real keys in source/REDACTIONS.md.
