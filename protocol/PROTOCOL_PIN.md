@@ -14,3 +14,5 @@ Template repo: vsenthil7/claude-history-workbench @ 0c1ee3e (layout, scripts, re
 - 2026-10-18 22:00 (T004): bulk imports run on Senthil's PC clone (C:\Users\v_sen\develop\chatgpt-history-workbench); the zip is read in place from G:\My Drive. Batch commits listed in the turn record.
 - 2026-10-18 22:22 (T005): attachments that contain credentials INSIDE (found by scripts/scan_containers.py) are held back Drive-only via scripts/hold_back.py (moved, never deleted; not rewritten). scan_containers.py runs before every attachment push.
 - 2026-10-18 22:30 (T005): PC bridge practice — no `-ExecutionPolicy Bypass` (EPERM); start python/git directly; waits ≤ 45 s; commit messages as files.
+- 2026-10-18 22:48 (T006): redaction also runs on decoded JSON string values (`redact_json_text`); text-level alone missed 9 values hidden by JSON escaping. verify_raw uses the same function.
+- 2026-10-18 22:58 (T006): `readable/**` is `-text` (byte-exact), like raw/ and index/.

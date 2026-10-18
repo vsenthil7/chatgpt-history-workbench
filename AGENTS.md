@@ -26,8 +26,8 @@ Close every turn with: `python3 -I scripts/turn_close/turn_close.py --turn T### 
 | `raw/conversations/YYYY/MM/` | one chat per file — VERBATIM except logged redactions |
 | `raw/data/` | the export's other data files (byte copies; user.json not copied) |
 | `raw/files/` | attachments `<file id>__<real name>` (byte copies; text files may carry logged redactions) |
-| `readable/conversations/YYYY/MM/` | DERIVED readable version of each chat |
-| `index/` | conversations.csv, manifest, timeline, export-to-export diff |
+| `readable/conversations/YYYY/MM/` | DERIVED readable version of each chat (byte-exact in Git: `-text`) |
+| `index/` | `manifest.md` (start here), conversations.csv, projects.csv, files/large/held-back/missing-files CSVs, exports/ (inventory, baseline, compares), timeline |
 | `scripts/` | importer, verifier, redactor, usage, turn close — rerunnable |
 | `usage/` | per-session MEASURED usage |
 | `docs/plans/` | versioned plans, one file per version |
@@ -45,7 +45,8 @@ File names for derived/working files: `chatgpt-history_<ai>_<type>_<topic>_YYYYM
 Both stay inside the export zip on Drive; `verify_raw.py` checks their SHA-256 against the zip.
 
 ## Import order for an export (rerunnable, on the PC clone)
-`inventory_export.py` → `import_export.py` (chats, data) → `import_files.py` (attachments) → `redact_secrets.py` (append-only log) → `secret_scan.py` + `scan_containers.py` → `hold_back.py` if containers hit → `verify_raw.py` (exit 0) → commit in batches ≤ ~200 MB.
+`inventory_export.py` → `import_export.py` (chats, data) → `import_files.py` (attachments) → `redact_secrets.py` (append-only log) → `secret_scan.py` + `scan_containers.py` → `hold_back.py` if containers hit → `verify_raw.py` (exit 0) → commit in batches ≤ ~200 MB → `make_readable.py` (readable chats + conversations/projects/missing-files indexes, cloud) → `secret_scan.py readable` → `compare_exports.py <repo> <NEW> <OLD>`.
+Redaction covers JSON-escaped values too (`redact_json_text`, T006); never redact JSON at text level only.
 
 ## Rules carried from Senthil's standards
 - Every turn starts with pull-and-merge; never overwrite other AIs' work.

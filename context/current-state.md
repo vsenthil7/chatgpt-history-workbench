@@ -1,7 +1,7 @@
-# Current state — 2026-10-18 22:35
+# Current state — 2026-10-18 23:05
 
-- T002 bootstrap · T003 inventory · T004 chats + data · T005 attachments.
-- In Git: 811 chats, 9 data files, 1,634 attachments (518 MB). Drive-only: 3 large files, chat.html, 42 containers with keys inside.
-- Redactions: 125 values in 25 files (2 runs). All scans 0 blocking; verify_raw 0 problems.
-- Not yet: S7 readable chats, S8 indexes (conversations.csv, manifest, timeline of chats), S9 export-compare baseline.
-- PC clone: C:\Users\v_sen\develop\chatgpt-history-workbench. Memory export still missing (not in the data export).
+- Plan v0.1 slices S1–S9 all done (T004–T006) for export 20261014. Start with `index/manifest.md`.
+- In Git: 811 raw chats, 811 readable chats, 9 data files, 1,634 attachments; indexes; baseline for the next export.
+- Drive-only: 3 large files, chat.html, 42 key-bearing containers. Missing from the export: 827 files, saved memory, Project names.
+- Redactions: 3 runs, 134 values. All scans 0 blocking; verify_raw 0 problems (after the T006 fix).
+- Open: memory export (Senthil); key rotation (Senthil); claude-history-workbench secret clean-up (finding in docs/reports/, needs "go").
