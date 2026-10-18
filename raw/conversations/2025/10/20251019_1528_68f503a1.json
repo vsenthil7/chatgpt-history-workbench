@@ -1,0 +1,1558 @@
+{
+ "conversation_id": "68f503a1-2228-8329-aad3-1fc253ff87a9",
+ "conversation_template_id": null,
+ "create_time": 1760887727.055109,
+ "current_node": "e062514d-073b-4706-a8ce-58a1ecd02238",
+ "default_model_slug": "gpt-5",
+ "id": "68f503a1-2228-8329-aad3-1fc253ff87a9",
+ "is_archived": false,
+ "is_do_not_remember": false,
+ "is_read_only": null,
+ "is_starred": null,
+ "is_study_mode": false,
+ "mapping": {
+  "1efff953-6746-4bd2-836f-8dac854e5bbf": {
+   "id": "1efff953-6746-4bd2-836f-8dac854e5bbf",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "generate a clean visual artifact based on this breakdown."
+     ]
+    },
+    "create_time": 1760888250.607,
+    "id": "1efff953-6746-4bd2-836f-8dac854e5bbf",
+    "metadata": {
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "234ab44d-c062-415d-a432-6c007e0d27d3"
+  },
+  "234ab44d-c062-415d-a432-6c007e0d27d3": {
+   "id": "234ab44d-c062-415d-a432-6c007e0d27d3",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Great — you've shared a **technical architecture diagram** of an *Enhanced Agentic RAG (Retrieval-Augmented Generation) system*, which includes both **traditional RAG components** and **new LLM-powered enhancements** like *query optimization, source identification, post-processing, and table-aware content enrichment.*\n\nI’ll now **explain this diagram block-by-block**, in a clear narrative flow—from **user query to final answer**, and from **document ingestion to offline storage**.\n\n---\n\n# 🧠 High-Level View of the System\n\n### There are **Two Major Pipelines**\n1️⃣ **User Query → Answer Pipeline** *(Real-time at inference time)*  \n2️⃣ **Knowledge Document → Embedding Pipeline** *(Offline/preprocessing time)*  \n\n### Two New Additions (Enhanced Agentic RAG)\n✔️ Use of **LLMs as agents** in key stages (query refinement, source selection, post-processing)  \n✔️ Use of **Document enrichment** using LLMs (metadata generation, table analysis)\n\n---\n\n# 🔂 Step-by-Step Explanation of Architecture\n\n---\n\n## 🟦 **A. User Interaction & Query Handling**\n\n### 🧍 Users → Slack Interface\n- Users ask questions via Slack (natural language).\n- Slack acts as the client UI, passing queries into the RAG system.\n\n### 🪛 Pre-Process Stage (LLM Small Models)\n| Component | Purpose |\n|-----------|---------|\n| 🔍 **Query Optimizer (LLM Small)** | Reformulates user questions into clearer, precise queries (removes ambiguity, clarifies intent). |\n| 🗂 **Source Identifier (LLM Small)** | Determines which knowledge source/document set to retrieve from (e.g., API docs vs SOP guides). |\n\nOutput: A cleaner, structured query + metadata filters.\n\n---\n\n## 🟩 **B. Retrieval Process (Dual Retriever System)**\n\n| Component | Role |\n|-----------|-----|\n| 🧮 **BM25 Retriever** | Traditional keyword-based search — catches exact terms. |\n| 🧠 **Vector Search (Embedding Model)** | Semantic retrieval — finds meaning-similar content. |\n\nBoth retrievers fetch candidate document chunks from **Vector Store** and **Feature Store**.\n\nResult: **Top relevant chunks** returned for answer generation.\n\n---\n\n## 🟨 **C. Answer Generation Pipeline**\n\n| Stage | Component | Function |\n|--------|-----------|----------|\n| 🧬 LLM (Large) | **Answer Generator** | Produces the actual answer using retrieved chunks. |\n| 🛠 LLM (Small) | **Post-Processor** | Refines answer, ensures formatting, citations, correctness. |\n| 🏷 Prompt Configs | Templates | Enforces instruction style (“Answer only from docs”, “cite sources”). |\n\nFinal answer → Sent back to Slack user.\n\n---\n\n## 🔁 **D. Feedback & Evaluation**\n\n| Feedback Type | Flow |\n|---------------|------|\n| ✅ Helpful ❌ Not Helpful | Logged via Slack |\n| Batch Eval / LLM-as-Judge | Uses “Golden Test Data” to evaluate answer quality |\n\nData → Post-Prod Metrics / Pre-Prod Metrics (for future improvements)\n\n---\n\n---\n\n# 📚 **E. Knowledge Document Ingestion Pipeline (Offline Processing)**\n\nThis part processes **internal documentation (as GDocs, Confluence, etc.)** into usable RAG chunks.\n\n### 1️⃣ Content Extraction (via GDoc API)\nPull raw documents (tables, text sections).\n\n### 2️⃣ Content Enrichment (LLM Large)\n- Add **custom metadata tags** (e.g., component name, API version).\n- Convert complex tables to structured formats.\n\n### 3️⃣ Table-Aware Chunking\nHandles tables intelligently, not breaking them mid-row.\n\n### 4️⃣ Embedding Generation (Embeddings Model)\nGenerate high-dimensional vectors → push to **Vector Store**.\n\nFinal → Both:\n- **Feature Store**\n- **Vector Store** (for retrieval)\n\n---\n\n# 📦 Summary of Key Innovations (Green Components in Diagram)\n\n| Enhancement | Purpose |\n|-------------|---------|\n| 🔍 Query Optimizer (LLM) | Makes vague queries actionable |\n| 🧭 Source Identifier (LLM) | Selects right knowledge base |\n| 🧮 Table-Aware Chunking | Keeps structured knowledge intact |\n| 🧱 Content Enrichment (LLM) | Adds metadata → powerful search |\n| 🛠 Post-Processing (LLM) | Reduces hallucinations, adds clarity |\n\n---\n\n# ⚠️ Risks in This Enhanced Architecture\n\n| Risk | Why It Matters |\n|------|----------------|\n| LLM hallucinations | Post-processor must verify facts |\n| Wrong Source Retrieval | Query optimizer / identifier must be accurate |\n| Expensive Pipeline | Multiple LLM calls per query |\n| Document Drift | Outdated embeddings cause incorrect answers |\n| Privacy/Security | GDocs ingestion must handle sensitive info |\n\n---\n\nWould you like a **PowerPoint version** or **clean architecture poster (PNG/PDF)** of this explanation to share with your team or interns? I can generate it professionally."
+     ]
+    },
+    "create_time": 1760887924.192567,
+    "id": "234ab44d-c062-415d-a432-6c007e0d27d3",
+    "metadata": {
+     "content_references": [],
+     "model_slug": "gpt-5",
+     "parent_id": "aed310c8-f061-451a-84ec-1a6861bc14e8"
+    }
+   },
+   "parent": "aed310c8-f061-451a-84ec-1a6861bc14e8"
+  },
+  "4371c819-f7a7-4a95-a433-17a99fe06f19": {
+   "id": "4371c819-f7a7-4a95-a433-17a99fe06f19",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Here’s a summary of the blog post **“entity[\"software\",\"Genie\",0]: Uber’s Gen AI On-Call Copilot”** from entity[\"organization\",\"Uber Technologies Inc.\",0] (October 10 2024). citeturn0view0\n\n---\n\n## ✅ What it’s about  \nUber describes “Genie” as an internal tool — essentially a generative-AI “copilot” for on-call engineering teams. The goal: help engineers and internal users ask questions (via Slack), get faster answers, reduce back-and-forth, and relieve burdens on human on-call responders. citeturn0view0turn0view0  \n\nIn more detail:  \n- Many internal Slack channels at Uber get lots of questions from users asking for support from on-call engineering teams. citeturn0view0  \n- The tool is built so that when a user requires help, they can ask via Slack and Genie uses large-language-model (LLM) + retrieval-augmented generation (RAG) methods to provide answers referencing Uber’s internal documentation. citeturn0view0turn0view0  \n- They chose a RAG (retrieval + generation) approach rather than fine-tuning a model from scratch, because RAG allowed faster time-to-market and needed fewer full “example” data sets. citeturn0view0  \n\n---\n\n## 🔍 How it works (architecture)  \nThe blog post provides a “deep dive” into how the system is built:\n\n- They ingest internal knowledge sources: Uber’s internal wiki (“Engwiki”), internal Stack Overflow instances, engineering requirement docs, etc. citeturn0view0  \n- These are chunked and embedded (vectorised) using an embedding model (OpenAI embedding) and stored in a vector database. citeturn0view0  \n- When a user asks a question in Slack, that query is also embedded; the system retrieves relevant knowledge chunks from the vector DB; those become the “context” for the LLM response. citeturn0view0  \n- They mention various components: ETL (extract/transform/load) stage using Apache Spark, indexing, pushing data to “Terrablob” (Uber’s internal blob storage) and “Sia” (Uber’s internal vector-db solution) for serving. citeturn0view0  \n- They track cost, usage, and maintain a feedback loop: users can mark replies as “Resolved”, “Helpful”, “Not Helpful”, “Not Relevant” within Slack; this feedback is collected via Kafka to Hive tables and dashboards. citeturn0view0  \n- To reduce hallucination (i.e., incorrect answers), they embed the source URL and sub-context into the prompt, instructing the LLM to only answer from those sources and provide citations. citeturn0view0  \n- They also restrict what data sources are used (to avoid leaking overly sensitive internal info) and design an interaction mode in Slack so if Genie can’t fully answer, escalation to a human on-call engineer is easy. citeturn0view0  \n\n---\n\n## 📊 Results & Impact  \n- Since launch (September 2023) it has rolled out to 154 Slack channels. citeturn0view0  \n- It has answered over 70,000 questions. citeturn0view0  \n- It has a “helpfulness” rate of ~48.9% (i.e., nearly half of responses were marked “Resolved”/“Helpful”). citeturn0view0  \n- They estimate it saved ~13,000 engineering hours so far. citeturn0view0  \n\n---\n\n## 🤔 Significance & Takeaways  \n- Internal help systems: This shows how a large tech company is using generative AI internally to handle “routine” questions and reduce load on engineers.  \n- Use of RAG over fine-tuning: They chose retrieval-augmented generation because it allowed quicker deployment and didn’t require extensive curated training data.  \n- Considerations: They pay attention to issues like hallucinations, data security, source documentation quality, feedback loops, and human escalation. These are good practices for deploying AI assistants in internal business settings.  \n- Metrics: The fact that roughly half of queries can be handled by Genie is promising; but also indicates that human-in-loop is still needed for many cases.  \n- Future potential: They mention that Genie’s scope could expand beyond Slack channels into product interfaces (e.g., within engineering IDEs, within their internal products) to serve as context-aware assistants. citeturn0view0  \n\n---\n\nIf you like, I can **pull out the full technical architecture diagram**, **list possible risks or limitations** discussed, or **compare this system to other internal AI assistants**. Would you like me to do that?"
+     ]
+    },
+    "create_time": 1760887731.248263,
+    "id": "4371c819-f7a7-4a95-a433-17a99fe06f19",
+    "metadata": {
+     "content_references": [
+      {
+       "alt": "Genie",
+       "prompt_text": null,
+       "type": "alt_text"
+      },
+      {
+       "alt": "Uber Technologies Inc.",
+       "prompt_text": null,
+       "type": "alt_text"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [
+          {
+           "attribution": "Uber",
+           "pub_date": null,
+           "snippet": null,
+           "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+           "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+          }
+         ],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [
+          {
+           "attribution": "Uber",
+           "pub_date": null,
+           "snippet": null,
+           "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+           "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+          }
+         ],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "",
+       "has_images": false,
+       "prompt_text": null,
+       "sources": [
+        {
+         "attribution": "Uber",
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "type": "sources_footnote"
+      }
+     ],
+     "model_slug": "gpt-5",
+     "parent_id": "32e63a4b-68b2-4595-a8c4-8787afe617b2"
+    }
+   },
+   "parent": "d22ec21b-68c8-450a-a5b1-57f8179d272e"
+  },
+  "4b95625c-bf03-41f0-a8ff-56a9b8853195": {
+   "id": "4b95625c-bf03-41f0-a8ff-56a9b8853195",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Here’s the “full tech architecture” of Uber’s **Genie** (their Gen-AI on-call copilot) distilled from the blog, plus a plain-English walkthrough of each block, and a risk/limitations checklist.\n\n# What the architecture shows (Figure 3) — end-to-end flow\n1) **Internal knowledge sources → ETL (Spark)**  \n   Uber scrapes/loads Engwiki (internal wiki), internal Stack Overflow, engineering docs, etc., into Spark dataframes. This is the *data prep* stage (source URL + content + metadata). citeturn0view0\n\n2) **Embedding generation → Terrablob (blob storage)**  \n   Document chunks are created (via LangChain), embeddings are generated with OpenAI (via PySpark UDFs), and both content chunks + vectors are written to **Terrablob** (Uber’s internal blob store). Access to embeddings is scoped to relevant Slack channels. citeturn0view0\n\n3) **Index build & push → Sia (vector DB)**  \n   A “bootstrap” job ingests into **Sia** (Uber’s in-house vector database). Two Spark jobs build/merge the index and publish snapshots to Terrablob. Each “leaf” node syncs the base index + snapshot; queries are fanned out to leaves for retrieval. citeturn0view0\n\n4) **Knowledge Service (back end)**  \n   Incoming user questions (from Slack) are embedded; the service fetches top-k chunks from Sia; those chunks become **prompt context** (“sub-contexts” with source URLs) passed to the LLM. citeturn0view0\n\n5) **LLM via Michelangelo Gateway + cost tracking**  \n   Requests carry a UUID from Slack → Knowledge Service → **Michelangelo Gateway** (pass-through to the LLM) so costs and audit logs can be attributed by UUID. citeturn0view0\n\n6) **Slack UX + human escalation**  \n   Genie posts an answer in Slack with buttons for **Resolved / Helpful / Not Helpful / Not Relevant** and quick **escalation to on-call** if needed. citeturn0view0\n\n7) **Feedback & evaluation pipelines**  \n   Button clicks flow through a Slack plugin into Kafka → Hive for dashboards. Separate evaluation ETL lets teams run “LLM-as-a-judge” checks on answer quality (e.g., hallucination, relevancy) and even evaluate **document quality** itself. Reports are exposed in the Michelangelo UI. citeturn0view0\n\n---\n\n# Components explained (what each block does)\n\n- **Engwiki, Internal Stack Overflow, Eng docs** – Primary corpora that hold answers to recurring support questions. citeturn0view0  \n- **Spark ETL (Data Prep)** – Fetch APIs/files, normalize into a dataframe schema: source URL, content, and metadata. citeturn0view0  \n- **Chunking + OpenAI Embeddings (via PySpark UDFs)** – Split long docs into smaller passages; compute vector embeddings per chunk; write artifacts to Terrablob. citeturn0view0  \n- **Terrablob (Blob Storage)** – Stores embedding artifacts, base indexes, snapshots that the vector infra consumes. citeturn0view0  \n- **Sia (Vector DB)** – Uber’s in-house vector search. Leaf nodes sync index snapshots; queries broadcast to leaves for fast nearest-neighbor retrieval. citeturn0view0  \n- **Knowledge Service** – Gateway that embeds the incoming Slack question, retrieves top chunks from Sia, and constructs an LLM prompt that *must* answer using supplied sub-contexts and cite their URLs. citeturn0view0  \n- **Michelangelo Gateway (LLM pass-through)** – Routes prompts to the chosen LLM and propagates a UUID for **cost/audit** tracking. citeturn0view0  \n- **Slack Client UX** – Presents the answer and provides one-click actions (Resolved/Helpful/Not Helpful/Not Relevant) and **escalate to human on-call**. citeturn0view0  \n- **Metrics & Eval (Kafka → Hive → Dashboards)** – Ingests feedback events; teams can run custom evals (LLM-as-judge) on Genie’s responses *and* on **document quality** to improve the KB. citeturn0view0\n\n---\n\n# Guardrails the blog calls out (how they reduce bad answers)\n\n- **Prompting with sub-contexts + mandatory citations** – Genie injects retrieved *sub-contexts* and asks the LLM to answer *only* from them and to **return source URLs**. This aims to curb hallucination. citeturn0view0  \n- **Curated data sources** – Only broadly accessible internal sources are used to avoid leaking sensitive content into Slack or to external model providers. citeturn0view0  \n- **Interaction design** – Buttons encourage follow-ups or quick escalation when Genie can’t help. citeturn0view0\n\n---\n\n# Risks & limitations\n\n**Explicit in the blog (or strongly implied):**\n- **Hallucination risk remains** (mitigated, not eliminated): even with RAG, incorrect or over-confident answers can slip through; thus evals, citations, and human escalation exist. citeturn0view0  \n- **Documentation quality is a hard ceiling**: poor, outdated, or inconsistent docs will cap answer quality; hence the separate **document evaluation** pipeline. citeturn0view0  \n- **Data exposure constraints**: only certain sources are allowed; over-restricting sources can reduce coverage; under-restricting raises leakage risk. citeturn0view0  \n- **User-experience dependency**: Slack channel norms and adoption influence success; Genie needs crisp questions and users willing to click feedback. citeturn0view0\n\n**Additional practical risks (inferred best-practice concerns):**\n- **Prompt-injection in docs**: Malicious or poorly formatted internal pages could try to steer the LLM. Content sanitization and retrieval-time filters are needed. (Inference)  \n- **RAG retrieval failure modes**: Embedding drift, bad chunking, or suboptimal top-k can return irrelevant slices → wrong answers. Continuous eval/tuning is required. (Inference)  \n- **Index freshness & scale**: High-churn docs require frequent re-indexing; Sia leaf syncs and snapshot management must keep up under load. (Inference)  \n- **Latency & cost spikes**: Vector search + LLM calls can be costly at Slack scale; mis-scoped UUID tracking, retry storms, or long contexts can balloon costs/latency. (Inference based on their cost-tracking emphasis.) citeturn0view0  \n- **Access control consistency**: Slack channel membership ≠ data entitlements; enforcing per-source ACLs at retrieval/prompt time is non-trivial. (Inference)  \n- **LLM-as-Judge biases**: Automated evals can encode model bias; human spot-checks and task-specific metrics are still needed. (Inference)  \n- **Operational coupling**: Reliance on Slack, Sia, Terrablob, Michelangelo, and OpenAI means any outage or API change can degrade Genie’s service quality. (Inference)\n\n---\n\n# Why they chose RAG (not fine-tuning)\nRAG gave **faster time-to-market** and avoided the need for large curated fine-tune datasets and ongoing fine-tune compute; it also keeps answers anchored to the latest internal sources. citeturn0view0\n\n---\n\n# Metrics snapshot (from the post)\n- Live since **September 2023**; expanded to **154 Slack channels**; **70k+ questions** answered; **~48.9% helpfulness**; **~13k engineer hours saved** (their estimate). citeturn0view0\n\nIf helpful, I can map this to a **buy-vs-build checklist** (what you’d need to replicate Genie in your org) or sketch a **threat model** for the RAG pipeline."
+     ]
+    },
+    "create_time": 1760887795.7044,
+    "id": "4b95625c-bf03-41f0-a8ff-56a9b8853195",
+    "metadata": {
+     "content_references": [
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Uber](https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Uber",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "view",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [],
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "",
+       "has_images": false,
+       "prompt_text": null,
+       "sources": [
+        {
+         "attribution": "Uber",
+         "title": "Genie: Uber’s Gen AI On-Call Copilot | Uber Blog",
+         "url": "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b"
+        }
+       ],
+       "type": "sources_footnote"
+      }
+     ],
+     "model_slug": "gpt-5-thinking",
+     "parent_id": "73c88fd4-a9fe-41d7-8e47-a2690b159bc8"
+    }
+   },
+   "parent": "73c88fd4-a9fe-41d7-8e47-a2690b159bc8"
+  },
+  "6e53bb65-2c61-4e56-a840-0604eb7a8934": {
+   "id": "6e53bb65-2c61-4e56-a840-0604eb7a8934",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "14374803-8a9b-4abf-89ef-1ec21d5d527a",
+     "thoughts": [
+      {
+       "chunks": [
+        "I need to retrieve more details from the article, including the architecture diagram.",
+        "The previous assistant summarized it but didn’t include citations.",
+        "So, I’ll extract key components like ingestion, vector DB, and the feedback loop (Kafka, Hive), while providing proper citations.",
+        "I’ll skip the image carousel for now since it's not relevant."
+       ],
+       "content": "I need to retrieve more details from the article, including the architecture diagram. The previous assistant summarized it but didn’t include citations. So, I’ll extract key components like ingestion, vector DB, and the feedback loop (Kafka, Hive), while providing proper citations. I’ll skip the image carousel for now since it's not relevant.",
+       "finished": true,
+       "summary": "Extracting article details"
+      }
+     ]
+    },
+    "create_time": 1760887786.851732,
+    "id": "6e53bb65-2c61-4e56-a840-0604eb7a8934",
+    "metadata": {
+     "content_references": [],
+     "model_slug": "gpt-5-thinking",
+     "parent_id": "d6c62b23-2037-4530-ad48-c2824d613add"
+    }
+   },
+   "parent": "7fc17ccd-f8a4-4054-ba71-80963ab537ab"
+  },
+  "6ef79ca1-1b2c-44e9-813c-af1b3fd93e12": {
+   "id": "6ef79ca1-1b2c-44e9-813c-af1b3fd93e12",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Here’s a **clear, step-by-step explanation of the technical architecture diagram** from Uber’s Genie (Gen-AI On-Call Copilot). I’ll translate the visual blocks into simple layers and explain how data flows through the system. This is *exactly what the diagram (Figure 3)* represents in the blog.\n\n---\n\n# 🧭 High-Level Architecture Flow  \n**(Data Sources → Embeddings & Indexing → Vector DB → Retrieval & LLM → Slack → Feedback Loops)**\n\n---\n\n# 🔍 Step-by-Step Breakdown of Each Architecture Component\n\n| **Stage** | **Component in Diagram** | **What It Does** | **Why It Exists** |\n|-----------|--------------------------|------------------|-------------------|\n| **1️⃣ Knowledge Input Layer** | 🗂 **EngWiki, Internal StackOverflow, EngDocs, etc.** | These are Uber’s internal documentation sources containing engineering answers, FAQs, troubleshooting guides. | Genie only answers from *trusted, internal knowledge* to avoid unsafe or guesswork answers. |\n| **2️⃣ Data Ingestion & ETL** | ⚙️ **Spark ETL Pipeline** | Uber uses Apache Spark to fetch data from those sources, clean it, unify it into a standard format (`source_url`, `content`, `metadata`). | Ensures structured, scalable ingestion — millions of documents handled. |\n| **3️⃣ Text Chunking & Embeddings** | ✂️ **LangChain (Chunking) + OpenAI Embedding via PySpark UDF** | Splits full documents into smaller meaning units (chunks). Generates vector embeddings (numeric representations) for each chunk. | Enables *semantic search* — the AI can “find meaning” rather than exact keywords. |\n| **4️⃣ Storage Layer (Raw & Indexed)** | 🗃 **Terrablob (Blob Storage)** | Stores both raw text chunks and vector embeddings. Snapshots of the vector index are also stored here. | Serves as a durable repository before pushing to the vector database. |\n| **5️⃣ Vector Search Platform** | 🧠 **Sia (Uber’s Internal Vector Database)** <br> 🌿 *Leaf Nodes + Base Index* | A high-speed semantic search engine. When users ask a question, Genie retrieves *nearest matching chunks* from Sia using cosine similarity. | Core of RAG — finds the *right paragraph* to answer from. |\n| **6️⃣ Knowledge Service (Retrieval & Prompt Builder)** | 🔍 **Knowledge Service / Retrieval Layer** | Takes user query → embeds it → retrieves top-k chunks from Sia → injects chunks into an LLM prompt with citations. | Converts raw vector matches into usable LLM context. |\n| **7️⃣ LLM Execution Gateway** | 🚪 **Michelangelo LLM Gateway (with UUID Tracking)** | Sends enriched prompt to LLM (e.g., GPT, internal models). Tracks each request with unique IDs for cost & logging. | Central governance — cost control, audit, safety. |\n| **8️⃣ User Interaction / Client** | 💬 **Slack Client Interface** | Users ask questions in Slack channels. Genie replies with answers, citations, and feedback buttons. | Brings AI to where engineers already work. No separate UI needed. |\n| **9️⃣ Feedback System** | ✅ ❌ **(Buttons: Resolved / Helpful / Not Helpful / Not Relevant)** | Sends user feedback to Kafka → Hive dashboards for evaluation. Teams monitor quality. | Continuous learning & performance monitoring. |\n| **🔁 Continuous Improvement Loop** | 📊 **Kafka → Hive → Evaluation UI (LLM-as-Judge)** | Run automated scoring on accuracy, hallucination, relevance. Also evaluates *document quality*. | Ensures Genie stays reliable and improves over time. |\n\n---\n\n# 🧵 **Full Data & Control Flow (Visual Summary in Words)**\n\n> *Slack Question* → Embed → Search Sia → Retrieve Context → Build Prompt → Call LLM → Send Answer → User Feedback → Metrics & Audit → Improve Docs & Model\n\n---\n\n# ⚠️ Key Risks Noted in Architecture\n\n| **Risk** | **Where It Happens** |\n|----------|----------------------|\n| Hallucination Risk | Knowledge Service & LLM (prompt limited by context to reduce it) |\n| Bad Documentation | Source Quality directly affects answer quality |\n| Access Control / Data Leakage | Data Ingestion Stage |\n| Index Staleness | Sia vector index lifecycle |\n| UX Adoption Issues | Slack interaction stage |\n\n---\n\n# 🔄 Why This Architecture Matters\n\n✔️ **Enterprise-Ready** – Clear control over cost, data security, and model behaviour  \n✔️ **RAG Over Fine-Tuning** – Instant updates when docs improve  \n✔️ **Scalable** – Built with Spark, Kafka, Hive, Slack integration\n\n---\n\nWould you like me to **redraw this architecture as a diagram (PNG / PPT / PDF)** for presentation or internal learning? I can generate a clean visual artifact based on this breakdown."
+     ]
+    },
+    "create_time": 1760887864.167576,
+    "id": "6ef79ca1-1b2c-44e9-813c-af1b3fd93e12",
+    "metadata": {
+     "content_references": [],
+     "model_slug": "gpt-5",
+     "parent_id": "dbe24cd7-9094-48f3-9c67-ad832096d2e1"
+    }
+   },
+   "parent": "fdd668bf-519a-4caf-ba68-0a5b12db0cef"
+  },
+  "73c88fd4-a9fe-41d7-8e47-a2690b159bc8": {
+   "id": "73c88fd4-a9fe-41d7-8e47-a2690b159bc8",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content": "Thought for 9s",
+     "content_type": "reasoning_recap"
+    },
+    "create_time": 1760887796.056848,
+    "id": "73c88fd4-a9fe-41d7-8e47-a2690b159bc8",
+    "metadata": {
+     "model_slug": "gpt-5-thinking",
+     "parent_id": "d217dc57-1650-489d-92ef-3d5c1fdff110"
+    }
+   },
+   "parent": "d217dc57-1650-489d-92ef-3d5c1fdff110"
+  },
+  "7fc17ccd-f8a4-4054-ba71-80963ab537ab": {
+   "id": "7fc17ccd-f8a4-4054-ba71-80963ab537ab",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "pull out the full technical architecture diagram, explain each component and list possible risks or limitations"
+     ]
+    },
+    "create_time": 1760887781.64,
+    "id": "7fc17ccd-f8a4-4054-ba71-80963ab537ab",
+    "metadata": {
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "4371c819-f7a7-4a95-a433-17a99fe06f19"
+  },
+  "aed310c8-f061-451a-84ec-1a6861bc14e8": {
+   "id": "aed310c8-f061-451a-84ec-1a6861bc14e8",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "multimodal_text",
+     "parts": [
+      {
+       "asset_pointer": "sediment://file_0000000005f46243947c007a725f8c5f",
+       "content_type": "image_asset_pointer",
+       "fovea": null,
+       "height": 841,
+       "metadata": {
+        "asset_pointer_link": null,
+        "container_pixel_height": null,
+        "container_pixel_width": null,
+        "dalle": null,
+        "emu_omit_glimpse_image": null,
+        "emu_patches_override": null,
+        "generation": null,
+        "gizmo": null,
+        "is_no_auth_placeholder": null,
+        "lpe_delta_encoding_channel": null,
+        "lpe_keep_patch_ijhw": null,
+        "sanitized": true,
+        "segmentation": null,
+        "watermarked_asset_pointer": null
+       },
+       "size_bytes": 520098,
+       "width": 1126
+      },
+      ""
+     ]
+    },
+    "create_time": 1760887920.149,
+    "id": "aed310c8-f061-451a-84ec-1a6861bc14e8",
+    "metadata": {
+     "attachments": [
+      {
+       "height": 841,
+       "id": "file_0000000005f46243947c007a725f8c5f",
+       "mime_type": "image/png",
+       "name": "6691498b-92a9-4f67-b764-0c8cbe50c6da.png",
+       "size": 520098,
+       "source": "local",
+       "width": 1126
+      }
+     ],
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "6ef79ca1-1b2c-44e9-813c-af1b3fd93e12"
+  },
+  "client-created-root": {
+   "id": "client-created-root",
+   "message": null,
+   "parent": null
+  },
+  "d217dc57-1650-489d-92ef-3d5c1fdff110": {
+   "id": "d217dc57-1650-489d-92ef-3d5c1fdff110",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "thoughts",
+     "source_analysis_msg_id": "d6d8d1ae-73f8-4734-a1b6-25648f55343e",
+     "thoughts": [
+      {
+       "chunks": [
+        "We"
+       ],
+       "content": "We",
+       "finished": true,
+       "summary": "Explaining architecture and risks"
+      }
+     ]
+    },
+    "create_time": 1760887795.791081,
+    "id": "d217dc57-1650-489d-92ef-3d5c1fdff110",
+    "metadata": {
+     "content_references": [],
+     "model_slug": "gpt-5-thinking",
+     "parent_id": "d55ee8c1-4e34-46cd-bfbc-6a6919e49bb3"
+    }
+   },
+   "parent": "6e53bb65-2c61-4e56-a840-0604eb7a8934"
+  },
+  "d22ec21b-68c8-450a-a5b1-57f8179d272e": {
+   "id": "d22ec21b-68c8-450a-a5b1-57f8179d272e",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "https://www.uber.com/en-NL/blog/genie-ubers-gen-ai-on-call-copilot/?uclick_id=4659440f-90cc-49a1-a872-cbbc4784420b could you please explain what is in this link.. "
+     ]
+    },
+    "create_time": 1760887725.487,
+    "id": "d22ec21b-68c8-450a-a5b1-57f8179d272e",
+    "metadata": {
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "client-created-root"
+  },
+  "e062514d-073b-4706-a8ce-58a1ecd02238": {
+   "id": "e062514d-073b-4706-a8ce-58a1ecd02238",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "✅ Here is a **first visual artifact** generated from your architecture request — a simplified *Enhanced Agentic RAG Flow Diagram*.  \nHowever, this draft is quite **rough and imperfect** (auto-generated). I will now **refine it fully** into a **professional, crystal-clear architecture visual** (perfect for teaching, slides, internal documentation).\n\n---\n\n## 🔍 What I’ll Deliver in the Final Polished Visual\n\n| Element | Refinement to Apply |\n|---------|----------------------|\n| 🎨 Visual Style | Clean, enterprise architecture (flat colors, proper icons, arrows) |\n| 🧩 Layout | Left-to-right flow: *Docs → Processing → Retrieval → LLM → Answer → Feedback* |\n| 🟢 Highlight New (Agentic) Components | Green boxes with icon badges (LLM-powered) |\n| ⚪ Traditional RAG Blocks | Grey standard blocks |\n| 🧭 Legend & Labels | Clear legend (New vs Traditional), Titles, Subsections |\n| 🛠 Icons | Google Docs, Spark, Vector DB, Slack, LLM, etc. |\n\n---\n\n## ✨ Before I Generate the Final Professional Diagram  \nPlease confirm your **preferred output format**:\n\n### 🔘 Choose One:\n1️⃣ **PNG Image** (for quick sharing or embedding)  \n2️⃣ **PPTX Slide** (PowerPoint - editable shapes for presentations)  \n3️⃣ **PDF Poster** (Printable, high resolution)\n\n---\n\nOnce you confirm the format, I will produce a **high-quality diagram** that you can directly use in:\n- AI Intern Training\n- Architecture Proposals\n- RAG System Presentations\n- Technical Blogs\n\n---\n\n### 📁 Also – would you like me to  \n**A. Include system components like Kafka, Hive, Terrablob, Michelangelo Gateway (Uber architecture version)**  \n**B. Keep it generic for industry (agnostic, no Uber labels)**\n\n---\n\nReply with:\n```\nFormat: PNG / PPTX / PDF\nStyle: Uber-specific / Generic Industry\n```\n\nAnd I’ll generate the polished artifact immediately."
+     ]
+    },
+    "create_time": 1760888357.082276,
+    "id": "e062514d-073b-4706-a8ce-58a1ecd02238",
+    "metadata": {
+     "content_references": [],
+     "model_slug": "gpt-5",
+     "parent_id": "8d5ea733-0a60-47c6-8ece-fc57c44666a1"
+    }
+   },
+   "parent": "1efff953-6746-4bd2-836f-8dac854e5bbf"
+  },
+  "fdd668bf-519a-4caf-ba68-0a5b12db0cef": {
+   "id": "fdd668bf-519a-4caf-ba68-0a5b12db0cef",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "explain the technical architecture diagram one by one"
+     ]
+    },
+    "create_time": 1760887860.86,
+    "id": "fdd668bf-519a-4caf-ba68-0a5b12db0cef",
+    "metadata": {
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "4b95625c-bf03-41f0-a8ff-56a9b8853195"
+  }
+ },
+ "memory_scope": "global_enabled",
+ "pinned_time": null,
+ "plugin_ids": null,
+ "title": "Genie AI overview",
+ "update_time": 1760888377.43972,
+ "voice": null
+}

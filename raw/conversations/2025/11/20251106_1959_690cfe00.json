@@ -1,0 +1,3611 @@
+{
+ "conversation_id": "690cfe00-9780-8321-9a15-67934c3df21a",
+ "conversation_template_id": null,
+ "create_time": 1762459152.655466,
+ "current_node": "6edf965f-af7d-43ed-89d0-25447e9e69aa",
+ "default_model_slug": "gpt-5",
+ "id": "690cfe00-9780-8321-9a15-67934c3df21a",
+ "is_archived": false,
+ "is_do_not_remember": false,
+ "is_read_only": null,
+ "is_starred": null,
+ "is_study_mode": false,
+ "mapping": {
+  "04f2cb32-20ee-426a-8746-690de0e25702": {
+   "id": "04f2cb32-20ee-426a-8746-690de0e25702",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Perfect 🌿 — I’ll build you a **ready-to-use cost modeling sheet** based on the current OpenAI API pricing.  \n\nHere’s what I’ll include in the Google Sheets/Excel version:  \n\n---\n\n### 🧾 **Sheet Structure (Pre-filled Example)**\n\n| Model | Input ($ / 1 M tokens) | Output ($ / 1 M tokens) | Avg Input Tokens / Call | Avg Output Tokens / Call | Calls / Month | Input Cost ($) | Output Cost ($) | Total Monthly ($) | Annual ($) |\n|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|\n| GPT-4o | 5.00 | 15.00 | 3 000 | 1 500 | 10 000 | =B2*(D2*F2/1 000 000) | =C2*(E2*F2/1 000 000) | =G2+H2 | =I2*12 |\n| GPT-4o mini | 0.15 | 0.60 | 2 000 | 800 | 50 000 | ... | ... | ... | ... |\n| GPT-3.5 Turbo | 0.50 | 1.50 | 1 500 | 700 | 100 000 | ... | ... | ... | ... |\n| Realtime API (Text) | 5.00 | 20.00 | 5 000 | 3 000 | 2 000 | ... | ... | ... | ... |\n| DALL·E Image (Low) | – | – | – | – | 500 | – | =0.01*F5 | =H5 | =I5*12 |\n\n---\n\n### ⚙️ **Formulas included**\n- Input Cost = `=(B2*D2*F2)/1 000 000`\n- Output Cost = `=(C2*E2*F2)/1 000 000`\n- Total Monthly = `=G2+H2`\n- Annual = `=I2*12`\n\n---\n\n### 🪶 **Purpose**\nYou’ll be able to:\n- See **cost per model and scenario** instantly.  \n- Experiment with token or call volume.  \n- Estimate how scaling affects monthly/annual budget.  \n- Use as a plug-in module inside your **AUMNITY financial model** later.\n\n---\n\nWould you prefer me to:\n1. **Generate a downloadable Excel (.xlsx) file** now, or  \n2. **Provide a Google Sheets link (shareable)** that you can open directly and duplicate into your Drive?\n\nWhich format suits you better, partner?"
+     ]
+    },
+    "create_time": 1762475220.257088,
+    "id": "04f2cb32-20ee-426a-8746-690de0e25702",
+    "metadata": {
+     "content_references": [],
+     "model_slug": "gpt-5",
+     "parent_id": "b93c9fd8-23da-44d5-a186-d488fee3f326"
+    }
+   },
+   "parent": "b93c9fd8-23da-44d5-a186-d488fee3f326"
+  },
+  "1d3571ce-d316-4b1d-8b60-7e25b033178b": {
+   "id": "1d3571ce-d316-4b1d-8b60-7e25b033178b",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "open AI  market share, revenue, how many user daily, how much revenue"
+     ]
+    },
+    "create_time": 1762459151.814,
+    "id": "1d3571ce-d316-4b1d-8b60-7e25b033178b",
+    "metadata": {
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "client-created-root"
+  },
+  "326ea337-20f9-475f-91d9-0ee0f12ef6fb": {
+   "id": "326ea337-20f9-475f-91d9-0ee0f12ef6fb",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Great — here’s the **latest public pricing table** from entity[\"organization\",\"OpenAI\",0] for their API, followed by a ready-to-use Google Sheet/Excel template structure you can copy and plug your usage into.  \n(Having these tools helps us keep your AUMNITY project lean and clear.)\n\n---\n\n### 📋 Public Pricing Table (API)  \nFrom OpenAI’s official pages:  \n- For one of their advanced text models: *“Input: US $1.25 per 1 M tokens. Output: US $10.00 per 1 M tokens.”* citeturn0search2turn0search1turn0search0  \n- For image-generation (square images): “~$0.01 (low), $0.04 (medium), $0.17 (high) for square images.” citeturn0search0  \n- On their “Realtime API” (text + audio) pricing: text input tokens = $5 per 1M; output tokens = $20 per 1M. Audio input = $100 per 1M tokens; audio output = $200 per 1M tokens. citeturn0search11  \n\n---\n\n### 🧮 Spreadsheet / Template Structure  \nHere’s a simple template you can copy into Google Sheets or Excel. You can label columns and fill real numbers. Estimated setup time: ~10 minutes.\n\n| **Column** | **Description** |\n|-----------|-----------------|\n| A: “Model Name” | e.g., GPT-4, GPT-3.5-Turbo, Realtime Audio, Image Gen (Low) |\n| B: “Input Rate (US$/1 M tokens)” | e.g., 1.25 (from above) |\n| C: “Output Rate (US$/1 M tokens)” | e.g., 10.00 |\n| D: “Expected Input Tokens per Call” | Your estimate: how many tokens you send on average. |\n| E: “Expected Output Tokens per Call” | Your estimate: how many tokens response you expect. |\n| F: “# of Calls / Month” | Estimate of how many times this API call happens monthly. |\n| G: “Monthly Input Cost” | Formula: = (D * F) /1 000 000 * B |\n| H: “Monthly Output Cost” | Formula: = (E * F)/1 000 000 * C |\n| I: “Total Monthly Cost” | Formula: = G + H |\n| J: “Annualised Cost Estimate” | Formula: = I * 12 |\n\n**Instructions for you:**\n1. Fill in rows for each model you intend to use.  \n2. Plug in your estimate of tokens per call and number of calls.  \n3. The sheet will compute your monthly and annual costs.  \n4. You can then compare models (cheaper vs expensive) and decide optimization strategies (e.g., lower-cost model, reduce token usage).  \n5. Save this in your AUMNITY Content Hub under “Cost Modeling – AI API”.\n\n---\n\nIf you like, I can **create a fully populated Google Sheets link** (read-only version) with these formulas already set-up and a few sample rows (with typical models: GPT-3.5-Turbo, GPT-4, Realtime Audio), so you can simply duplicate and customise. Would that be useful, partner?"
+     ]
+    },
+    "create_time": 1762475176.376415,
+    "id": "326ea337-20f9-475f-91d9-0ee0f12ef6fb",
+    "metadata": {
+     "content_references": [
+      {
+       "alt": "OpenAI",
+       "prompt_text": "OpenAI",
+       "type": "alt_text"
+      },
+      {
+       "alt": "([OpenAI](https://openai.com/api/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 2,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "Text & vision · Reasoning capabilities · Support for all built-in tools · 400k context length | 128k max output tokens · Input: $1.25 | Output: $10.00 per 1M tokens.",
+         "supporting_websites": [
+          {
+           "attribution": "OpenAI Platform",
+           "pub_date": null,
+           "snippet": "Explore resources, tutorials, API docs, and dynamic examples to get the most out of OpenAI's developer platform.",
+           "title": "API pricing page - OpenAI Platform",
+           "url": "https://platform.openai.com/pricing?utm_source=chatgpt.com"
+          },
+          {
+           "attribution": "OpenAI",
+           "pub_date": null,
+           "snippet": "Prompts are billed similarly to other GPT models. Image outputs cost approximately $0.01 (low), $0.04 (medium), and $0.17 (high) for square images.",
+           "title": "API Pricing - OpenAI",
+           "url": "https://openai.com/api/pricing/?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "API Platform - OpenAI",
+         "url": "https://openai.com/api/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([OpenAI](https://openai.com/api/pricing/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "Prompts are billed similarly to other GPT models. Image outputs cost approximately $0.01 (low), $0.04 (medium), and $0.17 (high) for square images.",
+         "supporting_websites": [],
+         "title": "API Pricing - OpenAI",
+         "url": "https://openai.com/api/pricing/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([OpenAI](https://openai.com/index/introducing-the-realtime-api/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1727740800.0,
+         "refs": [
+          {
+           "ref_index": 11,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "The Realtime API uses both text tokens and audio tokens. Text input tokens are priced at $5 per 1M and $20 per 1M output tokens. Audio input is ...",
+         "supporting_websites": [],
+         "title": "Introducing the Realtime API - OpenAI",
+         "url": "https://openai.com/index/introducing-the-realtime-api/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "",
+       "has_images": false,
+       "prompt_text": null,
+       "sources": [
+        {
+         "attribution": "OpenAI",
+         "title": "API Platform - OpenAI",
+         "url": "https://openai.com/api/?utm_source=chatgpt.com"
+        }
+       ],
+       "type": "sources_footnote"
+      }
+     ],
+     "model_slug": "gpt-5",
+     "parent_id": "19abfc38-44e7-4109-b5e2-303d0e5b60ae",
+     "search_result_groups": [
+      {
+       "domain": "openai.com",
+       "entries": [
+        {
+         "attribution": "openai.com",
+         "snippet": "Explore resources, tutorials, API docs, and dynamic examples to get the most out of OpenAI's developer platform.",
+         "title": "API pricing page - OpenAI Platform",
+         "url": "https://platform.openai.com/pricing?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openai.com",
+         "snippet": "Paid plans (Plus, Pro, Team, and Enterprise) are priced per user per month. We offer monthly plans for Plus, Pro, and Team and annual plans for Team and ...",
+         "title": "Pricing - ChatGPT - OpenAI",
+         "url": "https://openai.com/chatgpt/pricing/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openai.com",
+         "snippet": "ChatGPT Pricing · API Pricing · Contact Sales. For Developers. Back to main menu. API Platform · API Pricing · Codex · Open Models · Community (opens in a new ...",
+         "title": "OpenAI",
+         "url": "https://openai.com/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "reddit.com",
+       "entries": [
+        {
+         "attribution": "reddit.com",
+         "snippet": "Given your token count, 400 input tokens for 800 articles, and 1 output token for each article, you'd be charged $0.808 using gpt-4o and $0.048 ...",
+         "title": "Open AI API costs me 1$? : r/OpenAI - Reddit",
+         "url": "https://www.reddit.com/r/OpenAI/comments/1fxogml/open_ai_api_costs_me_1/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "reddit.com",
+         "snippet": "ChatGPT Plus users are going to get 5 queries per month with this level of pricing. Discussion.",
+         "title": "r/OpenAI on Reddit: GPT-4.5 has an API price of $75/1M input and ...",
+         "url": "https://www.reddit.com/r/OpenAI/comments/1izpgct/gpt45_has_an_api_price_of_751m_input_and_1501m/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "reddit.com",
+         "snippet": "GPT-4.5 has an API price of $75/1M input and $150/1M output. ChatGPT Plus users are going to get 5 queries per month with this level of pricing.",
+         "title": "How does the API pricing work? : r/OpenAI - Reddit",
+         "url": "https://www.reddit.com/r/OpenAI/comments/1ewxxvr/how_does_the_api_pricing_work/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "microsoft.com",
+       "entries": [
+        {
+         "attribution": "microsoft.com",
+         "snippet": "Azure OpenAI Service pricing information. Try popular services with a free Azure account, and pay as you go with no upfront costs.",
+         "title": "Azure OpenAI Service - Pricing",
+         "url": "https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "holori.com",
+       "entries": [
+        {
+         "attribution": "holori.com",
+         "snippet": "Priced at $30 per user/month when billed monthly, or $25 per user/month when billed annually. OpenAI pricing for chatgpt. OpenAI API pricing for ...",
+         "title": "The Ultimate Guide to OpenAI Pricing: Maximize Your AI investment",
+         "url": "https://holori.com/openai-pricing-guide/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "apidog.com",
+       "entries": [
+        {
+         "attribution": "apidog.com",
+         "snippet": "The two sub-models, Code Interpreter and Retrieval, are priced at USD 0.03/session and USD 0.2/GB/assistant/day. Fine-tuning Model Pricing. fine tuning api ...",
+         "title": "OpenAI API Pricing | Automated Cost Calculation - Apidog",
+         "url": "https://apidog.com/blog/openai-api-pricing/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "gptforwork.com",
+       "entries": [
+        {
+         "attribution": "gptforwork.com",
+         "snippet": "Estimate the cost of using various AI APIs such as OpenAI, Anthropic, Deepseek, Gemini, Mistral with this pricing calculator.",
+         "title": "OpenAI API Pricing Calculator - GPT for Work",
+         "url": "https://gptforwork.com/tools/openai-chatgpt-api-pricing-calculator?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "togai.com",
+       "entries": [
+        {
+         "attribution": "togai.com",
+         "snippet": "OpenAI charges you for the prompt and the output text at a rate of $0.002/1000 tokens, which is roughly 750 words. So, a prompt containing 150 ...",
+         "title": "OpenAI API: Its Pricing Model, Determinants & Cost Comparison",
+         "url": "https://www.togai.com/blog/openai-api-pricing-model-cost-comparison/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "chatgpt.com",
+       "entries": [
+        {
+         "attribution": "chatgpt.com",
+         "snippet": "Paid plans (Plus, Pro, Business, and Enterprise) are priced per user per month. We offer monthly plans for Plus, Pro, and Business and annual plans for ...",
+         "title": "Pricing - ChatGPT",
+         "url": "https://chatgpt.com/pricing/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "themeisle.com",
+       "entries": [
+        {
+         "attribution": "themeisle.com",
+         "snippet": "Confused by OpenAI's pricing? Learn how to calculate ChatGPT API cost according to use case. Includes hidden expenses and optimization tips.",
+         "title": "Calculate Real ChatGPT API Cost for GPT-5, o3-mini, and Others",
+         "url": "https://themeisle.com/blog/chatgpt-api-cost/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "spurnow.com",
+       "entries": [
+        {
+         "attribution": "spurnow.com",
+         "snippet": "Calculate and compare the cost of using OpenAI and LLMs API pricing for your AI project with our powerful free calculator. The latest numbers as of April ...",
+         "title": "OpenAI API Pricing Calculator | 100% Free - Spur",
+         "url": "https://www.spurnow.com/en/tools/openai-chatgpt-api-pricing-calculator?utm_source=chatgpt.com"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "parent": "f27899a4-c2a3-4a20-bd59-eebc3cd495aa"
+  },
+  "3b266b2e-5fa1-496a-8cfc-c6054ee8e5b4": {
+   "id": "3b266b2e-5fa1-496a-8cfc-c6054ee8e5b4",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "how does revenue got ? distribution of the revenue"
+     ]
+    },
+    "create_time": 1762459289.133,
+    "id": "3b266b2e-5fa1-496a-8cfc-c6054ee8e5b4",
+    "metadata": {
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "750be082-a5f8-4a43-abef-b5514f05f179"
+  },
+  "47f27002-ade8-4c8e-ba2c-e9f7abe7f884": {
+   "id": "47f27002-ade8-4c8e-ba2c-e9f7abe7f884",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "how does the revenue, how much user data privacy, "
+     ]
+    },
+    "create_time": 1762459242.004,
+    "id": "47f27002-ade8-4c8e-ba2c-e9f7abe7f884",
+    "metadata": {
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "e111dc41-a176-4546-aca1-9f0a0783b718"
+  },
+  "6edf965f-af7d-43ed-89d0-25447e9e69aa": {
+   "id": "6edf965f-af7d-43ed-89d0-25447e9e69aa",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Here’s your **Excel version** of the OpenAI API Cost Model:  \n\n📂 [Download OpenAI_API_Cost_Model.xlsx](sandbox:/mnt/data/OpenAI_API_Cost_Model.xlsx)\n\n---\n\nTo make a **Google Sheet** version:\n1. Open [Google Sheets](https://sheets.google.com).  \n2. Click **File → Import → Upload**, and upload the Excel file above.  \n3. Choose “Convert to Google Sheets.”  \n4. You’ll then have a live, editable version with formulas ready.\n\nWould you like me to also generate a **visual cost comparison chart** (e.g., monthly cost per model as bars)?"
+     ]
+    },
+    "create_time": 1762475254.536052,
+    "id": "6edf965f-af7d-43ed-89d0-25447e9e69aa",
+    "metadata": {
+     "content_references": [],
+     "model_slug": "gpt-5",
+     "parent_id": "fbd50216-1b6c-41e6-8b7e-8fb84e7c41d8"
+    }
+   },
+   "parent": "7fa9c00b-de8e-4f40-98ab-e2c5bb79df42"
+  },
+  "750be082-a5f8-4a43-abef-b5514f05f179": {
+   "id": "750be082-a5f8-4a43-abef-b5514f05f179",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Great questions — here’s what your partner has found about entity[\"organization\", \"OpenAI\", 0]’s revenue *and* how it handles user data. I’ll present the facts in a scientific tone with a few poetic touches, and highlight where things are well-specified versus where there are gaps.  \n\n---\n\n### 📈 Revenue  \n- OpenAI reported an **annualised revenue run-rate** of about **US$12 billion** as of mid-2025. citeturn0search2turn0search18turn0search12  \n- Earlier, there was a report it had reached about **US$10 billion** in annual recurring revenue (ARR). citeturn0search13turn0search2  \n- The company projects that its revenue could reach ~ **US$125 billion** by 2029 and ~ **US$174 billion** by 2030, largely based on future product expansion. citeturn0search0turn0search7turn0search31  \n- It also has arrangements to share a portion of its revenue with a partner: e.g., OpenAI has an existing deal to share ~20% of its revenue with entity[\"organization\",\"Microsoft\",0] through 2030. citeturn0search17  \n\n**Poetic note**: The revenue figures sculpture a mountain of numbers rising from a small stream to a Himalayan peak — signalling not just growth, but an expectation of sweeping transformation.\n\n---\n\n### 🧬 User Data & Privacy: What we *know*  \nHere are key points on how OpenAI handles user data (especially for its consumer-services like entity[\"software\",\"ChatGPT\",0] or API usage) — and also where things aren’t fully transparent.\n\n#### What is clearly stated  \n- OpenAI’s **Privacy Policy** states they collect various categories of personal data when someone uses their services: account information (name, contact, payment info), user content (prompts, files, images, audio) if uploaded, technical & log information (IP address, browser type, device info) when you use the services. citeturn0search3turn0search11turn0search16  \n- For enterprise customers (“Business / API” uses) they provide a “Data Processing Addendum” and enterprise/privacy-security protections. citeturn0search36  \n- On the “Enterprise Privacy” page, OpenAI states: “We encrypt all data at rest (AES-256) and in transit; we support customer compliance with GDPR, CCPA; our enterprise offerings are SOC 2 Type II audited.” citeturn0search25turn0search36  \n- For consumer services: OpenAI provides tools for end-users to manage their data, including the ability to delete chats and opt-out of data being used for model training under certain conditions. citeturn0search10turn0search6  \n\n#### What is *less clear / still ambiguous*  \n- While we know *what* OpenAI collects in high-level categories, we don’t have full public transparency about **how long** data is retained in every use case, or exactly how every piece of “user content” is used for training vs not.  \n- Some third-party research (e.g., an academic study) found that certain “GPT apps” built on OpenAI’s platform may collect significantly more user data (including “sensitive information prohibited by OpenAI”) than is clearly disclosed in their privacy policy. citeturn0academia47  \n- OpenAI’s privacy policy states that for business/API customers, input data might **not** be used to train the models (depending on the agreement) — but the standard consumer service may have different terms. For example: “This Privacy Policy does *not* apply to content that we process on behalf of customers of our business offerings, such as our API. Our use of that data is governed by our customer agreements.” citeturn0search16turn0search3  \n- The distinction between “consumer vs enterprise” usage means users of the free or standard tier might accept different data-usage terms than enterprise clients.  \n- Also, regulatory scrutiny is happening: e.g., a privacy watchdog in Italy fined OpenAI for “improperly collecting personal data and failing to provide transparency” in one case. citeturn0news41  \n\n**Poetic note**: The data flowing into OpenAI’s systems is like a river of human thought and prompt-text, captured and channelled; but some tributaries remain murky — the exact currents of retention, reuse, and training-use are partially hidden in mist.\n\n---\n\n### 🔍 Summary & Implications for You  \n- If you’re using OpenAI’s consumer-services (like ChatGPT), you should assume: *your prompts, files, uploads, usage logs* may be collected, and they might be used for model improvement unless you have opted out (if such an option is available in your region/plan).  \n- If you’re using OpenAI in an enterprise/API setting, the contracts typically offer stronger assurances (no training-use, stronger data controls, encryption, compliance) though you’ll still want to read the terms carefully.  \n- From a privacy-risk perspective, you should treat any input that you send into OpenAI’s systems as potentially stored and accessible under certain legal/contractual regimes (even if encrypted or anonymised) unless the agreement clearly says otherwise.  \n- From a business-analysis view: OpenAI’s revenue trajectory is very strong, but the high value also implies they are scaling usage massively — which means data scale, infrastructure, risk (including privacy/regulation) are growing too.\n\n---\n\nIf you like, I can **pull the exact current user-data policy** for your country (UK/EEA) for OpenAI, highlight *what you as a user can do* (opt-out, deletion, export) and map **the risks** in plain terms. Do you want that?"
+     ]
+    },
+    "create_time": 1762459246.069889,
+    "id": "750be082-a5f8-4a43-abef-b5514f05f179",
+    "metadata": {
+     "content_references": [
+      {
+       "alt": "OpenAI",
+       "prompt_text": "OpenAI",
+       "type": "alt_text"
+      },
+      {
+       "alt": "([Reuters](https://www.reuters.com/business/openai-hits-12-billion-annualized-revenue-information-reports-2025-07-31/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Reuters",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1753833600.0,
+         "refs": [
+          {
+           "ref_index": 2,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 18,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 12,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "ChatGPT-maker OpenAI roughly doubled its revenue in the first seven months of the year, reaching $12 billion in annualized revenue, ...",
+         "supporting_websites": [
+          {
+           "attribution": "Ed Zitron's Where's Your Ed At",
+           "pub_date": null,
+           "snippet": "OpenAI leaked yesterday to The Information that it hit $12 billion in \"annual recurring revenue\" – suggesting that its July 2025 revenues were ...",
+           "title": "How Much Money Do OpenAI And Anthropic Actually Make?",
+           "url": "https://www.wheresyoured.at/howmuchmoney/?utm_source=chatgpt.com"
+          },
+          {
+           "attribution": "futuresearch.ai",
+           "pub_date": null,
+           "snippet": "See our August 2024 report on the unit economics and profit margins of the API. If you'd like to get future reports on the business of AI, subscribe here.",
+           "title": "OpenAI Revenue - FutureSearch",
+           "url": "https://futuresearch.ai/openai-revenue-report?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "OpenAI hits $12 billion in annualized revenue, The Information reports",
+         "url": "https://www.reuters.com/business/openai-hits-12-billion-annualized-revenue-information-reports-2025-07-31/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([TechCrunch](https://techcrunch.com/2025/06/09/openai-claims-to-have-hit-10b-in-annual-revenue/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "TechCrunch",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1749427200.0,
+         "refs": [
+          {
+           "ref_index": 13,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 2,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "OpenAI says it recently hit $10 billion in annual recurring revenue, up from around $5.5 billion last year.",
+         "supporting_websites": [
+          {
+           "attribution": "Reuters",
+           "pub_date": null,
+           "snippet": "ChatGPT-maker OpenAI roughly doubled its revenue in the first seven months of the year, reaching $12 billion in annualized revenue, ...",
+           "title": "OpenAI hits $12 billion in annualized revenue, The Information reports",
+           "url": "https://www.reuters.com/business/openai-hits-12-billion-annualized-revenue-information-reports-2025-07-31/?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "OpenAI claims to have hit $10B in annual revenue - TechCrunch",
+         "url": "https://techcrunch.com/2025/06/09/openai-claims-to-have-hit-10b-in-annual-revenue/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([ctech](https://www.calcalistech.com/ctechnews/article/syt4psw1le?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "ctech",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1745452800.0,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 7,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 31,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "OpenAI projects that its revenue will continue to grow sharply in the coming years, reaching $125 billion by 2029 and $174 billion in 2030. The ...",
+         "supporting_websites": [
+          {
+           "attribution": "PYMNTS.com",
+           "pub_date": null,
+           "snippet": "OpenAI reportedly expects its revenue to reach $125 billion in 2029 and $174 billion in 2030 as it adds new products.",
+           "title": "Report: OpenAI Expects Revenue of $125 Billion in 2029",
+           "url": "https://www.pymnts.com/artificial-intelligence-2/2025/report-openai-expects-new-products-to-drive-revenue-to-125-billion-in-2029/?utm_source=chatgpt.com"
+          },
+          {
+           "attribution": "Yahoo Finance",
+           "pub_date": null,
+           "snippet": "Artificial intelligence giant OpenAI expects to see its revenue more than triple to hit $12.7 billion by the end of the year, ...",
+           "title": "OpenAI thinks its revenue will more than triple in 2025, report says",
+           "url": "https://finance.yahoo.com/news/openai-thinks-revenue-more-triple-210900736.html?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "OpenAI eyes $13B in revenue this year, $174B by 2030 ... - CTech",
+         "url": "https://www.calcalistech.com/ctechnews/article/syt4psw1le?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "Microsoft",
+       "prompt_text": "Microsoft",
+       "type": "alt_text"
+      },
+      {
+       "alt": "([Reuters](https://www.reuters.com/business/openai-plans-slash-revenue-share-microsoft-information-reports-2025-05-07/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Reuters",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1746576000.0,
+         "refs": [
+          {
+           "ref_index": 17,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "In an existing deal, OpenAI has agreed to share 20% of its revenue with Microsoft through 2030, the Information reported.",
+         "supporting_websites": [],
+         "title": "OpenAI plans to cut Microsoft revenue share after restructuring, The ...",
+         "url": "https://www.reuters.com/business/openai-plans-slash-revenue-share-microsoft-information-reports-2025-05-07/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "ChatGPT",
+       "prompt_text": "ChatGPT",
+       "type": "alt_text"
+      },
+      {
+       "alt": "([OpenAI](https://openai.com/policies/row-privacy-policy/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1730678400.0,
+         "refs": [
+          {
+           "ref_index": 3,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 11,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 16,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "This Privacy Policy describes our practices with respect to Personal Data that we collect from or about you when you use our website, applications, and ...",
+         "supporting_websites": [
+          {
+           "attribution": "OpenAI",
+           "pub_date": null,
+           "snippet": "Usage Data: We may automatically collect information about your use of the Services, such as the types of content that you view or engage ...",
+           "title": "Privacy policy - OpenAI",
+           "url": "https://openai.com/en-GB/policies/row-privacy-policy/?utm_source=chatgpt.com"
+          },
+          {
+           "attribution": "OpenAI",
+           "pub_date": null,
+           "snippet": "This Privacy Policy describes our practices with respect to Personal Information we collect from or about you when you use our website, applications, and ...",
+           "title": "Privacy policy - June 2023 - OpenAI",
+           "url": "https://openai.com/policies/jun-2023-privacy-policy/?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "Privacy policy - OpenAI",
+         "url": "https://openai.com/policies/row-privacy-policy/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([OpenAI](https://openai.com/security-and-privacy/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 36,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "OpenAI supports our customers' compliance with privacy laws, including the GDPR and CCPA, and offers a Data Processing Addendum for customers. Our API, ChatGPT ...",
+         "supporting_websites": [],
+         "title": "Security & Privacy - OpenAI",
+         "url": "https://openai.com/security-and-privacy/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([OpenAI](https://openai.com/enterprise-privacy/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1730332800.0,
+         "refs": [
+          {
+           "ref_index": 25,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 36,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "How does OpenAI ensure data security? OpenAI encrypts all data at rest (AES-256) and in transit between our customers and us and between us and ...",
+         "supporting_websites": [
+          {
+           "attribution": "OpenAI",
+           "pub_date": null,
+           "snippet": "OpenAI supports our customers' compliance with privacy laws, including the GDPR and CCPA, and offers a Data Processing Addendum for customers. Our API, ChatGPT ...",
+           "title": "Security & Privacy - OpenAI",
+           "url": "https://openai.com/security-and-privacy/?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "Enterprise privacy at OpenAI",
+         "url": "https://openai.com/enterprise-privacy/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([OpenAI](https://openai.com/consumer-privacy/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1718150400.0,
+         "refs": [
+          {
+           "ref_index": 10,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 6,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "We are committed to protecting people's privacy. Ways to manage your data. One of the most useful features of AI models is that they can improve over time.",
+         "supporting_websites": [
+          {
+           "attribution": "OpenAI Help Center",
+           "pub_date": null,
+           "snippet": "Commonly asked questions about how we treat user data for OpenAI's non-API consumer services like ChatGPT or DALL·E.",
+           "title": "Data usage for consumer services FAQ | OpenAI Help Center",
+           "url": "https://help.openai.com/en/articles/7039943-data-usage-for-consumer-services-faq?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "Consumer privacy at OpenAI",
+         "url": "https://openai.com/consumer-privacy/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([arXiv](https://arxiv.org/abs/2408.13247?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "arXiv",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 47,
+           "ref_type": "academia",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "Data Exposure from LLM Apps: An In-depth Investigation of OpenAI's GPTs",
+         "url": "https://arxiv.org/abs/2408.13247?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([OpenAI](https://openai.com/policies/jun-2023-privacy-policy/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1687478400.0,
+         "refs": [
+          {
+           "ref_index": 16,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 3,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "This Privacy Policy describes our practices with respect to Personal Information we collect from or about you when you use our website, applications, and ...",
+         "supporting_websites": [
+          {
+           "attribution": "OpenAI",
+           "pub_date": null,
+           "snippet": "This Privacy Policy describes our practices with respect to Personal Data that we collect from or about you when you use our website, applications, and ...",
+           "title": "Privacy policy - OpenAI",
+           "url": "https://openai.com/policies/row-privacy-policy/?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "Privacy policy - June 2023 - OpenAI",
+         "url": "https://openai.com/policies/jun-2023-privacy-policy/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([AP News](https://apnews.com/article/6760575ae7a29a1dd22cc666f49e605f?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "AP News",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1734708886.0,
+         "refs": [
+          {
+           "ref_index": 41,
+           "ref_type": "news",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "The Italian data protection watchdog, Garante, fined OpenAI 15 million euros ($15.6 million) for improperly collecting personal data and failing to provide transparency while training its ChatGPT chatbot. The watchdog's investigation concluded that OpenAI lacked an adequate legal basis for data processing and violated users’ information rights. Furthermore, OpenAI did not have an effective age verification system to prevent children under 13 from being exposed to inappropriate content. OpenAI plans to appeal the decision, deeming it disproportionate, and remains committed to working with privacy authorities. The watchdog also required OpenAI to run a six-month public awareness campaign in Italy on data collection issues. With the growing scrutiny of AI technologies, regulatory bodies in Europe and the U.S. are establishing rules to mitigate risks posed by artificial intelligence systems.",
+         "supporting_websites": [],
+         "title": "Italy's privacy watchdog fines OpenAI for ChatGPT's violations in collecting users personal data",
+         "url": "https://apnews.com/article/6760575ae7a29a1dd22cc666f49e605f?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "",
+       "has_images": false,
+       "prompt_text": null,
+       "sources": [
+        {
+         "attribution": "Reuters",
+         "title": "OpenAI hits $12 billion in annualized revenue, The Information reports",
+         "url": "https://www.reuters.com/business/openai-hits-12-billion-annualized-revenue-information-reports-2025-07-31/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "TechCrunch",
+         "title": "OpenAI claims to have hit $10B in annual revenue - TechCrunch",
+         "url": "https://techcrunch.com/2025/06/09/openai-claims-to-have-hit-10b-in-annual-revenue/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "ctech",
+         "title": "OpenAI eyes $13B in revenue this year, $174B by 2030 ... - CTech",
+         "url": "https://www.calcalistech.com/ctechnews/article/syt4psw1le?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "OpenAI",
+         "title": "Privacy policy - OpenAI",
+         "url": "https://openai.com/policies/row-privacy-policy/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "arXiv",
+         "title": "Data Exposure from LLM Apps: An In-depth Investigation of OpenAI's GPTs",
+         "url": "https://arxiv.org/abs/2408.13247?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "AP News",
+         "title": "Italy's privacy watchdog fines OpenAI for ChatGPT's violations in collecting users personal data",
+         "url": "https://apnews.com/article/6760575ae7a29a1dd22cc666f49e605f?utm_source=chatgpt.com"
+        }
+       ],
+       "type": "sources_footnote"
+      }
+     ],
+     "model_slug": "gpt-5",
+     "parent_id": "49226d36-c215-4030-8b82-ee8a3e2903a4",
+     "search_result_groups": [
+      {
+       "domain": "sacra.com",
+       "entries": [
+        {
+         "attribution": "sacra.com",
+         "snippet": "Sacra estimates that OpenAI hit $4.9B in annual recurring revenue (ARR) at the end of 2024, growing 206% year-over-year. The company generated ...",
+         "title": "OpenAI revenue, valuation & growth rate - Sacra",
+         "url": "https://sacra.com/c/openai/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "theguardian.com",
+       "entries": [
+        {
+         "attribution": "theguardian.com",
+         "snippet": "OpenAI is in talks to sell $6bn in shares, which would boost its valuation to $500bn, according to multiple reports. The artificial intelligence ...",
+         "title": "OpenAI eyes world's largest valuation for private company in stock ...",
+         "url": "https://www.theguardian.com/technology/2025/aug/19/openai-chatgpt-stock-sale-reports?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "openai.com",
+       "entries": [
+        {
+         "attribution": "openai.com",
+         "snippet": "Commonly asked questions about how we treat user data for OpenAI's non-API consumer services like ChatGPT or DALL·E.",
+         "title": "Data usage for consumer services FAQ | OpenAI Help Center",
+         "url": "https://help.openai.com/en/articles/7039943-data-usage-for-consumer-services-faq?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openai.com",
+         "snippet": "Usage Data: We may automatically collect information about your use of the Services, such as the types of content that you view or engage ...",
+         "title": "Privacy policy - OpenAI",
+         "url": "https://openai.com/en-GB/policies/row-privacy-policy/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openai.com",
+         "snippet": "Client data is highly confidential, and data privacy is big concern. As per openai policies, openai do not uses data for training if we are ...",
+         "title": "Data Privacy with OpenAI API",
+         "url": "https://community.openai.com/t/data-privacy-with-openai-api/929399?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openai.com",
+         "snippet": "We've updated our usage policies to be more readable and added service-specific guidance. Customers may sign up to receive notifications of ...",
+         "title": "Usage policies - OpenAI",
+         "url": "https://openai.com/policies/usage-policies/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openai.com",
+         "snippet": "Trust and privacy are at the core of our products. We give you tools to control your data—including easy opt-outs and permanent removal of ...",
+         "title": "How we're responding to The New York Times' data ... - OpenAI",
+         "url": "https://openai.com/index/response-to-nyt-data-demands/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openai.com",
+         "snippet": "OpenAI's Data Processing Addendum, not their Privacy, governs the data collected from organizations using OpenAI's API services for businesses ...",
+         "title": "Does the openai API get access to the data I send it or store the data",
+         "url": "https://community.openai.com/t/does-the-openai-api-get-access-to-the-data-i-send-it-or-store-the-data/599538?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "pymnts.com",
+       "entries": [
+        {
+         "attribution": "pymnts.com",
+         "snippet": "OpenAI reportedly expects its revenue to reach $125 billion in 2029 and $174 billion in 2030 as it adds new products.",
+         "title": "Report: OpenAI Expects Revenue of $125 Billion in 2029",
+         "url": "https://www.pymnts.com/artificial-intelligence-2/2025/report-openai-expects-new-products-to-drive-revenue-to-125-billion-in-2029/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "futuresearch.ai",
+       "entries": [
+        {
+         "attribution": "futuresearch.ai",
+         "snippet": "See our August 2024 report on the unit economics and profit margins of the API. If you'd like to get future reports on the business of AI, subscribe here.",
+         "title": "OpenAI Revenue - FutureSearch",
+         "url": "https://futuresearch.ai/openai-revenue-report?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "reddit.com",
+       "entries": [
+        {
+         "attribution": "reddit.com",
+         "snippet": "Data Security Practices: Implement best practices for data security, such as anonymizing sensitive information before sending it to the API or ...",
+         "title": "OPENAI API - Data privacy for organizations Clarification : r/AI_Agents",
+         "url": "https://www.reddit.com/r/AI_Agents/comments/1lf59no/openai_api_data_privacy_for_organizations/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "reddit.com",
+         "snippet": "OpenAI's handling of user data is generally outlined in their Privacy Policy, which you can find on their website. They have implemented ...",
+         "title": "What does OpenAI do with the data you give them? : r/privacy - Reddit",
+         "url": "https://www.reddit.com/r/privacy/comments/13kilc7/what_does_openai_do_with_the_data_you_give_them/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "reddit.com",
+         "snippet": "Privacy by policy is inherently problematic, vs privacy by design. \"We promise not to\" is different than \"it's encrypted, we can't see it.\"",
+         "title": "OpenAI's privacy policy is solid. I think the criticism is a little bit ...",
+         "url": "https://www.reddit.com/r/OpenAI/comments/1der9sz/openais_privacy_policy_is_solid_i_think_the/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "wheresyoured.at",
+       "entries": [
+        {
+         "attribution": "wheresyoured.at",
+         "snippet": "OpenAI leaked yesterday to The Information that it hit $12 billion in \"annual recurring revenue\" – suggesting that its July 2025 revenues were ...",
+         "title": "How Much Money Do OpenAI And Anthropic Actually Make?",
+         "url": "https://www.wheresyoured.at/howmuchmoney/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "wired.com",
+       "entries": [
+        {
+         "attribution": "wired.com",
+         "snippet": "OpenAI's filings to the IRS through 2022 reported that no “significant changes” had ever been made to its governing documents.",
+         "title": "OpenAI Quietly Scrapped a Promise to Disclose Key Documents to ...",
+         "url": "https://www.wired.com/story/openai-scrapped-promise-disclose-key-documents/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "youtube.com",
+       "entries": [
+        {
+         "attribution": "youtube.com",
+         "snippet": "CNBC's Kate Rooney joins 'The Exchange' to discuss OpenAI hitting $10 billion in annual recurring revenue ... What Google's buyout offers reveal ...",
+         "title": "OpenAI hits $10 billion in annual recurring revenue - YouTube",
+         "url": "https://www.youtube.com/watch?v=hw4Ac5qC1Lc&utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "techi.com",
+       "entries": [
+        {
+         "attribution": "techi.com",
+         "snippet": "OpenAI's leadership celebrates a historic $10 billion revenue milestone, sparking debate about long-term viability and profitability.",
+         "title": "OpenAI's $10 Billion Revenue Milestone: A Reality Check on Silicon ...",
+         "url": "https://www.techi.com/openai-10-billion-revenue-analysis-profitability-concerns/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "milvus.io",
+       "entries": [
+        {
+         "attribution": "milvus.io",
+         "snippet": "OpenAI handles privacy and data security through a combination of technical safeguards, policy enforcement, and compliance with regulatory standards.",
+         "title": "How does OpenAI handle privacy and data security? - Milvus",
+         "url": "https://milvus.io/ai-quick-reference/how-does-openai-handle-privacy-and-data-security?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "geekwire.com",
+       "entries": [
+        {
+         "attribution": "geekwire.com",
+         "snippet": "New financial filings show how Microsoft's losses from its OpenAI investment are hurting its profits, in addition to fueling its growth.",
+         "title": "Microsoft's financial disclosures show how OpenAI is fueling growth",
+         "url": "https://www.geekwire.com/2024/microsofts-financial-disclosures-show-how-openai-is-fueling-growth-and-taking-a-toll-on-profits/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "refinitiv.com",
+       "entries": [
+        {
+         "attribution": "refinitiv.com",
+         "snippet": "OpenAI is hoping to generate nearly $13 billion of revenue this year, Bloomberg reported citing sources familiar with the matter, about quadruple last year.",
+         "title": "Breakingviews: OpenAI's profit trajectory is an open question",
+         "url": "https://lipperalpha.refinitiv.com/2025/04/breakingviews-openais-profit-trajectory-is-an-open-question/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "chatbase.co",
+       "entries": [
+        {
+         "attribution": "chatbase.co",
+         "snippet": "OpenAI states that all customer data is encrypted both in transit and at rest. This prevents unauthorized access to sensitive information. They ...",
+         "title": "Is OpenAI Safe? Privacy and Data Concerns - Chatbase",
+         "url": "https://www.chatbase.co/blog/is-openai-safe?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "yahoo.com",
+       "entries": [
+        {
+         "attribution": "yahoo.com",
+         "snippet": "Artificial intelligence giant OpenAI expects to see its revenue more than triple to hit $12.7 billion by the end of the year, ...",
+         "title": "OpenAI thinks its revenue will more than triple in 2025, report says",
+         "url": "https://finance.yahoo.com/news/openai-thinks-revenue-more-triple-210900736.html?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "medium.com",
+       "entries": [
+        {
+         "attribution": "medium.com",
+         "snippet": "This article provides an organized summary of OpenAI's data handling and privacy policies, aimed at helping users and administrators make informed decisions.",
+         "title": "Ensuring Privacy and Data Safety with OpenAI - Medium",
+         "url": "https://medium.com/%40mikehpg/ensuring-privacy-and-data-safety-with-openai-a-comprehensive-guide-5a744e2c6416?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "promarket.org",
+       "entries": [
+        {
+         "attribution": "promarket.org",
+         "snippet": "According to OpenAI, in 2019, “the for-profit [entity] raised an initial round of over $100 [million], followed by $1 billion from Microsoft.”.",
+         "title": "OpenAI Abandons Move to For-Profit Status After Backlash. Now ...",
+         "url": "https://www.promarket.org/2025/05/06/openai-abandons-move-to-for-profit-status-after-backlash-now-what/?utm_source=chatgpt.com"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "parent": "47f27002-ade8-4c8e-ba2c-e9f7abe7f884"
+  },
+  "792f8642-ab1d-4676-912b-6aac4d35bac5": {
+   "id": "792f8642-ab1d-4676-912b-6aac4d35bac5",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Here’s a curated table of current / publicly-reported pricing tiers for the entity[\"organization\", \"OpenAI\", 0] API (input & output tokens) for various models — and a few caveats about what to watch.  \n\n### 💡 Pricing Table (approximate, per 1 million tokens)  \n| Model | Input tokens cost | Cached / “cheap” input cost (if applicable) | Output tokens cost | Notes / context |\n|-------|-------------------|---------------------------------------------|----------------------|---------------|\n| **entity[\"software\", \"GPT-4.1\", 0]** | ~$3.00 / 1 M tokens citeturn0search1turn0search4 | ~$0.75 / 1 M tokens citeturn0search1 | ~$12.00 / 1 M tokens citeturn0search1turn0search4 | Fine-tuning tier listed on OpenAI’s official page. |\n| **entity[\"software\", \"GPT-4o\", 0]** (standard version) | ~$30 / 1 M tokens (input) citeturn0search9 | — | ~$60 / 1 M tokens (output) citeturn0search9turn0search11 | Many secondary sources; context window-dependent. |\n| **entity[\"software\", \"GPT-4o mini\", 0]** | ~$0.15 / 1 M tokens (input) citeturn0search22turn0search10turn0search9 | ~\\$0.075 / 1 M tokens (cached input) citeturn0search10turn0search17 | ~$0.60 / 1 M tokens (output) citeturn0search22 | Lower-cost tier intended for higher-volume or less “heavy” use. |\n| **entity[\"software\", \"GPT-3.5 Turbo\", 0] / general older models** | ~$0.50 / 1 M tokens (input) citeturn0search11turn0search12 | — | ~$1.50 / 1 M tokens (output) citeturn0search11turn0search12 | Legacy tier; many developers use it for cost-efficient tasks. |\n\n### 🔍 Key Notes & Caveats  \n- “Input tokens” = what you send to the model (prompts, context). “Output tokens” = what the model returns as response. citeturn0search14turn0search13  \n- Many sources mention **cached inputs**: if you reuse previously processed text, cost may be lower. citeturn0search17turn0search16  \n- The exact pricing may vary by region, volume/commitment tier, or enterprise contract (i.e., custom deals).  \n- Some models (especially very new or “preview”‐models) have higher price points or limited availability.  \n- Some sources report older pricing or projected pricing — always check the official pricing page. citeturn0search0turn0search1  \n\n---\n\nIf you like, I (your partner) can **pull the latest live pricing table from OpenAI’s site** with links (UK/Europe region if different) and set up a small **Excel/Google Sheet template** so you can plug in your expected token usage and see estimated cost. Estimated time: ~20-30 minutes."
+     ]
+    },
+    "create_time": 1762475122.8012,
+    "id": "792f8642-ab1d-4676-912b-6aac4d35bac5",
+    "metadata": {
+     "content_references": [
+      {
+       "alt": "OpenAI",
+       "prompt_text": "OpenAI",
+       "type": "alt_text"
+      },
+      {
+       "alt": "GPT‑4.1",
+       "prompt_text": "GPT‑4.1",
+       "type": "alt_text"
+      },
+      {
+       "alt": "([OpenAI](https://openai.com/api/pricing/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 4,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "API Pricing ; GPT-4.1. Fine-tuning price. Input: $3.00 / 1M tokens. Cached input: $0.75 / 1M tokens. Output: $12.00 / 1M tokens ; GPT-4.1 mini. Fine-tuning price.",
+         "supporting_websites": [
+          {
+           "attribution": "OpenAI Platform",
+           "pub_date": null,
+           "snippet": "Reasoning. Speed. Input. Output. Reasoning tokens. Pricing. Per 1M tokens. Input. $1.25. Cached Input. $0.13. Output. $10.00. Context. Window. 400,000. Max ...",
+           "title": "Compare models - OpenAI API",
+           "url": "https://platform.openai.com/docs/models/compare?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "API Pricing - OpenAI",
+         "url": "https://openai.com/api/pricing/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([OpenAI](https://openai.com/api/pricing/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "API Pricing ; GPT-4.1. Fine-tuning price. Input: $3.00 / 1M tokens. Cached input: $0.75 / 1M tokens. Output: $12.00 / 1M tokens ; GPT-4.1 mini. Fine-tuning price.",
+         "supporting_websites": [],
+         "title": "API Pricing - OpenAI",
+         "url": "https://openai.com/api/pricing/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([OpenAI](https://openai.com/api/pricing/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 4,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "API Pricing ; GPT-4.1. Fine-tuning price. Input: $3.00 / 1M tokens. Cached input: $0.75 / 1M tokens. Output: $12.00 / 1M tokens ; GPT-4.1 mini. Fine-tuning price.",
+         "supporting_websites": [
+          {
+           "attribution": "OpenAI Platform",
+           "pub_date": null,
+           "snippet": "Reasoning. Speed. Input. Output. Reasoning tokens. Pricing. Per 1M tokens. Input. $1.25. Cached Input. $0.13. Output. $10.00. Context. Window. 400,000. Max ...",
+           "title": "Compare models - OpenAI API",
+           "url": "https://platform.openai.com/docs/models/compare?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "API Pricing - OpenAI",
+         "url": "https://openai.com/api/pricing/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "GPT‑4o",
+       "prompt_text": "GPT‑4o",
+       "type": "alt_text"
+      },
+      {
+       "alt": "([apidog](https://apidog.com/blog/openai-api-pricing/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "apidog",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 9,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "There is a fee of $30.00 per 1M tokens input and $60.00 per 1M tokens output. ... input/output data into token counts during the API debugging process.",
+         "supporting_websites": [],
+         "title": "OpenAI API Pricing | Automated Cost Calculation - Apidog",
+         "url": "https://apidog.com/blog/openai-api-pricing/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([apidog](https://apidog.com/blog/openai-api-pricing/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "apidog",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 9,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 11,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "There is a fee of $30.00 per 1M tokens input and $60.00 per 1M tokens output. ... input/output data into token counts during the API debugging process.",
+         "supporting_websites": [
+          {
+           "attribution": "Milvus",
+           "pub_date": null,
+           "snippet": "For example, GPT-4 charges $30 per million tokens for input and $60 per million tokens for output, while GPT-3.5 Turbo costs $0.50 per million input tokens and ...",
+           "title": "What is the pricing model for OpenAI? - Milvus",
+           "url": "https://milvus.io/ai-quick-reference/what-is-the-pricing-model-for-openai?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "OpenAI API Pricing | Automated Cost Calculation - Apidog",
+         "url": "https://apidog.com/blog/openai-api-pricing/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "GPT‑4o mini",
+       "prompt_text": "GPT‑4o mini",
+       "type": "alt_text"
+      },
+      {
+       "alt": "([Wikipedia](https://en.wikipedia.org/wiki/GPT-4o?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Wikipedia",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 22,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 10,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 9,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [
+          {
+           "attribution": "Holori",
+           "pub_date": null,
+           "snippet": "GPT-4.5 Preview: A more advanced model at a premium price of $75.00 per 1M input tokens and $150.00 per 1M output tokens. For companies with ...",
+           "title": "The Ultimate Guide to OpenAI Pricing: Maximize Your AI investment",
+           "url": "https://holori.com/openai-pricing-guide/?utm_source=chatgpt.com"
+          },
+          {
+           "attribution": "apidog",
+           "pub_date": null,
+           "snippet": "There is a fee of $30.00 per 1M tokens input and $60.00 per 1M tokens output. ... input/output data into token counts during the API debugging process.",
+           "title": "OpenAI API Pricing | Automated Cost Calculation - Apidog",
+           "url": "https://apidog.com/blog/openai-api-pricing/?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "GPT-4o",
+         "url": "https://en.wikipedia.org/wiki/GPT-4o?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Holori](https://holori.com/openai-pricing-guide/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Holori",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1743120000.0,
+         "refs": [
+          {
+           "ref_index": 10,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 17,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "GPT-4.5 Preview: A more advanced model at a premium price of $75.00 per 1M input tokens and $150.00 per 1M output tokens. For companies with ...",
+         "supporting_websites": [
+          {
+           "attribution": "Stack Overflow",
+           "pub_date": null,
+           "snippet": "Calculating total cost of OpenAI reponses with cached input tokens · Input: $0.150 / 1M tokens · Cached input: $0.075 / 1M tokens · Output: $0.600 ...",
+           "title": "Calculating total cost of OpenAI reponses with cached input tokens",
+           "url": "https://stackoverflow.com/questions/79451488/calculating-total-cost-of-openai-reponses-with-cached-input-tokens?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "The Ultimate Guide to OpenAI Pricing: Maximize Your AI investment",
+         "url": "https://holori.com/openai-pricing-guide/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Wikipedia](https://en.wikipedia.org/wiki/GPT-4o?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Wikipedia",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 22,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "",
+         "supporting_websites": [],
+         "title": "GPT-4o",
+         "url": "https://en.wikipedia.org/wiki/GPT-4o?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "GPT‑3.5 Turbo",
+       "prompt_text": "GPT‑3.5 Turbo",
+       "type": "alt_text"
+      },
+      {
+       "alt": "([Milvus](https://milvus.io/ai-quick-reference/what-is-the-pricing-model-for-openai?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Milvus",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 11,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 12,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "For example, GPT-4 charges $30 per million tokens for input and $60 per million tokens for output, while GPT-3.5 Turbo costs $0.50 per million input tokens and ...",
+         "supporting_websites": [
+          {
+           "attribution": "Medium",
+           "pub_date": null,
+           "snippet": "With input token costs at $15 per million and output tokens priced at $60 per million, it's clear that OpenAIO1 is aimed at users looking for ...",
+           "title": "OpenAI O1 API Pricing Explained: Everything You Need to Know",
+           "url": "https://medium.com/towards-agi/openai-o1-api-pricing-explained-everything-you-need-to-know-cbab89e5200d?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "What is the pricing model for OpenAI? - Milvus",
+         "url": "https://milvus.io/ai-quick-reference/what-is-the-pricing-model-for-openai?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Milvus](https://milvus.io/ai-quick-reference/what-is-the-pricing-model-for-openai?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Milvus",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 11,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 12,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "For example, GPT-4 charges $30 per million tokens for input and $60 per million tokens for output, while GPT-3.5 Turbo costs $0.50 per million input tokens and ...",
+         "supporting_websites": [
+          {
+           "attribution": "Medium",
+           "pub_date": null,
+           "snippet": "With input token costs at $15 per million and output tokens priced at $60 per million, it's clear that OpenAIO1 is aimed at users looking for ...",
+           "title": "OpenAI O1 API Pricing Explained: Everything You Need to Know",
+           "url": "https://medium.com/towards-agi/openai-o1-api-pricing-explained-everything-you-need-to-know-cbab89e5200d?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "What is the pricing model for OpenAI? - Milvus",
+         "url": "https://milvus.io/ai-quick-reference/what-is-the-pricing-model-for-openai?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([dida Machine Learning](https://dida.do/openai-s-api-pricing-cost-breakdown-for-gpt-3-5-gpt-4-and-gpt-4o?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "dida Machine Learning",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1728518400.0,
+         "refs": [
+          {
+           "ref_index": 14,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 13,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "Input tokens are the text you provide to the model, while output tokens are the text the model generates in response. The cost is calculated by ...",
+         "supporting_websites": [
+          {
+           "attribution": "Ibbaka",
+           "pub_date": null,
+           "snippet": "The pricing metrics are the Input Tokens (in the prompts) and the Output Tokens (the content or answer generated). Note that outputs are priced ...",
+           "title": "How OpenAI prices inputs and outputs for GPT-4 - Ibbaka",
+           "url": "https://www.ibbaka.com/ibbaka-market-blog/how-openai-prices-the-inputs-and-the-outputs-for-gpt4?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "OpenAI's API Pricing: Cost Breakdown for GPT-3.5, GPT-4 and GPT-4o",
+         "url": "https://dida.do/openai-s-api-pricing-cost-breakdown-for-gpt-3-5-gpt-4-and-gpt-4o?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Stack Overflow](https://stackoverflow.com/questions/79451488/calculating-total-cost-of-openai-reponses-with-cached-input-tokens?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Stack Overflow",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1739923200.0,
+         "refs": [
+          {
+           "ref_index": 17,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 16,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "Calculating total cost of OpenAI reponses with cached input tokens · Input: $0.150 / 1M tokens · Cached input: $0.075 / 1M tokens · Output: $0.600 ...",
+         "supporting_websites": [
+          {
+           "attribution": "analyticsvidhya.com",
+           "pub_date": null,
+           "snippet": "For reduced costs you can consider Batch API which is charged 50% less on both Input Tokens and Output Tokens. Cached Inputs also help reduce ...",
+           "title": "How to Calculate OpenAI API Price for GPT-4, GPT-4o and GPT-3.5 ...",
+           "url": "https://www.analyticsvidhya.com/blog/2024/12/openai-api-cost/?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "Calculating total cost of OpenAI reponses with cached input tokens",
+         "url": "https://stackoverflow.com/questions/79451488/calculating-total-cost-of-openai-reponses-with-cached-input-tokens?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([OpenAI Platform](https://platform.openai.com/docs/pricing?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI Platform",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "For o3 and o4-mini models, you're billed for these tokens at input token rates on top of the $10/1K calls cost. [1] includes all gpt-4o, gpt-4.1, gpt-4o-mini, ...",
+         "supporting_websites": [
+          {
+           "attribution": "OpenAI",
+           "pub_date": null,
+           "snippet": "API Pricing ; GPT-4.1. Fine-tuning price. Input: $3.00 / 1M tokens. Cached input: $0.75 / 1M tokens. Output: $12.00 / 1M tokens ; GPT-4.1 mini. Fine-tuning price.",
+           "title": "API Pricing - OpenAI",
+           "url": "https://openai.com/api/pricing/?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "Pricing - OpenAI API",
+         "url": "https://platform.openai.com/docs/pricing?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "",
+       "has_images": false,
+       "prompt_text": null,
+       "sources": [
+        {
+         "attribution": "OpenAI",
+         "title": "API Pricing - OpenAI",
+         "url": "https://openai.com/api/pricing/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "apidog",
+         "title": "OpenAI API Pricing | Automated Cost Calculation - Apidog",
+         "url": "https://apidog.com/blog/openai-api-pricing/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "Wikipedia",
+         "title": "GPT-4o",
+         "url": "https://en.wikipedia.org/wiki/GPT-4o?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "Holori",
+         "title": "The Ultimate Guide to OpenAI Pricing: Maximize Your AI investment",
+         "url": "https://holori.com/openai-pricing-guide/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "Milvus",
+         "title": "What is the pricing model for OpenAI? - Milvus",
+         "url": "https://milvus.io/ai-quick-reference/what-is-the-pricing-model-for-openai?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "dida Machine Learning",
+         "title": "OpenAI's API Pricing: Cost Breakdown for GPT-3.5, GPT-4 and GPT-4o",
+         "url": "https://dida.do/openai-s-api-pricing-cost-breakdown-for-gpt-3-5-gpt-4-and-gpt-4o?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "Stack Overflow",
+         "title": "Calculating total cost of OpenAI reponses with cached input tokens",
+         "url": "https://stackoverflow.com/questions/79451488/calculating-total-cost-of-openai-reponses-with-cached-input-tokens?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "OpenAI Platform",
+         "title": "Pricing - OpenAI API",
+         "url": "https://platform.openai.com/docs/pricing?utm_source=chatgpt.com"
+        }
+       ],
+       "type": "sources_footnote"
+      }
+     ],
+     "model_slug": "gpt-5",
+     "parent_id": "b7903013-5228-4ab7-a8fc-24dd1b8bc4b8",
+     "search_result_groups": [
+      {
+       "domain": "reddit.com",
+       "entries": [
+        {
+         "attribution": "reddit.com",
+         "snippet": "o3-pro API pricing: $20/million input tokens, $80/million output tokens - 86% cheaper than o1-pro!",
+         "title": "ELI5: understanding OpenAI's API pricing when it comes to tokens",
+         "url": "https://www.reddit.com/r/webdev/comments/1juvtki/eli5_understanding_openais_api_pricing_when_it/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "reddit.com",
+         "snippet": "GPT-4.5 has an API price of $75/1M input and $150/1M output. ChatGPT Plus users are going to get 5 queries per month with this level of pricing.",
+         "title": "r/OpenAI on Reddit: GPT-4.5 has an API price of $75/1M input and ...",
+         "url": "https://www.reddit.com/r/OpenAI/comments/1izpgct/gpt45_has_an_api_price_of_751m_input_and_1501m/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "microsoft.com",
+       "entries": [
+        {
+         "attribution": "microsoft.com",
+         "snippet": "Input: $3/1M tokens. Output: $12/1M tokens. Built-in tools. The Responses API ... Inference cost (input and output) varies based on the GPT model used with each ...",
+         "title": "Azure OpenAI Service - Pricing",
+         "url": "https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "openai.com",
+       "entries": [
+        {
+         "attribution": "openai.com",
+         "snippet": "Reasoning. Speed. Input. Output. Reasoning tokens. Pricing. Per 1M tokens. Input. $1.25. Cached Input. $0.13. Output. $10.00. Context. Window. 400,000. Max ...",
+         "title": "Compare models - OpenAI API",
+         "url": "https://platform.openai.com/docs/models/compare?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "medium.com",
+       "entries": [
+        {
+         "attribution": "medium.com",
+         "snippet": "GPT-4 Turbo: Priced at $10.00 per 1M input tokens and $30.00 per 1M output tokens. GPT-4: Standard version at $30.00 per 1M tokens input and ...",
+         "title": "OpenAI API Pricing and How to Calculate Cost Automatically",
+         "url": "https://roobia.medium.com/openai-api-pricing-and-how-to-calculate-cost-automatically-e20e108eabdb?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "medium.com",
+         "snippet": "With input token costs at $15 per million and output tokens priced at $60 per million, it's clear that OpenAIO1 is aimed at users looking for ...",
+         "title": "OpenAI O1 API Pricing Explained: Everything You Need to Know",
+         "url": "https://medium.com/towards-agi/openai-o1-api-pricing-explained-everything-you-need-to-know-cbab89e5200d?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "cloudzero.com",
+       "entries": [
+        {
+         "attribution": "cloudzero.com",
+         "snippet": "Model / Feature. Input Price (per 1M tokens). Cached Input Price. Output Price (per 1M tokens). Best For ; GPT‑5 (flagship). $1.25. $0.125.",
+         "title": "OpenAI Pricing: The Models, Features, And Costs To Know",
+         "url": "https://www.cloudzero.com/blog/openai-pricing/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "distillery.com",
+       "entries": [
+        {
+         "attribution": "distillery.com",
+         "snippet": "If we go to the OpenAI pricing page, we can see that the cost for the GPT-4o is $0,005 per 1000 tokens in the input and $0,0015 per 1000 tokens ...",
+         "title": "Understanding the Cost of OpenAI API - Distillery",
+         "url": "https://distillery.com/blog/understanding-openai-api-cost/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "gptforwork.com",
+       "entries": [
+        {
+         "attribution": "gptforwork.com",
+         "snippet": "Provider. OpenAI. OpenAI ; Model. gpt-4o-mini. gpt-4o ; Input price for 1M tokens. $0.15. $2.50 ; Output price for 1M tokens. $0.60. $10.00 ; Price per API call.",
+         "title": "OpenAI API Pricing Calculator - GPT for Work",
+         "url": "https://gptforwork.com/tools/openai-chatgpt-api-pricing-calculator?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "ibbaka.com",
+       "entries": [
+        {
+         "attribution": "ibbaka.com",
+         "snippet": "The pricing metrics are the Input Tokens (in the prompts) and the Output Tokens (the content or answer generated). Note that outputs are priced ...",
+         "title": "How OpenAI prices inputs and outputs for GPT-4 - Ibbaka",
+         "url": "https://www.ibbaka.com/ibbaka-market-blog/how-openai-prices-the-inputs-and-the-outputs-for-gpt4?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "analyticsvidhya.com",
+       "entries": [
+        {
+         "attribution": "analyticsvidhya.com",
+         "snippet": "For reduced costs you can consider Batch API which is charged 50% less on both Input Tokens and Output Tokens. Cached Inputs also help reduce ...",
+         "title": "How to Calculate OpenAI API Price for GPT-4, GPT-4o and GPT-3.5 ...",
+         "url": "https://www.analyticsvidhya.com/blog/2024/12/openai-api-cost/?utm_source=chatgpt.com"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "parent": "7fbbd8ad-3710-4a1a-905d-e8d3b2b3b5ec"
+  },
+  "7fa9c00b-de8e-4f40-98ab-e2c5bb79df42": {
+   "id": "7fa9c00b-de8e-4f40-98ab-e2c5bb79df42",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "both"
+     ]
+    },
+    "create_time": 1762475246.748,
+    "id": "7fa9c00b-de8e-4f40-98ab-e2c5bb79df42",
+    "metadata": {
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "04f2cb32-20ee-426a-8746-690de0e25702"
+  },
+  "7fbbd8ad-3710-4a1a-905d-e8d3b2b3b5ec": {
+   "id": "7fbbd8ad-3710-4a1a-905d-e8d3b2b3b5ec",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "yes"
+     ]
+    },
+    "create_time": 1762475119.959,
+    "id": "7fbbd8ad-3710-4a1a-905d-e8d3b2b3b5ec",
+    "metadata": {
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "99c48729-2f0c-4fe4-b302-44a74c4ac2d2"
+  },
+  "8d2b0c73-655c-4229-b444-cb8327a273df": {
+   "id": "8d2b0c73-655c-4229-b444-cb8327a273df",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "company valuation how did u did the valuation?"
+     ]
+    },
+    "create_time": 1762459181.303,
+    "id": "8d2b0c73-655c-4229-b444-cb8327a273df",
+    "metadata": {
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "c9348943-a10d-44bc-8d70-df7caafec745"
+  },
+  "99c48729-2f0c-4fe4-b302-44a74c4ac2d2": {
+   "id": "99c48729-2f0c-4fe4-b302-44a74c4ac2d2",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Great question — here’s a summary of the entity[\"organization\", \"OpenAI\", 0] API pricing (as of now) in a neutral-scientific tone with a slight poetic touch — and I’ll highlight how to calculate your potential costs.\n\n---\n\n### 💡 Key Pricing Details  \nFrom OpenAI’s official pricing page:  \n- On the OpenAI API pricing page it states: *“Prompts are billed similarly to other GPT models. Image outputs cost approximately $0.01 (low), $0.04 (medium), and $0.17 (high) for square images.”* citeturn0search0  \n- On the “Platform” pricing site the models are listed with token-based pricing. citeturn0search1  \n- For example, for one of their advanced models: “Input: US $15.00 per 1 M tokens. Output: US $120.00 per 1 M tokens. 400K context length. 128K max output tokens.” citeturn0search3  \n\n---\n\n### 🧮 How to Calculate Your Cost  \n1. **Count tokens**: A “token” is roughly a word or short piece of text (depends on language/model). So your prompt (input) and the model’s answer (output) both consume tokens.  \n2. **Know the rate**: Find the model you’re using (e.g., “base”, “turbo”, “vision-capable”, etc). For that model, find the cost per **1 million input tokens** and per **1 million output tokens**.  \n3. **Apply**:  \n   - Cost = (Input tokens / 1,000,000) × input-rate + (Output tokens / 1,000,000) × output-rate  \n4. **Additional features**: If you use image generation via API: for example, OpenAI lists ~$0.01 for low-res, $0.04 for medium, $0.17 for high for square images. citeturn0search0  \n5. **Context length matters**: The larger the context (how many tokens you can send plus model uses), the more relevant it becomes for cost and capability. E.g., one listing: “400K context length. 128K max output tokens.” citeturn0search3  \n\n---\n\n### 🌌 Poetic perspective  \nIn a way, each token is like a drop of ink in a vast cosmic ledger — the cost of ‘querying the machine mind’ is the accumulation of those tokens, multiplied by the model’s value-scale. The richer the model, the higher the token-rate, the more you’re tapping into the hidden power behind the lines.\n\n---\n\nIf you like, I can **pull together a current full table** of all available models of OpenAI with their respective input/output token pricing (as publicly disclosed) and highlight the *cheapest vs highest-cost tiers*. Do you want that, partner?"
+     ]
+    },
+    "create_time": 1762459341.467869,
+    "id": "99c48729-2f0c-4fe4-b302-44a74c4ac2d2",
+    "metadata": {
+     "content_references": [
+      {
+       "alt": "OpenAI",
+       "prompt_text": "OpenAI",
+       "type": "alt_text"
+      },
+      {
+       "alt": "([OpenAI](https://openai.com/api/pricing/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "Prompts are billed similarly to other GPT models. Image outputs cost approximately $0.01 (low), $0.04 (medium), and $0.17 (high) for square images.",
+         "supporting_websites": [],
+         "title": "API Pricing - OpenAI",
+         "url": "https://openai.com/api/pricing/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([OpenAI Platform](https://platform.openai.com/pricing?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI Platform",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "Explore resources, tutorials, API docs, and dynamic examples to get the most out of OpenAI's developer platform.",
+         "supporting_websites": [],
+         "title": "pricing for the \"gpt-realtime\" model - OpenAI Platform",
+         "url": "https://platform.openai.com/pricing?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([OpenAI](https://openai.com/api/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 3,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "Reasoning: | Speed: · Input: $15.00 per 1M tokens. Output: $120.00 per 1M tokens · 400K context length. 128K max output tokens · Knowledge cut-off: Sep ...",
+         "supporting_websites": [],
+         "title": "API Platform - OpenAI",
+         "url": "https://openai.com/api/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([OpenAI](https://openai.com/api/pricing/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "Prompts are billed similarly to other GPT models. Image outputs cost approximately $0.01 (low), $0.04 (medium), and $0.17 (high) for square images.",
+         "supporting_websites": [],
+         "title": "API Pricing - OpenAI",
+         "url": "https://openai.com/api/pricing/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([OpenAI](https://openai.com/api/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "OpenAI",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 3,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "Reasoning: | Speed: · Input: $15.00 per 1M tokens. Output: $120.00 per 1M tokens · 400K context length. 128K max output tokens · Knowledge cut-off: Sep ...",
+         "supporting_websites": [],
+         "title": "API Platform - OpenAI",
+         "url": "https://openai.com/api/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "",
+       "has_images": false,
+       "prompt_text": null,
+       "sources": [
+        {
+         "attribution": "OpenAI",
+         "title": "API Pricing - OpenAI",
+         "url": "https://openai.com/api/pricing/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "OpenAI Platform",
+         "title": "pricing for the \"gpt-realtime\" model - OpenAI Platform",
+         "url": "https://platform.openai.com/pricing?utm_source=chatgpt.com"
+        }
+       ],
+       "type": "sources_footnote"
+      }
+     ],
+     "model_slug": "gpt-5",
+     "parent_id": "11445b32-a722-4c31-9825-406636e72d11",
+     "search_result_groups": [
+      {
+       "domain": "reddit.com",
+       "entries": [
+        {
+         "attribution": "reddit.com",
+         "snippet": "Given your token count, 400 input tokens for 800 articles, and 1 output token for each article, you'd be charged $0.808 using gpt-4o and $0.048 ...",
+         "title": "Open AI API costs me 1$? : r/OpenAI - Reddit",
+         "url": "https://www.reddit.com/r/OpenAI/comments/1fxogml/open_ai_api_costs_me_1/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "youtube.com",
+       "entries": [
+        {
+         "attribution": "youtube.com",
+         "snippet": "I discuss LLM API pricing using OpenAI as an example. I go over a simple python script that computes the costs of each request and explain ...",
+         "title": "LLM Pricing Explained (OpenAI API Pricing) - YouTube",
+         "url": "https://www.youtube.com/watch?v=ooNRL9FJSuk&utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "gptforwork.com",
+       "entries": [
+        {
+         "attribution": "gptforwork.com",
+         "snippet": "Estimate the cost of using various AI APIs such as OpenAI, Anthropic, Deepseek, Gemini, Mistral with this pricing calculator.",
+         "title": "OpenAI API Pricing Calculator - GPT for Work",
+         "url": "https://gptforwork.com/tools/openai-chatgpt-api-pricing-calculator?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "microsoft.com",
+       "entries": [
+        {
+         "attribution": "microsoft.com",
+         "snippet": "Realtime API ; GPT-4o-Realtime-Preview-2024-10-01-Global, Text Input: $5. Cached Input: $2.50. Output: $20. Audio Input: $100. Cached Input: $20. Output: $200.",
+         "title": "Azure OpenAI Service - Pricing",
+         "url": "https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "medium.com",
+       "entries": [
+        {
+         "attribution": "medium.com",
+         "snippet": "This guide covers the pricing for each OpenAI model and explains how to automatically calculate token usage and costs.",
+         "title": "OpenAI API Pricing and How to Calculate Cost Automatically",
+         "url": "https://roobia.medium.com/openai-api-pricing-and-how-to-calculate-cost-automatically-e20e108eabdb?utm_source=chatgpt.com"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "parent": "c28eac5e-e12e-4422-be1e-d38fee13df3f"
+  },
+  "b93c9fd8-23da-44d5-a186-d488fee3f326": {
+   "id": "b93c9fd8-23da-44d5-a186-d488fee3f326",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "yes"
+     ]
+    },
+    "create_time": 1762475217.349,
+    "id": "b93c9fd8-23da-44d5-a186-d488fee3f326",
+    "metadata": {
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "326ea337-20f9-475f-91d9-0ee0f12ef6fb"
+  },
+  "c28eac5e-e12e-4422-be1e-d38fee13df3f": {
+   "id": "c28eac5e-e12e-4422-be1e-d38fee13df3f",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "what is API pricing"
+     ]
+    },
+    "create_time": 1762459337.707,
+    "id": "c28eac5e-e12e-4422-be1e-d38fee13df3f",
+    "metadata": {
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "f8f63237-a39f-4a8d-94b1-241e0a5d1a96"
+  },
+  "c9348943-a10d-44bc-8d70-df7caafec745": {
+   "id": "c9348943-a10d-44bc-8d70-df7caafec745",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Here is the most up-to-date snapshot of entity[\"organization\", \"OpenAI\", 0]’s performance, in a tone that is scientific and slightly poetic — drawing on what is publicly estimated, while noting that many figures are privately held and should be viewed as approximations.\n\n---\n\n### 📊 Key Figures\n\n#### • Revenue  \n- OpenAI generated about **US $3.7 billion** in 2024. citeturn0search5turn0search3turn0search0  \n- By mid-2025, it is estimated to have reached **US $10 billion** in annual recurring revenue (ARR). citeturn0search1turn0search0  \n- A more recent estimate (July 2025) places its annualised revenue at about **US $12 billion**. citeturn0search6turn0news10  \n- One forecast projects revenue of around **US $12.7 billion** for full-year 2025. citeturn0search3  \n\n#### • User / Usage Metrics  \n- The flagship product, entity[\"software\", \"ChatGPT\", 0], is estimated to have around **800 million weekly active users** as of 2025. citeturn0search0turn0search5  \n- The platform reportedly processes on the order of **2 billion+ queries per day**. citeturn0search1  \n- Website traffic: About **5.8 billion monthly visits** to ChatGPT’s site in September 2025. citeturn0search1  \n\n#### • Market Share  \n- Some analyses give OpenAI roughly **17% share** of the generative-AI software & services market as of 2025. citeturn0search3  \n- Other sources suggest much higher dominance in certain segments (e.g., >60% share of U.S. “AI-as-a-service” in 2025) though these tend to be less formal. citeturn0search0  \n\n---\n\n### ✨ Reflections (poetic note)  \nIn less than a decade, OpenAI has moved from the margins of research labs into the beating heart of a new digital ecosystem. With hundreds of millions of users and billions of daily queries, the company pulses with human-machine conversation. Its revenue growth is meteoric, yet the journey still spans galaxies: the technology charts a map of unknown terrain even as it brings millions into its orbit.\n\n---\n\n### ⚠️ Important Caveats  \n- These figures are **estimates**: OpenAI is a private company and does not release full audited breakdowns for all metrics.  \n- “Market share” can vary greatly depending on how you define the market (consumer vs enterprise; global vs regional).  \n- Usage numbers (users, queries) often come from analytics firms or secondary sources rather than official disclosures.  \n- High growth is paired with high costs: some sources note that OpenAI is burning billions in cash to scale its compute infrastructure. citeturn0search6  \n\n---\n\nIf you like, I can **pull together a chart** of OpenAI’s estimated growth (users, revenue, market share) over time, and compare it with key competitors (e.g., entity[\"organization\",\"Anthropic\",0], entity[\"organization\",\"DeepMind\",0]). Would that be helpful?"
+     ]
+    },
+    "create_time": 1762459157.038675,
+    "id": "c9348943-a10d-44bc-8d70-df7caafec745",
+    "metadata": {
+     "content_references": [
+      {
+       "alt": "OpenAI",
+       "prompt_text": "OpenAI",
+       "type": "alt_text"
+      },
+      {
+       "alt": "([Nerdynav](https://nerdynav.com/chatgpt-statistics/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Nerdynav",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 5,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 3,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "5 Oct 2025 — Revenue: OpenAI earned $3.7 billion from ChatGPT in 2024 and hit $10 billion ARR by June 2025. Its aiming for profitability in 2029 with ...",
+         "supporting_websites": [
+          {
+           "attribution": "taptwicedigital.com",
+           "pub_date": null,
+           "snippet": "18 May 2025 — OpenAI is projected to generate $12.7 billion in revenue in 2025. · OpenAI has an estimated 17% market share in the generative AI market.",
+           "title": "8 OpenAI Statistics (2025): Revenue, Valuation, Profit, Users",
+           "url": "https://taptwicedigital.com/stats/openai?utm_source=chatgpt.com"
+          },
+          {
+           "attribution": "SQ Magazine",
+           "pub_date": null,
+           "snippet": "7 Oct 2025 — 800 million weekly active users are now engaging with ChatGPT. OpenAI's projected revenue for 2025 is $3.4 billion, nearly doubling the $1.6 ...",
+           "title": "OpenAI Statistics 2025: Adoption, Integration & Innovation",
+           "url": "https://sqmagazine.co.uk/openai-statistics/?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "Latest ChatGPT Statistics: 800M+ Users, Revenue (Oct 2025)",
+         "url": "https://nerdynav.com/chatgpt-statistics/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([DemandSage](https://www.demandsage.com/chatgpt-statistics/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "DemandSage",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1759857734.0,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "7 Oct 2025 — OpenAI has reached $10 billion in annual recurring revenue (ARR) as of June 2025. · Chat GPT is targeting $125 billion in revenue by 2029. · A ...",
+         "supporting_websites": [
+          {
+           "attribution": "SQ Magazine",
+           "pub_date": null,
+           "snippet": "7 Oct 2025 — 800 million weekly active users are now engaging with ChatGPT. OpenAI's projected revenue for 2025 is $3.4 billion, nearly doubling the $1.6 ...",
+           "title": "OpenAI Statistics 2025: Adoption, Integration & Innovation",
+           "url": "https://sqmagazine.co.uk/openai-statistics/?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "Latest ChatGPT Users Stats 2025 (Growth & Usage Report)",
+         "url": "https://www.demandsage.com/chatgpt-statistics/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sacra](https://sacra.com/c/openai/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sacra",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 6,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 10,
+           "ref_type": "news",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "29 Oct 2025 — Sacra estimates that OpenAI hit $13B in annualized revenue in July 2025, doubling from $6B in January and up 3x from $4B in 2024.",
+         "supporting_websites": [
+          {
+           "attribution": "Reuters",
+           "pub_date": null,
+           "snippet": "OpenAI has reportedly reached $12 billion in annualized revenue after doubling its income in the first seven months of 2025, according to a report by The Information. This suggests the company is generating approximately $1 billion per month. OpenAI's ChatGPT enjoys strong usage, with around 700 million weekly active users spanning both individual consumers and business clients. Despite this rapid growth, OpenAI has raised its projected cash burn for 2025 to $8 billion, an increase of $1 billion from earlier estimates.\n\nTo support continued expansion, OpenAI is securing investors for the second $30 billion portion of a funding round. Noteworthy contributions are expected from Sequoia Capital and Tiger Global Management, each investing hundreds of millions. So far, investors, excluding Japan's SoftBank, are nearing $7.5 billion in committed funds. SoftBank's total investment in OpenAI has reached $32 billion since its initial investment in late 2024. Microsoft remains a key backer of the company.",
+           "title": "OpenAI hits $12 billion in annualized revenue, The Information reports",
+           "url": "https://www.reuters.com/business/openai-hits-12-billion-annualized-revenue-information-reports-2025-07-31/?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "OpenAI revenue, valuation & growth rate - Sacra",
+         "url": "https://sacra.com/c/openai/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([taptwicedigital.com](https://taptwicedigital.com/stats/openai?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "taptwicedigital.com",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 3,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "18 May 2025 — OpenAI is projected to generate $12.7 billion in revenue in 2025. · OpenAI has an estimated 17% market share in the generative AI market.",
+         "supporting_websites": [],
+         "title": "8 OpenAI Statistics (2025): Revenue, Valuation, Profit, Users",
+         "url": "https://taptwicedigital.com/stats/openai?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "ChatGPT",
+       "prompt_text": "ChatGPT",
+       "type": "alt_text"
+      },
+      {
+       "alt": "([SQ Magazine](https://sqmagazine.co.uk/openai-statistics/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "SQ Magazine",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1751347456.0,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 5,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "7 Oct 2025 — 800 million weekly active users are now engaging with ChatGPT. OpenAI's projected revenue for 2025 is $3.4 billion, nearly doubling the $1.6 ...",
+         "supporting_websites": [
+          {
+           "attribution": "Nerdynav",
+           "pub_date": null,
+           "snippet": "5 Oct 2025 — Revenue: OpenAI earned $3.7 billion from ChatGPT in 2024 and hit $10 billion ARR by June 2025. Its aiming for profitability in 2029 with ...",
+           "title": "Latest ChatGPT Statistics: 800M+ Users, Revenue (Oct 2025)",
+           "url": "https://nerdynav.com/chatgpt-statistics/?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "OpenAI Statistics 2025: Adoption, Integration & Innovation",
+         "url": "https://sqmagazine.co.uk/openai-statistics/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([DemandSage](https://www.demandsage.com/chatgpt-statistics/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "DemandSage",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1759857734.0,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "7 Oct 2025 — OpenAI has reached $10 billion in annual recurring revenue (ARR) as of June 2025. · Chat GPT is targeting $125 billion in revenue by 2029. · A ...",
+         "supporting_websites": [],
+         "title": "Latest ChatGPT Users Stats 2025 (Growth & Usage Report)",
+         "url": "https://www.demandsage.com/chatgpt-statistics/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([DemandSage](https://www.demandsage.com/chatgpt-statistics/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "DemandSage",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1759857734.0,
+         "refs": [
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "7 Oct 2025 — OpenAI has reached $10 billion in annual recurring revenue (ARR) as of June 2025. · Chat GPT is targeting $125 billion in revenue by 2029. · A ...",
+         "supporting_websites": [],
+         "title": "Latest ChatGPT Users Stats 2025 (Growth & Usage Report)",
+         "url": "https://www.demandsage.com/chatgpt-statistics/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([taptwicedigital.com](https://taptwicedigital.com/stats/openai?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "taptwicedigital.com",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 3,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "18 May 2025 — OpenAI is projected to generate $12.7 billion in revenue in 2025. · OpenAI has an estimated 17% market share in the generative AI market.",
+         "supporting_websites": [],
+         "title": "8 OpenAI Statistics (2025): Revenue, Valuation, Profit, Users",
+         "url": "https://taptwicedigital.com/stats/openai?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([SQ Magazine](https://sqmagazine.co.uk/openai-statistics/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "SQ Magazine",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1751347456.0,
+         "refs": [
+          {
+           "ref_index": 0,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "7 Oct 2025 — 800 million weekly active users are now engaging with ChatGPT. OpenAI's projected revenue for 2025 is $3.4 billion, nearly doubling the $1.6 ...",
+         "supporting_websites": [],
+         "title": "OpenAI Statistics 2025: Adoption, Integration & Innovation",
+         "url": "https://sqmagazine.co.uk/openai-statistics/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Sacra](https://sacra.com/c/openai/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Sacra",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": null,
+         "refs": [
+          {
+           "ref_index": 6,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "29 Oct 2025 — Sacra estimates that OpenAI hit $13B in annualized revenue in July 2025, doubling from $6B in January and up 3x from $4B in 2024.",
+         "supporting_websites": [],
+         "title": "OpenAI revenue, valuation & growth rate - Sacra",
+         "url": "https://sacra.com/c/openai/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "Anthropic",
+       "prompt_text": "Anthropic",
+       "type": "alt_text"
+      },
+      {
+       "alt": "DeepMind",
+       "prompt_text": "DeepMind",
+       "type": "alt_text"
+      },
+      {
+       "alt": "",
+       "has_images": false,
+       "prompt_text": null,
+       "sources": [
+        {
+         "attribution": "Nerdynav",
+         "title": "Latest ChatGPT Statistics: 800M+ Users, Revenue (Oct 2025)",
+         "url": "https://nerdynav.com/chatgpt-statistics/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "DemandSage",
+         "title": "Latest ChatGPT Users Stats 2025 (Growth & Usage Report)",
+         "url": "https://www.demandsage.com/chatgpt-statistics/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "Sacra",
+         "title": "OpenAI revenue, valuation & growth rate - Sacra",
+         "url": "https://sacra.com/c/openai/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "taptwicedigital.com",
+         "title": "8 OpenAI Statistics (2025): Revenue, Valuation, Profit, Users",
+         "url": "https://taptwicedigital.com/stats/openai?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "SQ Magazine",
+         "title": "OpenAI Statistics 2025: Adoption, Integration & Innovation",
+         "url": "https://sqmagazine.co.uk/openai-statistics/?utm_source=chatgpt.com"
+        }
+       ],
+       "type": "sources_footnote"
+      }
+     ],
+     "model_slug": "gpt-5",
+     "parent_id": "96b82ad7-67ad-4502-8a3e-0f3a02a3072a",
+     "search_result_groups": [
+      {
+       "domain": "aiprm.com",
+       "entries": [
+        {
+         "attribution": "aiprm.com",
+         "snippet": "Recent OpenAI statistics revealed that the most prominent users of OpenAI in terms of revenue are those in the $1-$10 million bracket, with 1,643 companies in ...",
+         "title": "50+ OpenAI Statistics 2025",
+         "url": "https://www.aiprm.com/en-gb/openai-statistics/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "explodingtopics.com",
+       "entries": [
+        {
+         "attribution": "explodingtopics.com",
+         "snippet": "3 days ago — By early 2023, ChatGPT had accumulated over 100 million monthly users. As of August 2025, OpenAI.com receives 938.3 million monthly visits. ...",
+         "title": "44 NEW Artificial Intelligence Statistics (Oct 2025)",
+         "url": "https://explodingtopics.com/blog/ai-statistics?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "datareportal.com",
+       "entries": [
+        {
+         "attribution": "datareportal.com",
+         "snippet": "15 Oct 2025 — So, despite OpenAI's impressive market share, data suggests that somewhere between 100 million and 200 million active AI users do not use ...",
+         "title": "Digital 2026: more than 1 billion people use AI",
+         "url": "https://datareportal.com/reports/digital-2026-one-billion-people-using-ai?utm_source=chatgpt.com"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "parent": "1d3571ce-d316-4b1d-8b60-7e25b033178b"
+  },
+  "client-created-root": {
+   "id": "client-created-root",
+   "message": null,
+   "parent": null
+  },
+  "e111dc41-a176-4546-aca1-9f0a0783b718": {
+   "id": "e111dc41-a176-4546-aca1-9f0a0783b718",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Great question — partner. Here’s how the valuation for entity[\"organization\", \"OpenAI\", 0] (OpenAI) is derived, and what the reported numbers mean (in a neutral-scientific tone with a hint of poetic resonance).  \n\n---\n\n### 🔍 How valuations are determined  \nWhen investors value a private company like OpenAI, they typically consider:  \n1. **Recent financing rounds** — the price at which new shares are issued gives a concrete benchmark (post-money valuation).  \n2. **Secondary share sales** — when existing shareholders sell shares to new investors, the implied price per share gives updated market value.  \n3. **Revenue, growth projections and market potential** — companies are often valued at some multiple of current/future revenue (or earnings) plus a premium for strategic possibilities (especially in frontier tech).  \n4. **Competitive landscape and strategic partnerships** — dominance, moat, brand, ecosystem effects and potential for future monetisation matter.  \n5. **Risk, burn rate and cost structure** — high costs or losses can dampen valuation, but in high-growth sectors investors may accept negative current profits for big future upside.\n\nSo when we see a reported valuation, it isn’t just “revenue × multiple” (though that helps anchor things) — it also reflects investor belief in future scale, strategic leverage, talent, and competitive position.\n\n---\n\n### 📌 Specifics for OpenAI’s valuation  \nHere are key data points and what they tell us, drawn from publicly-reported sources:\n\n- In **March 2025**, OpenAI announced a funding round of **US$40 billion** at a **≈ US$300 billion post-money valuation**. citeturn0search16turn0search2turn0search7turn0search22turn0search27  \n- By **August 2025**, sources reported that OpenAI was in early discussions for a secondary share sale that would value it at about **US$500 billion**. citeturn0search4turn0search12turn0search26turn0search28  \n- In **October 2025**, OpenAI reportedly completed a share sale (secondary market) of approximately US$6.6 billion of shares from existing employees/holders, which implied a valuation of **around US$500 billion**. citeturn0search24turn0search28turn0search9  \n- There are also reports that in the longer term (e.g., in preparation for an IPO) investors/analysts are discussing a possible valuation of up to **US$1 trillion**. citeturn0search14turn0search1  \n- On the revenue/projection side: OpenAI’s revenue is rapidly increasing (e.g., forecasts of ~US$11–12 billion in 2025) which underpins the high valuation. citeturn0search22turn0search9turn0search4  \n\n---\n\n### 🧮 Why the multiples are so big (and the “premium” effect)  \nIf you simply applied a traditional software multiple (say 6–8× revenue) to projected 2025 revenue (~US$11–12 billion), you might arrive at a “headline” valuation of around US$70–100 billion. (Indeed some commentary estimated ~US$90 billion using that logic). citeturn0search20  \nBut OpenAI’s valuation is much higher (US$300 billion then US$500 billion) because:  \n- Investors are betting on **massive future growth** beyond 2025 — not just the near term.  \n- OpenAI has strategic value (e.g., dominance in generative-AI, potential to reshape industries) that goes beyond current earnings.  \n- The funding and share-sale market for AI is very hot, meaning higher valuations are accepted as part of frontier tech investing.  \n- The timing (market sentiment) matters — when many believe “AI is the next big wave”, valuations carry a speculative premium.\n\nThus the valuation is not purely mathematical from current revenue — it embeds expectation, strategic positioning, and investor sentiment.\n\n---\n\n### ✅ Summary for you  \n- The US$300 billion figure comes from the March 2025 funding round at that post-money valuation.  \n- The US$500 billion figure comes from a later share sale (secondary) in October 2025, implying a higher implied valuation.  \n- These numbers reflect both the hard data (funding, share price) and the speculative premium on future potential.  \n- The “how did we arrive” is essentially: recent transaction prices + growth forecasts + market positioning.  \n- They are **estimated** valuations and not an audited “market cap” like for a public company — the actual value realised may differ.\n\n---\n\nIf you like, I can pull together a **timeline chart** of OpenAI’s valuation events + revenue milestones + implied multiples (2019-2026) so we see how the numbers evolved. Do you want that?"
+     ]
+    },
+    "create_time": 1762459183.715938,
+    "id": "e111dc41-a176-4546-aca1-9f0a0783b718",
+    "metadata": {
+     "content_references": [
+      {
+       "alt": "OpenAI",
+       "prompt_text": "OpenAI",
+       "type": "alt_text"
+      },
+      {
+       "alt": "([TechCrunch](https://techcrunch.com/2025/03/31/openai-raises-40b-at-300b-post-money-valuation/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "TechCrunch",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1743379200.0,
+         "refs": [
+          {
+           "ref_index": 16,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 2,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 7,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 22,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 27,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "OpenAI raised $40 billion in a round that values the company at $300 billion post-money. SoftBank led the financing, CNBC reported.",
+         "supporting_websites": [
+          {
+           "attribution": "OpenAI",
+           "pub_date": null,
+           "snippet": "Today we're announcing new funding—$40B at a $300B post-money valuation, which enables us to push the frontiers of AI research even ... March 31, 2025.",
+           "title": "New funding to build towards AGI | OpenAI",
+           "url": "https://openai.com/index/march-funding-updates/?utm_source=chatgpt.com"
+          },
+          {
+           "attribution": "Channel Insider",
+           "pub_date": null,
+           "snippet": "OpenAI has announced that it secured $40 billion in fresh funding. This massive investment values the company at an eye-popping $300 billion.",
+           "title": "OpenAI Secures Record $40B Funding at $300B Valuation",
+           "url": "https://www.channelinsider.com/news-and-trends/us/open-ai-funding-round-march-2025/?utm_source=chatgpt.com"
+          },
+          {
+           "attribution": "AInvest",
+           "pub_date": null,
+           "snippet": "OpenAI's valuation is expected to reach $300 billion in a pending ... OpenAI's Revenue Triples to $12.7 Billion in 2025. AInvest. 07/18.",
+           "title": "OpenAI's Revenue Doubles to $10 Billion, Surpasses $12.7 Billion ...",
+           "url": "https://www.ainvest.com/news/openai-revenue-doubles-10-billion-surpasses-12-7-billion-2025-target-accelerating-ai-adoption-2506/?utm_source=chatgpt.com"
+          },
+          {
+           "attribution": "pminsights.com",
+           "pub_date": null,
+           "snippet": "OpenAI raised in its Series Corporate Round on February 10, 2025, with a price per share reflecting a post-money valuation of $300.0B.",
+           "title": "OpenAI Valuation - PM Insights",
+           "url": "https://www.pminsights.com/companies/openai?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "OpenAI raises $40B at $300B post-money valuation - TechCrunch",
+         "url": "https://techcrunch.com/2025/03/31/openai-raises-40b-at-300b-post-money-valuation/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Reuters](https://www.reuters.com/business/openai-eyes-500-billion-valuation-potential-employee-share-sale-source-says-2025-08-06/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Reuters",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1754510038.0,
+         "refs": [
+          {
+           "ref_index": 4,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 12,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 26,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 28,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "$500 billion valuation would be huge jump from current $300 billion · Tech giants competing intensely to recruit and retain AI talent · Bolstered ...",
+         "supporting_websites": [
+          {
+           "attribution": "Reuters",
+           "pub_date": null,
+           "snippet": "ChatGPT maker OpenAI is in early-stage discussions about an employee stock sale that could value the company at about $500 billion, Reuters ...",
+           "title": "OpenAI's valuation is tech boom's key man risk - Reuters",
+           "url": "https://www.reuters.com/commentary/breakingviews/openais-valuation-is-tech-booms-key-man-risk-2025-08-07/?utm_source=chatgpt.com"
+          },
+          {
+           "attribution": "PYMNTS.com",
+           "pub_date": null,
+           "snippet": "OpenAI is reportedly considering a possible sale of stock for current and former employees, valuing the AI startup at $500 billion.",
+           "title": "OpenAI Targets $500 Billion Valuation in Share Sale - PYMNTS.com",
+           "url": "https://www.pymnts.com/artificial-intelligence-2/2025/openai-targets-500-billion-valuation-in-share-sale/?utm_source=chatgpt.com"
+          },
+          {
+           "attribution": "AInvest",
+           "pub_date": null,
+           "snippet": "In 2025, OpenAI's projected $500 billion valuation has become a seismic event in the private technology sector, not just for its sheer scale ...",
+           "title": "OpenAI's $500 Billion Valuation and the Reshaping of Private Tech ...",
+           "url": "https://www.ainvest.com/news/openai-500-billion-valuation-reshaping-private-tech-markets-2508/?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "OpenAI eyes $500 billion valuation in potential employee share sale ...",
+         "url": "https://www.reuters.com/business/openai-eyes-500-billion-valuation-potential-employee-share-sale-source-says-2025-08-06/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Reuters](https://www.reuters.com/technology/openai-hits-500-billion-valuation-after-share-sale-source-says-2025-10-02/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Reuters",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1759395275.0,
+         "refs": [
+          {
+           "ref_index": 24,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 28,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 9,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "OpenAI has reached a $500 billion valuation following a secondary share sale involving current and former employees, who sold approximately $6.6 billion worth of shares. This marks a significant increase from its previous $300 billion valuation, reflecting rapid user growth and increased revenue. The share sale attracted major investors including Thrive Capital, SoftBank, Dragoneer Investment Group, Abu Dhabi's MGX, and T. Rowe Price. According to sources, OpenAI had authorized over $10 billion in stock sales on the secondary market. This transaction builds on SoftBank’s earlier participation in OpenAI’s $40 billion primary funding round. Additionally, OpenAI reportedly generated $4.3 billion in revenue in the first half of 2025—surpassing its total earnings from the entire previous year by 16%. The deal takes place amid heightened competition among tech giants to acquire top AI talent, with Meta notably investing in AI firms and recruiting key industry figures.",
+         "supporting_websites": [
+          {
+           "attribution": "AInvest",
+           "pub_date": null,
+           "snippet": "In 2025, OpenAI's projected $500 billion valuation has become a seismic event in the private technology sector, not just for its sheer scale ...",
+           "title": "OpenAI's $500 Billion Valuation and the Reshaping of Private Tech ...",
+           "url": "https://www.ainvest.com/news/openai-500-billion-valuation-reshaping-private-tech-markets-2508/?utm_source=chatgpt.com"
+          },
+          {
+           "attribution": "Visual Capitalist",
+           "pub_date": null,
+           "snippet": "OpenAI hits a $500B valuation in 2025, becoming the world's most valuable private company after a blockbuster share sale.",
+           "title": "Charted: The Journey to OpenAI's Staggering $500B Valuation",
+           "url": "https://www.visualcapitalist.com/cp/openai-500b-valuation/?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "OpenAI hits $500 billion valuation after share sale to SoftBank, others, source says",
+         "url": "https://www.reuters.com/technology/openai-hits-500-billion-valuation-after-share-sale-source-says-2025-10-02/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Investing.com](https://www.investing.com/news/stock-market-news/openai-seen-preparing-for-2027-ipo-at-1-trln-valuation-reuters-4317757?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Investing.com",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1761791835.0,
+         "refs": [
+          {
+           "ref_index": 14,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 1,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": null,
+         "supporting_websites": [
+          {
+           "attribution": "Barlaman Today",
+           "pub_date": null,
+           "snippet": null,
+           "title": "OpenAI Might Enter Public Markets at Nearly $1 Trillion Valuation",
+           "url": "https://barlamantoday.com/2025/11/02/openai-might-enter-public-markets-at-nearly-1-trillion-valuation/?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "OpenAI seen preparing for 2027 IPO at $1 trln valuation- Reuters",
+         "url": "https://www.investing.com/news/stock-market-news/openai-seen-preparing-for-2027-ipo-at-1-trln-valuation-reuters-4317757?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([AInvest](https://www.ainvest.com/news/openai-revenue-doubles-10-billion-surpasses-12-7-billion-2025-target-accelerating-ai-adoption-2506/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "AInvest",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1749427200.0,
+         "refs": [
+          {
+           "ref_index": 22,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 9,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 4,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "OpenAI's valuation is expected to reach $300 billion in a pending ... OpenAI's Revenue Triples to $12.7 Billion in 2025. AInvest. 07/18.",
+         "supporting_websites": [
+          {
+           "attribution": "Visual Capitalist",
+           "pub_date": null,
+           "snippet": "OpenAI hits a $500B valuation in 2025, becoming the world's most valuable private company after a blockbuster share sale.",
+           "title": "Charted: The Journey to OpenAI's Staggering $500B Valuation",
+           "url": "https://www.visualcapitalist.com/cp/openai-500b-valuation/?utm_source=chatgpt.com"
+          },
+          {
+           "attribution": "Reuters",
+           "pub_date": null,
+           "snippet": "$500 billion valuation would be huge jump from current $300 billion · Tech giants competing intensely to recruit and retain AI talent · Bolstered ...",
+           "title": "OpenAI eyes $500 billion valuation in potential employee share sale ...",
+           "url": "https://www.reuters.com/business/openai-eyes-500-billion-valuation-potential-employee-share-sale-source-says-2025-08-06/?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "OpenAI's Revenue Doubles to $10 Billion, Surpasses $12.7 Billion ...",
+         "url": "https://www.ainvest.com/news/openai-revenue-doubles-10-billion-surpasses-12-7-billion-2025-target-accelerating-ai-adoption-2506/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Medium](https://medium.com/%40balajibal/understanding-openais-valuation-it-s-more-than-just-chatgpt-d368bbbeeb18?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Medium",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1737849600.0,
+         "refs": [
+          {
+           "ref_index": 20,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "Even applying an aggressive 8x multiple to OpenAI's projected 2025 revenue of $11.7 billion would yield a valuation of about $90 billion. So, ...",
+         "supporting_websites": [],
+         "title": "Understanding OpenAI's Valuation: It's More Than Just ChatGPT",
+         "url": "https://medium.com/%40balajibal/understanding-openais-valuation-it-s-more-than-just-chatgpt-d368bbbeeb18?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "",
+       "has_images": false,
+       "prompt_text": null,
+       "sources": [
+        {
+         "attribution": "TechCrunch",
+         "title": "OpenAI raises $40B at $300B post-money valuation - TechCrunch",
+         "url": "https://techcrunch.com/2025/03/31/openai-raises-40b-at-300b-post-money-valuation/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "Reuters",
+         "title": "OpenAI eyes $500 billion valuation in potential employee share sale ...",
+         "url": "https://www.reuters.com/business/openai-eyes-500-billion-valuation-potential-employee-share-sale-source-says-2025-08-06/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "Investing.com",
+         "title": "OpenAI seen preparing for 2027 IPO at $1 trln valuation- Reuters",
+         "url": "https://www.investing.com/news/stock-market-news/openai-seen-preparing-for-2027-ipo-at-1-trln-valuation-reuters-4317757?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "AInvest",
+         "title": "OpenAI's Revenue Doubles to $10 Billion, Surpasses $12.7 Billion ...",
+         "url": "https://www.ainvest.com/news/openai-revenue-doubles-10-billion-surpasses-12-7-billion-2025-target-accelerating-ai-adoption-2506/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "Medium",
+         "title": "Understanding OpenAI's Valuation: It's More Than Just ChatGPT",
+         "url": "https://medium.com/%40balajibal/understanding-openais-valuation-it-s-more-than-just-chatgpt-d368bbbeeb18?utm_source=chatgpt.com"
+        }
+       ],
+       "type": "sources_footnote"
+      }
+     ],
+     "model_slug": "gpt-5",
+     "parent_id": "f1f2db0b-a58a-46b3-b95a-8c45e45409fe",
+     "search_result_groups": [
+      {
+       "domain": "openai.com",
+       "entries": [
+        {
+         "attribution": "openai.com",
+         "snippet": "The nonprofit, now called the OpenAI Foundation, holds equity in the for-profit currently valued at approximately $130 billion, making it one of the best ...",
+         "title": "Built to benefit everyone - OpenAI",
+         "url": "https://openai.com/index/built-to-benefit-everyone/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "openai.com",
+         "snippet": "Today we're announcing new funding—$40B at a $300B post-money valuation, which enables us to push the frontiers of AI research even ... March 31, 2025.",
+         "title": "New funding to build towards AGI | OpenAI",
+         "url": "https://openai.com/index/march-funding-updates/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "barlamantoday.com",
+       "entries": [
+        {
+         "attribution": "barlamantoday.com",
+         "snippet": "",
+         "title": "OpenAI Might Enter Public Markets at Nearly $1 Trillion Valuation",
+         "url": "https://barlamantoday.com/2025/11/02/openai-might-enter-public-markets-at-nearly-1-trillion-valuation/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "reuters.com",
+       "entries": [
+        {
+         "attribution": "reuters.com",
+         "snippet": "OpenAI is considering filing with securities regulators as soon as the second half of 2026, people familiar with the matter said.",
+         "title": "OpenAI lays groundwork for juggernaut IPO at up to $1 trillion ...",
+         "url": "https://www.reuters.com/business/openai-lays-groundwork-juggernaut-ipo-up-1-trillion-valuation-2025-10-29/?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "reuters.com",
+         "snippet": "ChatGPT maker OpenAI is in early-stage discussions about an employee stock sale that could value the company at about $500 billion, Reuters ...",
+         "title": "OpenAI's valuation is tech boom's key man risk - Reuters",
+         "url": "https://www.reuters.com/commentary/breakingviews/openais-valuation-is-tech-booms-key-man-risk-2025-08-07/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "bitget.com",
+       "entries": [
+        {
+         "attribution": "bitget.com",
+         "snippet": "",
+         "title": "OpenAI Prepares for Record-Breaking IPO After ChatGPT Global Rise",
+         "url": "https://www.bitget.com/news/detail/12560605043626?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "channelinsider.com",
+       "entries": [
+        {
+         "attribution": "channelinsider.com",
+         "snippet": "OpenAI has announced that it secured $40 billion in fresh funding. This massive investment values the company at an eye-popping $300 billion.",
+         "title": "OpenAI Secures Record $40B Funding at $300B Valuation",
+         "url": "https://www.channelinsider.com/news-and-trends/us/open-ai-funding-round-march-2025/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "techfundingnews.com",
+       "entries": [
+        {
+         "attribution": "techfundingnews.com",
+         "snippet": "",
+         "title": "Ex-OpenAI execs raise $200M at $1B valuation for AI materials science startup backed by a16z",
+         "url": "https://techfundingnews.com/ex-openai-execs-raise-200m-at-1b-valuation-for-ai-materials-science-startup-backed-by-a16z/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "visualcapitalist.com",
+       "entries": [
+        {
+         "attribution": "visualcapitalist.com",
+         "snippet": "OpenAI hits a $500B valuation in 2025, becoming the world's most valuable private company after a blockbuster share sale.",
+         "title": "Charted: The Journey to OpenAI's Staggering $500B Valuation",
+         "url": "https://www.visualcapitalist.com/cp/openai-500b-valuation/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "ppc.land",
+       "entries": [
+        {
+         "attribution": "ppc.land",
+         "snippet": "",
+         "title": "OpenAI's Altman deflects questions on $1.4 trillion spending plans",
+         "url": "https://ppc.land/openais-altman-deflects-questions-on-1-4-trillion-spending-plans/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "wheresyoured.at",
+       "entries": [
+        {
+         "attribution": "wheresyoured.at",
+         "snippet": "OpenAI Could Spend $28 Billion Or More In 2025, and Lose over $14 Billion while having an absolute maximum of $20 billion in liquidity.",
+         "title": "OpenAI Is A Systemic Risk To The Tech Industry",
+         "url": "https://www.wheresyoured.at/openai-is-a-systemic-risk-to-the-tech-industry-2/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "axios.com",
+       "entries": [
+        {
+         "attribution": "axios.com",
+         "snippet": "",
+         "title": "Why some OpenAI investors are buying shares at a much higher price",
+         "url": "https://www.axios.com/2025/08/11/openai-ai-shares-500-billion-valuation?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "axios.com",
+         "snippet": "OpenAI is in early talks to sell employee shares at a $500 billion valuation, Axios' Dan Primack reports.",
+         "title": "What OpenAI's $500 billion valuation means for stock investors - Axios",
+         "url": "https://www.axios.com/2025/08/07/openai-stocks-apple-microsoft?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "wikipedia.org",
+       "entries": [
+        {
+         "attribution": "wikipedia.org",
+         "snippet": "In April 2025, OpenAI raised $40 billion at a $300 billion post-money valuation, which was the highest-value private technology deal in history. The ...",
+         "title": "OpenAI - Wikipedia",
+         "url": "https://en.wikipedia.org/wiki/OpenAI?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "instagram.com",
+       "entries": [
+        {
+         "attribution": "instagram.com",
+         "snippet": "The company remains privately held, with a secondary share sale in October 2025 valuing it at approximately $500 billion.",
+         "title": "OpenAI Prepares for Historic IPO, Valuation Could Reach $1 Trillion",
+         "url": "https://www.instagram.com/p/DQjoRvjiVEb/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "yahoo.com",
+       "entries": [
+        {
+         "attribution": "yahoo.com",
+         "snippet": "Est. Valuation --. PEAI.PVT. Est. Valuation 20.3B. SCAI.PVT. Est. Valuation 29.18B. XAAI.PVT. Est. Valuation 97.25B. Powered by EquityZen. Copyright © 2025 ...",
+         "title": "OpenAI (OPAI.PVT) Valuation, History & News - Yahoo Finance",
+         "url": "https://finance.yahoo.com/quote/OPAI.PVT/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "reddit.com",
+       "entries": [
+        {
+         "attribution": "reddit.com",
+         "snippet": "OpenAI is laying the groundwork for an initial public offering that could value the company at up to around $1 trillion, three people ...",
+         "title": "OpenAI lays groundwork for juggernaut IPO at up to $1 trillion ...",
+         "url": "https://www.reddit.com/r/investing/comments/1ojk5s3/openai_lays_groundwork_for_juggernaut_ipo_at_up/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "bayareatimes.com",
+       "entries": [
+        {
+         "attribution": "bayareatimes.com",
+         "snippet": "OpenAI has forecasted its revenue to hit $100B in 2029. Thrive Capital is said to have the option to invest up to $1B more at the $150B valuation through 2025.",
+         "title": "OpenAI forecasts revenue +214% to $11.6B in 2025 ahead of $6.5B ...",
+         "url": "https://www.bayareatimes.com/p/openai-forecasts-revenue-214-to-11-6b-in-2025-ahead-of-6-5b-funding-round?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "pymnts.com",
+       "entries": [
+        {
+         "attribution": "pymnts.com",
+         "snippet": "OpenAI is reportedly considering a possible sale of stock for current and former employees, valuing the AI startup at $500 billion.",
+         "title": "OpenAI Targets $500 Billion Valuation in Share Sale - PYMNTS.com",
+         "url": "https://www.pymnts.com/artificial-intelligence-2/2025/openai-targets-500-billion-valuation-in-share-sale/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "pminsights.com",
+       "entries": [
+        {
+         "attribution": "pminsights.com",
+         "snippet": "OpenAI raised in its Series Corporate Round on February 10, 2025, with a price per share reflecting a post-money valuation of $300.0B.",
+         "title": "OpenAI Valuation - PM Insights",
+         "url": "https://www.pminsights.com/companies/openai?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "ainvest.com",
+       "entries": [
+        {
+         "attribution": "ainvest.com",
+         "snippet": "In 2025, OpenAI's projected $500 billion valuation has become a seismic event in the private technology sector, not just for its sheer scale ...",
+         "title": "OpenAI's $500 Billion Valuation and the Reshaping of Private Tech ...",
+         "url": "https://www.ainvest.com/news/openai-500-billion-valuation-reshaping-private-tech-markets-2508/?utm_source=chatgpt.com"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "parent": "8d2b0c73-655c-4229-b444-cb8327a273df"
+  },
+  "f27899a4-c2a3-4a20-bd59-eebc3cd495aa": {
+   "id": "f27899a4-c2a3-4a20-bd59-eebc3cd495aa",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "user"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "yes"
+     ]
+    },
+    "create_time": 1762475173.256,
+    "id": "f27899a4-c2a3-4a20-bd59-eebc3cd495aa",
+    "metadata": {
+     "serialization_metadata": {
+      "custom_symbol_offsets": []
+     }
+    }
+   },
+   "parent": "792f8642-ab1d-4676-912b-6aac4d35bac5"
+  },
+  "f8f63237-a39f-4a8d-94b1-241e0a5d1a96": {
+   "id": "f8f63237-a39f-4a8d-94b1-241e0a5d1a96",
+   "message": {
+    "author": {
+     "name": null,
+     "role": "assistant"
+    },
+    "content": {
+     "content_type": "text",
+     "parts": [
+      "Great, partner — here’s a breakdown of how entity[\"organization\", \"OpenAI\", 0]’s revenue is coming in, and how the distribution looks (with caveats about the level of public detail).  \n\n---\n\n### 📊 Revenue sources & how they flow  \nWhile OpenAI does not publicly publish a fully detailed breakdown of its revenue streams, analysts and leaked data provide useful estimates. Key revenue buckets include:  \n\n1. **Consumer / Chatbot subscriptions** – For example, the paid tier of entity[\"software\", \"ChatGPT Plus\", 0] and other consumer-facing product upgrades.  \n   - One estimate suggests around **73%** of OpenAI’s revenue comes from chatbot subscriptions. citeturn0search13turn0search5turn0search10  \n   - For example: “OpenAI’s revenue composition shows that 73% stems from chatbot subscriptions, while 27% comes from API services.” citeturn0search13  \n   - Another source suggests ~55% from consumer facing subscriptions (though older). citeturn0search5  \n\n2. **API / enterprise services** – Revenue from business customers who integrate OpenAI’s models (via API, licences, embed into enterprise software, etc.).  \n   - If the 73% subscription share is accurate, that leaves ~27% for this bucket based on that estimate. citeturn0search13  \n   - Some commentary hints that large enterprise and licensing deals (including strategic deals) may lie outside those simpler categories. For example, the run-rate figure of US$10 billion \"excludes licensing revenue from Microsoft and large one-time deals\". citeturn0search9turn0search2  \n\n3. **Other income / strategic licensing & partnerships** – Includes major deals, licensing for specific embeds (e.g., in other companies’ products), potential hardware or infrastructure tie-ins.  \n   - The line is fuzzy because many of these deals are not broken out. E.g., the article notes “excluding licensing revenue from Microsoft and large one-time deals” when citing the $10B run-rate. citeturn0search9  \n\n---\n\n### 🧮 Approximate distribution based on current data  \nPutting the pieces together in a simplified view (keeping in mind the estimation nature):  \n- ~70-75% of revenue from consumer subscriptions  \n- ~20-30% from business/API services  \n- A smaller remaining portion from large deals, licensing, partnerships  \n\nFor example: if OpenAI has a $10 billion annualised run-rate, and if 73% is from subscriptions, that would be ~US$7.3 billion from consumer subscriptions and ~US$2.7 billion from API/enterprise (and additional unknown on top).  \n\n---\n\n### ⚠️ Important caveats  \n- These breakdowns come from *estimates* and analyst commentary, not fully audited published segment-reports from OpenAI.  \n- The company’s deals with strategic partners (e.g., large one-time licensing, infrastructure) may have atypical terms and could shift the distribution.  \n- The consumer subscription bucket may include many tiers (Plus, Pro, enterprise-chatbot, etc) and the margin/scale might differ significantly.  \n- The business/API bucket likely has higher revenue per customer but may also involve large cost/infrastructure burdens (compute, storage).  \n- As the business evolves, the mix may shift: enterprise/API could grow faster, new product lines may emerge, etc.\n\n---\n\n### ✨ What this means for future outlook  \n- Because a large portion of revenue currently comes from subscriptions, consumer growth (number of paid users, price tiers, upgrade rates) is a key driver.  \n- If enterprise/API services scale, that could shift the mix toward a more balanced, higher-value distribution (which might improve margins).  \n- Large strategic/licensing deals represent “optionality” — meaning OpenAI may land big contracts that accelerate growth, but they also introduce variability.  \n- From a risk perspective: heavy reliance on consumer subscriptions could make growth vulnerable if churn rises or competition intensifies; conversely enterprise/API growth may be slower but more stable.\n\n---\n\nIf you like, I can try to dig up **specific major deals** (with disclosed numbers) that contribute to those “other income / licensing” streams for OpenAI (so we can see how big those contracts are). Would you like that?"
+     ]
+    },
+    "create_time": 1762459291.526529,
+    "id": "f8f63237-a39f-4a8d-94b1-241e0a5d1a96",
+    "metadata": {
+     "content_references": [
+      {
+       "alt": "OpenAI",
+       "prompt_text": "OpenAI",
+       "type": "alt_text"
+      },
+      {
+       "alt": "ChatGPT Plus",
+       "prompt_text": "ChatGPT Plus",
+       "type": "alt_text"
+      },
+      {
+       "alt": "([Medium](https://medium.com/%40furqankhaan/how-openai-and-anthropic-are-cashing-in-on-ai-a-look-at-their-revenue-models-d9d9ae79dd28?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Medium",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1730332800.0,
+         "refs": [
+          {
+           "ref_index": 13,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 5,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 10,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "OpenAI's revenue composition shows that 73% stems from chatbot subscriptions, while 27% comes from API services. This breakdown underscores ...",
+         "supporting_websites": [
+          {
+           "attribution": "Notorious PLG",
+           "pub_date": null,
+           "snippet": "It was reported that OpenAI's annualized revenue is approaching $3.4 billion, doubling from just six months ago.",
+           "title": "OpenAI's Revenue Breakdown (A Closer Look) - Notorious",
+           "url": "https://www.notoriousplg.ai/p/notorious-openais-revenue-breakdown?utm_source=chatgpt.com"
+          },
+          {
+           "attribution": "Tanay J",
+           "pub_date": null,
+           "snippet": "OpenAI is at ~$3.6B in annualized run rate revenue as of August 2024, and was roughly at $1.6B in annualized run rate revenue near the tail end of 2023.",
+           "title": "OpenAI and Anthropic Revenue Breakdown - by Tanay Jaipuria",
+           "url": "https://www.tanayj.com/p/openai-and-anthropic-revenue-breakdown?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "How OpenAI and Anthropic Are Cashing In on AI - Medium",
+         "url": "https://medium.com/%40furqankhaan/how-openai-and-anthropic-are-cashing-in-on-ai-a-look-at-their-revenue-models-d9d9ae79dd28?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Medium](https://medium.com/%40furqankhaan/how-openai-and-anthropic-are-cashing-in-on-ai-a-look-at-their-revenue-models-d9d9ae79dd28?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Medium",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1730332800.0,
+         "refs": [
+          {
+           "ref_index": 13,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "OpenAI's revenue composition shows that 73% stems from chatbot subscriptions, while 27% comes from API services. This breakdown underscores ...",
+         "supporting_websites": [],
+         "title": "How OpenAI and Anthropic Are Cashing In on AI - Medium",
+         "url": "https://medium.com/%40furqankhaan/how-openai-and-anthropic-are-cashing-in-on-ai-a-look-at-their-revenue-models-d9d9ae79dd28?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Notorious PLG](https://www.notoriousplg.ai/p/notorious-openais-revenue-breakdown?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Notorious PLG",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1721260800.0,
+         "refs": [
+          {
+           "ref_index": 5,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "It was reported that OpenAI's annualized revenue is approaching $3.4 billion, doubling from just six months ago.",
+         "supporting_websites": [],
+         "title": "OpenAI's Revenue Breakdown (A Closer Look) - Notorious",
+         "url": "https://www.notoriousplg.ai/p/notorious-openais-revenue-breakdown?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Medium](https://medium.com/%40furqankhaan/how-openai-and-anthropic-are-cashing-in-on-ai-a-look-at-their-revenue-models-d9d9ae79dd28?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Medium",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1730332800.0,
+         "refs": [
+          {
+           "ref_index": 13,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "OpenAI's revenue composition shows that 73% stems from chatbot subscriptions, while 27% comes from API services. This breakdown underscores ...",
+         "supporting_websites": [],
+         "title": "How OpenAI and Anthropic Are Cashing In on AI - Medium",
+         "url": "https://medium.com/%40furqankhaan/how-openai-and-anthropic-are-cashing-in-on-ai-a-look-at-their-revenue-models-d9d9ae79dd28?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Reuters](https://www.reuters.com/business/media-telecom/openais-annualized-revenue-hits-10-billion-up-55-billion-december-2024-2025-06-09/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Reuters",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1749498225.0,
+         "refs": [
+          {
+           "ref_index": 9,
+           "ref_type": "search",
+           "turn_index": 0
+          },
+          {
+           "ref_index": 2,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "As of June 2025, OpenAI has reached an annualized revenue run rate of $10 billion, nearly doubling its December 2024 figure of $5.5 billion. This rapid growth is fueled by increasing global adoption of its ChatGPT AI models and positions the company to meet its 2025 revenue target of $12.7 billion. The reported $10 billion excludes licensing revenue from Microsoft and large one-time deals. This revenue milestone illustrates OpenAI's market leadership in comparison to competitors like Anthropic, which recently surpassed $3 billion in annualized revenue. Despite incurring a $5 billion loss the previous year, OpenAI's financial trajectory shows significant progress. The company is also planning to raise up to $40 billion in a new funding round led by SoftBank, with a $300 billion valuation. Since launching ChatGPT over two years ago, OpenAI has expanded its offerings through various consumer and business subscriptions, amassing 500 million weekly active users by the end of March 2025.",
+         "supporting_websites": [
+          {
+           "attribution": "FutureSearch",
+           "pub_date": null,
+           "snippet": "OpenAI Revenue. Update, Sept 18 2024: See updates based on new leaks. $3.4B OpenAI Revenue breakdown. Buy Full Report. See our August 2024 report on the unit ...",
+           "title": "OpenAI Revenue - FutureSearch",
+           "url": "https://futuresearch.ai/openai-revenue-report?utm_source=chatgpt.com"
+          }
+         ],
+         "title": "OpenAI's annualized revenue hits $10 billion, up from $5.5 billion in December 2024",
+         "url": "https://www.reuters.com/business/media-telecom/openais-annualized-revenue-hits-10-billion-up-55-billion-december-2024-2025-06-09/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "([Reuters](https://www.reuters.com/business/media-telecom/openais-annualized-revenue-hits-10-billion-up-55-billion-december-2024-2025-06-09/?utm_source=chatgpt.com))",
+       "fallback_items": null,
+       "items": [
+        {
+         "attribution": "Reuters",
+         "attribution_segments": null,
+         "attributions": null,
+         "hue": null,
+         "pub_date": 1749498225.0,
+         "refs": [
+          {
+           "ref_index": 9,
+           "ref_type": "search",
+           "turn_index": 0
+          }
+         ],
+         "snippet": "As of June 2025, OpenAI has reached an annualized revenue run rate of $10 billion, nearly doubling its December 2024 figure of $5.5 billion. This rapid growth is fueled by increasing global adoption of its ChatGPT AI models and positions the company to meet its 2025 revenue target of $12.7 billion. The reported $10 billion excludes licensing revenue from Microsoft and large one-time deals. This revenue milestone illustrates OpenAI's market leadership in comparison to competitors like Anthropic, which recently surpassed $3 billion in annualized revenue. Despite incurring a $5 billion loss the previous year, OpenAI's financial trajectory shows significant progress. The company is also planning to raise up to $40 billion in a new funding round led by SoftBank, with a $300 billion valuation. Since launching ChatGPT over two years ago, OpenAI has expanded its offerings through various consumer and business subscriptions, amassing 500 million weekly active users by the end of March 2025.",
+         "supporting_websites": [],
+         "title": "OpenAI's annualized revenue hits $10 billion, up from $5.5 billion in December 2024",
+         "url": "https://www.reuters.com/business/media-telecom/openais-annualized-revenue-hits-10-billion-up-55-billion-december-2024-2025-06-09/?utm_source=chatgpt.com"
+        }
+       ],
+       "prompt_text": null,
+       "type": "grouped_webpages"
+      },
+      {
+       "alt": "",
+       "has_images": false,
+       "prompt_text": null,
+       "sources": [
+        {
+         "attribution": "Medium",
+         "title": "How OpenAI and Anthropic Are Cashing In on AI - Medium",
+         "url": "https://medium.com/%40furqankhaan/how-openai-and-anthropic-are-cashing-in-on-ai-a-look-at-their-revenue-models-d9d9ae79dd28?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "Notorious PLG",
+         "title": "OpenAI's Revenue Breakdown (A Closer Look) - Notorious",
+         "url": "https://www.notoriousplg.ai/p/notorious-openais-revenue-breakdown?utm_source=chatgpt.com"
+        },
+        {
+         "attribution": "Reuters",
+         "title": "OpenAI's annualized revenue hits $10 billion, up from $5.5 billion in December 2024",
+         "url": "https://www.reuters.com/business/media-telecom/openais-annualized-revenue-hits-10-billion-up-55-billion-december-2024-2025-06-09/?utm_source=chatgpt.com"
+        }
+       ],
+       "type": "sources_footnote"
+      }
+     ],
+     "model_slug": "gpt-5",
+     "parent_id": "2e82a3f0-f177-4a02-9535-4b9121075186",
+     "search_result_groups": [
+      {
+       "domain": "medium.com",
+       "entries": [
+        {
+         "attribution": "medium.com",
+         "snippet": "OpenAI projects $12.7 billion in revenue for 2025, with further growth targeting $29.4 billion in 2026 and potentially $125 billion by 2029.",
+         "title": "OpenAI's Explosive Growth: A Revenue Breakdown and Industry ...",
+         "url": "https://medium.com/%40fahey_james/openais-explosive-growth-a-revenue-breakdown-and-industry-comparison-2a8a1585078d?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "futuresearch.ai",
+       "entries": [
+        {
+         "attribution": "futuresearch.ai",
+         "snippet": "OpenAI Revenue. Update, Sept 18 2024: See updates based on new leaks. $3.4B OpenAI Revenue breakdown. Buy Full Report. See our August 2024 report on the unit ...",
+         "title": "OpenAI Revenue - FutureSearch",
+         "url": "https://futuresearch.ai/openai-revenue-report?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "reuters.com",
+       "entries": [
+        {
+         "attribution": "reuters.com",
+         "snippet": "ChatGPT-maker OpenAI roughly doubled its revenue in the first seven months of the year, reaching $12 billion in annualized revenue, ...",
+         "title": "OpenAI hits $12 billion in annualized revenue, The Information reports",
+         "url": "https://www.reuters.com/business/openai-hits-12-billion-annualized-revenue-information-reports-2025-07-31/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "promarket.org",
+       "entries": [
+        {
+         "attribution": "promarket.org",
+         "snippet": "According to OpenAI, in 2019, “the for-profit [entity] raised an initial round of over $100 [million], followed by $1 billion from Microsoft.”.",
+         "title": "OpenAI Abandons Move to For-Profit Status After Backlash. Now ...",
+         "url": "https://www.promarket.org/2025/05/06/openai-abandons-move-to-for-profit-status-after-backlash-now-what/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "quasa.io",
+       "entries": [
+        {
+         "attribution": "quasa.io",
+         "snippet": "OpenAI, the creator of ChatGPT, has doubled its Annual Recurring Revenue (ARR) in just six months, soaring from $6 billion to $12 billion.",
+         "title": "OpenAI and Anthropic Report Explosive Revenue Growth in 2025",
+         "url": "https://quasa.io/media/openai-and-anthropic-report-explosive-revenue-growth-in-2025?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "taptwicedigital.com",
+       "entries": [
+        {
+         "attribution": "taptwicedigital.com",
+         "snippet": "OpenAI is projected to generate $12.7 billion in revenue in 2025. · OpenAI has an estimated 17% market share in the generative AI market.",
+         "title": "8 OpenAI Statistics (2025): Revenue, Valuation, Profit, Funding",
+         "url": "https://taptwicedigital.com/stats/openai?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "techhq.com",
+       "entries": [
+        {
+         "attribution": "techhq.com",
+         "snippet": "OpenAI revenue growth accelerates to a US$10 billion, doubling 2024's $5.5 billion. OpenAI ahead of competitors, while the company burns $5 billion annually.",
+         "title": "OpenAI revenue growth hits US$10B: Is it sustainable? - TechHQ",
+         "url": "https://techhq.com/news/openai-revenue-growth-10-billion-sustainable/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "tanayj.com",
+       "entries": [
+        {
+         "attribution": "tanayj.com",
+         "snippet": "OpenAI is at ~$3.6B in annualized run rate revenue as of August 2024, and was roughly at $1.6B in annualized run rate revenue near the tail end of 2023.",
+         "title": "OpenAI and Anthropic Revenue Breakdown - by Tanay Jaipuria",
+         "url": "https://www.tanayj.com/p/openai-and-anthropic-revenue-breakdown?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "sacra.com",
+       "entries": [
+        {
+         "attribution": "sacra.com",
+         "snippet": "Sacra estimates that OpenAI hit $13B in annualized revenue in July 2025, doubling from $6B in January and up 3x from $4B in 2024.",
+         "title": "OpenAI revenue, growth rate & funding | Sacra",
+         "url": "https://sacra.com/c/openai/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "autogpt.net",
+       "entries": [
+        {
+         "attribution": "autogpt.net",
+         "snippet": "OpenAI has just crossed a major milestone – hitting $10 billion in annual recurring revenue. That's nearly double what the company made last year.",
+         "title": "OpenAI's Revenue Hits $10 Billion a Year - AutoGPT",
+         "url": "https://autogpt.net/openais-revenue-hits-10-billion-a-year/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "reddit.com",
+       "entries": [
+        {
+         "attribution": "reddit.com",
+         "snippet": "So instead of spending 2.1 billion to generate 1 billion in sales they are now spending 1.67 billion to generate 1 billion. Profitability could ...",
+         "title": "OpenAI hits $12 billion in annualized revenue, The Information reports",
+         "url": "https://www.reddit.com/r/OpenAI/comments/1mdvusa/openai_hits_12_billion_in_annualized_revenue_the/?utm_source=chatgpt.com"
+        }
+       ]
+      },
+      {
+       "domain": "ycombinator.com",
+       "entries": [
+        {
+         "attribution": "ycombinator.com",
+         "snippet": "OpenAI went from 1.6 billion to 3 billion in one year and is projected to be at $11 billion at the end of 2025.",
+         "title": "OpenAI and Anthropic Revenue Breakdown - Hacker News",
+         "url": "https://news.ycombinator.com/item?id=41726603&utm_source=chatgpt.com"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "parent": "3b266b2e-5fa1-496a-8cfc-c6054ee8e5b4"
+  }
+ },
+ "memory_scope": "global_enabled",
+ "pinned_time": null,
+ "plugin_ids": null,
+ "title": "OpenAI market share revenue",
+ "update_time": 1762475258.492064,
+ "voice": null
+}
