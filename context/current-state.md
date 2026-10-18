@@ -1,5 +1,5 @@
-# Current state — 2026-10-18 21:34
+# Current state — 2026-10-18 21:45
 
 - Repo bootstrapped (T002): AGENTS.md, protocol pin, turn-close + usage + secret-scan scripts, folder layout.
-- Not yet imported: the ChatGPT export on Google Drive (file id 15kf76J_ZXUKZg_vl4acUvr0advqOTCyh, link given in T001).
-- Next: plan v0.1 (export contents inventory → import → verify → readable → index), then the first import.
+- Export located and inventoried (T003): 811 chats, 1,679 files, SHA-256 in source/SOURCE_CHECKSUMS.md. Not imported yet.
+- Next: plan v0.1 (docs/plans/) waiting for "go"; then T004 = S1–S3 on the PC clone C:\Users\v_sen\develop\chatgpt-history-workbench.
