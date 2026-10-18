@@ -6,7 +6,7 @@ Mirrors claude-history-workbench/scripts/verify_raw.py.
 Checks:
  1. zip SHA-256 equals the value in source/SOURCE_CHECKSUMS.md
  2. every chat in conversations-00N.json has exactly one raw file, and that file is JSON-equal to the
-    chat object after the same redaction as scripts/redact_secrets.py; no extra chat files on disk
+    chat object after the same redaction as scripts/redact_secrets.py (text level + JSON value level, T006); no extra chat files on disk
  3. every raw/data/<name> equals the zip entry after the same redaction (byte compare)
 
 Usage: python -I verify_raw.py <export.zip> <repo_dir>
@@ -15,7 +15,7 @@ Exit 0 = identical (apart from logged redactions); 1 = differences (printed).
 import datetime as dt, hashlib, json, os, re, sys, zipfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from redact_secrets import redact_text  # noqa: E402
+from redact_secrets import redact_text, redact_json_text  # noqa: E402
 
 ZIP, REPO = sys.argv[1], sys.argv[2]
 bad = []
@@ -40,7 +40,7 @@ for n in sorted(x for x in z.namelist() if x.startswith("conversations-") and x.
         p = os.path.join(REPO, rel)
         if not os.path.exists(p):
             bad.append(f"missing {rel}"); continue
-        exp = json.loads(redact_text(json.dumps(c, ensure_ascii=False)))
+        exp = json.loads(redact_json_text(json.dumps(c, ensure_ascii=False), reserialise=True))
         if json.load(open(p, encoding="utf-8")) != exp:
             bad.append(f"differs {rel}")
 
@@ -55,7 +55,8 @@ for fn in sorted(os.listdir(ddir)) if os.path.isdir(ddir) else []:
     n_data += 1
     src = z.read(fn)
     try:
-        src = redact_text(src.decode("utf-8")).encode("utf-8")
+        t = src.decode("utf-8")
+        src = (redact_json_text(t) if fn.endswith(".json") else redact_text(t)).encode("utf-8")
     except UnicodeDecodeError:
         pass
     if open(os.path.join(ddir, fn), "rb").read() != src:
@@ -89,7 +90,8 @@ for path in idx:
         got = open(p, "rb").read()
         if got != src:
             try:
-                src = redact_text(src.decode("utf-8")).encode("utf-8")
+                t = src.decode("utf-8")
+                src = (redact_json_text(t) if r["stored_path"].endswith(".json") else redact_text(t)).encode("utf-8")
             except UnicodeDecodeError:
                 pass
             if got != src:

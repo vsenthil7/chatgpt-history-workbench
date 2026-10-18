@@ -40,6 +40,55 @@ def redact_text(s, log=None, path=None):
     return s
 
 
+# ---- JSON value level (T006 fix) --------------------------------------------------------------------------
+# Text-level redaction cannot see a value hidden by JSON escaping (e.g. password=\"abc…\" or a key after \n).
+# So for JSON files every decoded string value is redacted too. Same function in redactor and verify_raw.
+
+def _redact_obj(o, pairs, log, path):
+    if isinstance(o, str):
+        r = redact_text(o, log, path)
+        if r != o:
+            pairs.append((o, r))
+        return r
+    if isinstance(o, list):
+        return [_redact_obj(v, pairs, log, path) for v in o]
+    if isinstance(o, dict):
+        return {k: _redact_obj(v, pairs, log, path) for k, v in o.items()}
+    return o
+
+
+def redact_json_text(s, log=None, path=None, reserialise=False):
+    """Text-level redaction, then value-level on the parsed JSON.
+    reserialise=True (our own chat files): write back as json.dump(indent=1, ensure_ascii=False) + LF, the importer's format.
+    reserialise=False (byte copies): patch only the encoded changed strings in place; falls back to reserialising
+    only if that cannot reproduce the redacted object."""
+    s1 = redact_text(s, log, path)
+    try:
+        o = json.loads(s1)
+    except ValueError:
+        return s1
+    pairs = []
+    o2 = _redact_obj(o, pairs, log, path)
+    if not pairs:
+        return s1
+    if reserialise:
+        return json.dumps(o2, ensure_ascii=False, indent=1) + "\n"
+    s2 = s1
+    for old, new in pairs:
+        for ea in (False, True):
+            s2 = s2.replace(json.dumps(old, ensure_ascii=ea)[1:-1], json.dumps(new, ensure_ascii=ea)[1:-1])
+    try:
+        if json.loads(s2) == o2:
+            return s2
+    except ValueError:
+        pass
+    return json.dumps(o2, ensure_ascii=False, indent=1) + "\n"
+
+
+def is_chat_file(rel):
+    return rel.replace("\\", "/").startswith("raw/conversations/")
+
+
 if __name__ == "__main__":
     repo, log, broken = sys.argv[1], [], []
     for top in ("raw", "readable"):
@@ -51,7 +100,10 @@ if __name__ == "__main__":
                 except UnicodeDecodeError:
                     continue
                 rel = os.path.relpath(p, repo).replace("\\", "/")
-                n = redact_text(s, log, rel)
+                if fn.endswith(".json"):
+                    n = redact_json_text(s, log, rel, reserialise=is_chat_file(rel))
+                else:
+                    n = redact_text(s, log, rel)
                 if n != s:
                     if fn.endswith(".json"):
                         try:
