@@ -61,7 +61,44 @@ for fn in sorted(os.listdir(ddir)) if os.path.isdir(ddir) else []:
     if open(os.path.join(ddir, fn), "rb").read() != src:
         bad.append(f"differs raw/data/{fn}")
 
-print(f"zip sha256 ok: {not any(b.startswith('zip') for b in bad)} · chats in export {n_chats} · chat files {len(on_disk)} · data files {n_data} · problems {len(bad)}")
+# 4. attachments (S4, T005): every row of index/files_*.csv; git rows byte-equal (after redaction), drive-only rows
+#    SHA-256-equal to the zip entry; no file in raw/files/ that the index does not list
+n_files = n_drive = 0
+fdir = os.path.join(REPO, "raw", "files")
+idx = [os.path.join(REPO, "index", f) for f in sorted(os.listdir(os.path.join(REPO, "index")))
+       if f.startswith("files_") and f.endswith(".csv")] if os.path.isdir(fdir) else []
+listed = set()
+for path in idx:
+    import csv
+    for r in csv.DictReader(open(path, encoding="utf-8")):
+        if r["location"] == "drive-only":
+            n_drive += 1
+            hh = hashlib.sha256()
+            with z.open(r["entry"]) as f:
+                for b in iter(lambda: f.read(1 << 20), b""):
+                    hh.update(b)
+            if hh.hexdigest() != r["sha256"]:
+                bad.append(f"drive-only sha256 differs {r['entry']}")
+            continue
+        n_files += 1
+        listed.add(r["stored_path"])
+        p = os.path.join(REPO, r["stored_path"])
+        if not os.path.exists(p):
+            bad.append(f"missing {r['stored_path']}"); continue
+        src = z.read(r["entry"])
+        got = open(p, "rb").read()
+        if got != src:
+            try:
+                src = redact_text(src.decode("utf-8")).encode("utf-8")
+            except UnicodeDecodeError:
+                pass
+            if got != src:
+                bad.append(f"differs {r['stored_path']}")
+if os.path.isdir(fdir):
+    bad += [f"extra raw/files/{f}" for f in sorted(os.listdir(fdir)) if f"raw/files/{f}" not in listed]
+
+print(f"zip sha256 ok: {not any(b.startswith('zip') for b in bad)} · chats in export {n_chats} · chat files {len(on_disk)} · data files {n_data}"
+      f" · attachments in git {n_files} · drive-only {n_drive} · problems {len(bad)}")
 for b in bad[:50]:
     print(" ", b)
 sys.exit(1 if bad else 0)
