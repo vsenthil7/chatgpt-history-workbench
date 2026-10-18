@@ -27,7 +27,21 @@ BLOCK, ALLOW = _vals["BLOCK"], _vals["ALLOW"]
 PATTERNS = {k.replace("secret", "value").replace(" ", "-").replace("/", "-"): re.compile(v) for k, v in BLOCK.items()}
 
 
+# Optional legacy pass (T007): a repo that redacted earlier with other labels lists those patterns in
+# scripts/redact_legacy.json ({"kind": "regex", ...}, applied first, in order, no ALLOW) so verify still
+# reproduces the old placeholders exactly. No file = no legacy pass.
+_lp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "redact_legacy.json")
+LEGACY = {k: re.compile(v) for k, v in json.load(open(_lp, encoding="utf-8")).items()} if os.path.exists(_lp) else {}
+
+
 def redact_text(s, log=None, path=None):
+    for kind, rx in LEGACY.items():
+        def lsub(m, kind=kind):
+            tag = hashlib.sha256(m.group(0).encode()).hexdigest()[:12]
+            if log is not None:
+                log.append((path, kind, tag))
+            return f"[REDACTED:{kind}:sha256-{tag}]"
+        s = rx.sub(lsub, s)
     for kind, rx in PATTERNS.items():
         def sub(m):
             if any(a in m.group(0) for a in ALLOW):  # same allow-list as the scan (placeholders)
@@ -71,8 +85,9 @@ def redact_json_text(s, log=None, path=None, reserialise=False):
     o2 = _redact_obj(o, pairs, log, path)
     if not pairs:
         return s1
+    nl = "\n" if s.endswith("\n") else ""  # keep the file's own trailing newline (T007)
     if reserialise:
-        return json.dumps(o2, ensure_ascii=False, indent=1) + "\n"
+        return json.dumps(o2, ensure_ascii=False, indent=1) + nl
     s2 = s1
     for old, new in pairs:
         for ea in (False, True):
@@ -82,7 +97,7 @@ def redact_json_text(s, log=None, path=None, reserialise=False):
             return s2
     except ValueError:
         pass
-    return json.dumps(o2, ensure_ascii=False, indent=1) + "\n"
+    return json.dumps(o2, ensure_ascii=False, indent=1) + nl
 
 
 def is_chat_file(rel):

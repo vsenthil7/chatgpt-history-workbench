@@ -7,5 +7,6 @@
 - 21:47 — 811 chats + 9 data files in Git, 98 values redacted, verify_raw 0 problems. T004. [claude, T004]
 - 22:05 — 1,634 attachments in Git, 42 key-bearing zips held back Drive-only, verify 0 problems. T005. [claude, T005]
 - 22:42 — 811 readable chats + indexes + compare baseline; JSON-escape redaction fix (9 values); verify 0 problems. T006. [claude, T006]
+- 23:03 — claude-history-workbench secret clean-up (home record there, T016); redactor legacy pass + newline keeping. T007. [claude, T007]
 
 Navigation only. Use turn and plan files for detail.
