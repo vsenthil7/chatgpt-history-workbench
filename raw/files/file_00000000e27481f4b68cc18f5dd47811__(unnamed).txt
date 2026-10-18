@@ -1,0 +1,513 @@
+# AT-LifeOperatingSystem V036 — Independent Deep Review
+
+**Review timestamp:** 11/08/2026 18:56 BST  
+**Reviewer:** ChatGPT  
+**Reviewed release:** `AT-LifeOperatingSystem_DurableIdentityBoundaryAndReleaseIntegrityClosure_Claude_V036_20260811_1823.zip`  
+**Separate seal record:** `AT-LifeOperatingSystem_SealEvidence_Claude_V036_20260811_1823.json`
+
+## Final disposition
+
+> **V036 REJECTED — not independently accepted, not shippable, and must not become the frozen AT-LOS baseline.**
+
+The release is substantially better than V035: the deterministic suite is genuinely green, mixed-scheme preflight protections are materially improved, canonical primitive handling is hardened, mutation evidence is much stronger, and the physical package is complete and hash-consistent. However, the durable schema boundary still accepts hostile target-owned SQLite objects, including a trigger that silently deletes a write while the API reports success. The final-seal process also does not execute or evidence the complete required gate sequence, uses a pre-packaging timestamp as `sealed_at`, does not prove generator zero-diff, and the facts/readability audits retain material blind spots.
+
+### New V036 findings
+
+| Severity | Count |
+|---|---:|
+| **BLOCKER** | **3** |
+| **HIGH** | **2** |
+| **MEDIUM** | **2** |
+| **Total** | **7** |
+
+## 1. Review scope and package verification
+
+### Physical package
+
+- Outer ZIP SHA-256: `76fd836f0fb5a1b3b419983c9e85153868304fbed7e0058f389aaf1df545f416`
+- Separate seal record declares the same outer SHA-256.
+- Outer ZIP CRC: **PASS**
+- Outer entries: **12** — 11 manifest-managed payloads plus the manifest.
+- Manifest membership: **exact**
+- Manifest byte counts: **PASS**
+- Manifest SHA-256 values: **PASS**
+- Nested repository ZIP SHA-256: `e7e9807c5bf36ae375f8f44b21996c9e94260064cf8326ed69e2a882852c05d1`
+- Nested repository ZIP CRC: **PASS**
+- Nested packaged files: **149**
+- Python files parsed: **52/52**
+- JSON files parsed: **4/4**
+- TOML files parsed: **14/14**
+- Structural parse errors: **0**
+- No manifest omission, duplicate payload, path traversal, CRC failure, or shipped cache/editor contamination was found.
+
+### Every outer artefact opened
+
+| Artefact | Review result |
+|---|---|
+| `00000_README` V036 | Opened and reviewed. Contains disproved claims about complete schema validation, complete seal re-verification, actual final-seal time, and the seal evidence being “in this package.” |
+| Decision Memo V004 DOCX | Opened and rendered: two clean historical pages. |
+| Metadata V036 JSON | Valid JSON. Current-state claims reviewed; contains a false compatibility statement and literal `{V}` placeholder. |
+| Project Memory Standard V036 MD | Opened and reviewed; inherits current release assertions. |
+| Project Memory V036 XLSX | All 16 worksheets rendered and formula-scanned. No formula errors. |
+| DDD V006 DOCX | Opened and rendered: three clean historical pages. |
+| Test Strategy V036 XLSX | All 30 worksheets rendered and formula-scanned. Current V036 disposition row F09 is still clipped. |
+| Evidence Register V004 XLSX | All six worksheets rendered and formula-scanned. No formula errors. |
+| Change Log V036 MD | Opened and reviewed; repeats the overbroad identity-compatibility and complete-schema claims. |
+| Manifest V036 CSV | All 11 rows independently checked for membership, size, and SHA-256. |
+| Call Effectiveness V009 XLSX | All six worksheets rendered and formula-scanned. No formula errors; a historical text note mentions `#NAME?`, but there is no live formula error. |
+| Nested repository V036 ZIP | All 149 files inventoried; all Python/JSON/TOML structurally parsed; current code, tests, release tooling, facts, mutation report, ADRs, RTM, and generated documents deeply inspected. |
+
+All 58 workbook worksheets were rendered. Both DOCX files were rendered page by page.
+
+## 2. Independent execution results
+
+| Gate | Independent result |
+|---|---|
+| Deterministic suite | **PASS — 670 passed, 1 skipped, 2 deselected in 22.03s** |
+| Coverage | **PASS — 2,243 statements, 690 branches, 100% line and branch** |
+| Environment-dependent integration | **1 passed, 1 skipped**; skip was caused by the isolated environment lacking an installable `hatchling` package source |
+| Targeted V036 closure tests | **PASS — 41 tests** covering durable scheme/preflight, identity, release integrity, retired aliases, and workbook gate behaviour |
+| Python/JSON/TOML structural parsing | **PASS** |
+| Outer/nested CRC and manifest | **PASS** |
+| Ruff | Not independently rerun because the isolated review environment did not provide Ruff; critically, the final seal record also does not execute or record it |
+| Mypy strict | Not independently rerun because the isolated review environment did not provide mypy; critically, the final seal record also does not execute or record it |
+| Mutation report audit | Shipped report is internally coherent: 69 mutants, 69 killed, zero survived/invalid, source hashes match, and every result records a failing test. A complete independent 69-mutant replay was not completed. |
+| Package audit on exact package | Returned **0 findings**, but adversarial copies demonstrate two audit blind spots described below |
+
+## 3. V035 closure status
+
+| Prior V035 finding | V036 status |
+|---|---|
+| F01 red deterministic suite | **Closed.** Exact suite independently reproduces 670 passing tests with 100% line/branch coverage. |
+| F02 mixed identity schemes and CLI partial writes | **Materially closed for the tested class.** Both-store preflight and refusal regressions pass. |
+| F03 unsafe sibling/partial-schema adoption | **Not closed at the required class level.** Name/shape checks improved, but the fingerprint omits constraints and ignores hostile target-owned extras. |
+| F04 non-injective subclass identity | **Closed.** Exact primitive checks and hostile subclass regressions are present and pass. |
+| F05 release provenance/final seal | **Not closed.** The sealer omits required gates, mislabels the stamp as final seal, and does not prove zero-diff. |
+| F06 invalid mutation result | **Materially improved.** Baseline-green and per-mutant evidence exist, but final sealing only trusts the pre-existing report rather than running/recording the mutation command. |
+| F07 stale/retired metadata aliases | **Closed for the exact V035 probes.** Retired alias and stale-version negative tests pass. A new canonical facts key-set blind spot remains. |
+| F08 language-independent instant grammar | **Code correction closed.** Manual fixed-width formatting plus a year-range guard is present. The release’s compatibility wording is false. |
+| F09 clipped review worksheet | **Not closed.** The current V036 disposition sheet is still visibly clipped and the gate falsely certifies it. |
+
+# 4. Detailed findings
+
+## F01 — BLOCKER  
+## Durable schema validation accepts hostile target-owned SQLite objects and can silently lose writes
+
+V036 says it validates the “complete expected schema” derived from each store’s schema script. The implementation does not capture or compare the complete SQLite semantics.
+
+### Root cause
+
+`at_durable._fingerprint()` records only:
+
+- Tables: column name, declared type, `NOT NULL`, primary-key position; and limited foreign-key table/from/to fields.
+- Indexes: owning table and indexed column names.
+- Triggers: trigger name and owning table.
+
+It omits, among other things:
+
+- Column defaults.
+- `UNIQUE`, `CHECK`, generated-column, `STRICT`, and `WITHOUT ROWID` semantics.
+- Foreign-key update/delete/match/deferred actions.
+- Index uniqueness, origin, partial predicate, collation, sort direction, and expression details.
+- Trigger timing, event, condition, and body.
+
+`schema_differences()` then checks only that each expected named object exists with the limited recorded shape and explicitly ignores objects beyond the expected set because a sibling store may share the file. That makes an unexpected index or trigger attached to a **target-owned table** invisible.
+
+### Independent adversarial reproductions
+
+#### A. Unexpected unique index on an event-store table
+
+A valid event database was modified with an additional unique index over event source fields. V036 reopened it successfully. Inserting two legitimate events from the same source then failed:
+
+```text
+IntegrityError: UNIQUE constraint failed:
+event.workspace_ref, event.source_id, event.source_sha256, event.origin_kind
+```
+
+The transaction left `event_count = 0`.
+
+#### B. Unexpected deletion trigger on an event-store table
+
+A trigger was attached to the `event` table that deletes each inserted event. V036 reopened the database successfully. The API reported:
+
+```text
+reported_added = 1
+```
+
+But the database contained:
+
+```text
+event_count = 0
+get_event(...) = None
+```
+
+This is silent durable-data loss: the store reports success for a record that does not exist.
+
+#### C. Expected index name and columns, wrong uniqueness
+
+An expected index was recreated with the same name and columns but as `UNIQUE`. V036 accepted the database because index uniqueness is absent from the fingerprint.
+
+#### D. Wrong column default
+
+A schema was created with `author_match DEFAULT 999`. V036 accepted it because defaults are absent from the fingerprint.
+
+### Required V037 correction
+
+- Define target-store ownership for every table and every object attached to those tables.
+- Reject any unexpected index or trigger attached to a target-owned table. Sibling-store tolerance must apply only to genuinely sibling-owned objects.
+- Build a full semantic fingerprint using, at minimum:
+  - `PRAGMA table_xinfo` plus normalized table SQL for defaults, checks, generated columns, table constraints, `STRICT`, and `WITHOUT ROWID`.
+  - Full `PRAGMA foreign_key_list` semantics, including update/delete/match and deferred behaviour where represented.
+  - `PRAGMA index_list` and `PRAGMA index_xinfo` for uniqueness, origin, partial status, expression/collation/order/key columns, plus normalized partial predicates.
+  - Full normalized trigger SQL, not only trigger name/table.
+- Compare the exact set of target-owned objects and their complete semantics.
+- Add permanent regressions for all four reproductions above.
+- Every rejected open must leave the database and WAL/SHM/journal sidecars byte-identical.
+
+## F02 — BLOCKER  
+## The “single complete final seal” omits required gates and does not carry complete evidence
+
+The sealer’s documentation says the complete test and audit sequence is non-skippable and that `seal_evidence.json` records every command, exit code, count, timestamp, and hash. The implementation and supplied seal record do not support those statements.
+
+### Commands omitted by `tools/final_seal.py`
+
+The pre-package `_gates()` runs:
+
+- Deterministic pytest.
+- Three generators.
+- A second generator run.
+- Validation of an already-existing `mutation_report.json`.
+
+It does **not** execute:
+
+- `python -m pytest tests/internal/integration -q -o addopts="" -m integration`
+- Ruff.
+- Mypy strict.
+- `python tools/standalone_install_check.py`
+- `python tools/mutation_regression.py`
+
+The extracted-package `_reverify()` runs only deterministic pytest, each generator once, the package audit, CRC, and manifest verification. It does not rerun the integration, Ruff, mypy, standalone-install, or mutation gates against extracted bytes.
+
+### Seal-record evidence
+
+The separate V036 seal record contains no positive integration, Ruff, mypy, or standalone-install step. Its mutation entry contains only `killed` and `mutants`; it has no command, exit code, timestamp, report hash, or source-hash set. Therefore it does not satisfy the release’s own statement that every command, exit code, count, timestamp, and hash is recorded.
+
+### Unbound sidecar
+
+The README states that `seal_evidence.json` is “in this package.” It is not one of the 11 manifest-managed payloads in the outer ZIP. It was supplied as a separate sidecar and is not hash-pinned by the product manifest. The sidecar does hash the outer ZIP, but the delivery has no higher-level immutable envelope that pins both files together.
+
+### Required V037 correction
+
+- Put every required release command in one canonical gate registry and have the sealer execute it, rather than relying on prose or prior manual execution.
+- Record for every gate: exact command, tool version, cwd, start/end timestamps, exit code, stdout/stderr digest or retained log, result counts, and relevant source/report hashes.
+- Execute the required extracted-byte sequence against the exact packaged repository.
+- Run the mutation command in the seal workflow, or explicitly produce a cryptographically pinned prior mutation execution record with its exact command, exit code, timestamp, report SHA-256, and source-hash set; do not represent a two-number summary as full command evidence.
+- Record any legitimate integration skip and bind it to immutable authoritative CI evidence rather than silently omitting the gate.
+- Resolve the sidecar circularity explicitly:
+  - Include a manifest-pinned `seal_run_evidence.json` inside the product package that contains the command evidence but not the outer ZIP’s self-hash.
+  - Produce an external `delivery_attestation.json` after packaging that hashes both the final product ZIP and the run-evidence identity.
+  - Deliver both through one named delivery envelope or signed attestation so neither can be substituted independently.
+
+## F03 — BLOCKER  
+## `sealed_at` is captured before packaging and re-verification, not at the actual final seal
+
+`tools/final_seal.py` assigns `sealed_at` immediately after the initial `_gates()` call. After that timestamp, it still:
+
+1. Edits `tools/release_facts.py`.
+2. Rebuilds release facts.
+3. Regenerates facts blocks.
+4. Reruns the deterministic suite.
+5. Generates outer artefacts.
+6. Builds the nested repository ZIP, manifest, and outer ZIP.
+7. Re-extracts and tests the final bytes.
+8. Runs the package audit.
+9. Verifies CRC and manifest.
+10. Writes the seal evidence.
+
+The supplied record declares:
+
+```text
+sealed_at = 2026-08-11T18:23:05+01:00
+```
+
+Its last timestamped step is the extracted package audit at:
+
+```text
+2026-08-11T18:24:58.365014+01:00
+```
+
+That is approximately **113 seconds after** the declared seal. The 18:23:05 value is a build/release-stamp creation time, not a final-seal completion time.
+
+### Required V037 correction
+
+- Rename the current value to `release_stamp_created_at` or `build_started_at`.
+- Record `seal_completed_at` only after the final extracted-byte audit, CRC/manifest verification, and evidence assembly have succeeded.
+- Do not claim that an earlier stamp is the “actual final seal.”
+- If the final filename must use the completion minute, rename the already-verified immutable ZIP after completion; renaming does not change its bytes. Keep internal build-stamp semantics distinct from completion semantics.
+- Put the final outer SHA-256 and completion timestamp in the external delivery attestation described in F02.
+
+## F04 — HIGH  
+## The canonical release-facts audit accepts missing and extra derived fields
+
+The current reader validates the `release-facts/1` wrapper, then iterates freshly derived facts and compares a value only when the key also exists in the shipped facts:
+
+```python
+for key, value in fresh.items():
+    if key in shipped and shipped[key] != value:
+        ...
+```
+
+It never requires exact key-set equality and never rejects extra fields.
+
+### Independent diagnostic
+
+A copy of the exact nested repository facts was changed as follows:
+
+- Removed required field `tests_passed` whose shipped value is 670.
+- Added `bogus_unverified_fact = 999999`.
+- Preserved `schema = release-facts/1` and `integrity_failures = []`.
+
+The exact V036 `audit_package()` returned:
+
+```text
+findings = 0
+```
+
+A canonical schema that accepts missing required fields and arbitrary extra fields is not canonical.
+
+### Required V037 correction
+
+- Require `set(shipped) == set(fresh)`.
+- Report every missing and every unexpected key.
+- Require type equality as well as value equality, avoiding Python equality aliases such as `True == 1` and `670.0 == 670`.
+- Define any intentionally optional fields in an explicit schema rather than silently tolerating absence.
+- Add negative regressions for missing required field, extra field, wrong type with equal value, malformed wrapper, and non-empty integrity failures.
+
+## F05 — HIGH  
+## Generator steps are labelled “zero-diff” without performing a diff or hash comparison
+
+The sealer executes `git status --porcelain` but discards the result with `del diff`. It then labels a second generator run `*-second-run-zero-diff` solely because the generator exits zero. On extracted bytes, it runs each generator once and labels the run `*-zero-diff` without comparing any file before and after.
+
+A successful generator exit does not prove that it changed no files. A second successful run proves neither that the first run was clean nor that outputs are deterministic unless the owned output bytes are compared.
+
+### Required V037 correction
+
+- Define the exact files owned by each generator.
+- Hash those files before and after every generator run.
+- Fail if the first release-validation run changes a generated artefact that was supposed to be current.
+- Run again and require identical hashes.
+- Repeat the before/after hash comparison on the extracted repository.
+- Record the owned file set, before hashes, after hashes, and changed-file list in seal evidence.
+- Remove “zero-diff” labels unless a real comparison returned no changes.
+
+## F06 — MEDIUM  
+## The current V036 review-disposition worksheet is still clipped, and its readability gate certifies it
+
+The current sheet `29_V036ReviewDisposition` was rendered from the shipped workbook. The final F09 row is vertically clipped; the stored cell text continues beyond what the rendered row displays.
+
+The readability function’s docstring says current sheets must declare usable widths, wrap cells, and render without manual repair. The implementation checks only:
+
+- A populated column width of at least 9.
+- A frozen header row.
+
+It does not check:
+
+- Wrapped alignment.
+- Explicit or calculated row height.
+- Auto-filter presence.
+- Rendered clipping.
+- Whether all text is visible.
+
+The “readable” test also creates long wrapped content without any row auto-fit requirement, so the exact class can pass while clipping remains. The package audit returned zero findings for the shipped clipped sheet.
+
+### Required V037 correction
+
+- Set explicit calculated row heights for every wrapped multi-line row; do not rely on Excel opening the file and auto-fitting it later.
+- Audit wrap settings, row heights, auto-filter, freeze panes, and column widths.
+- Add a negative regression containing a long final wrapped row that the present gate falsely passes.
+- Render every current workbook sheet during release assembly and retain preview evidence for the current review-disposition sheet.
+- Fail the build when the rendered current governance sheet hides any text.
+
+## F07 — MEDIUM  
+## Identity compatibility claims are false, and current metadata contains an unresolved template token
+
+V035 accepted and derived an `atid/3` identity for an aware year-1 instant. V036 rejects that same value before derivation. The V036 design choice to reject years before 1000 was allowed by the V035 review as an alternative to a scheme bump; the implementation is reasonable. The release wording is not.
+
+Current files repeatedly claim:
+
+> Every id derivable under V035’s atid/3 is byte-identical under V036’s.
+
+That is false because some IDs derivable under V035 are no longer derivable under V036. The accurate statement is:
+
+> For values accepted by V036, the canonical bytes and IDs remain unchanged from V035; V035-only aware instants before year 1000 are now rejected.
+
+The current metadata also contains the unresolved literal:
+
+```text
+No accepted release ever wrote an id from a value {V} rejects
+```
+
+### Required V037 correction
+
+- Replace the overbroad compatibility statement everywhere: README, metadata, changelog, ADR, `identity.toml`, code comments/docstrings, and project memory.
+- State explicitly that V035 could derive pre-year-1000 identities while V036/V037 reject them.
+- Support any assertion that no durable baseline actually contains those values with evidence; otherwise phrase it as an assumption or migration precondition.
+- Remove the `{V}` token.
+- Add a current-artefact audit for unresolved template placeholders such as `{STAMP}`, `{V}`, `TODO_REPLACE`, and equivalent markers.
+
+# 5. Improvements that must be preserved
+
+V036 contains substantial valid work:
+
+- Exact outer-package and manifest integrity is good.
+- The deterministic suite is genuinely green and independently reproducible.
+- Coverage is genuinely 100% line and branch for the deterministic suite.
+- The clean-environment dependency fixture includes `at-durable`; V035 F01 is fixed.
+- All platform markers are retained and mixed-scheme refusal is tested in both directions.
+- CLI preflight now covers both stores before normal writes in the tested scenarios.
+- Malformed marker and corrupt-SQLite failures are converted into domain refusals.
+- Schema creation and marker stamping are transactional.
+- Canonical identity uses exact built-in primitive types and rejects hostile subclasses.
+- Instant formatting is manual and fixed-width within the accepted year range.
+- Mutation tooling now proves a green baseline, records per-mutant failing tests, distinguishes invalid outcomes, and binds results to source hashes.
+- Retired metadata aliases and stale release references have permanent negative tests.
+- Historical DOCX files render cleanly.
+- All four workbooks contain no live formula errors.
+- No six-status evidence model, timeline, commitments, questions, consent, UI/API, or AT-056 feature tranche was started.
+
+# 6. Required next release
+
+## Version
+
+**V037 — corrective release only**
+
+## Required release stem
+
+```text
+AT-LifeOperatingSystem_DurableSchemaExactnessAndFinalSealEvidenceClosure_Claude_V037
+```
+
+## Required final delivery name
+
+```text
+AT-LifeOperatingSystem_DurableSchemaExactnessAndFinalSealEvidenceClosure_Claude_V037_<actual-seal-completion-YYYYMMDD_HHMM>.zip
+```
+
+The final timestamp must mean **seal completion**, not the earlier time at which release facts were stamped. Keep `release_stamp_created_at` and `seal_completed_at` as distinct facts.
+
+# 7. Exact response to paste to Claude
+
+```text
+V036 has been independently reviewed and is REJECTED. Prepare V037 as a corrective release only.
+
+Do not start the six-status evidence model, timeline, commitments, questions, consent, AT-056, UI/API work, or any other feature tranche.
+
+Required release stem:
+
+AT-LifeOperatingSystem_DurableSchemaExactnessAndFinalSealEvidenceClosure_Claude_V037
+
+The final delivery filename must use the actual seal-completion minute, not the earlier release-stamp creation minute:
+
+AT-LifeOperatingSystem_DurableSchemaExactnessAndFinalSealEvidenceClosure_Claude_V037_<actual-seal-completion-YYYYMMDD_HHMM>.zip
+
+Reproduce and close every finding below. Do not reject, relabel, or defer a finding without executable contradictory evidence.
+
+F01 BLOCKER — The durable schema fingerprint is not complete and accepts hostile target-owned SQLite objects.
+
+Independent reproductions against V036:
+
+1. Add an unexpected UNIQUE index to the event table’s source fields. The store reopens; two legitimate events then fail with a UNIQUE constraint and event_count remains zero.
+2. Add a trigger that deletes each inserted event. The store reopens; put_events reports added=1, but event_count is zero and get_event returns None.
+3. Recreate an expected index with the same name/columns but UNIQUE. The store reopens.
+4. Change author_match’s default to 999. The store reopens.
+
+The fingerprint omits defaults, UNIQUE/CHECK/generated/STRICT/WITHOUT ROWID semantics, foreign-key actions, index uniqueness/partial/collation/order/expression semantics, and trigger bodies. schema_differences also ignores every extra object, including an extra trigger or index attached to a target-owned table.
+
+Define exact target-store ownership and compare the complete semantic schema. Reject every unexpected object attached to target-owned tables while allowing genuinely sibling-owned objects only. Use table_xinfo plus normalized table SQL; full foreign-key semantics; index_list/index_xinfo plus normalized predicates; and full normalized trigger SQL. Add permanent adversarial tests for all four reproductions and prove every refusal leaves the DB and WAL/SHM/journal sidecars unchanged.
+
+F02 BLOCKER — final_seal.py does not run or record the complete required gate sequence.
+
+It omits integration, Ruff, mypy strict, standalone_install_check.py, and mutation_regression.py. The extracted-package sequence omits them too. The seal JSON has no positive integration/Ruff/mypy/standalone steps and the mutation entry has only killed/mutants, with no command, exit code, timestamp, report hash, or source-hash set.
+
+Put every gate in one canonical registry and make the sealer execute it. Record exact command, tool version, cwd, start/end, exit code, output digest/log, counts, and relevant hashes. Record legitimate integration skips and bind any claimed authoritative CI run immutably. Do not treat an existing mutation report’s two counts as full command evidence.
+
+The README also says seal_evidence.json is inside the package, but it is a separate unmanifested sidecar. Resolve the circularity explicitly: include manifest-pinned seal_run_evidence.json inside the product ZIP without the outer self-hash, then produce an external delivery_attestation.json that hashes the final product ZIP and the run-evidence identity. Deliver both in one named envelope or signed attestation.
+
+F03 BLOCKER — sealed_at is not the final seal time.
+
+V036 records sealed_at=2026-08-11T18:23:05+01:00, but the extracted package audit is timestamped 18:24:58.365014+01:00. The code captures sealed_at before stamping facts, post-stamp tests, artefact generation, packaging, extracted tests/audit, manifest verification, and evidence writing.
+
+Rename the early timestamp release_stamp_created_at/build_started_at. Set seal_completed_at only after all final-byte verification succeeds. Never call the earlier value the actual final seal. Use seal_completed_at for the final delivery filename, using a final rename of the already-verified immutable ZIP if necessary. Put completion time and outer SHA-256 in the external delivery attestation.
+
+F04 HIGH — the release-facts/1 reader does not enforce an exact schema.
+
+Removing required tests_passed=670 and adding bogus_unverified_fact=999999 still produces audit findings=0. Require exact key-set equality and exact types, not only value comparisons for keys that happen to exist. Add tests for missing keys, extra keys, True versus 1, 670.0 versus 670, malformed wrapper, and non-empty integrity_failures.
+
+F05 HIGH — generator runs are labelled zero-diff without a diff or hash comparison.
+
+The git-status result is discarded. A second successful generator execution is called zero-diff only because exit code is zero. Extracted generators run once and are also labelled zero-diff.
+
+Define each generator’s owned outputs. Hash them before/after the first run and require no change; run again and require identical hashes; repeat against extracted bytes. Record file sets, hashes, and changed-file lists. Never write zero-diff in evidence without a real comparison.
+
+F06 MEDIUM — the V036 review-disposition worksheet is still clipped and the gate returns clean.
+
+29_V036ReviewDisposition row F09 is vertically clipped in the shipped render. workbook_readability_failures checks only width>=9 and freeze panes; it does not check wrap, row height, auto-filter, rendered clipping, or text visibility.
+
+Calculate and set explicit row heights for wrapped rows. Audit wrap, row heights, filter, freeze, widths, and actual current-sheet renders. Add a negative test with a long final wrapped row that the current gate falsely passes. Render every current sheet during release assembly and retain the V037 disposition preview as evidence.
+
+F07 MEDIUM — the identity compatibility wording is false and metadata contains {V}.
+
+V035 could derive an atid/3 ID for an aware year-1 instant; V036 rejects it. Therefore “every id derivable under V035 is byte-identical under V036” is false. The accurate statement is that for values accepted by V036/V037, canonical bytes and IDs remain unchanged; V035-only pre-year-1000 instants are now rejected.
+
+Correct README, metadata, changelog, ADR, identity.toml, code comments/docstrings, and project memory. Remove the unresolved {V} token. Add a current-artefact audit for unresolved placeholders. Any assertion that no durable baseline contains pre-year-1000 values must be evidence-backed or explicitly stated as a migration precondition/assumption.
+
+Preserve the valid V036 work: 670 deterministic passes, 100% line/branch coverage, all-marker mixed-scheme refusal, both-store CLI preflight, atomic schema creation/stamping, exact primitive identity boundaries, fixed-width accepted instant grammar, baseline-green mutation semantics, source-hash binding, retired-alias/stale-reference guards, and clean package/manifest handling.
+
+Required V037 adversarial regressions:
+
+1. Unexpected UNIQUE index attached to a target-owned table: reject unchanged.
+2. Unexpected deletion trigger attached to a target-owned table: reject unchanged.
+3. Expected index name/columns but wrong uniqueness/collation/order/partial predicate: reject unchanged.
+4. Wrong column default, UNIQUE/CHECK/generated/STRICT/WITHOUT ROWID semantics: reject unchanged.
+5. Wrong foreign-key action and altered trigger body/timing/event: reject unchanged.
+6. Missing and extra release-fact fields, plus equal-value wrong types: audit failure.
+7. Generator changes an owned file despite exit zero: seal aborts and records changed hashes.
+8. Missing integration/Ruff/mypy/standalone/mutation gate evidence: seal aborts.
+9. Long wrapped final worksheet row with insufficient height: readability gate fails.
+10. Unresolved {V}/{STAMP}/TODO_REPLACE token in any current authority artefact: audit fails.
+11. seal_completed_at must be later than every timestamped gate and must name the final delivery.
+12. Product ZIP and evidence/attestation must be mutually bound by manifest and external hashes.
+
+Run and retain machine-readable evidence for:
+
+- python -m pytest -q -m "not integration"
+- python -m pytest tests/internal/integration -q -o addopts="" -m integration
+- ruff check packages tests tools verification
+- mypy --strict packages/*/src
+- python tools/mutation_regression.py
+- python tools/standalone_install_check.py
+- every generator with real before/after hash comparison
+- the canonical facts builder and exact-key/type package audit
+- the one final sealer
+- the complete extracted-byte validation sequence
+- ZIP CRC, exact manifest membership, byte counts, and SHA-256 verification
+- rendering of all current workbook sheets, including the V037 review-disposition sheet
+
+Do not state accepted, shippable, complete schema, complete test sequence, actual final seal, zero-diff, or all findings closed until the exact final V037 delivery and its bound evidence prove those claims.
+
+Describe V037 only as a candidate for independent review.
+```
+
+## 8. Review evidence files
+
+- `AT-LifeOperatingSystem_V036_DeterministicTestLog_ChatGPT_V001.txt`
+- `AT-LifeOperatingSystem_V036_IntegrationTestLog_ChatGPT_V001.txt`
+- `AT-LifeOperatingSystem_V036_PackageIntegrityLog_ChatGPT_V001.txt`
+- `AT-LifeOperatingSystem_V036_StructuralValidationLog_ChatGPT_V001.txt`
+- `AT-LifeOperatingSystem_V036_AdversarialSchemaEvidence_ChatGPT_V001.json`
+- `AT-LifeOperatingSystem_V036_AuditBlindSpotEvidence_ChatGPT_V001.txt`
+- `AT-LifeOperatingSystem_V036_PackageAuditDirectLog_ChatGPT_V001.txt`
+- `AT-LifeOperatingSystem_V036_NestedFileInventory_ChatGPT_V001.csv`
+- `AT-LifeOperatingSystem_V036_F09_ClippedReviewDisposition.png`
+
+**Final disposition: V036 rejected. Submit corrective V037 only.**

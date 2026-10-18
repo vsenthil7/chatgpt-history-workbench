@@ -1,0 +1,281 @@
+{
+  "schema": "delivery-attestation/1",
+  "delivery": "AT-LifeOperatingSystem_DurableSchemaExactnessAndFinalSealEvidenceClosure_Claude_V037_20260811_2236.zip",
+  "delivery_sha256": "4efacccc78466bb221c4eb8574e3647030b0288c5e73e18e9be7680b0f4de8b9",
+  "in_package_evidence": "AT-LifeOperatingSystem_09997_SealRunEvidence_Claude_V037_20260811_2230.json",
+  "in_package_evidence_sha256": "046f5620ac4ba5ba3e1ba227459fb8f45810ade29091f37e2efe91ffe5693d72",
+  "build_started_at": "2026-08-11T22:25:21.871661+01:00",
+  "release_stamp_created_at": "2026-08-11T22:30:17+01:00",
+  "seal_completed_at": "2026-08-11T22:36:29+01:00",
+  "extracted_gate_registry": [
+    "deterministic-suite",
+    "integration-suite",
+    "ruff",
+    "mypy-strict",
+    "standalone-install-check",
+    "mutation-regression"
+  ],
+  "extracted_steps": [
+    {
+      "label": "extracted:deterministic-suite",
+      "command": "python -m pytest -q -m not integration",
+      "tool_version": "3.12.3",
+      "cwd": "/tmp/tmp8aqcj2r4/repo/at-platform",
+      "started_at": "2026-08-11T22:31:17.545836+01:00",
+      "ended_at": "2026-08-11T22:31:27.210670+01:00",
+      "exit_code": 0,
+      "output_sha256": "b5d8c850275887ca8111301e0302939d29197d1325296c968c761d0c6ca8d457",
+      "output_tail": "t_whatsapp/__init__.py         107      0     34      0   100%\npackages/at-store/src/at_store/__init__.py                             104      0     24      0   100%\npackages/at-store/src/at_store/_ports.py                                13      0      0      0   100%\npackages/at-store/src/at_store/_records.py                              67      0     14      0   100%\npackages/at-store/src/at_store/_sqlite.py                              125      0     26      0   100%\n----------------------------------------------------------------------------------------------------------------\nTOTAL                                                                 2257      0    696      0   100%\nRequired test coverage of 100% reached. Total coverage: 100.00%\n685 passed, 1 skipped, 2 deselected in 9.31s\n",
+      "counts": "685"
+    },
+    {
+      "label": "extracted:integration-suite",
+      "command": "python -m pytest tests/internal/integration -q -o addopts= -m integration",
+      "tool_version": "3.12.3",
+      "cwd": "/tmp/tmp8aqcj2r4/repo/at-platform",
+      "started_at": "2026-08-11T22:31:27.210802+01:00",
+      "ended_at": "2026-08-11T22:31:50.901546+01:00",
+      "exit_code": 0,
+      "output_sha256": "f7844497ecd2ff3456b7a8256f239d2a30d821a2e484eae7fc73b47251631ab6",
+      "output_tail": "..                                                                       [100%]\n2 passed in 23.48s\n",
+      "counts": "2"
+    },
+    {
+      "label": "extracted:ruff",
+      "command": "ruff check packages tests tools verification",
+      "tool_version": "ruff 0.16.2",
+      "cwd": "/tmp/tmp8aqcj2r4/repo/at-platform",
+      "started_at": "2026-08-11T22:31:50.905708+01:00",
+      "ended_at": "2026-08-11T22:31:50.957193+01:00",
+      "exit_code": 0,
+      "output_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "output_tail": "All checks passed!\n"
+    },
+    {
+      "label": "extracted:mypy-strict",
+      "command": "mypy --strict packages/at-cli/src packages/at-durable/src packages/at-evidence/src packages/at-identity/src packages/at-ingest-core/src packages/at-ingest-llm-export/src packages/at-ingest-whatsapp/src packages/at-store/src",
+      "tool_version": "mypy 2.3.0 (compiled: yes)",
+      "cwd": "/tmp/tmp8aqcj2r4/repo/at-platform",
+      "started_at": "2026-08-11T22:31:51.130417+01:00",
+      "ended_at": "2026-08-11T22:31:52.978096+01:00",
+      "exit_code": 0,
+      "output_sha256": "5ca59a2361304496c36048048a43aa6f41eb23e74111d16719b962637888fc08",
+      "output_tail": "Success: no issues found in 22 source files\n"
+    },
+    {
+      "label": "extracted:standalone-install-check",
+      "command": "python tools/standalone_install_check.py",
+      "tool_version": "3.12.3",
+      "cwd": "/tmp/tmp8aqcj2r4/repo/at-platform",
+      "started_at": "2026-08-11T22:31:52.978131+01:00",
+      "ended_at": "2026-08-11T22:33:14.748866+01:00",
+      "exit_code": 0,
+      "output_sha256": "cb36a7a835512e57f7b3e743c019e2b2c106afbab28f0e074e6cd66b16f840dc",
+      "output_tail": "PASS  at-cli: installs, imports and tests standalone\nPASS  at-durable: installs, imports and tests standalone\nPASS  at-evidence: installs, imports and tests standalone\nPASS  at-identity: installs, imports and tests standalone\nPASS  at-ingest-core: installs and imports cleanly (no test directory)\nPASS  at-ingest-llm-export: installs, imports and tests standalone\nPASS  at-ingest-whatsapp: installs, imports and tests standalone\nPASS  at-store: installs, imports and tests standalone\n\n8/8 packages standalone-clean\n"
+    },
+    {
+      "label": "extracted:mutation-regression",
+      "command": "python tools/mutation_regression.py",
+      "tool_version": "3.12.3",
+      "cwd": "/tmp/tmp8aqcj2r4/repo/at-platform",
+      "started_at": "2026-08-11T22:33:14.748925+01:00",
+      "ended_at": "2026-08-11T22:35:39.220818+01:00",
+      "exit_code": 0,
+      "output_sha256": "fe3de3b61f56a5127cbb9565dfd998ef181e934c70cb4facf3867c86deff9b81",
+      "output_tail": "_rejects_every_hostile_primitive_subclass\nKILLED  V035 review F04: datetime subclasses accepted into canonical instants\n        by tests/internal/identity/test_canonical_identity.py::test_canonical_instants_are_fixed_width_and_bounded\nKILLED  V036 review F01: hostile objects attached to target-owned tables no longer refused - the silent-data-loss trigger class revived\n        by tests/internal/release/test_v037_schema_exactness_regressions.py::test_regression_1_unexpected_unique_index_on_owned_table\nKILLED  V036 review F04: fact type aliases (True==1, 670.0==670) accepted again by the package audit\n        by tests/internal/release/test_release_integrity_gates.py::test_the_shipped_repository_facts_file_is_audited\n\n71/71 mutants killed (0 invalid, 0 survived) - mutation_report.json written\n",
+      "counts": [
+        "71",
+        "71"
+      ],
+      "mutation_report_sha256": "5c88c3288acc48cb8d7309cfa84c5d8f266ad10361c1463f5c4669bdc4dddb82",
+      "mutation_source_hashes": {
+        ".github/workflows/ci.yml": "cb68ebb3a0ccb3d3c26a0f53b1d4cc92cfcb8355d3293e7d8c86924c38b12160",
+        "packages/at-durable/src/at_durable/__init__.py": "67cc57aac5deb315b6d97fb1a40a900270d6ccd72d56d1aeb2c6be195ded8b9f",
+        "packages/at-evidence/src/at_evidence/_admission.py": "5630247e1fd544a4e7596c11e9f08785ff60f296db8913221639343c1ee05705",
+        "packages/at-evidence/src/at_evidence/_memory.py": "4d7de4d43b09d25056f7e04bebb22ce17d691b6bd7b8ce042a94b48ea3248414",
+        "packages/at-evidence/src/at_evidence/_records.py": "0f6d1611ba1ea64219c108f03f965c55efbd0077077c3eba196898495adefc3b",
+        "packages/at-evidence/src/at_evidence/_sqlite.py": "a152c3f5a15852fba1534493ca22ad42d3a84f05d4fbe98fb4257342b432ec6d",
+        "packages/at-identity/src/at_identity/__init__.py": "03b461a5ac09a5059afb8c18ba23a9406b971a07743ba4c5cd52b95c31e3e175",
+        "packages/at-identity/src/at_identity/_records.py": "73ea905cf4c5646315f2fb6f78ae3b0cffd7e255f8ae6da73b5f3f23dfb51fd3",
+        "packages/at-ingest-core/src/at_ingest_core/__init__.py": "5a3069afeaf12539959828d03dd4651aa21b8a447c4013ad0e46145fb101deab",
+        "packages/at-ingest-core/src/at_ingest_core/_durable.py": "1063d1d0599ab3f6e30a6d357c4557fce155236eb5bd3d90502cb6d75b921782",
+        "packages/at-ingest-core/src/at_ingest_core/_identity.py": "9f61848345a52e05db45ac1799c756db5da7e46c58c66dfbead979d364b69403",
+        "packages/at-ingest-llm-export/src/at_ingest_llm_export/__init__.py": "ac628639074265d5af7a2d47a3b79c9ef72902a0336488f361604ba31a40a7fe",
+        "packages/at-ingest-whatsapp/src/at_ingest_whatsapp/__init__.py": "b043fa809ca3e089577db85765ec955bf60c1a198dd2cba347e74cb04fe11d82",
+        "packages/at-store/src/at_store/__init__.py": "36f98bd1a18fe5130d5c81f87b97143605e5da5c694377e58a8128aeb06ca711",
+        "packages/at-store/src/at_store/_records.py": "ee468376123a152f4e3bb89c73d874d0a895044cb1ff6a784e2670a2cb301c24",
+        "packages/at-store/src/at_store/_sqlite.py": "e91e3945ee46c5f270387f6be02f038f9200813248894517f190e0161691f335",
+        "tools/release_check.py": "aa596c2da39114ff51cd83b0a471bc2c2f1ce76f204bd308a94fc0a997b7807b"
+      },
+      "mutation_summary": {
+        "mutants": 71,
+        "killed": 71,
+        "survived": 0,
+        "invalid": 0,
+        "baseline": "green (proven before and after)"
+      }
+    },
+    {
+      "label": "extracted-run1:gen_architecture.py",
+      "command": "python tools/gen_architecture.py",
+      "cwd": "/tmp/tmp8aqcj2r4/repo/at-platform",
+      "started_at": "2026-08-11T22:35:39.225309+01:00",
+      "ended_at": "2026-08-11T22:35:39.266192+01:00",
+      "exit_code": 0,
+      "owned_files": [
+        "docs/ARCHITECTURE.md"
+      ],
+      "before_sha256": {
+        "docs/ARCHITECTURE.md": "565d9afc9f8bd77afc2bebd9e81d6b86d4c1cec0adefb615f1c1055acb4fb66e"
+      },
+      "after_sha256": {
+        "docs/ARCHITECTURE.md": "565d9afc9f8bd77afc2bebd9e81d6b86d4c1cec0adefb615f1c1055acb4fb66e"
+      },
+      "changed_files": [],
+      "result": "zero-diff (hash-proven)"
+    },
+    {
+      "label": "extracted-run1:gen_testing_docs.py",
+      "command": "python tools/gen_testing_docs.py",
+      "cwd": "/tmp/tmp8aqcj2r4/repo/at-platform",
+      "started_at": "2026-08-11T22:35:39.266550+01:00",
+      "ended_at": "2026-08-11T22:35:39.299215+01:00",
+      "exit_code": 0,
+      "owned_files": [
+        "docs/testing/00-index.md",
+        "docs/testing/internal/00-index.md",
+        "docs/testing/external/00-index.md"
+      ],
+      "before_sha256": {
+        "docs/testing/00-index.md": "6a4d361f7a5180aef5c1e8851b4e5e580a923b458a596dcb6933e92c76e60956",
+        "docs/testing/internal/00-index.md": "74f93434070660213676f8b90d4b890a20aa6b6bce9f74700d4d2a5416797365",
+        "docs/testing/external/00-index.md": "7125dd6f1aa0200d38f35347278d00f4f9fc542f0c0427b8bef5f293db330a9b"
+      },
+      "after_sha256": {
+        "docs/testing/00-index.md": "6a4d361f7a5180aef5c1e8851b4e5e580a923b458a596dcb6933e92c76e60956",
+        "docs/testing/internal/00-index.md": "74f93434070660213676f8b90d4b890a20aa6b6bce9f74700d4d2a5416797365",
+        "docs/testing/external/00-index.md": "7125dd6f1aa0200d38f35347278d00f4f9fc542f0c0427b8bef5f293db330a9b"
+      },
+      "changed_files": [],
+      "result": "zero-diff (hash-proven)"
+    },
+    {
+      "label": "extracted-run1:gen_facts_block.py",
+      "command": "python tools/gen_facts_block.py",
+      "cwd": "/tmp/tmp8aqcj2r4/repo/at-platform",
+      "started_at": "2026-08-11T22:35:39.299670+01:00",
+      "ended_at": "2026-08-11T22:35:55.973178+01:00",
+      "exit_code": 0,
+      "owned_files": [
+        "README.md",
+        "READ_THIS_FIRST.md",
+        "docs/ARCHITECTURE.md",
+        "docs/TEST_STRATEGY.md"
+      ],
+      "before_sha256": {
+        "README.md": "1c1d6d327114716bd3b1dc159d53e645bc108e85b6e643eab86b6fb5592583c7",
+        "READ_THIS_FIRST.md": "a14f60bbb12f413439b1a1d50110bbfb0c9da9b763b7ca02deddb29a41464643",
+        "docs/ARCHITECTURE.md": "565d9afc9f8bd77afc2bebd9e81d6b86d4c1cec0adefb615f1c1055acb4fb66e",
+        "docs/TEST_STRATEGY.md": "67a43b3ad2e3aed62bca6a574870efaaa7f7cf73bc1194915745d4e276c8ac18"
+      },
+      "after_sha256": {
+        "README.md": "1c1d6d327114716bd3b1dc159d53e645bc108e85b6e643eab86b6fb5592583c7",
+        "READ_THIS_FIRST.md": "a14f60bbb12f413439b1a1d50110bbfb0c9da9b763b7ca02deddb29a41464643",
+        "docs/ARCHITECTURE.md": "565d9afc9f8bd77afc2bebd9e81d6b86d4c1cec0adefb615f1c1055acb4fb66e",
+        "docs/TEST_STRATEGY.md": "67a43b3ad2e3aed62bca6a574870efaaa7f7cf73bc1194915745d4e276c8ac18"
+      },
+      "changed_files": [],
+      "result": "zero-diff (hash-proven)"
+    },
+    {
+      "label": "extracted-run2:gen_architecture.py",
+      "command": "python tools/gen_architecture.py",
+      "cwd": "/tmp/tmp8aqcj2r4/repo/at-platform",
+      "started_at": "2026-08-11T22:35:55.973339+01:00",
+      "ended_at": "2026-08-11T22:35:56.010173+01:00",
+      "exit_code": 0,
+      "owned_files": [
+        "docs/ARCHITECTURE.md"
+      ],
+      "before_sha256": {
+        "docs/ARCHITECTURE.md": "565d9afc9f8bd77afc2bebd9e81d6b86d4c1cec0adefb615f1c1055acb4fb66e"
+      },
+      "after_sha256": {
+        "docs/ARCHITECTURE.md": "565d9afc9f8bd77afc2bebd9e81d6b86d4c1cec0adefb615f1c1055acb4fb66e"
+      },
+      "changed_files": [],
+      "result": "zero-diff (hash-proven)"
+    },
+    {
+      "label": "extracted-run2:gen_testing_docs.py",
+      "command": "python tools/gen_testing_docs.py",
+      "cwd": "/tmp/tmp8aqcj2r4/repo/at-platform",
+      "started_at": "2026-08-11T22:35:56.010292+01:00",
+      "ended_at": "2026-08-11T22:35:56.045020+01:00",
+      "exit_code": 0,
+      "owned_files": [
+        "docs/testing/00-index.md",
+        "docs/testing/internal/00-index.md",
+        "docs/testing/external/00-index.md"
+      ],
+      "before_sha256": {
+        "docs/testing/00-index.md": "6a4d361f7a5180aef5c1e8851b4e5e580a923b458a596dcb6933e92c76e60956",
+        "docs/testing/internal/00-index.md": "74f93434070660213676f8b90d4b890a20aa6b6bce9f74700d4d2a5416797365",
+        "docs/testing/external/00-index.md": "7125dd6f1aa0200d38f35347278d00f4f9fc542f0c0427b8bef5f293db330a9b"
+      },
+      "after_sha256": {
+        "docs/testing/00-index.md": "6a4d361f7a5180aef5c1e8851b4e5e580a923b458a596dcb6933e92c76e60956",
+        "docs/testing/internal/00-index.md": "74f93434070660213676f8b90d4b890a20aa6b6bce9f74700d4d2a5416797365",
+        "docs/testing/external/00-index.md": "7125dd6f1aa0200d38f35347278d00f4f9fc542f0c0427b8bef5f293db330a9b"
+      },
+      "changed_files": [],
+      "result": "zero-diff (hash-proven)"
+    },
+    {
+      "label": "extracted-run2:gen_facts_block.py",
+      "command": "python tools/gen_facts_block.py",
+      "cwd": "/tmp/tmp8aqcj2r4/repo/at-platform",
+      "started_at": "2026-08-11T22:35:56.045193+01:00",
+      "ended_at": "2026-08-11T22:36:12.565595+01:00",
+      "exit_code": 0,
+      "owned_files": [
+        "README.md",
+        "READ_THIS_FIRST.md",
+        "docs/ARCHITECTURE.md",
+        "docs/TEST_STRATEGY.md"
+      ],
+      "before_sha256": {
+        "README.md": "1c1d6d327114716bd3b1dc159d53e645bc108e85b6e643eab86b6fb5592583c7",
+        "READ_THIS_FIRST.md": "a14f60bbb12f413439b1a1d50110bbfb0c9da9b763b7ca02deddb29a41464643",
+        "docs/ARCHITECTURE.md": "565d9afc9f8bd77afc2bebd9e81d6b86d4c1cec0adefb615f1c1055acb4fb66e",
+        "docs/TEST_STRATEGY.md": "67a43b3ad2e3aed62bca6a574870efaaa7f7cf73bc1194915745d4e276c8ac18"
+      },
+      "after_sha256": {
+        "README.md": "1c1d6d327114716bd3b1dc159d53e645bc108e85b6e643eab86b6fb5592583c7",
+        "READ_THIS_FIRST.md": "a14f60bbb12f413439b1a1d50110bbfb0c9da9b763b7ca02deddb29a41464643",
+        "docs/ARCHITECTURE.md": "565d9afc9f8bd77afc2bebd9e81d6b86d4c1cec0adefb615f1c1055acb4fb66e",
+        "docs/TEST_STRATEGY.md": "67a43b3ad2e3aed62bca6a574870efaaa7f7cf73bc1194915745d4e276c8ac18"
+      },
+      "changed_files": [],
+      "result": "zero-diff (hash-proven)"
+    },
+    {
+      "label": "extracted:package-audit",
+      "command": "python tools/build_release.py /tmp/tmp8aqcj2r4/outer",
+      "tool_version": "3.12.3",
+      "cwd": "/tmp/tmp8aqcj2r4/repo/at-platform",
+      "started_at": "2026-08-11T22:36:12.565674+01:00",
+      "ended_at": "2026-08-11T22:36:29.398473+01:00",
+      "exit_code": 0,
+      "output_sha256": "276c90be6c3d414ee2e34378bebac605bbaf1fa5b5c2bb27c531e3b6aa6ce434",
+      "output_tail": "wrote release_facts.json: 55 derived fields, 0 integrity failures\npackage audit clean: /tmp/tmp8aqcj2r4/outer\nrelease facts written and all artefacts consistent\n"
+    },
+    {
+      "label": "extracted:manifest-verification",
+      "at": "2026-08-11T22:36:29.414698+01:00",
+      "payloads": 12,
+      "result": "all byte counts and SHA-256 verified"
+    }
+  ],
+  "note": "seal_completed_at is the completion of the final extracted-byte verification; release_stamp_created_at is when the release identity was written into the tree. The delivery filename uses the completion minute; the rename of the verified ZIP changed no bytes, as the SHA-256 recorded here proves."
+}

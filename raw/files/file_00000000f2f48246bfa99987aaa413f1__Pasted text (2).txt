@@ -1,0 +1,609 @@
+You are viewing
+Sravan Menthula
+s screen
+View Options
+Sravan Menthula
+Q&A
+
+
+All questions (30)My questions (1)
+A
+Apoorv
+11:39 AM
+I had a few doubts.
+1. How do you use voice agents in medical field. Like how do u ensure that you don’t hallucinate in such high stakes environment.
+2. How do you input difficult things like a name.. and how do you ensure that the name of the person is correct. Like my name is Apoorv, so how do I make sure the spelling is correct?
+avatar
+Ekansh Bansal
+11:42 AM
+Healthcare is actually a major usecase that voice agents are helping with. Strong guardrails in the prompt help ensure that the agents are not giving medical advice, hallucinating, etc.
+
+The models are trained on a lot of Indian data, which includes Indian names. So the models are able to get that right most of the times.
+MV
+Mihir Vekariya
+11:43 AM
+ecommerce..?
+avatar
+Ekansh Bansal
+11:43 AM
+can you elaborate?
+DS
+DHARMENDAR SHAH
+11:45 AM
+I want to ask for all version stt and tts cost is same
+avatar
+Ekansh Bansal
+11:46 AM
+STT and TTS cost is included in Voice Agents platform pricing. Unless you’re talking about using our STT and TTS Model APIs?
+
+
+
+
+
+M
+Manish
+11:46 AM
+Is Sarvam using 105 conversations as default for all Voice Agents ? or we can we use Gemma4 as well ?
+avatar
+Ekansh Bansal
+11:47 AM
+We use a fine-tuned model as our LLM for Voice Agents, bringing in some other model is not supported today.
+
+S
+Shiv
+11:46 AM
+We have a production AI calling agent using Exotel and Pipecat. We initially used Sarvam STT and TTS, but the end-to-end latency was high, so we moved to Gemini Live. What is the recommended Sarvam STT/TTS setup today for achieving very low latency in real-time phone conversations?
+avatar
+Ekansh Bansal
+11:47 AM
+Were you using the Model APIs directly? Would suggest using the Voice Agents platform. You don’t have to worry about wiring different APIs together, and the latency is very low.
+MN
+Mohit's Notetaker (Otter.ai)
+11:46 AM
+Is there a plan to add per-turn timestamps to transcripts in the interactions API?
+avatar
+Ekansh Bansal
+11:48 AM
+yes in the roadmap, should be out soon
+AB
+Ankit Bansal
+11:47 AM
+Right now you STT has limitation of 2 hr and 20 speakers diarization, can we get more length with speaker diarization in future ?
+avatar
+Ekansh Bansal
+11:48 AM
+Are you talking about our Model APIs?
+
+
+
+SV
+Shubham Verma
+11:48 AM
+Can we take any inbound servicing example? Can Indus handle reasoning on top of large SOPs (say 500 pager?)
+avatar
+Ekansh Bansal
+11:49 AM
+Yes, you can break the large doc down into smaller knowledge bases based on separation of concerns. The voice agent will be able to use these for reasoning on a phone call.
+NP
+Nilesh Pawar
+11:48 AM
+Does sarvam provides any like startup related program to use the emerging startup to use the sarvam apis?
+SA
+Saakshi Adiga (Sarvam)
+11:56 AM
+Yes, we do. You can check the website
+S
+Shiv
+11:48 AM
+Yes, I am using the Model APIS for the STT and TTS.
+avatar
+Ekansh Bansal
+11:50 AM
+Try using the Voice Agents platform, you should see better performance because of the optimisations that we’ve done on our side.
+AP
+Ashwini Pai
+11:48 AM
+Which telephony providers do you support or how to bring our own telephony and integrate with your voice agent
+avatar
+Ekansh Bansal
+11:51 AM
+Vobiz, Exotel, Plivo, Twilio and more are supported. You can check the full list on the platform. https://indus.sarvam.ai/ - you can login here
+
+
+
+MN
+Mohit's Notetaker (Otter.ai)
+11:49 AM
+Can agents on the platform hand a live call to one another, for example a routing agent passing the call to smaller task agents, and if not, is that on the roadmap?
+
+Asking because the voice agent's prompt instructions are getting too long for a single agent
+avatar
+Ekansh Bansal
+11:52 AM
+Yes, agents can transfer calls to other agents.
+P
+PA
+11:49 AM
+Hey can someone summarize what's happened, I joined a bit late
+SA
+Saakshi Adiga (Sarvam)
+11:52 AM
+We are showing how to build out an agent from scratch. Till now Sravan discussed about Sarvam Voice agent's journey and scale.
+
+
+DS
+DHARMENDAR SHAH
+11:50 AM
+as we are using apis so we need api cost
+avatar
+Ekansh Bansal
+11:53 AM
+you can check that here: https://indus.sarvam.ai/pricing/buy-credits
+anony-avatar
+Anonymous Attendee
+11:51 AM
+could you please add the prompt in chat? will the screen be shared?
+
+
+
+AG
+Ankur Gupta
+11:53 AM
+Does your agent allow interuptions during the greeting in an outbound call? I haven’t been to get interuptions to work during the initial greetings
+SA
+Saakshi Adiga (Sarvam)
+11:55 AM
+Yes, they work. Initial greeting is not interrupted due to architecture design. But post that everything else should be interruptible.
+AB
+Ankit Bansal
+11:54 AM
+Is it possible to connect APIs  for data and other LLM API(gemai, gpt ..) for some generation and reply the content
+avatar
+Ekansh Bansal
+11:54 AM
+Yes, you can integrate any API in the Voice Agent
+
+MN
+Mohit's Notetaker (Otter.ai)
+11:55 AM
+Is there any documentation on doing this multi-agent right now? There was multi-agent flows before but that's being shut down I think
+avatar
+Ekansh Bansal
+11:57 AM
+We’re actually working on a multi-agent architecture that should be out soon. For now, connect Agent 1 to Phone Number 1, connect Agent 2 to Phone Number 2. Ask Agent 1 to transfer the call to Agent 2, and configure the transferred number as Phone number 2.
+
+Are you working with PSTN numbers, or with SIP URIs?
+
+
+S
+Satya
+11:55 AM
+post configuring the voice Agent, can we make Outbound calls using APIs?  I have checked the platform, currently a batch(list) upload is available. Basically i want handle the dialing part.
+SA
+Saakshi Adiga (Sarvam)
+11:57 AM
+Yes, you definitely can- please check Deploy with code section. https://docs.sarvam.ai/conversations/deploy/deploy-with-code
+VS
+Vansh Sharma
+11:56 AM
+May I connect external CRMs in the Voice Agent like Shopify, Kapture, Unicommerce, etc. to fetch the real time data and handle calls based on it?
+avatar
+Ekansh Bansal
+11:57 AM
+Yes, you can integrate their APIs to fetch and update data in these external CRMs. We’re also working on direct Integrations which should be out soon.
+
+
+MN
+Mohit's Notetaker (Otter.ai)
+11:58 AM
+Neither right now: we use an in-app React Native SDK. Will multi-agent handoff work for SDK sessions too, and is there an early-access list?
+avatar
+Ekansh Bansal
+11:59 AM
+I’ll have to check and get back to you. Can you reach out to us on developer@sarvam.ai?
+AB
+Ankit Bansal
+11:58 AM
+can we feed some data to agent on start of call so that it persist througout the call ?
+SA
+Saakshi Adiga (Sarvam)
+11:59 AM
+Yes, you can do this using API tool and configuring it to 'On Start'. This data will be stored within the variables and will be available during the entire call for the agent
+AB
+Ankit Bansal
+11:59 AM
+and what will the context size and how pricing effects that
+avatar
+Ekansh Bansal
+12:00 PM
+Tool calls are included in the pricing.
+
+
+
+AV
+Alam Vamsidhara Reddy
+12:01 PM
+How much control does Bulbul provide over a voice's perceived age, personality/persona, and emotional state? For patient avatars, we need voices that can convincingly sound young, middle-aged, or elderly. If there isn't explicit age information for the available voices, can age be controlled or induced through prompting or other parameters, and can age, persona, and emotion be changed dynamically for each response?
+avatar
+Ekansh Bansal
+12:03 PM
+There are multiple voices on the platform - different voices have different ages, personas, etc. You can pick the ones that work the best for you.
+SK
+Supreeth Kadalur
+12:03 PM
+what is the best way to engage Saravm experts to integrate saravam APIs with our enterprise platform ? covering, best practices, security, dedicated network etc,.
+avatar
+Ekansh Bansal
+12:04 PM
+you can reach out to us on developer@sarvam.ai
+
+
+
+KM
+Kunal Malviya
+12:03 PM
+how can I connect the sarvam SDK to my current local AI work flow?
+avatar
+Ekansh Bansal
+12:04 PM
+can you elaborate on the usecase that you’re trying to solve for?
+M
+Maulin
+12:04 PM
+How can I access the recording to this session ?
+SA
+Saakshi Adiga (Sarvam)
+12:04 PM
+yes, we will share & will be available on YouTube too
+
+
+AV
+Alam Vamsidhara Reddy
+12:04 PM
+what about the emotions?
+avatar
+Ekansh Bansal
+12:05 PM
+That is supported in Bulbul v4 on the Voice Agents Platform
+RS
+Rahul Sharma
+12:06 PM
+Is it possible for the same agent to handle both inbound and outbound calls?
+avatar
+Ekansh Bansal
+12:06 PM
+yes, that’s supported
+
+
+
+KM
+Kunal Malviya
+12:06 PM
+currently I have a AI voice Agent pipeline (stt, llm, tts) but now I want to change this to Sarvam SDK  so how we can do this changes?
+avatar
+Ekansh Bansal
+12:07 PM
+check out the docs for the Voice Agents platform: https://docs.sarvam.ai/conversations/introduction
+AB
+Ankit Bansal
+12:07 PM
+How you are different from Exotel ?
+avatar
+Ekansh Bansal
+12:08 PM
+Exotel is a Telephony provider. Our Voice Agents platform helps you build AI agents that can do phone calling on your behalf. Some of our users get telephony from Exotel and create voice agents on our platform.
+B
+Bhuvanasri
+12:08 PM
+How does the agent handle interruptions and background noise in real calls?                                                               If our calls are getting marked as spam, what can we do to improve the answer rate?                                                    If the customer asks a side question instead of answering the agent, how does it handle that?
+SA
+Saakshi Adiga (Sarvam)
+12:09 PM
+yes- it is handled at runtime.
+SA
+Saakshi Adiga (Sarvam)
+12:10 PM
+Monitoring the health of phone numbers will help you with the spam marking. You can find that under Monitor tab in Voice agents
+
+RS
+Rahul Sharma
+12:08 PM
+Do we have a way to check the logs of the tool calls? I couldn't find it.
+avatar
+Ekansh Bansal
+12:09 PM
+yes this is missing at the moment, but we’re already working on it. ETA for this going live is 2-3 weeks.
+avatar
+Ekansh Bansal
+12:09 PM
+You’ll be able to access tool logs on the UI, as well as over APIs/webhooks
+AB
+Ankit Bansal
+12:09 PM
+Exotel alos have Voice Agents
+avatar
+Ekansh Bansal
+12:10 PM
+Sarvam uses it’s own AI models for the voice agents that are created on our platform. This allows us to keep costs and latency low, while keeping Indian language conversation quality high
+D
+Dewanshu
+12:09 PM
+how much is the estimated cost of each call, for example this haircut appointment you did?
+SA
+Saakshi Adiga (Sarvam)
+12:11 PM
+You can check pricing here: https://indus.sarvam.ai/pricing/buy-credits
+
+
+
+RS
+Rahul Sharma
+12:07 PM
+what is the recommendation to do it? Any documentation? I have seen most of examples cater to single use case only.
+avatar
+Ekansh Bansal
+12:12 PM
+Assuming this is for using the same agent for inbound - outbound usecase. You can use Genie (our AI assistant on the platform) to actually create an agent who’s system prompt handles both usecases.
+AV
+Alam Vamsidhara Reddy
+12:09 PM
+Is the same emotion control available through the Bulbul v4 API directly?
+avatar
+Ekansh Bansal
+12:12 PM
+Yes
+RP
+Rounak Patel
+12:12 PM
+When will other Indian languages be available like gujrati ?
+SA
+Saakshi Adiga (Sarvam)
+12:12 PM
+Yes, we support 11 indic langauges. And we support Gujarati as well
+
+
+
+Anonymous Attendee
+12:13 PM
+So sorry to ask like this can you role play as a rough customer and tryign to cut the call thats most of the outbound or cold reaction from people
+MN
+Mohit's Notetaker (Otter.ai)
+12:13 PM
+Is there a way to tune end-of-speech detection for slower speakers who pause mid-sentence?
+SA
+Saakshi Adiga (Sarvam)
+12:14 PM
+You can configure it within setting of an agent
+
+
+RS
+Rahul Sharma
+12:12 PM
+Just wanted to report an issue we’ve been experiencing while using the Sarvam Voice Agent over the past month. The UX seems buggy—it sometimes overwrites the tool configurations when we commit a new voice agent version. Even Genie appears to reset the tool configurations to the defaults, which causes a lot of unnecessary churn.
+
+Do you support these operations through APIs? That would make it easier for us to manage the configurations reliably.
+avatar
+Ekansh Bansal
+12:14 PM
+Yes this is an issue that we’re aware of, fix is going live by end of this week.
+
+We don’t have APIs at the moment to create agents, but you can use the MCP for programatticaly creating agents. We’re coming out with an API suite and CLI next month.
+B
+Bhuvanasri
+12:14 PM
+How do you prevent the agent from making up information, especially things like EMI amount, due date or loan details?
+SA
+Saakshi Adiga (Sarvam)
+12:16 PM
+The best way to do it is to ensure that you're giving it enough context during the conversation. If you have these info already available it will not hallucinate. Also, guardrails will be baked in. And automated testing will also help to prevent this.
+
+
+
+RP
+Rounak Patel
+12:15 PM
+Do you have any startup plan where we get support with some credits for using it.
+SA
+Saakshi Adiga (Sarvam)
+12:16 PM
+it is there on the website
+JO
+Jay Oswal
+12:13 PM
+I want to build agent for chemist store, which has 100+ tricky + very similar medicines names, how should be my approach for tricky medicinal names? should I store it in knowledge base? etc
+avatar
+Ekansh Bansal
+12:17 PM
+You should add this to the knowledge base + use the pronounciation dictionary in the Agent Settings.
+
+
+JO
+Jay Oswal
+12:13 PM
+I want to build agent for chemist store, which has 100+ tricky + very similar medicines names, how should be my approach for tricky medicinal names? should I store it in knowledge base? etc
+avatar
+Ekansh Bansal
+12:17 PM
+You should add this to the knowledge base + use the pronounciation dictionary in the Agent Settings.
+AB
+Ankit Bansal
+12:15 PM
+in my usecase wht we need to reply from data that agent will get form API call made to BE, if data returned is in english and user is talking in Bangla (Bangali), in which langusge voice agent will reply ?
+SA
+Saakshi Adiga (Sarvam)
+12:17 PM
+it will continue in the language the conversation was occuring in, ie Bangla
+P
+PA
+12:00 PM
+Is there an option to connect a local/API decision maker model to the live voice output and what would be the latency in sharing data/summarized data.
+avatar
+Ekansh Bansal
+12:17 PM
+You can integrate any API in your voice Agent. Latency depends on the latency of the API call.
+
+
+AV
+Alam Vamsidhara Reddy
+12:15 PM
+How does Saaras handle background noise, especially when the noise contains speech? Does it have any built-in noise suppression or voice-isolation capability?
+avatar
+Ekansh Bansal
+12:18 PM
+yes, would suggest creating an agent on the platform and seeing for yourself!
+RP
+Rounak Patel
+12:17 PM
+Also how much documents knowledge base can give to sarvam kb like a pdf of 1000 pages for taxation and finance books etc
+avatar
+Ekansh Bansal
+12:18 PM
+There are some limits, you can reach out to developer@sarvam.ai if you face any issues.
+RS
+Rahul Sharma
+12:18 PM
+One more issue we’ve noticed: sometimes, when the agent is unable to call a configured tool, it seems to fall back to the default configuration and continues with the call instead of handling the tool failure appropriately. Not sure how to handle this. can you suggest to handle such scenarios?
+SA
+Saakshi Adiga (Sarvam)
+12:20 PM
+within the api tool, there is a way to configure how the agent should handle API failures.
+KS
+Kushal sharma
+12:19 PM
+how can we manage the language style according to the real human for e.g. in some regions of tamil it is superb fast and AI Agents seems slow and result into the call disconnect
+but if we increase the pace of the call the LLM will struggle to give the results to TTS
+what's the good approach ?
+avatar
+Ekansh Bansal
+12:20 PM
+You can play around with different speaking speeds for the agent. The LLM won’t struggle.
+AB
+Ankit Bansal
+12:18 PM
+so it translate the english message to Bangla
+correct
+SA
+Saakshi Adiga (Sarvam)
+12:21 PM
+it will go as context- even variables will be in english but it is not spoken in english. so context is different from actual conversations
+Type your question here...
+
+KS
+Kushal sharma
+12:19 PM
+how can we manage the language style according to the real human for e.g. in some regions of tamil it is superb fast and AI Agents seems slow and result into the call disconnect
+but if we increase the pace of the call the LLM will struggle to give the results to TTS
+what's the good approach ?
+avatar
+Ekansh Bansal
+12:20 PM
+You can play around with different speaking speeds for the agent. The LLM won’t struggle.
+AB
+Ankit Bansal
+12:18 PM
+so it translate the english message to Bangla
+correct
+SA
+Saakshi Adiga (Sarvam)
+12:21 PM
+it will go as context- even variables will be in english but it is not spoken in english. so context is different from actual conversations
+SK
+Supreeth Kadalur
+12:19 PM
+do you have a phone number for consultation support - regarding signing contracts with Saravm for intergration with our enterprise apps , integration best pracatices, support model post integration , etc,.
+avatar
+Ekansh Bansal
+12:21 PM
+reach out to developer@sarvam.ai
+Type your question here...
+
+AB
+Ankit Bansal
+12:18 PM
+so it translate the english message to Bangla
+correct
+SA
+Saakshi Adiga (Sarvam)
+12:21 PM
+it will go as context- even variables will be in english but it is not spoken in english. so context is different from actual conversations
+SK
+Supreeth Kadalur
+12:19 PM
+do you have a phone number for consultation support - regarding signing contracts with Saravm for intergration with our enterprise apps , integration best pracatices, support model post integration , etc,.
+avatar
+Ekansh Bansal
+12:21 PM
+reach out to developer@sarvam.ai
+SK
+Supreeth Kadalur
+12:21 PM
+emails to support and developer Ids are very slow or sometimes ignored.. please let us know the phone number or escalation path. thank you
+SA
+Saakshi Adiga (Sarvam)
+12:21 PM
+we have made support much more robust- you will not be facing these issues going forward.
+Type your question here...
+
+
+
+SK
+Supreeth Kadalur
+12:19 PM
+do you have a phone number for consultation support - regarding signing contracts with Saravm for intergration with our enterprise apps , integration best pracatices, support model post integration , etc,.
+avatar
+Ekansh Bansal
+12:21 PM
+reach out to developer@sarvam.ai
+SK
+Supreeth Kadalur
+12:21 PM
+emails to support and developer Ids are very slow or sometimes ignored.. please let us know the phone number or escalation path. thank you
+SA
+Saakshi Adiga (Sarvam)
+12:21 PM
+we have made support much more robust- you will not be facing these issues going forward.
+RS
+Rahul Sharma
+12:21 PM
+Do you have a technical support email or contact address we can reach out to for any technical assistance?
+SA
+Saakshi Adiga (Sarvam)
+12:22 PM
+developers.sarvam.ai
+Type your question here...
+
+
+
+H
+Hitesh
+12:20 PM
+can we setup a call where we can discuss what all integration can be done with our product and discuss about the pricing as well ?
+avatar
+Ekansh Bansal
+12:23 PM
+you can reach out to developer@sarvam.ai
+D
+dhruv
+12:21 PM
+how good does the sarvam identifies the language correctly
+SA
+Saakshi Adiga (Sarvam)
+12:23 PM
+very well :) you can try it out yourself!
+LM
+Lal Mahammad
+12:18 PM
+Can you show a live demo call in other Indian regional language? Except Hindi and English.
+SA
+Saakshi Adiga (Sarvam)
+12:24 PM
+you can try it out yourself as well :) https://indus.sarvam.ai/
+Type your question here...
+
+
+
+
+
+
+
+

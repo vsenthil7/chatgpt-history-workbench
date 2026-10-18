@@ -1,0 +1,37 @@
+# Senthil Context Ledger — Git Turn Recovery Queue
+
+Status captured after user correction following ~14:54 UK, 2026-10-12.
+
+## Critical rule
+Do not allow Git write failures to erase conversational source context. Until Git writes resume, every material turn must be tracked here as PENDING/BLOCKED and later reconciled against the repository before commit.
+
+## Last confirmed repository state
+- Last confirmed Git turn reported in conversation: T024, commit `50f1cbf`.
+- Subsequent turns must NOT be represented as committed unless Git confirms a commit SHA.
+
+## Recovery queue
+- T025 onward: pending recovery/reconciliation. Exact boundaries and contents must be reconstructed from current page/context and repository before final commits.
+- T030 attempt: BLOCKED by safety checks; NOT COMMITTED.
+- Current user turn after T030: PENDING; captures correction + persistence requirement.
+
+## T030 correction (important)
+Previous attempted T030 contained a factual error: it said Omshakthi Consulting Ltd was mentioned on Senthil's LinkedIn/profile. User explicitly corrected this: **Omshakthi Consulting Ltd was NOT put on the LinkedIn page.**
+
+Therefore do not preserve the false claim in the eventual Git turn. Sathya's message "Here you mentioned omshakthi consulting ltd. Thatswhy asking" refers to something Senthil mentioned in the WhatsApp conversation / earlier message, not necessarily LinkedIn. The exact originating message should be recovered before asserting where she saw it.
+
+Known legitimate contracting explanation from Senthil: he is a contractor; Omshakthi Consulting Ltd is his UK company / contracting vehicle; he works for client engagements through that structure. Do not invent where this information appeared publicly.
+
+## Current user instruction
+- Track every Git turn, including turns that fail to commit.
+- At the end of each material turn, clearly state commit status.
+- Do not stop attempting silently and thereby lose context.
+- If Git is blocked, persist pending-turn information locally until it can be reconciled and committed.
+- Preserve source-level detail; do not silently compress away assumptions/corrections.
+- Later evaluate whether a higher ChatGPT plan adds useful capacity, but do not assume upgrading is required to solve Git write blocking.
+
+## Next reconciliation actions
+1. Inspect repository head and turn-index/protocol files when Git reads/writes are available.
+2. Reconstruct T025 onward from the current conversation/context, preserving raw evidence vs inference/corrections.
+3. Correct T030 before committing; never commit the false LinkedIn/Omshakthi claim.
+4. Add this current turn as the next pending turn according to the repository's actual numbering protocol.
+5. Update recovery queue after every subsequent material turn until backlog is zero.

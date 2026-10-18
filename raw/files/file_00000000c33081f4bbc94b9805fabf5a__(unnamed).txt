@@ -1,0 +1,439 @@
+# 09/08/2026 21:56 — 00003-AT-WP V013 Deep Review
+
+## Review status
+
+**Release verdict: REJECT / NO FREEZE / V014 hardening required.**
+
+V013 is a materially stronger package than V012 and its official release evidence is internally substantial. The ordinary `run → joined read → guarded mutator` leak addressed by ADR-026 is closed. However, independent adversarial execution found three release-blocking defects that the 181-test, 100%-coverage, 97/97-mutation result does not exercise:
+
+1. every in-memory store still exposes an unguarded full-state `restore()` mutation channel, including from READ frames;
+2. several public work-object commands are split into separate read and write transactions, and `block()` can persist a stale interrupted state after a valid interleaving commit;
+3. a raw string `"CRITICAL"` bypasses the critical-evidence completion policy.
+
+A fourth high-severity rollback gap allows writes to survive a `BaseException`. The RTM currently labels the contradicted behaviours `ENFORCED`, so this is both an implementation defect and an evidence/governance defect.
+
+---
+
+## Package reviewed
+
+| Item | Verified result |
+|---|---:|
+| ZIP | `AUMNITY-Work-Platform-SaaS_Claude_V013_20260809_2003.zip` |
+| Independently calculated SHA-256 | `5d341c47565da3480f992ba9951526bc3754d40999d782848cf3d745f4d6ec2b` |
+| Files in ZIP | 176 |
+| Root manifest-controlled files | 172 |
+| Declared/self-referential files outside manifest list | 4 |
+| Preserved baseline files | 81 |
+| Official collected tests | 181: 80 unit, 15 contract, 86 isolation |
+| Independent test execution | 181 passed |
+| Independent coverage | 697 statements, 92 branches, 100% line and branch |
+| Official mutation result | 97 generated, 97 killed, 0 survivors |
+| Official deterministic double build | PASS |
+| Official extracted-final-ZIP ladder runs | PASS twice |
+
+The uploaded release sidecar's SHA, counts, two final-ZIP ladder runs, manifest re-verification, and unchanged manifest-controlled tree digest agree with the package I inspected.
+
+### Review coverage
+
+All 176 ZIP files were extracted/inventoried from the archive itself, hashed, classified, and checked against the package controls. I directly reviewed the active executable source, contracts, adapters, tests, gate implementations, current control/product/architecture/testing/quality documents, RTM, ADR index and bodies, defect/finding ledgers, AI handoffs, generated evidence, and release scripts. The 81-file `10-baseline/` corpus was treated as preserved authority/history: its manifests and byte integrity were verified, and its relevant product/architecture requirements were compared with the current implementation rather than accepted as current test evidence.
+
+The accompanying CSV contains the complete 176-file path, size, SHA-256, line count, category, and review treatment.
+
+---
+
+## Independent execution
+
+I ran the complete shipped test collection against the extracted source using the available independent environment (Python 3.13.5 / pytest 9.0.2):
+
+```text
+181 tests passed
+697 statements, 0 missing
+92 branches, 0 missing
+100.00% total coverage
+```
+
+The official sidecar separately proves the declared pinned clean-room toolchain and two release-ladder runs against the exact final ZIP. Passing tests and full structural coverage are therefore confirmed facts. They do not establish semantic completeness: the adversarial probes below execute reachable paths absent from the suite.
+
+---
+
+# Findings
+
+## F01 — BLOCKER: public `restore()` bypasses READ mode and transaction scope
+
+### Evidence
+
+Ordinary mutators call `_require_mutation_context()` in:
+
+- `platform/packages/aumnity_kernel/src/aumnity_kernel/adapters/memory.py:61-89`.
+
+The full-state restore methods do not:
+
+- organisation restore: `memory.py:232-235`;
+- principal restore: `memory.py:255-257`;
+- work-object restore: `memory.py:369-370`;
+- evidence restore: `memory.py:395-396`;
+- audit restore: `memory.py:422-423`.
+
+`InMemoryUnitOfWork.read()` correctly pushes a READ frame at `memory.py:502-525`, but a callback can call one of these restore methods directly and replace persisted state because restore never checks the current frame.
+
+### Executed reproduction
+
+```text
+P1_JOINED_READ_RESTORE_MUTATION_PERSISTED True
+P1_TOP_LEVEL_READ_RESTORE_MUTATION_PERSISTED True
+```
+
+Both a top-level READ and a READ joined into a WRITE transaction persisted a new organisation.
+
+### Impact
+
+This defeats the central V013 guarantee that read-only is context-independent. It also bypasses current-scope coverage: a nested narrow transaction can replace an undeclared ancestor store even though it holds no savepoint for that store. The same channel can wipe or inject organisations, principals, work objects, evidence, or audit events.
+
+It contradicts:
+
+- `RD-003` read-only in every context;
+- `TXN-004` every mutation mechanically participates;
+- `TXN-007` current declared scope is the mutation boundary;
+- ADR-026's stated closure of the V012 leak.
+
+### Required correction
+
+Make restore transaction-internal or require current WRITE mode and current-scope coverage on every restore path. Preserve legitimate rollback through private/capability-based transaction plumbing or a correctly guarded internal protocol. Add the same negative matrix for all five stores: outside transaction, top-level READ, joined READ, undeclared nested WRITE scope, and caught nested failure. Also prove top-level and savepoint rollback still works.
+
+---
+
+## F02 — BLOCKER: public commands are split across transactions; `block()` persists stale state
+
+### Evidence
+
+`WorkObjectRegistry._transition()` correctly performs load, transition validation, mutation, persistence, and audit in one write transaction at:
+
+- `platform/packages/aumnity_kernel/src/aumnity_kernel/workobject/service.py:403-428`.
+
+But these public operations perform an earlier read/validation outside that transaction:
+
+- `assign`: assignee membership at `service.py:248-262`;
+- `resume`: `get()`/precondition at `service.py:270-274`;
+- `block`: `get()`/precondition at `service.py:276-285`;
+- `unblock`: `get()`/target selection at `service.py:287-297`;
+- `restart_after_rework`: `get()`/precondition at `service.py:314-320`.
+
+`block()` captures `work_object.state` from the completed read transaction and later writes it into `blocked_from` inside a different transaction. `READY` and `ASSIGNABLE` are both valid blockable states (`workobject/state.py:38-45`), so an intervening valid transition does not necessarily cause the later write to fail.
+
+### Executed reproduction
+
+The probe inserted a valid `mark_assignable` commit after `block()`'s read had returned but before `_transition()` acquired the write transaction:
+
+```text
+P2_STATE_AT_WRITE_WAS_ASSIGNABLE True
+P2_STALE_BLOCKED_FROM READY
+P2_EXPECTED_BLOCKED_FROM ASSIGNABLE
+```
+
+The aggregate was blocked from its current `ASSIGNABLE` state, but persisted `blocked_from=READY`. A later unblock therefore returns it to the wrong state.
+
+### Impact
+
+This is deterministic TOCTOU state corruption, not a theoretical race. It directly contradicts ADR-023 and RTM `RD-001`, which say every public operation is one transaction with no validate-to-write window.
+
+### Required correction
+
+Each public mutating operation must define one write command callback containing all binding, membership checks, aggregate loads, operation-specific preconditions, state derivation, persistence, and audit. `block()` must derive `blocked_from` from the aggregate loaded inside that write. Add deterministic interleaving tests for all five split operations and a machine-maintained inventory covering every public mutating method.
+
+---
+
+## F03 — BLOCKER: raw enum value bypasses critical evidence policy
+
+### Evidence
+
+`WorkObject` declares enum-typed fields, but `__post_init__` validates identifiers and version only:
+
+- `platform/packages/aumnity_kernel/src/aumnity_kernel/workobject/model.py:38-71`.
+
+`WorkObjectRegistry.create()` passes caller values directly into the aggregate:
+
+- `service.py:184-238`.
+
+The policy checks enum identity:
+
+- `platform/packages/aumnity_kernel/src/aumnity_kernel/policy.py:28-36`.
+
+Therefore `risk_level="CRITICAL"` remains a plain string and does not satisfy `risk_level is RiskLevel.CRITICAL`.
+
+### Executed reproduction
+
+```text
+P3_RAW_CRITICAL_TYPE str 'CRITICAL'
+P3_CRITICAL_COMPLETED_WITHOUT_EVIDENCE True
+```
+
+A work object carrying the externally visible value `CRITICAL` was advanced through approval and completed with zero evidence.
+
+### Impact
+
+The baseline's most important completion guard—no critical work completes without evidence—is bypassable through a public service argument despite static type annotations. This also reveals a broader defective-adapter/domain-boundary problem for `Priority`, `WorkObjectState`, `PrincipalKind`, and `EvidenceKind`.
+
+### Required correction
+
+Enforce canonical runtime enum types at public/domain boundaries and reject malformed adapter-returned aggregates before disclosure or action. Use fail-closed policy logic. Add raw-string, foreign-enum, and malformed-adapter regressions. Static typing is not a runtime trust boundary.
+
+---
+
+## F04 — HIGH: transaction rollback does not catch `BaseException`
+
+### Evidence
+
+Rollback catches `Exception` rather than `BaseException` in:
+
+- joined tenant provisioning: `memory.py:309-315`;
+- top-level tenant provisioning: `memory.py:323-329`;
+- joined unit of work: `memory.py:481-487`;
+- top-level unit of work: `memory.py:492-498`.
+
+The surrounding `finally` releases the scope/lock, so a direct `BaseException` exits without restoration.
+
+### Executed reproduction
+
+```text
+P4_BASEEXCEPTION_WRITE_PERSISTED True
+```
+
+A custom transaction-abort class derived directly from `BaseException` was re-raised, but the organisation written before the abort remained committed.
+
+### Impact
+
+Cancellation-style failures, `KeyboardInterrupt`, `SystemExit`, custom abort signals, and exception groups outside `Exception` can violate all-or-nothing semantics. This contradicts the implementation documentation's “ANY failure” wording at `memory.py:264-269` and `memory.py:433-435`.
+
+### Required correction
+
+Rollback on `BaseException`, restore before re-raising the exact original object, and add top-level/joined/provisioning/caught-nested regressions. Document intended cancellation semantics explicitly.
+
+---
+
+## F05 — HIGH: RTM claims `ENFORCED` for behaviour disproved by execution
+
+### Evidence
+
+The following rows are marked `ENFORCED` in `06-traceability/RTM.md:44-49`:
+
+- `TXN-004`: every mutation mechanically participates;
+- `TXN-007`: current scope is the mutation boundary;
+- `RD-001`: every public operation is one transaction;
+- `RD-003`: read-only is context-independent.
+
+F01 and F02 disprove those broad claims.
+
+G09's implementation checks only that a cited pytest node is collectable or an evidence/script file exists:
+
+- `platform/scripts/gates/g09_rtm_gate.py:43-65` and `68-120`.
+
+It does not enumerate public operations, adapter mutation methods, or semantics. A collectable test for one guarded mutator is therefore accepted as proof of “every mutation.”
+
+### Impact
+
+The gate converts partial evidence into a stronger enforcement claim than the suite establishes. This is why all official gates can pass while core RTM guarantees are false.
+
+### Required correction
+
+Temporarily downgrade affected RTM rows until closed. Add a machine-readable inventory of every published operation and adapter mutation primitive, with explicit positive/negative tests per path. Make G09 validate inventory completeness, not merely node existence.
+
+---
+
+## F06 — MEDIUM: current ChatGPT handoff is materially stale V002 content
+
+### Evidence
+
+`08-ai/CHATGPT-REVIEW-HANDOFF.md:21` begins `# V002 Build Handoff`. It still says:
+
+- acting-principal existence is not verified (`lines 48-52`), although later architecture added that binding;
+- G07 is scoped only to state and policy (`lines 53-54`), which no longer describes the current mutation gate;
+- the implementation summary names obsolete public surfaces.
+
+Versioned files exist from V002 through V011, but there is no V012 or V013 handoff. The unversioned file is a current navigational surface used by the reading map, so the historical text is not harmless archival material.
+
+### Impact
+
+A reviewer following the package's own instructions is sent to a false implementation description. This can misdirect review effort and hide newly introduced risks.
+
+### Required correction
+
+Keep historical handoffs versioned, generate a truthful current V014 handoff from source and sidecar facts, account explicitly for missing V012/V013 records, and extend G10 to verify the current handoff's artifact version and current-state assertions.
+
+---
+
+## F07 — MEDIUM: tenant-neutrality guard is trivially bypassable
+
+### Evidence
+
+G06 defines only five exact, case-sensitive substrings:
+
+```python
+FORBIDDEN_TOKENS = (
+    "IPBS", "KuralFlow", "KURALFLOW", "Evil-to-Evil", "tenant-hardcoded"
+)
+```
+
+Source: `platform/scripts/gates/g06_architecture_guard.py:20-22, 49-52`.
+
+Lowercase variants, split/concatenated strings, any unlisted customer name, and values loaded from configuration pass. No current tenant-specific source was found; the finding concerns the gate's claimed preventative strength.
+
+### Required correction
+
+Casefold governed identifiers, maintain them in a controlled registry, test lowercase/split variants, inspect relevant literal/configuration surfaces, and retain the useful AST dependency-direction checks.
+
+---
+
+## F08 — MEDIUM: V013 generated evidence contains V012 staging paths
+
+### Evidence
+
+The V013 ZIP embeds absolute paths naming an older artifact directory:
+
+- `platform/evidence/g04_coverage.txt:32` points to `...AUMNITY-Work-Platform-SaaS_Claude_V012_20260809_1538/...`;
+- `platform/evidence/gate_ladder.json` repeats that V012 path for G01, coverage, G06, G07, G09, G10, and manifest commands.
+
+### Impact
+
+The numerical results are consistent with V013 and the final sidecar is stronger evidence, but the embedded path weakens provenance and demonstrates that G10's current-version checks do not cover evidence bodies.
+
+### Required correction
+
+Emit relative/normalised command paths and add a release check rejecting stale artifact-version tokens and host-specific absolute roots in current evidence.
+
+---
+
+## F09 — MEDIUM: G11's unchanged-tree proof covers 172 of 176 ZIP files
+
+### Evidence
+
+`g11_release.py:_tree_digest()` explicitly hashes only manifest entries:
+
+- `platform/scripts/gates/g11_release.py:179-188`.
+
+The root manifest lists 172 files. Four ZIP files are not part of that digest:
+
+```text
+PACKAGE-MANIFEST.json
+platform/evidence/g01_manifest.json
+platform/evidence/g11_packaging.json
+platform/evidence/gate_ladder.json
+```
+
+These are deliberately self-referential/excluded packaging artifacts. The implementation documentation and sidecar language can nevertheless be read as proving the entire extracted 176-file tree is unchanged.
+
+### Impact
+
+The package is not shown to have mutated during official validation, and my review found no such mutation. The issue is proof scope: the evidence establishes unchanged manifest-controlled content, not byte equality for every ZIP member.
+
+### Required correction
+
+Compare the full path/byte set before and after validation with explicit handling for self-referential files, or label the existing result precisely and add a separate whole-ZIP file-set comparison.
+
+---
+
+## F10 — MEDIUM: `content_sha256` accepts values that are not SHA-256
+
+### Evidence
+
+`EvidenceRecord.__post_init__` calls only `require_identifier`:
+
+- `platform/packages/aumnity_kernel/src/aumnity_kernel/evidence.py:29-57`.
+
+Executed probe:
+
+```text
+SHORT_SHA_ACCEPTED abc
+```
+
+The field and docstring say the value fixes the artefact content, but no 64-hex validation occurs.
+
+### Impact
+
+A record can satisfy the critical-work evidence presence policy while carrying malformed checksum metadata. This does not prove the referenced content itself; it does not even prove the field is syntactically a SHA-256 digest.
+
+### Required correction
+
+Require exactly 64 hexadecimal characters and choose a normalised case, or rename/document the field as an opaque checksum. State separately whether URI resolution and content re-hashing are deferred.
+
+---
+
+## F11 — LOW: “bare critical section accepts no joins” is false for READ joins
+
+### Evidence
+
+`TransactionMutex.__enter__` says the empty bare scope accepts no coordinator joins (`memory.py:202-207`), and RTM `TXN-007` repeats that claim. But `UnitOfWork.read()` pushes an empty READ frame (`memory.py:515-520`), and the empty declared set is a subset of the bare frame's empty set.
+
+Executed probe:
+
+```text
+BARE_SECTION_READ_JOIN_ACCEPTED joined
+```
+
+The existing `test_bare_critical_section_accepts_no_coordinator_join` tests only a WRITE UoW (`test_tenant_isolation.py:1929-1939`).
+
+### Impact
+
+No mutation authority is granted, so this is not a confidentiality/integrity bypass. It is a precise ADR/RTM/test overstatement.
+
+### Required correction
+
+Either reject all joins using an explicit bare-frame type, or document and test the actual rule: no WRITE joins, but READ joins are permitted and remain read-only.
+
+---
+
+## F12 — LOW: provider/domain validation and ADR ordering hygiene
+
+`Clock.now()` promises an aware UTC datetime (`aumnity_contracts/providers.py:12-17`), but `TickingClock` accepts a naive `start` and zero/negative `step_seconds` (`providers.py:28-38`). That can produce naive or non-monotonic audit timestamps. Validate the constructor or deliberately weaken the contract.
+
+The ADR index lists `ADR-020` after `ADR-026` (`12-adr/ADR-INDEX.md:24-30`). This is harmless to execution but should be corrected because the table presents itself as the canonical decision index.
+
+---
+
+# What V013 did correctly
+
+The NO-GO verdict should not erase the genuine improvements:
+
+| Area | Confirmed result |
+|---|---|
+| V012 joined-read defect | Ordinary guarded mutators are rejected under a joined READ frame |
+| Frame-mode model | Current-frame READ/WRITE authority and no WRITE escalation under READ are coherent for guarded mutators |
+| Nested scope model | Immediate-parent subset checks and savepoint restoration work in covered paths |
+| Tenant/principal binding | Acting principal and embedded aggregate references are revalidated in current services |
+| Persistence integrity | Duplicate IDs, expected-version CAS, defensive work-object copies, immutable evidence records, and append-only audit design are covered |
+| Audit | Actor binding and defensive payload behaviour are materially hardened |
+| Testing | 181 tests execute and structural line/branch coverage is genuinely 100% |
+| Mutation | The declared 97-mutant scope has no survivors |
+| Packaging | SHA, deterministic double build, two final-ZIP ladder runs, and manifest checks are real and consistent |
+| Baseline | Preserved baseline package/manifests remain intact |
+| SaaS source | No actual tenant/customer-specific product code was found in the current package |
+
+The problem is not that V013 is empty or careless. The problem is that the suite/gates prove only the paths they model, while the release claims use universal words such as **every**, **one transaction**, and **read-only in every context**.
+
+---
+
+# Required V014 acceptance gate
+
+V014 should remain a hardening-only release and must not be frozen until:
+
+| Required proof | Acceptance condition |
+|---|---|
+| F01 restore boundary | All five stores reject restore outside current declared WRITE scope; rollback/savepoints still work |
+| F02 operation atomicity | Every public mutation has one transaction; deterministic interleaving tests cover the split methods |
+| F03 policy boundary | Raw/foreign enum values are rejected; malformed adapter aggregates fail closed |
+| F04 abort rollback | Top-level, joined, provisioning, and nested paths roll back on `BaseException` |
+| RTM | Statuses and test mapping state only what is actually established |
+| G09 | Public-operation and adapter-mutation inventory is complete and machine-checked |
+| Handoff | Current unversioned handoff accurately describes V014 |
+| G06 | Case-insensitive/governed tenant-name protection has adversarial tests |
+| Evidence | No V012 path or unnormalised host root appears in V014 current evidence |
+| G11 | Whole-tree proof scope is exact and unambiguous |
+| Evidence hash | `content_sha256` contract is enforced or renamed |
+| Release | Extracted final ZIP passes full ladder twice; deterministic double build; counts machine-derived |
+
+---
+
+# Final disposition
+
+**V013 is not ready to freeze or become the trusted platform baseline.**
+
+The release should be returned to Claude as **V014 hardening**, with F01–F04 mandatory code closures and F05–F12 governance/integrity closures. No feature expansion is needed. The exact reproduction script and a ready-to-paste Claude correction brief accompany this report.

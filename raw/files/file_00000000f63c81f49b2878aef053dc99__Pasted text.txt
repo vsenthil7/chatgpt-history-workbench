@@ -1,0 +1,575 @@
+PS C:\platform-tools> date
+
+10 October 2026 17:02:25
+
+
+PS C:\platform-tools> date
+
+10 October 2026 17:02:26
+
+
+PS C:\platform-tools>
+PS C:\platform-tools> $OUT = Get-ChildItem "$env:USERPROFILE\Desktop\S24_Shutdown_*" -Directory |
+>>        Sort-Object LastWriteTime -Descending |
+>>        Select-Object -First 1 -ExpandProperty FullName
+PS C:\platform-tools>
+PS C:\platform-tools> Write-Host "`n=== POWER OFF / RESET REASON ==="
+
+=== POWER OFF / RESET REASON ===
+PS C:\platform-tools> .\adb.exe shell cat /data/log/power_off_reset_reason.txt |
+>>     Tee-Object "$OUT\13_power_off_reset_reason.txt"
+26/09/17 18:39:23
+reason : no power
+java.lang.Exception: It is not an exception!! just save the trace for process which called shutdown thread!! ShutdownThread.shutdown
+        at com.android.server.power.ShutdownThread.shutdownInner(qb/113419284 f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:426)
+        at com.android.server.power.ShutdownThread.systemShutdown(qb/113419284 f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:34)
+        at com.android.server.BatteryService$13.run(qb/113419284 f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:195)
+        at android.os.Handler.handleCallback(Handler.java:1070)
+        at android.os.Handler.dispatchMessage(Handler.java:125)
+        at android.os.Looper.dispatchMessage(Looper.java:358)
+        at android.os.Looper.loopOnce(Looper.java:288)
+        at android.os.Looper.loop(Looper.java:392)
+        at com.android.server.SystemServer.main(qb/113419284 f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:898)
+        at java.lang.reflect.Method.invoke(Native Method)
+        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:638)
+        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:950)
+18:39:28  2026-09-17 18:39:28+0100 | SHUTDOWN |       | REASON: no power [440]
+18:39:29  terminating init service start
+18:39:33  terminating init service end
+18:39:33  volume shutdown start
+18:39:34  sync() before umount...
+18:39:36  sync() before umount took
+18:39:36  zram start
+18:39:37  zram end
+18:39:37  disable vlu...
+18:39:37  disable vlu took...
+18:39:39  TryUmount start
+2026-09-17 17:40:23+0000 |          | NP    | OFFSRC: PWRHOLD / ONSRC: ACOKB / RSTSTAT: PINRESET PORESET [441] / 3837mV (3%)
+
+2026-09-17 17:40:23+0000 |   LPM    |       |
+
+2026-09-17 18:42:15+0100 |    ON    | RP    | S921BXXSHDZH3 [442]/ apex_updated
+
+26/09/29 05:22:18
+reason : no power
+java.lang.Exception: It is not an exception!! just save the trace for process which called shutdown thread!! ShutdownThread.shutdown
+        at com.android.server.power.ShutdownThread.shutdownInner(qb/113419284 f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:426)
+        at com.android.server.power.ShutdownThread.systemShutdown(qb/113419284 f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:34)
+        at com.android.server.BatteryService$13.run(qb/113419284 f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:195)
+        at android.os.Handler.handleCallback(Handler.java:1070)
+        at android.os.Handler.dispatchMessage(Handler.java:125)
+        at android.os.Looper.dispatchMessage(Looper.java:358)
+        at android.os.Looper.loopOnce(Looper.java:288)
+        at android.os.Looper.loop(Looper.java:392)
+        at com.android.server.SystemServer.main(qb/113419284 f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:898)
+        at java.lang.reflect.Method.invoke(Native Method)
+        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:638)
+        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:950)
+05:22:23  2026-09-29 05:22:23+0100 | SHUTDOWN |       | REASON: no power [442]
+05:22:24  terminating init service start
+05:22:27  terminating init service end
+05:22:27  volume shutdown start
+05:22:28  sync() before umount...
+05:22:29  sync() before umount took
+05:22:29  zram start
+05:22:30  zram end
+05:22:30  disable vlu...
+05:22:30  disable vlu took...
+05:22:32  TryUmount start
+2026-09-29 04:23:15+0000 |          | NP    | OFFSRC: PWRHOLD / ONSRC: ACOKB / RSTSTAT: PINRESET PORESET [443] / 3929mV (0%)
+
+2026-09-29 04:23:15+0000 |   LPM    |       |
+
+2026-09-29 05:27:59+0100 |    ON    | RP    | S921BXXSHDZH3 [444]/ apex_updated
+
+26/10/04 14:49:46
+reason : no power
+java.lang.Exception: It is not an exception!! just save the trace for process which called shutdown thread!! ShutdownThread.shutdown
+        at com.android.server.power.ShutdownThread.shutdownInner(qb/113419284 f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:426)
+        at com.android.server.power.ShutdownThread.systemShutdown(qb/113419284 f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:34)
+        at com.android.server.BatteryService$13.run(qb/113419284 f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:195)
+        at android.os.Handler.handleCallback(Handler.java:1070)
+        at android.os.Handler.dispatchMessage(Handler.java:125)
+        at android.os.Looper.dispatchMessage(Looper.java:358)
+        at android.os.Looper.loopOnce(Looper.java:288)
+        at android.os.Looper.loop(Looper.java:392)
+        at com.android.server.SystemServer.main(qb/113419284 f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:898)
+        at java.lang.reflect.Method.invoke(Native Method)
+        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:638)
+        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:950)
+14:50:00  2026-10-04 14:50:00+0100 | SHUTDOWN |       | REASON: no power [444]
+14:50:00  terminating init service start
+14:50:05  terminating init service end
+14:50:05  volume shutdown start
+14:50:05  sync() before umount...
+14:50:05  sync() before umount took
+14:50:05  zram start
+14:50:06  zram end
+14:50:06  disable vlu...
+14:50:06  disable vlu took...
+14:50:08  TryUmount start
+2026-10-04 13:50:34+0000 |          | NP    | OFFSRC: PWRHOLD / ONSRC: ACOKB / RSTSTAT: PINRESET PORESET [445] / 3918mV (1%)
+
+2026-10-04 13:50:34+0000 |   LPM    |       |
+
+2026-10-04 15:38:27+0100 |    ON    | RP    | S921BXXSHDZH3 [446]
+
+26/10/06 03:50:02
+reason : no power
+java.lang.Exception: It is not an exception!! just save the trace for process which called shutdown thread!! ShutdownThread.shutdown
+        at com.android.server.power.ShutdownThread.shutdownInner(qb/113419284 f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:426)
+        at com.android.server.power.ShutdownThread.systemShutdown(qb/113419284 f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:34)
+        at com.android.server.BatteryService$13.run(qb/113419284 f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:195)
+        at android.os.Handler.handleCallback(Handler.java:1070)
+        at android.os.Handler.dispatchMessage(Handler.java:125)
+        at android.os.Looper.dispatchMessage(Looper.java:358)
+        at android.os.Looper.loopOnce(Looper.java:288)
+        at android.os.Looper.loop(Looper.java:392)
+        at com.android.server.SystemServer.main(qb/113419284 f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:898)
+        at java.lang.reflect.Method.invoke(Native Method)
+        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:638)
+        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:950)
+03:50:06  2026-10-06 03:50:06+0100 | SHUTDOWN |       | REASON: no power [446]
+03:50:06  terminating init service start
+03:50:11  terminating init service end
+03:50:11  volume shutdown start
+03:50:13  sync() before umount...
+03:50:13  sync() before umount took
+03:50:13  zram start
+03:50:14  zram end
+03:50:14  disable vlu...
+03:50:14  disable vlu took...
+03:50:15  TryUmount start
+2026-10-06 06:13:58+0000 |          | NP    | OFFSRC: PWRHOLD / ONSRC: ACOKB / RSTSTAT: PINRESET PORESET [448] / 3885mV (0%)
+
+2026-10-06 06:13:58+0000 |   LPM    |       |
+
+2026-10-06 07:14:39+0100 |    ON    | RP    | S921BXXSHDZH3 [449]
+
+2023-01-01 12:00:10+0000 |          | NP    | OFFSRC: - / ONSRC: ACOKB / RSTSTAT: PINRESET PORESET [450] / 4141mV (62%)
+
+2023-01-01 12:00:10+0000 |   LPM    |       |
+
+2026-10-09 14:37:07+0100 |    ON    | RP    | S921BXXSHDZH3 [451]/ apex_updated
+
+2026-10-10 16:39:36+0100 |    ON    | NP    | S921BXXSHDZH3 / OFFSRC: (M)PWRHOLD (S)PWRHOLD,PWROND / ONSRC: PWRON / RST_STAT: PIN,RSVD31 [453]
+
+PS C:\platform-tools>
+PS C:\platform-tools> Write-Host "`n=== BACKUP RESET HISTORY ==="
+
+=== BACKUP RESET HISTORY ===
+PS C:\platform-tools> .\adb.exe shell cat /data/log/power_off_reset_reason_backup.txt |
+>>     Tee-Object "$OUT\14_power_off_reset_reason_backup.txt"
+26/08/15 10:35:57
+reason : no power
+java.lang.Exception: It is not an exception!! just save the trace for process which called shutdown thread!! ShutdownThread.shutdown
+        at com.android.server.power.ShutdownThread.shutdownInner(qb/108483227 7cf7c03e2df19de258da6ad0958feaec07bc993db23bd3ee83c4aa0dede3da15:212)
+        at com.android.server.power.ShutdownThread.systemShutdown(qb/108483227 7cf7c03e2df19de258da6ad0958feaec07bc993db23bd3ee83c4aa0dede3da15:34)
+        at com.android.server.BatteryService$16.run(qb/108483227 7cf7c03e2df19de258da6ad0958feaec07bc993db23bd3ee83c4aa0dede3da15:160)
+        at android.os.Handler.handleCallback(Handler.java:995)
+        at android.os.Handler.dispatchMessage(Handler.java:103)
+        at android.os.Looper.loopOnce(Looper.java:273)
+        at android.os.Looper.loop(Looper.java:363)
+        at com.android.server.SystemServer.main(qb/108483227 7cf7c03e2df19de258da6ad0958feaec07bc993db23bd3ee83c4aa0dede3da15:867)
+        at java.lang.reflect.Method.invoke(Native Method)
+        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:632)
+        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:953)
+10:36:13  2026-08-15 10:36:13+0100 | SHUTDOWN |       | REASON: no power [419]
+10:36:13  terminating init service start
+10:36:16  terminating init service end
+10:36:16  volume shutdown start
+10:36:16  sync() before umount...
+10:36:17  sync() before umount took
+10:36:17  zram start
+10:36:17  zram end
+10:36:18  TryUmountAndFsck start
+2026-08-15 09:36:38+0000 |          | NP    | OFFSRC: PWRHOLD / ONSRC: ACOKB / RSTSTAT: PINRESET PORESET [420] / 3837mV (8%)
+
+2026-08-15 09:36:38+0000 |   LPM    |       |
+
+2026-08-15 10:37:28+0100 |    ON    | RP    | S921BXXSECZD1 [421]
+
+26/08/20 20:27:15
+reason : no power
+java.lang.Exception: It is not an exception!! just save the trace for process which called shutdown thread!! ShutdownThread.shutdown
+        at com.android.server.power.ShutdownThread.shutdownInner(qb/108483227 7cf7c03e2df19de258da6ad0958feaec07bc993db23bd3ee83c4aa0dede3da15:212)
+        at com.android.server.power.ShutdownThread.systemShutdown(qb/108483227 7cf7c03e2df19de258da6ad0958feaec07bc993db23bd3ee83c4aa0dede3da15:34)
+        at com.android.server.BatteryService$16.run(qb/108483227 7cf7c03e2df19de258da6ad0958feaec07bc993db23bd3ee83c4aa0dede3da15:160)
+        at android.os.Handler.handleCallback(Handler.java:995)
+        at android.os.Handler.dispatchMessage(Handler.java:103)
+        at android.os.Looper.loopOnce(Looper.java:273)
+        at android.os.Looper.loop(Looper.java:363)
+        at com.android.server.SystemServer.main(qb/108483227 7cf7c03e2df19de258da6ad0958feaec07bc993db23bd3ee83c4aa0dede3da15:867)
+        at java.lang.reflect.Method.invoke(Native Method)
+        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:632)
+        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:953)
+20:27:20  2026-08-20 20:27:20+0100 | SHUTDOWN |       | REASON: no power [421]
+20:27:21  terminating init service start
+20:27:25  terminating init service end
+20:27:25  volume shutdown start
+20:27:26  sync() before umount...
+20:27:26  sync() before umount took
+20:27:26  zram start
+20:27:27  zram end
+20:27:29  TryUmountAndFsck start
+2026-08-20 19:31:39+0000 |          | NP    | OFFSRC: PWRHOLD / ONSRC: ACOKB / RSTSTAT: PINRESET PORESET [423] / 3909mV (0%)
+
+2026-08-20 19:31:39+0000 |   LPM    |       |
+
+2026-08-20 20:40:04+0100 |    ON    | RP    | S921BXXSECZD1 [424]
+
+2023-01-01 12:00:10+0000 |          | NP    | OFFSRC: - / ONSRC: ACOKB / RSTSTAT: PINRESET PORESET [425] / 3832mV (5%)
+
+2023-01-01 12:00:10+0000 |   LPM    |       |
+
+2026-08-26 15:16:10+0100 |    ON    | RP    | S921BXXSECZD1 [426]
+
+26/08/28 15:52:27
+reason : no power
+java.lang.Exception: It is not an exception!! just save the trace for process which called shutdown thread!! ShutdownThread.shutdown
+        at com.android.server.power.ShutdownThread.shutdownInner(qb/108483227 7cf7c03e2df19de258da6ad0958feaec07bc993db23bd3ee83c4aa0dede3da15:212)
+        at com.android.server.power.ShutdownThread.systemShutdown(qb/108483227 7cf7c03e2df19de258da6ad0958feaec07bc993db23bd3ee83c4aa0dede3da15:34)
+        at com.android.server.BatteryService$16.run(qb/108483227 7cf7c03e2df19de258da6ad0958feaec07bc993db23bd3ee83c4aa0dede3da15:160)
+        at android.os.Handler.handleCallback(Handler.java:995)
+        at android.os.Handler.dispatchMessage(Handler.java:103)
+        at android.os.Looper.loopOnce(Looper.java:273)
+        at android.os.Looper.loop(Looper.java:363)
+        at com.android.server.SystemServer.main(qb/108483227 7cf7c03e2df19de258da6ad0958feaec07bc993db23bd3ee83c4aa0dede3da15:867)
+        at java.lang.reflect.Method.invoke(Native Method)
+        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:632)
+        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:953)
+15:52:35  2026-08-28 15:52:35+0100 | SHUTDOWN |       | REASON: no power [426]
+15:52:35  terminating init service start
+15:52:36  terminating init service end
+15:52:36  volume shutdown start
+15:52:37  sync() before umount...
+15:52:37  sync() before umount took
+15:52:37  zram start
+15:52:38  zram end
+15:52:39  TryUmountAndFsck start
+2026-08-28 14:52:55+0000 |          | NP    | OFFSRC: PWRHOLD / ONSRC: ACOKB / RSTSTAT: PINRESET PORESET [427] / 3852mV (0%)
+
+2026-08-28 14:52:55+0000 |   LPM    |       |
+
+2026-08-28 16:04:15+0100 |    ON    | RP    | S921BXXSECZD1 [428]
+
+26/08/31 02:03:58
+reason : no power
+java.lang.Exception: It is not an exception!! just save the trace for process which called shutdown thread!! ShutdownThread.shutdown
+        at com.android.server.power.ShutdownThread.shutdownInner(qb/108483227 7cf7c03e2df19de258da6ad0958feaec07bc993db23bd3ee83c4aa0dede3da15:212)
+        at com.android.server.power.ShutdownThread.systemShutdown(qb/108483227 7cf7c03e2df19de258da6ad0958feaec07bc993db23bd3ee83c4aa0dede3da15:34)
+        at com.android.server.BatteryService$16.run(qb/108483227 7cf7c03e2df19de258da6ad0958feaec07bc993db23bd3ee83c4aa0dede3da15:160)
+        at android.os.Handler.handleCallback(Handler.java:995)
+        at android.os.Handler.dispatchMessage(Handler.java:103)
+        at android.os.Looper.loopOnce(Looper.java:273)
+        at android.os.Looper.loop(Looper.java:363)
+        at com.android.server.SystemServer.main(qb/108483227 7cf7c03e2df19de258da6ad0958feaec07bc993db23bd3ee83c4aa0dede3da15:867)
+        at java.lang.reflect.Method.invoke(Native Method)
+        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:632)
+        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:953)
+02:04:11  2026-08-31 02:04:11+0100 | SHUTDOWN |       | REASON: no power [428]
+02:04:12  terminating init service start
+02:04:15  terminating init service end
+02:04:15  volume shutdown start
+02:04:16  sync() before umount...
+02:04:17  sync() before umount took
+02:04:17  zram start
+02:04:17  zram end
+02:04:18  TryUmountAndFsck start
+2026-08-31 02:35:26+0000 |          | NP    | OFFSRC: PWRHOLD / ONSRC: ACOKB / RSTSTAT: PINRESET PORESET [430] / 3880mV (0%)
+
+2026-08-31 02:35:26+0000 |   LPM    |       |
+
+2026-08-31 03:36:35+0100 |    ON    | RP    | S921BXXSECZD1 [431]
+
+26/08/31 03:45:36
+reason : recovery-update
+java.lang.Exception: It is not an exception!! just save the trace for process which called shutdown thread!! ShutdownThread.shutdown
+        at com.android.server.power.ShutdownThread.shutdownInner(qb/108483227 7cf7c03e2df19de258da6ad0958feaec07bc993db23bd3ee83c4aa0dede3da15:212)
+        at com.android.server.power.ShutdownThread.reboot(qb/108483227 7cf7c03e2df19de258da6ad0958feaec07bc993db23bd3ee83c4aa0dede3da15:50)
+        at com.android.server.power.PowerManagerService$4.run(qb/108483227 7cf7c03e2df19de258da6ad0958feaec07bc993db23bd3ee83c4aa0dede3da15:43)
+        at android.os.Handler.handleCallback(Handler.java:995)
+        at android.os.Handler.dispatchMessage(Handler.java:103)
+        at android.os.Looper.loopOnce(Looper.java:273)
+        at android.os.Looper.loop(Looper.java:363)
+        at android.os.HandlerThread.run(HandlerThread.java:85)
+        at com.android.server.ServiceThread.run(ServiceThread.java:49)
+        at com.android.server.UiThread.run(qb/108483227 7cf7c03e2df19de258da6ad0958feaec07bc993db23bd3ee83c4aa0dede3da15:16)
+03:46:05  2026-08-31 03:46:05+0100 |  REBOOT  |       | REASON: recovery [431]
+03:46:05  terminating init service start
+03:46:08  terminating init service end
+03:46:08  volume shutdown start
+03:46:08  sync() before umount...
+03:46:08  sync() before umount took
+03:46:08  zram start
+03:46:08  zram end
+03:46:10  TryUmountAndFsck start
+2026-08-31 03:57:23+0100 |    ON    | RP    | S921BXXUEDZDR [434]
+
+26/08/31 08:57:37
+reason : recovery-update
+java.lang.Exception: It is not an exception!! just save the trace for process which called shutdown thread!! ShutdownThread.shutdown
+        at com.android.server.power.ShutdownThread.shutdownInner(qb/109228860 dbcaeef68945cb6accaedd5a728f968b915ab90db80cc4c0069d7b0dbbee69e5:426)
+        at com.android.server.power.ShutdownThread.reboot(qb/109228860 dbcaeef68945cb6accaedd5a728f968b915ab90db80cc4c0069d7b0dbbee69e5:50)
+        at com.android.server.power.PowerManagerService$4.run(qb/109228860 dbcaeef68945cb6accaedd5a728f968b915ab90db80cc4c0069d7b0dbbee69e5:43)
+        at android.os.Handler.handleCallback(Handler.java:1070)
+        at android.os.Handler.dispatchMessage(Handler.java:125)
+        at android.os.Looper.dispatchMessage(Looper.java:358)
+        at android.os.Looper.loopOnce(Looper.java:288)
+        at android.os.Looper.loop(Looper.java:392)
+        at android.os.HandlerThread.run(HandlerThread.java:139)
+        at com.android.server.ServiceThread.run(ServiceThread.java:46)
+        at com.android.server.UiThread.run(qb/109228860 dbcaeef68945cb6accaedd5a728f968b915ab90db80cc4c0069d7b0dbbee69e5:16)
+08:57:41  2026-08-31 08:57:41+0100 |  REBOOT  |       | REASON: recovery [434]
+08:57:41  terminating init service start
+08:57:45  terminating init service end
+08:57:45  volume shutdown start
+08:57:45  sync() before umount...
+08:57:45  sync() before umount took
+08:57:45  zram start
+08:57:45  zram end
+08:57:45  disable vlu...
+08:57:45  disable vlu took...
+08:57:46  TryUmount start
+2026-08-31 09:02:02+0100 |    ON    | RP    | S921BXXSGDZG1 [437]
+
+26/09/07 04:00:35
+reason : recovery-update
+java.lang.Exception: It is not an exception!! just save the trace for process which called shutdown thread!! ShutdownThread.shutdown
+        at com.android.server.power.ShutdownThread.shutdownInner(qb/111684899 d79b28241f24552c9ea0ae7bf3d15a9ba4b25ea945c17e887e49942d85ce37b5:426)
+        at com.android.server.power.ShutdownThread.reboot(qb/111684899 d79b28241f24552c9ea0ae7bf3d15a9ba4b25ea945c17e887e49942d85ce37b5:50)
+        at com.android.server.power.PowerManagerService$4.run(qb/111684899 d79b28241f24552c9ea0ae7bf3d15a9ba4b25ea945c17e887e49942d85ce37b5:43)
+        at android.os.Handler.handleCallback(Handler.java:1070)
+        at android.os.Handler.dispatchMessage(Handler.java:125)
+        at android.os.Looper.dispatchMessage(Looper.java:358)
+        at android.os.Looper.loopOnce(Looper.java:288)
+        at android.os.Looper.loop(Looper.java:392)
+        at android.os.HandlerThread.run(HandlerThread.java:139)
+        at com.android.server.ServiceThread.run(ServiceThread.java:46)
+        at com.android.server.UiThread.run(qb/111684899 d79b28241f24552c9ea0ae7bf3d15a9ba4b25ea945c17e887e49942d85ce37b5:16)
+04:00:39  2026-09-07 04:00:39+0100 |  REBOOT  |       | REASON: recovery [437]
+04:00:39  terminating init service start
+04:00:42  terminating init service end
+04:00:42  volume shutdown start
+04:00:43  sync() before umount...
+04:00:43  sync() before umount took
+04:00:43  zram start
+04:00:43  zram end
+04:00:43  disable vlu...
+04:00:43  disable vlu took...
+04:00:44  TryUmount start
+2026-09-07 04:04:51+0100 |    ON    | RP    | S921BXXSHDZH3 [440]
+
+PS C:\platform-tools>
+PS C:\platform-tools> Write-Host "`n=== DEBUG HISTORY — LAST 200 LINES ==="
+
+=== DEBUG HISTORY — LAST 200 LINES ===
+PS C:\platform-tools> .\adb.exe shell tail -n 200 /data/log/dumpstate_debug_history.lst |
+>>     Tee-Object "$OUT\15_dumpstate_debug_history_tail.txt"
+[ 199] 240229 06:53:47 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  333mV(93%)() /56[0x000] 56[0x000] 55[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)shell (240229 15:02:38+0700)
+[ 198] 240229 06:53:01 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  330mV(93%)() /55[0x000] 56[0x000] 55[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 13:53:35+0700)
+[ 197] 240229 06:52:11 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  330mV(93%)() /55[0x000] 56[0x000] 55[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 13:52:49+0700)
+[ 196] 240229 06:51:25 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  328mV(93%)() /56[0x000] 55[0x000] 56[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 13:52:00+0700)
+[ 195] 240229 06:50:40 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  327mV(93%)() /54[0x000] 54[0x000] 54[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 13:51:14+0700)
+[ 194] 240229 06:49:47 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  325mV(92%)() /54[0x000] 55[0x000] 55[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 13:50:27+0700)
+[ 193] 240229 06:48:59 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  328mV(92%)() /54[0x000] 54[0x000] 54[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 13:49:35+0700)
+[ 192] 240229 06:47:49 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  317mV(92%)() /55[0x000] 56[0x000] 55[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 13:48:48+0700)
+[ 191] 240229 06:47:02 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  317mV(92%)() /55[0x000] 55[0x000] 55[0x000],40 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 13:47:38+0700)
+[ 190] 240229 06:46:12 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  312mV(91%)() /55[0x000] 56[0x000] 55[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)user_flex_clk (240229 13:46:51+0700)
+[ 189] 240229 06:45:24 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  316mV(91%)() /54[0x000] 54[0x000] 53[0x000],39 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 13:46:01+0700)
+[ 188] 240229 06:44:14 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  305mV(91%)() /55[0x000] 55[0x000] 55[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 13:45:12+0700)
+[ 187] 240229 06:43:27 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  304mV(91%)() /54[0x000] 54[0x000] 54[0x000],40 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 13:44:02+0700)
+[ 186] 240229 06:42:38 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  299mV(90%)() /55[0x000] 55[0x000] 55[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)user_flex_clk (240229 13:43:15+0700)
+[ 185] 240229 06:41:50 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  304mV(90%)() /54[0x000] 54[0x000] 54[0x000],39 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 13:42:26+0700)
+[ 184] 240229 06:40:40 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  292mV(90%)() /55[0x000] 56[0x000] 55[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 13:41:38+0700)
+[ 183] 240229 06:39:54 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  292mV(89%)() /55[0x000] 55[0x000] 54[0x000],40 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 13:40:28+0700)
+[ 182] 240229 06:39:04 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  288mV(89%)() /55[0x000] 55[0x000] 55[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)user_flex_clk (240229 13:39:42+0700)
+[ 181] 240229 06:38:19 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  292mV(89%)() /54[0x000] 55[0x000] 54[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 13:38:52+0700)
+[ 180] 240229 06:37:09 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  285mV(89%)() /56[0x000] 56[0x000] 55[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 13:38:07+0700)
+[ 179] 240229 06:36:22 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  286mV(88%)() /54[0x000] 55[0x000] 54[0x000],40 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 13:36:57+0700)
+[ 178] 240229 06:35:32 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  286mV(88%)() /55[0x000] 55[0x000] 55[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)user_flex_clk (240229 13:36:11+0700)
+[ 177] 240229 06:34:46 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  285mV(88%)() /54[0x000] 55[0x000] 54[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 13:35:21+0700)
+[ 176] 240229 06:33:35 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  285mV(87%)() /56[0x000] 56[0x000] 55[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 13:34:34+0700)
+[ 175] 240229 06:32:49 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  284mV(87%)() /54[0x000] 55[0x000] 55[0x000],40 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 13:33:23+0700)
+[ 174] 240229 06:31:59 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  285mV(87%)() /55[0x000] 56[0x000] 55[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)user_flex_clk (240229 13:32:37+0700)
+[ 173] 240229 06:31:13 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  284mV(86%)() /54[0x000] 54[0x000] 54[0x000],39 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 13:31:48+0700)
+[ 172] 240229 06:30:02 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  285mV(86%)() /55[0x000] 55[0x000] 54[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 13:31:01+0700)
+[ 171] 240229 06:29:15 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  284mV(86%)() /54[0x000] 54[0x000] 54[0x000],40 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 13:29:51+0700)
+[ 170] 240229 06:28:25 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  283mV(85%)() /54[0x000] 55[0x000] 55[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)user_flex_clk (240229 13:29:04+0700)
+[ 169] 240229 06:27:39 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  284mV(85%)() /54[0x000] 53[0x000] 54[0x000],39 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 13:28:13+0700)
+[ 168] 240229 06:26:29 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  284mV(84%)() /54[0x000] 55[0x000] 54[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 13:27:28+0700)
+[ 167] 240229 06:25:42 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  284mV(84%)() /54[0x000] 54[0x000] 54[0x000],40 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 13:26:17+0700)
+[ 166] 240229 06:24:52 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  281mV(84%)() /54[0x000] 55[0x000] 54[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)user_flex_clk (240229 13:25:31+0700)
+[ 165] 240229 06:24:03 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  283mV(83%)() /54[0x000] 54[0x000] 53[0x000],39 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 13:24:40+0700)
+[ 164] 240229 06:22:51 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  269mV(83%)() /56[0x000] 55[0x000] 54[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 13:23:52+0700)
+[ 163] 240229 06:22:03 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  270mV(82%)() /54[0x000] 54[0x000] 54[0x000],39 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 13:22:40+0700)
+[ 162] 240229 06:21:13 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  263mV(82%)() /55[0x000] 55[0x000] 55[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)user_flex_clk (240229 13:21:51+0700)
+[ 161] 240229 06:20:25 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  266mV(82%)() /55[0x000] 56[0x000] 56[0x000],39 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 13:21:01+0700)
+[ 160] 240229 06:19:19 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  251mV(81%)() /54[0x000] 53[0x000] 53[0x000],39 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 13:20:14+0700)
+[ 159] 240229 06:18:32 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  252mV(81%)() /53[0x000] 54[0x000] 53[0x000],39 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 13:19:07+0700)
+[ 158] 240229 06:17:43 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  240mV(80%)() /53[0x000] 54[0x000] 53[0x000],39 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)user_flex_clk (240229 13:18:21+0700)
+[ 157] 240229 06:16:55 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  240mV(80%)() /54[0x000] 56[0x000] 55[0x000],38 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 13:17:32+0700)
+[ 156] 240229 06:15:49 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  226mV(79%)() /52[0x000] 53[0x000] 52[0x000],38 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 13:16:44+0700)
+[ 155] 240229 06:15:02 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  215mV(79%)() /55[0x000] 55[0x000] 54[0x000],38 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 13:15:37+0700)
+[ 154] 240229 06:14:20 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  220mV(79%)() /46[0x000] 47[0x000] 46[0x000],34 / 00000000000000 /  X /   -  / OFT, INFORM3(0) > NORMAL > UMP2K --> (R)user_flex_clk (240229 13:14:51+0700)
+[ 153] 240229 05:46:20 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  167mV(79%)() /57[0x000] 56[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abc60001 > NORMAL > st_from_UDTP_S [ec_debug_work_end]
+[ 152] 240229 05:45:05 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  210mV(79%)() /56[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_dram_test_plus (240229 12:46:10+0700)
+[ 151] 240229 05:44:17 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  222mV(79%)() /57[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_flex_clk (240229 12:44:54+0700)
+[ 150] 240229 05:43:31 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  220mV(79%)() /57[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_flex_clk (240229 12:44:06+0700)
+[ 149] 240229 05:42:44 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  215mV(79%)() /56[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_flex_clk (240229 12:43:20+0700)
+[ 148] 240229 05:41:57 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  204mV(78%)() /56[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_flex_clk (240229 12:42:33+0700)
+[ 147] 240229 05:41:11 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  215mV(79%)() /56[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_flex_clk (240229 12:41:46+0700)
+[ 146] 240229 05:40:22 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  205mV(78%)() /57[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_flex_clk (240229 12:40:59+0700)
+[ 145] 240229 05:39:34 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  207mV(78%)() /56[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_flex_clk (240229 12:40:10+0700)
+[ 144] 240229 05:38:48 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  220mV(79%)() /57[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_flex_clk (240229 12:39:22+0700)
+[ 143] 240229 05:38:01 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  218mV(78%)() /55[0x000] 56[0x000] 55[0x000],41 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_flex_clk (240229 12:38:36+0700)
+[ 142] 240229 05:37:11 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  212mV(78%)() /56[0x000] 56[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)user_flex_clk (240229 12:37:50+0700)
+[ 141] 240229 05:36:25 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  199mV(78%)() /55[0x000] 55[0x000] 55[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 12:37:00+0700)
+[ 140] 240229 05:35:15 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  211mV(78%)() /57[0x000] 58[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 12:36:13+0700)
+[ 139] 240229 05:34:28 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  200mV(78%)() /57[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 12:35:03+0700)
+[ 138] 240229 05:33:40 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  210mV(78%)() /56[0x000] 56[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)user_flex_clk (240229 12:34:16+0700)
+[ 137] 240229 05:32:48 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  203mV(77%)() /56[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)shell (240229 12:33:29+0700)
+[ 136] 240229 05:32:01 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  192mV(77%)() /55[0x000] 56[0x000] 56[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 12:32:36+0700)
+[ 135] 240229 05:30:52 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  206mV(77%)() /57[0x000] 58[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 12:31:49+0700)
+[ 134] 240229 05:30:06 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  201mV(77%)() /58[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 12:30:40+0700)
+[ 133] 240229 05:29:21 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  199mV(77%)() /56[0x000] 56[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)user_flex_clk (240229 12:29:54+0700)
+[ 132] 240229 05:28:32 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  194mV(76%)() /57[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)shell (240229 12:29:09+0700)
+[ 131] 240229 05:27:45 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  185mV(76%)() /56[0x000] 56[0x000] 55[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 12:28:20+0700)
+[ 130] 240229 05:26:32 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  193mV(76%)() /57[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 12:27:33+0700)
+[ 129] 240229 05:25:43 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  189mV(76%)() /57[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 12:26:21+0700)
+[ 128] 240229 05:24:56 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  190mV(75%)() /57[0x000] 56[0x000] 55[0x000],42 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)user_flex_clk (240229 12:25:32+0700)
+[ 127] 240229 05:24:07 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  185mV(75%)() /57[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)shell (240229 12:24:44+0700)
+[ 126] 240229 05:23:19 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  186mV(75%)() /55[0x000] 56[0x000] 56[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 12:23:55+0700)
+[ 125] 240229 05:22:09 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  173mV(74%)() /57[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 12:23:08+0700)
+[ 124] 240229 05:21:23 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  170mV(74%)() /57[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 12:21:57+0700)
+[ 123] 240229 05:20:38 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  171mV(73%)() /56[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)user_flex_clk (240229 12:21:12+0700)
+[ 122] 240229 05:19:49 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  165mV(73%)() /56[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)shell (240229 12:20:27+0700)
+[ 121] 240229 05:19:01 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  165mV(73%)() /55[0x000] 56[0x000] 56[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 12:19:37+0700)
+[ 120] 240229 05:17:49 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  154mV(72%)() /57[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 12:18:49+0700)
+[ 119] 240229 05:17:02 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  152mV(72%)() /56[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 12:17:37+0700)
+[ 118] 240229 05:16:17 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  151mV(71%)() /56[0x000] 56[0x000] 55[0x000],42 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)user_flex_clk (240229 12:16:51+0700)
+[ 117] 240229 05:15:26 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  148mV(71%)() /56[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)shell (240229 12:16:06+0700)
+[ 116] 240229 05:14:40 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  148mV(71%)() /56[0x000] 56[0x000] 55[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 12:15:15+0700)
+[ 115] 240229 05:13:29 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  137mV(70%)() /57[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 12:14:28+0700)
+[ 114] 240229 05:12:43 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  135mV(70%)() /56[0x000] 56[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 12:13:18+0700)
+[ 113] 240229 05:11:57 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  143mV(69%)() /57[0x000] 56[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)user_flex_clk (240229 12:12:30+0700)
+[ 112] 240229 05:11:08 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  137mV(69%)() /56[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)shell (240229 12:11:46+0700)
+[ 111] 240229 05:10:21 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  134mV(69%)() /56[0x000] 56[0x000] 55[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 12:10:57+0700)
+[ 110] 240229 05:09:12 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  124mV(68%)() /57[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 12:10:10+0700)
+[ 109] 240229 05:08:25 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  120mV(67%)() /58[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 12:09:00+0700)
+[ 108] 240229 05:07:41 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  119mV(67%)() /56[0x000] 56[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)user_flex_clk (240229 12:08:14+0700)
+[ 107] 240229 05:06:50 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  112mV(66%)() /56[0x000] 56[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)shell (240229 12:07:29+0700)
+[ 106] 240229 05:06:02 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  111mV(66%)() /56[0x000] 56[0x000] 56[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 12:06:39+0700)
+[ 105] 240229 05:04:52 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  100mV(65%)() /56[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 12:05:51+0700)
+[ 104] 240229 05:04:05 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  095mV(65%)() /57[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 12:04:41+0700)
+[ 103] 240229 05:03:21 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  095mV(65%)() /56[0x000] 56[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)user_flex_clk (240229 12:03:55+0700)
+[ 102] 240229 05:02:31 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  090mV(64%)() /56[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)shell (240229 12:03:09+0700)
+[ 101] 240229 05:01:42 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  086mV(64%)() /56[0x000] 56[0x000] 56[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 12:02:20+0700)
+[ 100] 240229 05:00:32 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  077mV(63%)() /57[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 12:01:31+0700)
+[  99] 240229 04:59:45 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  074mV(62%)() /57[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 12:00:21+0700)
+[  98] 240229 04:58:59 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  070mV(62%)() /56[0x000] 56[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)user_flex_clk (240229 11:59:32+0700)
+[  97] 240229 04:58:10 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  068mV(62%)() /56[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)shell (240229 11:58:48+0700)
+[  96] 240229 04:57:21 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  064mV(61%)() /56[0x000] 56[0x000] 55[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 11:57:59+0700)
+[  95] 240229 04:56:11 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  055mV(60%)() /57[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 11:57:09+0700)
+[  94] 240229 04:55:24 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  052mV(60%)() /57[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 11:55:59+0700)
+[  93] 240229 04:54:40 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  051mV(59%)() /56[0x000] 56[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)user_flex_clk (240229 11:55:14+0700)
+[  92] 240229 04:53:50 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  045mV(59%)() /56[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)shell (240229 11:54:28+0700)
+[  91] 240229 04:53:03 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  042mV(58%)() /55[0x000] 56[0x000] 55[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 11:53:38+0700)
+[  90] 240229 04:51:53 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  033mV(58%)() /57[0x000] 56[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 11:52:52+0700)
+[  89] 240229 04:51:06 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  030mV(57%)() /57[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 11:51:41+0700)
+[  88] 240229 04:50:21 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  027mV(57%)() /56[0x000] 56[0x000] 55[0x000],41 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)user_flex_clk (240229 11:50:55+0700)
+[  87] 240229 04:49:31 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  022mV(56%)() /56[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)shell (240229 11:50:10+0700)
+[  86] 240229 04:48:45 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  017mV(56%)() /57[0x000] 56[0x000] 55[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 11:49:20+0700)
+[  85] 240229 04:47:33 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  009mV(55%)() /57[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 11:48:33+0700)
+[  84] 240229 04:46:45 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  005mV(55%)() /57[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 11:47:21+0700)
+[  83] 240229 04:46:00 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  003mV(54%)() /56[0x000] 56[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)user_flex_clk (240229 11:46:34+0700)
+[  82] 240229 04:45:11 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  998mV(54%)() /56[0x000] 56[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)shell (240229 11:45:49+0700)
+[  81] 240229 04:44:25 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  996mV(53%)() /56[0x000] 56[0x000] 56[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 11:45:00+0700)
+[  80] 240229 04:43:15 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  983mV(53%)() /57[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 11:44:13+0700)
+[  79] 240229 04:42:26 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  979mV(52%)() /58[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 11:43:03+0700)
+[  78] 240229 04:41:39 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  980mV(52%)() /56[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)user_flex_clk (240229 11:42:15+0700)
+[  77] 240229 04:40:49 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  974mV(51%)() /57[0x000] 56[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)shell (240229 11:41:28+0700)
+[  76] 240229 04:40:00 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  972mV(51%)() /56[0x000] 56[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 11:40:38+0700)
+[  75] 240229 04:38:51 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  963mV(50%)() /57[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 11:39:49+0700)
+[  74] 240229 04:38:04 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  960mV(50%)() /56[0x000] 57[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 11:38:39+0700)
+[  73] 240229 04:37:19 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  960mV(49%)() /56[0x000] 56[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)user_flex_clk (240229 11:37:52+0700)
+[  72] 240229 04:36:29 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  956mV(49%)() /56[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)shell (240229 11:37:08+0700)
+[  71] 240229 04:35:42 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  953mV(48%)() /55[0x000] 56[0x000] 56[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 11:36:18+0700)
+[  70] 240229 04:34:32 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  945mV(47%)() /57[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 11:35:31+0700)
+[  69] 240229 04:33:46 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  943mV(47%)() /57[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 11:34:21+0700)
+[  68] 240229 04:33:01 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  942mV(47%)() /56[0x000] 56[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)user_flex_clk (240229 11:33:35+0700)
+[  67] 240229 04:32:11 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  940mV(46%)() /56[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)shell (240229 11:32:50+0700)
+[  66] 240229 04:31:22 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  938mV(46%)() /56[0x000] 56[0x000] 55[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 11:32:00+0700)
+[  65] 240229 04:30:13 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  931mV(45%)() /56[0x000] 57[0x000] 56[0x000],42 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 11:31:11+0700)
+[  64] 240229 04:29:26 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  931mV(44%)() /57[0x000] 56[0x000] 57[0x000],42 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 11:30:02+0700)
+[  63] 240229 04:28:42 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  930mV(44%)() /56[0x000] 55[0x000] 55[0x000],41 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)user_flex_clk (240229 11:29:15+0700)
+[  62] 240229 04:27:52 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  926mV(43%)() /55[0x000] 56[0x000] 55[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)shell (240229 11:28:30+0700)
+[  61] 240229 04:27:04 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  926mV(43%)() /55[0x000] 55[0x000] 55[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 11:27:40+0700)
+[  60] 240229 04:25:53 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  916mV(42%)() /56[0x000] 56[0x000] 56[0x000],41 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 11:26:52+0700)
+[  59] 240229 04:25:05 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  915mV(41%)() /55[0x000] 56[0x000] 55[0x000],41 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 11:25:42+0700)
+[  58] 240229 04:24:20 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  913mV(41%)() /54[0x000] 55[0x000] 54[0x000],40 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)user_flex_clk (240229 11:24:53+0700)
+[  57] 240229 04:23:30 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  913mV(40%)() /54[0x000] 54[0x000] 55[0x000],40 / 00000000000000 /  X /   -  / OFT, abcbc000 > NORMAL > UMP2K --> (R)shell (240229 11:24:08+0700)
+[  56] 240229 04:22:43 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  917mV(39%)() /55[0x000] 56[0x000] 55[0x000],39 / 00000000000000 /  X /   -  / OFT, abcbd000 > NORMAL > UMP2K --> (R)user_nominal_clk (240229 11:23:18+0700)
+[  55] 240229 04:21:37 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  905mV(38%)() /54[0x000] 54[0x000] 54[0x000],39 / 00000000000000 /  X /   -  / OFT, abcbb000 > NORMAL > UMP2K --> (R)user_turbo_clk (240229 11:22:32+0700)
+[  54] 240229 04:20:51 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  907mV(38%)() /54[0x000] 55[0x000] 54[0x000],38 / 00000000000000 /  X /   -  / OFT, abcba000 > NORMAL > UMP2K --> (R)user_svs_clk (240229 11:21:25+0700)
+[  53] 240229 04:20:11 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  934mV(37%)() /47[0x000] 47[0x000] 47[0x000],36 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)user_flex_clk (240229 11:20:40+0700)
+[  52] 240229 04:03:24 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  846mV(33%)() /47[0x000] 49[0x000] 47[0x000],35 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)shell (240229 11:19:59+0700)
+[  51] 240229 01:46:56 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  165mV(73%)() /47[0x000] 48[0x000] 47[0x000],35 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 11:03:15+0700)
+[  50] 240229 01:31:00 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  153mV(67%)() /49[0x000] 50[0x000] 50[0x000],37 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 08:46:47+0700)
+[  49] 240229 01:28:43 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  141mV(65%)() /50[0x000] 51[0x000] 49[0x000],37 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 08:30:50+0700)
+[  48] 240229 01:25:49 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  123mV(63%)() /48[0x000] 48[0x000] 48[0x000],36 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 08:28:33+0700)
+[  47] 240229 01:17:11 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  056mV(52%)() /48[0x000] 49[0x000] 48[0x000],35 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)RamPlusChanged (240229 08:25:38+0700)
+[  46] 240228 22:43:00 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  090mV(66%)() /48[0x000] 48[0x000] 48[0x000],36 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 08:17:01+0700)
+[  45] 240228 22:40:58 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  095mV(66%)() /45[0x000] 45[0x000] 45[0x000],33 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)RamPlusChanged (240229 05:42:50+0700)
+[  44] 240228 22:21:47 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  132mV(70%)() /46[0x000] 46[0x000] 45[0x000],33 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 05:40:49+0700)
+[  43] 240228 22:14:57 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  141mV(71%)() /45[0x000] 46[0x000] 45[0x000],33 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 05:21:38+0700)
+[  42] 240228 21:56:28 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  195mV(76%)() /54[0x000] 54[0x000] 54[0x000],39 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 05:14:48+0700)
+[  41] 240228 21:55:21 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  190mV(75%)() /55[0x000] 55[0x000] 55[0x000],39 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 04:56:18+0700)
+[  40] 240228 21:54:16 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  190mV(75%)() /54[0x000] 55[0x000] 54[0x000],38 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 04:55:12+0700)
+[  39] 240228 21:53:09 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  184mV(75%)() /55[0x000] 55[0x000] 55[0x000],38 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 04:54:06+0700)
+[  38] 240228 21:52:11 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  183mV(75%)() /47[0x000] 47[0x000] 47[0x000],34 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 04:53:00+0700)
+[  37] 240228 21:47:03 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  190mV(75%)() /54[0x000] 53[0x000] 53[0x000],38 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 04:52:01+0700)
+[  36] 240228 21:45:49 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  189mV(75%)() /54[0x000] 54[0x000] 53[0x000],38 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 04:46:53+0700)
+[  35] 240228 21:44:38 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  189mV(75%)() /53[0x000] 53[0x000] 53[0x000],38 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 04:45:40+0700)
+[  34] 240228 21:43:23 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  185mV(75%)() /53[0x000] 53[0x000] 53[0x000],38 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 04:44:28+0700)
+[  33] 240228 21:42:10 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  185mV(74%)() /53[0x000] 54[0x000] 53[0x000],38 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 04:43:14+0700)
+[  32] 240228 21:40:59 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  182mV(74%)() /52[0x000] 53[0x000] 53[0x000],38 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 04:42:01+0700)
+[  31] 240228 21:39:48 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  181mV(74%)() /52[0x000] 53[0x000] 53[0x000],38 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 04:40:49+0700)
+[  30] 240228 21:38:37 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  180mV(74%)() /52[0x000] 53[0x000] 52[0x000],37 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 04:39:38+0700)
+[  29] 240228 21:37:27 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  175mV(74%)() /52[0x000] 53[0x000] 52[0x000],37 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 04:38:28+0700)
+[  28] 240228 21:36:20 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  174mV(73%)() /47[0x000] 48[0x000] 47[0x000],34 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 04:37:18+0700)
+[  27] 240228 20:37:44 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  178mV(73%)() /52[0x000] 54[0x000] 53[0x000],38 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 04:36:10+0700)
+[  26] 240228 20:36:42 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  175mV(72%)() /54[0x000] 53[0x000] 53[0x000],37 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 03:37:35+0700)
+[  25] 240228 20:35:39 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  173mV(72%)() /54[0x000] 54[0x000] 53[0x000],37 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 03:36:32+0700)
+[  24] 240228 20:34:39 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  171mV(72%)() /52[0x000] 53[0x000] 52[0x000],36 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 03:35:29+0700)
+[  23] 240228 20:33:41 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  168mV(72%)() /44[0x000] 44[0x000] 44[0x000],31 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 03:34:30+0700)
+[  22] 240228 20:06:22 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  109mV(59%)() /48[0x000] 48[0x000] 48[0x000],36 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 03:33:32+0700)
+[  21] 240228 19:54:59 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  994mV(41%)() /48[0x000] 48[0x000] 48[0x000],35 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 03:06:13+0700)
+[  20] 240228 15:32:57 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  784mV(29%)() /45[0x000] 46[0x000] 46[0x000],33 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)ACTThread (240229 02:54:49+0700)
+[  19] 240228 15:25:24 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  785mV(30%)() /48[0x000] 48[0x000] 47[0x000],35 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K --> (R)HELPER_R_ACTAG (240228 22:32:48+0700)
+[  18] 240228 15:17:34 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  776mV(31%)() /55[0x000] 54[0x000] 54[0x000],40 / 00000000000000 /  X /   -  / OFT, REBOOTMODE0 > NORMAL > UMP2K --> (R)HELPER_R (240228 22:25:14+0700)
+[  17] 240228 15:16:10 / RP (  0) / __ / N / S921BXXU1AWM9 75606870 /  787mV(32%)() /48[0x000] 48[0x000] 48[0x000],35 / 00000000000000 /  X /   -  / OFT, DEBUGLEVEL494d > NORMAL > UMP2K --> (R)HELPER_R (240228 22:17:24+0700)
+[  16] 000101 12:00:15 / NP (  0) / __ / N / S921BXXU1AWM9 75606870 /  826mV(35%)() /43[0x000] 44[0x000] 43[0x000],32 / 00000000000000 /  X /   -  / IN, JIGONB (M) , (S) UVLOB, INFORM3(0) > NORMAL > UMP2K --> (R)debug0x494d (240228 22:16:00+0700)
+[  15] 000101 12:00:08 / NP (  0) / __ / D / FAU0_S921BFAU1AXB2 76983889 /  391mV(97%)() /42[0x000] 42[0x000] 42[0x000],31 / 00000000000000 /  X /   -  / IN, ACOKB (M) , (S) UVLOB, INFORM3(0), JIG,  > DOWNLOAD >  [OWNLOAD_COMPLETE]
+[  14] 000101 12:00:16 / NP (  0) / __ / N / FAU0_S921BFAU1AXB2 76983889 /  802mV(33%)() /36[0x000] 37[0x000] 36[0x000],27 / 00000000000000 /  X /   -  / IN, JIGONB (M) , (S) UVLOB, INFORM3(0) > NORMAL > UMP2K
+[  13] 240206 12:45:45 / RP (  0) / __ / N / FAU0_S921BFAU1AXB2 76983889 /  783mV(39%)() /40[0x000] 40[0x000] 39[0x000],26 / 00000000000000 /  X /   -  / OFT, INFORM3(12345600) > NORMAL > UMP2K
+[  12] 240206 12:29:34 / 0P (  0) / __ / N / FAU0_S921BFAU1AXB2 76983889 /  815mV(43%)() /36[0x000] 38[0x000] 37[0x000],25 / 00000000000000 /  X /   -  / OFT > NORMAL >  [q_nad_do_test]
+[  11] 240206 11:53:22 / RP (  0) / __ / N / FAU0_S921BFAU1AXB2 76983889 /  886mV(55%)() /42[0x000] 41[0x000] 40[0x000],29 / 00000000000000 /  X /   -  / OFT, REBOOTMODE0 > NORMAL > UMP2K --> (R) (240206 19:29:27+0700)
+[  10] 240206 11:38:24 / NP (  0) / __ / N / FAU0_S921BFAU1AXB2 76983889 /  910mV(56%)() /32[0x000] 32[0x000] 31[0x000],22 / 00000000000000 /  X /   -  / IN, PWRON (M) PWRHOLD, (S) PWRHOLD,PWROND, INFORM3(0) > NORMAL > UMP2K --> (R)[FACM] reboot by FACM Service... (240206 18:53:13+0700)
+[   9] 000101 12:00:05 / NP (  0) / __ / N / FAU0_S921BFAU1AXB2 76983889 /  938mV(58%)() /36[0x000] 36[0x000] 35[0x000],27 / 00000000000000 /  X /   -  / IN, PWRON (M) , (S) UVLOB, INFORM3(0) > NORMAL > UMP2K --> (S)[FactoryTest] powreset 0 (240206 13:32:37+0700)
+[   8] 000101 12:00:12 / NP (  0) / __ / N / FAU0_S921BFAU1AXB2 76983889 /  392mV(97%)() /36[0x000] 36[0x000] 36[0x000],20 / 00000000000000 /  X /   -  / IN, ACOKB (M) , (S) UVLOB, INFORM3(0) > NORMAL > UMP2K --> (S)[FactoryTest] powreset 0 (240228 12:48:25+0700)
+[   7] 000101 12:00:12 / NP (  0) / __ / N / FAU0_S921BFAU1AXB2 76983889 /  390mV(97%)() /35[0x000] 35[0x000] 34[0x000],20 / 00000000000000 /  X /   -  / IN, ACOKB (M) , (S) UVLOB, INFORM3(0) > NORMAL > UMP2K --> (S)[FactoryTest] powreset 0 (240228 01:40:53+0000)
+[   6] 000101 12:03:00 / RP (  0) / __ / N / FAU0_S921BFAU1AXB2 76983889 /  391mV(97%)() /55[0x000] 55[0x000] 54[0x000],20 / 00000000000000 /  X /   -  / OFT, INFORM3(0) > NORMAL > UMP2K --> (S)[FactoryTest] powreset 0 (240206 05:11:56+0000)
+[   5] 000101 12:02:47 / 0P (  0) / __ / N / FAU0_S921BFAU1AXB2 76983889 /  390mV(97%)() /57[0x000] 57[0x000] 57[0x000],20 / 00000000000000 /  X /   -  / OFT, INFORM3(0) > NORMAL > st_Fuse_secureboot_OTPs [nit ddi/efuse]
+[   4] 000101 12:00:08 / 0P (  0) / __ / N / FAU0_S921BFAU1AXB2 76983889 /  390mV(97%)() /43[0x000] 44[0x000] 43[0x000],20 / 00000000000000 /  O /   -  / IN, JIGONB,ACOKB (M) , (S) UVLOB > NORMAL >  [q_nad_do_test]
+[   3] 000101 12:00:10 / NP (  0) / __ / N / RAU0_S921BFAU1AWL9 75516729 /  389mV(97%)() /40[0x000] 40[0x000] 39[0x000],20 / 00000000000000 /  X /   -  / IN, ACOKB (M) , (S) UVLOB, INFORM3(0) > NORMAL > UMP2K
+[   2] 231226 07:02:55 / RP (  0) / __ / N / RAU0_S921BFAU1AWL9 75516729 /  391mV(97%)() /41[0x000] 41[0x000] 40[0x000],20 / 00000000000000 /  X /   -  / OFT, REBOOTMODE0 > NORMAL > UMP2K
+[   1] 000101 12:04:43 / RP (  0) / __ / N / RAU0_S921BFAU1AWL9 75516729 /  389mV(97%)() /43[0x000] 43[0x000] 42[0x000],20 / 00000000000000 /  X /   -  / OFT, INFORM3(0) > NORMAL > UMP2K --> (R)shell (231226 07:02:39+0000)
+[   0] 000101 12:00:07 / 0P (  0) / __ / N / RAU0_S921BFAU1AWL9 75516729 /  387mV(97%)() /39[0x000] 39[0x000] 38[0x000],20 / 00000000000000 /  O /   -  / IN, JIGONB,ACOKB (M) , (S) UVLOB > NORMAL > st_NAD [q_nad_do_test]
+PS C:\platform-tools>
+PS C:\platform-tools> date
+
+10 October 2026 17:02:27
+
+
+PS C:\platform-tools>

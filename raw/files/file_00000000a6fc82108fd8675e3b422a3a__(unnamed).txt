@@ -1,0 +1,758 @@
+#!/usr/bin/env python3
+"""
+audio_to_sarvam.py
+
+Windows-friendly audio/video -> Sarvam STT pipeline.
+
+Flow
+----
+1. Inspect source with ffprobe.
+2. Create a <=20s sample and test the ORIGINAL/SOURCE format with Sarvam REST.
+3. If that test fails or returns an empty transcript, convert full source to
+   16 kHz mono 16-bit PCM WAV, then test a WAV sample.
+4. Split only when required by:
+      - --max-mb (local safety limit; default 90 MB), or
+      - Sarvam Batch duration limit (default 120 min; script uses a safety margin).
+5. Send prepared file(s) to Sarvam Batch STT with diarization.
+6. Download raw JSON and build plain + speaker-attributed transcripts.
+7. Keep an audit JSON describing decisions and results.
+
+Requires:
+    Python 3.10+
+    ffmpeg + ffprobe on PATH
+    pip install -U sarvamai
+
+Environment:
+    SARVAM_API_KEY=your_key_here
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import math
+import os
+import shutil
+import subprocess
+import sys
+import traceback
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+DEFAULT_MAX_MB = 90.0
+DEFAULT_TEST_SECONDS = 20.0
+BATCH_LIMIT_SECONDS = 2 * 60 * 60
+# Keep a little below documented 2-hour limit.
+BATCH_SAFE_SECONDS = 119 * 60
+
+VIDEO_EXTS = {
+    ".mp4", ".mkv", ".mov", ".avi", ".webm", ".wmv", ".m4v", ".mpeg", ".mpg"
+}
+AUDIO_EXTS = {
+    ".wav", ".mp3", ".aac", ".aiff", ".aif", ".ogg", ".opus", ".flac",
+    ".m4a", ".amr", ".wma", ".pcm"
+}
+
+
+def banner(text: str) -> None:
+    print("\n" + "=" * 72)
+    print(text)
+    print("=" * 72)
+
+
+def step(n: int, total: int, text: str) -> None:
+    print(f"\n[{n}/{total}] {text}")
+
+
+def fmt_duration(seconds: float | None) -> str:
+    if seconds is None:
+        return "unknown"
+    seconds = max(0, int(round(seconds)))
+    h, rem = divmod(seconds, 3600)
+    m, s = divmod(rem, 60)
+    return f"{h:02d}:{m:02d}:{s:02d}"
+
+
+def fmt_mb(num_bytes: int | float) -> str:
+    return f"{num_bytes / (1024 * 1024):.2f} MB"
+
+
+def run(cmd: list[str], capture: bool = False) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        cmd,
+        check=True,
+        text=True,
+        capture_output=capture,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+
+def require_program(name: str) -> None:
+    if shutil.which(name) is None:
+        raise RuntimeError(
+            f"{name} was not found on PATH.\n"
+            f"Install FFmpeg and reopen PowerShell, then test: {name} -version"
+        )
+
+
+def ffprobe(path: Path) -> dict[str, Any]:
+    cp = run([
+        "ffprobe", "-v", "error",
+        "-show_entries",
+        "format=duration,format_name,size:stream=index,codec_type,codec_name,sample_rate,channels",
+        "-of", "json", str(path)
+    ], capture=True)
+    data = json.loads(cp.stdout)
+    fmt = data.get("format", {})
+    streams = data.get("streams", [])
+    audio = next((s for s in streams if s.get("codec_type") == "audio"), None)
+    video = next((s for s in streams if s.get("codec_type") == "video"), None)
+    duration = float(fmt["duration"]) if fmt.get("duration") else None
+    size = int(fmt.get("size") or path.stat().st_size)
+    return {
+        "path": str(path),
+        "duration_seconds": duration,
+        "duration": fmt_duration(duration),
+        "size_bytes": size,
+        "size_mb": round(size / (1024 * 1024), 3),
+        "format_name": fmt.get("format_name"),
+        "has_audio": audio is not None,
+        "has_video": video is not None,
+        "audio_codec": audio.get("codec_name") if audio else None,
+        "sample_rate": audio.get("sample_rate") if audio else None,
+        "channels": audio.get("channels") if audio else None,
+        "video_codec": video.get("codec_name") if video else None,
+    }
+
+
+def jsonable(obj: Any) -> Any:
+    if obj is None or isinstance(obj, (str, int, float, bool)):
+        return obj
+    if isinstance(obj, Path):
+        return str(obj)
+    if isinstance(obj, dict):
+        return {str(k): jsonable(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [jsonable(x) for x in obj]
+    if hasattr(obj, "model_dump"):
+        return jsonable(obj.model_dump())
+    if hasattr(obj, "dict"):
+        try:
+            return jsonable(obj.dict())
+        except Exception:
+            pass
+    if hasattr(obj, "__dict__"):
+        return jsonable(vars(obj))
+    return str(obj)
+
+
+def write_json(path: Path, data: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(jsonable(data), ensure_ascii=False, indent=2),
+        encoding="utf-8"
+    )
+
+
+def extract_audio_from_video(source: Path, out: Path) -> Path:
+    """
+    Extract to compressed M4A/AAC first. This avoids immediately expanding
+    video into a huge WAV. If Sarvam rejects the sample, WAV fallback follows.
+    """
+    out.parent.mkdir(parents=True, exist_ok=True)
+    run([
+        "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+        "-i", str(source), "-vn",
+        "-c:a", "aac", "-b:a", "128k",
+        str(out)
+    ])
+    return out
+
+
+def make_source_format_test(source: Path, out_dir: Path, seconds: float) -> Path:
+    """
+    Make a small test in the same container/codec where practical using stream copy.
+    If stream-copy cannot make a valid sample, raise and let caller use WAV fallback.
+    """
+    out_dir.mkdir(parents=True, exist_ok=True)
+    suffix = source.suffix.lower() or ".bin"
+    out = out_dir / f"original_format_test{suffix}"
+    run([
+        "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+        "-i", str(source), "-t", str(seconds),
+        "-map", "0:a:0", "-c:a", "copy",
+        str(out)
+    ])
+    return out
+
+
+def convert_to_wav(source: Path, out: Path) -> Path:
+    out.parent.mkdir(parents=True, exist_ok=True)
+    run([
+        "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+        "-i", str(source), "-vn",
+        "-ac", "1", "-ar", "16000",
+        "-c:a", "pcm_s16le",
+        str(out)
+    ])
+    return out
+
+
+def make_wav_test(source: Path, out: Path, seconds: float) -> Path:
+    out.parent.mkdir(parents=True, exist_ok=True)
+    run([
+        "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+        "-i", str(source), "-t", str(seconds), "-vn",
+        "-ac", "1", "-ar", "16000",
+        "-c:a", "pcm_s16le",
+        str(out)
+    ])
+    return out
+
+
+def sarvam_rest_test(client: Any, sample: Path, language: str | None,
+                     keyterms: list[str]) -> tuple[bool, dict[str, Any]]:
+    kwargs: dict[str, Any] = {
+        "file": open(sample, "rb"),
+        "model": "saaras:v4",
+    }
+    # Saaras v4 defaults to transcription. Do not pass v3-only mode to REST.
+    if language:
+        kwargs["language_code"] = language
+    else:
+        kwargs["language_code"] = "unknown"
+    if keyterms:
+        kwargs["keyterms"] = keyterms
+
+    try:
+        response = client.speech_to_text.transcribe(**kwargs)
+        data = jsonable(response)
+        transcript = ""
+        if isinstance(data, dict):
+            transcript = str(data.get("transcript") or "").strip()
+        ok = bool(transcript)
+        return ok, {
+            "passed": ok,
+            "reason": "non-empty transcript" if ok else "API returned empty transcript",
+            "response": data,
+        }
+    except Exception as exc:
+        return False, {
+            "passed": False,
+            "reason": f"{type(exc).__name__}: {exc}",
+            "traceback": traceback.format_exc(),
+        }
+    finally:
+        try:
+            kwargs["file"].close()
+        except Exception:
+            pass
+
+
+def split_plan(info: dict[str, Any], max_mb: float) -> tuple[int, float]:
+    duration = float(info["duration_seconds"] or 0)
+    size_bytes = float(info["size_bytes"])
+    max_bytes = max_mb * 1024 * 1024
+
+    if duration <= 0:
+        raise RuntimeError("Could not determine audio duration.")
+
+    # Duration constraint.
+    by_duration = math.ceil(duration / BATCH_SAFE_SECONDS)
+
+    # Local size safety constraint. Use 95% of max to absorb container overhead.
+    safe_max_bytes = max_bytes * 0.95
+    by_size = math.ceil(size_bytes / safe_max_bytes) if safe_max_bytes > 0 else 1
+
+    parts = max(1, by_duration, by_size)
+    # Equal-duration pieces; because bitrate can vary, validation happens afterwards.
+    chunk_seconds = min(BATCH_SAFE_SECONDS, duration / parts)
+    return parts, chunk_seconds
+
+
+def split_audio(source: Path, out_dir: Path, max_mb: float) -> list[Path]:
+    """
+    Split by calculated duration. For WAV, encode PCM 16k mono.
+    For compressed supported audio, stream-copy first to preserve source quality.
+    Each output is then validated. If a compressed stream-copy chunk is too large,
+    caller receives an error with instructions to lower max-mb or use WAV fallback.
+    """
+    out_dir.mkdir(parents=True, exist_ok=True)
+    info = ffprobe(source)
+    planned_parts, chunk_seconds = split_plan(info, max_mb)
+
+    if planned_parts == 1:
+        print("      Splitting not required.")
+        return [source]
+
+    print(f"      Expected files : {planned_parts}")
+    print(f"      Target length  : ~{fmt_duration(chunk_seconds)} each")
+
+    results: list[Path] = []
+    start = 0.0
+    total_duration = float(info["duration_seconds"])
+    is_wav = source.suffix.lower() == ".wav"
+
+    idx = 1
+    while start < total_duration - 0.1:
+        remaining = total_duration - start
+        length = min(chunk_seconds, remaining)
+        ext = ".wav" if is_wav else source.suffix.lower()
+        out = out_dir / f"{source.stem}_part_{idx:03d}{ext}"
+
+        print(f"\n      Starting part {idx:03d}...")
+        if is_wav:
+            cmd = [
+                "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                "-ss", str(start), "-i", str(source), "-t", str(length),
+                "-ac", "1", "-ar", "16000", "-c:a", "pcm_s16le", str(out)
+            ]
+        else:
+            cmd = [
+                "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                "-ss", str(start), "-i", str(source), "-t", str(length),
+                "-map", "0:a:0", "-c:a", "copy", str(out)
+            ]
+        run(cmd)
+        ci = ffprobe(out)
+        print(f"      CREATED  : {out.name}")
+        print(f"      Duration : {ci['duration']}")
+        print(f"      Size     : {ci['size_mb']:.2f} MB")
+
+        if ci["duration_seconds"] and ci["duration_seconds"] > BATCH_LIMIT_SECONDS:
+            raise RuntimeError(f"Chunk exceeds Sarvam 2-hour limit: {out}")
+        if ci["size_mb"] > max_mb:
+            raise RuntimeError(
+                f"Chunk {out.name} is {ci['size_mb']:.2f} MB, above --max-mb {max_mb}.\n"
+                "Variable bitrate can cause this. Re-run with a smaller --max-mb, "
+                "or force WAV fallback using --force-wav."
+            )
+        results.append(out)
+        start += length
+        idx += 1
+
+    return results
+
+
+def find_json_files(folder: Path) -> list[Path]:
+    return sorted(p for p in folder.rglob("*.json") if p.is_file())
+
+
+def timestamp(seconds: float | int | None) -> str:
+    if seconds is None:
+        return "--:--:--"
+    return fmt_duration(float(seconds))
+
+
+def build_transcripts(raw_dir: Path, transcript_dir: Path) -> dict[str, Any]:
+    transcript_dir.mkdir(parents=True, exist_ok=True)
+    json_files = find_json_files(raw_dir)
+
+    plain_sections: list[str] = []
+    speaker_lines: list[str] = []
+    parsed = 0
+
+    for jf in json_files:
+        try:
+            data = json.loads(jf.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+
+        # Some downloads may wrap the actual response. Search a few common levels.
+        candidates = [data]
+        if isinstance(data, dict):
+            for key in ("result", "response", "data", "output"):
+                if isinstance(data.get(key), dict):
+                    candidates.append(data[key])
+
+        payload = next(
+            (x for x in candidates if isinstance(x, dict)
+             and ("transcript" in x or "diarized_transcript" in x)),
+            None
+        )
+        if not payload:
+            continue
+
+        parsed += 1
+        plain = str(payload.get("transcript") or "").strip()
+        if plain:
+            plain_sections.append(f"--- {jf.name} ---\n{plain}")
+
+        diarized = payload.get("diarized_transcript") or {}
+        entries = diarized.get("entries", []) if isinstance(diarized, dict) else []
+        if entries:
+            speaker_lines.append(f"\n--- {jf.name} ---")
+            for e in entries:
+                if not isinstance(e, dict):
+                    continue
+                spk = e.get("speaker_id", "?")
+                start = timestamp(e.get("start_time_seconds"))
+                end = timestamp(e.get("end_time_seconds"))
+                text = str(e.get("transcript") or "").strip()
+                speaker_lines.append(
+                    f"[{start} - {end}] Speaker {spk}: {text}"
+                )
+
+    plain_path = transcript_dir / "transcript.txt"
+    speaker_path = transcript_dir / "transcript_with_speakers.txt"
+
+    plain_path.write_text(
+        "\n\n".join(plain_sections) if plain_sections
+        else "No transcript field could be parsed. See 05_sarvam_raw.\n",
+        encoding="utf-8"
+    )
+    speaker_path.write_text(
+        "\n".join(speaker_lines).strip() + "\n" if speaker_lines
+        else "No diarized transcript entries could be parsed. See 05_sarvam_raw.\n",
+        encoding="utf-8"
+    )
+
+    return {
+        "json_files_found": len(json_files),
+        "json_outputs_parsed": parsed,
+        "plain_transcript": str(plain_path),
+        "speaker_transcript": str(speaker_path),
+    }
+
+
+def parse_args() -> argparse.Namespace:
+    p = argparse.ArgumentParser(
+        description="Prepare audio/video and transcribe with Sarvam Batch STT."
+    )
+    p.add_argument(
+        "input_file",
+        help="Input path. If only a filename is given, current working directory is used."
+    )
+    p.add_argument(
+        "--max-mb", type=float, default=DEFAULT_MAX_MB,
+        help=f"Local maximum size per prepared Batch file. Default: {DEFAULT_MAX_MB:g} MB."
+    )
+    p.add_argument(
+        "--language", default=None,
+        help="BCP-47 language, e.g. ta-IN or en-IN. Default: auto-detect."
+    )
+    p.add_argument(
+        "--speakers", type=int, default=None,
+        help="Expected speakers 1-20. Default: Sarvam auto-detect."
+    )
+    p.add_argument(
+        "--keyterms", default="",
+        help='Comma-separated v4 keyterms, e.g. "Rivin,IPBS,TalkProof". Max 50.'
+    )
+    p.add_argument(
+        "--test-seconds", type=float, default=DEFAULT_TEST_SECONDS,
+        help=f"Compatibility test length. Default: {DEFAULT_TEST_SECONDS:g}s; must be <30s."
+    )
+    p.add_argument(
+        "--force-wav", action="store_true",
+        help="Skip original-format REST test and prepare 16k mono PCM WAV."
+    )
+    p.add_argument(
+        "--prepare-only", action="store_true",
+        help="Prepare/test/split files but do not start the Batch transcription."
+    )
+    return p.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+
+    if not (0 < args.test_seconds < 30):
+        raise ValueError("--test-seconds must be greater than 0 and less than 30.")
+    if args.max_mb <= 0:
+        raise ValueError("--max-mb must be > 0.")
+    if args.speakers is not None and not (1 <= args.speakers <= 20):
+        raise ValueError("--speakers must be 1-20.")
+
+    keyterms = [x.strip() for x in args.keyterms.split(",") if x.strip()]
+    if len(keyterms) > 50:
+        raise ValueError("Sarvam v4 supports at most 50 keyterms.")
+
+    source = Path(args.input_file).expanduser()
+    if not source.is_absolute():
+        source = Path.cwd() / source
+    source = source.resolve()
+
+    if not source.exists() or not source.is_file():
+        raise FileNotFoundError(f"Input file not found: {source}")
+
+    require_program("ffmpeg")
+    require_program("ffprobe")
+
+    [REDACTED:assigned-value:sha256-e04d90352e95]("SARVAM_API_KEY", "").strip()
+    if not args.prepare_only and not api_key:
+        raise RuntimeError(
+            "SARVAM_API_KEY is not set.\n"
+            'PowerShell current session: $env:SARVAM_API_KEY="YOUR_KEY"\n'
+            'Permanent: setx SARVAM_API_KEY "YOUR_KEY"  (then reopen PowerShell)'
+        )
+
+    try:
+        from sarvamai import SarvamAI
+    except ImportError as exc:
+        raise RuntimeError(
+            "sarvamai is not installed. Run: python -m pip install -U sarvamai"
+        ) from exc
+
+    client = SarvamAI(api_subscription_key=api_key) if api_key else None
+
+    root = source.parent / f"{source.stem}_sarvam"
+    audit_dir = root / "01_audit"
+    test_dir = root / "02_test"
+    prepared_dir = root / "03_prepared"
+    chunks_dir = root / "04_chunks"
+    raw_dir = root / "05_sarvam_raw"
+    transcript_dir = root / "06_transcript"
+    for d in (audit_dir, test_dir, prepared_dir, chunks_dir, raw_dir, transcript_dir):
+        d.mkdir(parents=True, exist_ok=True)
+
+    audit: dict[str, Any] = {
+        "started_at": datetime.now().astimezone().isoformat(),
+        "input": str(source),
+        "settings": {
+            "max_mb": args.max_mb,
+            "max_mb_is_default": args.max_mb == DEFAULT_MAX_MB,
+            "test_seconds": args.test_seconds,
+            "model": "saaras:v4",
+            "language": args.language or "auto",
+            "diarization": True,
+            "speakers": args.speakers or "auto",
+            "keyterms": keyterms,
+            "force_wav": args.force_wav,
+            "prepare_only": args.prepare_only,
+        },
+        "decisions": [],
+    }
+
+    banner("SARVAM AUDIO / VIDEO TRANSCRIPTION")
+    source_info = ffprobe(source)
+    audit["source_info"] = source_info
+    write_json(audit_dir / "source_info.json", source_info)
+
+    if not source_info["has_audio"]:
+        raise RuntimeError("No audio stream found in the input file.")
+
+    print(f"Input          : {source}")
+    print(f"Type           : {'VIDEO' if source_info['has_video'] else 'AUDIO'}")
+    print(f"Container      : {source_info['format_name']}")
+    print(f"Audio codec    : {source_info['audio_codec']}")
+    print(f"Sample rate    : {source_info['sample_rate'] or 'unknown'}")
+    print(f"Channels       : {source_info['channels'] or 'unknown'}")
+    print(f"Duration       : {source_info['duration']}")
+    print(f"Input size     : {source_info['size_mb']:.2f} MB")
+    default_note = " (DEFAULT)" if args.max_mb == DEFAULT_MAX_MB else ""
+    print(f"Maximum part   : {args.max_mb:g} MB{default_note}")
+    print("Sarvam model   : saaras:v4")
+    print("Diarization    : ENABLED")
+    print(f"Speakers       : {args.speakers if args.speakers else 'AUTO'}")
+    print(f"Language       : {args.language if args.language else 'AUTO'}")
+    print(f"Output folder  : {root}")
+
+    total_steps = 6
+    working_source = source
+
+    step(1, total_steps, "Preparing source for compatibility test")
+    if source_info["has_video"]:
+        # User wanted video -> audio first. Use compressed M4A, not WAV yet.
+        extracted = prepared_dir / f"{source.stem}_extracted_audio.m4a"
+        print("      Video detected. Extracting compressed audio first...")
+        working_source = extract_audio_from_video(source, extracted)
+        wi = ffprobe(working_source)
+        print(f"      CREATED  : {working_source.name}")
+        print(f"      Duration : {wi['duration']}")
+        print(f"      Size     : {wi['size_mb']:.2f} MB")
+        audit["decisions"].append("Video detected: extracted AAC/M4A audio before format test.")
+
+    use_wav = args.force_wav
+    original_test_ok = False
+
+    step(2, total_steps, "Testing source format with Sarvam REST")
+    if args.force_wav:
+        print("      SKIPPED: --force-wav was supplied.")
+        audit["decisions"].append("Original-format test skipped due to --force-wav.")
+    elif args.prepare_only and not api_key:
+        print("      SKIPPED: --prepare-only and no API key.")
+        print("      Without API test, source format cannot be proven compatible.")
+        print("      WAV fallback will be used for deterministic preparation.")
+        use_wav = True
+        audit["decisions"].append(
+            "Prepare-only without API key: WAV fallback chosen because Sarvam compatibility was not tested."
+        )
+    else:
+        try:
+            sample = make_source_format_test(working_source, test_dir, args.test_seconds)
+            si = ffprobe(sample)
+            print(f"      Test file : {sample.name}")
+            print(f"      Duration  : {si['duration']}")
+            print(f"      Size      : {si['size_mb']:.3f} MB")
+            print("      Calling Sarvam REST...")
+            original_test_ok, result = sarvam_rest_test(
+                client, sample, args.language, keyterms
+            )
+            write_json(audit_dir / "original_format_test.json", result)
+            if original_test_ok:
+                print("      PASS: Sarvam returned a non-empty transcript.")
+                audit["decisions"].append(
+                    "Source-format sample passed Sarvam REST; full WAV conversion avoided."
+                )
+            else:
+                print("      FAIL: " + str(result.get("reason")))
+                print("      Activating WAV fallback.")
+                use_wav = True
+                audit["decisions"].append(
+                    "Source-format Sarvam REST test failed/empty; WAV fallback activated."
+                )
+        except Exception as exc:
+            result = {
+                "passed": False,
+                "reason": f"Could not create/test same-format sample: {type(exc).__name__}: {exc}",
+                "traceback": traceback.format_exc(),
+            }
+            write_json(audit_dir / "original_format_test.json", result)
+            print("      FAIL: " + result["reason"])
+            print("      Activating WAV fallback.")
+            use_wav = True
+            audit["decisions"].append(
+                "Source-format sample creation/test failed; WAV fallback activated."
+            )
+
+    step(3, total_steps, "Preparing final audio format")
+    if use_wav:
+        full_wav = prepared_dir / f"{source.stem}_16k_mono_pcm16.wav"
+        print("      Converting full recording to WAV...")
+        print("      Format   : PCM 16-bit")
+        print("      Rate     : 16000 Hz")
+        print("      Channels : mono")
+        convert_to_wav(working_source, full_wav)
+        working_source = full_wav
+        wi = ffprobe(working_source)
+        print(f"      CREATED  : {working_source.name}")
+        print(f"      Duration : {wi['duration']}")
+        print(f"      Size     : {wi['size_mb']:.2f} MB")
+
+        if not args.prepare_only or api_key:
+            wav_sample = test_dir / "wav_format_test.wav"
+            make_wav_test(working_source, wav_sample, args.test_seconds)
+            print("      Testing WAV sample with Sarvam REST...")
+            wav_ok, wav_result = sarvam_rest_test(
+                client, wav_sample, args.language, keyterms
+            )
+            write_json(audit_dir / "wav_format_test.json", wav_result)
+            if not wav_ok:
+                raise RuntimeError(
+                    "WAV fallback also failed Sarvam REST test.\n"
+                    f"Reason: {wav_result.get('reason')}\n"
+                    f"Audit: {audit_dir / 'wav_format_test.json'}"
+                )
+            print("      PASS: WAV returned a non-empty transcript.")
+            audit["decisions"].append("WAV fallback passed Sarvam REST.")
+    else:
+        print("      Keeping source format; full WAV conversion NOT required.")
+        wi = ffprobe(working_source)
+
+    step(4, total_steps, "Checking size/duration and preparing Batch file(s)")
+    parts, target_seconds = split_plan(wi, args.max_mb)
+    print(f"      Prepared size   : {wi['size_mb']:.2f} MB")
+    print(f"      Prepared length : {wi['duration']}")
+    print(f"      Planned files   : {parts}")
+    if parts > 1:
+        print(f"      Approx length   : {fmt_duration(target_seconds)} per file")
+    batch_files = split_audio(working_source, chunks_dir, args.max_mb)
+    audit["batch_files"] = [ffprobe(p) for p in batch_files]
+    write_json(audit_dir / "prepared_files.json", audit["batch_files"])
+
+    if args.prepare_only:
+        step(5, total_steps, "Sarvam Batch transcription")
+        print("      SKIPPED: --prepare-only")
+        step(6, total_steps, "Final output")
+        audit["completed_at"] = datetime.now().astimezone().isoformat()
+        audit["status"] = "prepared_only"
+        write_json(audit_dir / "run_audit.json", audit)
+        banner("PREPARATION COMPLETE")
+        print(f"Prepared files : {len(batch_files)}")
+        for p in batch_files:
+            print(f"  - {p}")
+        print(f"Audit          : {audit_dir / 'run_audit.json'}")
+        return 0
+
+    step(5, total_steps, "Starting Sarvam Batch transcription")
+    job_kwargs: dict[str, Any] = {
+        "model": "saaras:v4",
+        "mode": "transcribe",
+        "with_diarization": True,
+    }
+    if args.language:
+        job_kwargs["language_code"] = args.language
+    if args.speakers is not None:
+        job_kwargs["num_speakers"] = args.speakers
+    if keyterms:
+        job_kwargs["keyterms"] = keyterms
+
+    print(f"      Upload files : {len(batch_files)}")
+    print("      Creating Batch job...")
+    job = client.speech_to_text_job.create_job(**job_kwargs)
+
+    # Best-effort job id capture; SDK representation can evolve.
+    audit["batch_job_create"] = jsonable(job)
+    print("      Uploading...")
+    job.upload_files(file_paths=[str(p) for p in batch_files])
+    print("      Starting...")
+    job.start()
+    print("      Waiting for Sarvam to complete...")
+    job.wait_until_complete()
+
+    file_results = job.get_file_results()
+    audit["batch_file_results"] = file_results
+    write_json(audit_dir / "batch_file_results.json", file_results)
+
+    successful = file_results.get("successful", []) if isinstance(file_results, dict) else []
+    failed = file_results.get("failed", []) if isinstance(file_results, dict) else []
+
+    print(f"      Successful : {len(successful)}")
+    print(f"      Failed     : {len(failed)}")
+    for f in failed:
+        if isinstance(f, dict):
+            print(f"      FAILED: {f.get('file_name')} - {f.get('error_message')}")
+        else:
+            print(f"      FAILED: {f}")
+
+    if successful:
+        print("      Downloading raw Sarvam outputs...")
+        job.download_outputs(output_dir=str(raw_dir))
+    else:
+        raise RuntimeError(
+            "Sarvam Batch returned no successful files. "
+            f"See {audit_dir / 'batch_file_results.json'}"
+        )
+
+    step(6, total_steps, "Building readable transcripts")
+    transcript_result = build_transcripts(raw_dir, transcript_dir)
+    audit["transcript_build"] = transcript_result
+    audit["completed_at"] = datetime.now().astimezone().isoformat()
+    audit["status"] = "complete_with_failures" if failed else "complete"
+    write_json(audit_dir / "run_audit.json", audit)
+
+    banner("COMPLETE")
+    print(f"Successful files : {len(successful)}")
+    print(f"Failed files     : {len(failed)}")
+    print(f"Raw Sarvam JSON  : {raw_dir}")
+    print(f"Transcript       : {transcript_result['plain_transcript']}")
+    print(f"Speaker transcript: {transcript_result['speaker_transcript']}")
+    print(f"Audit            : {audit_dir / 'run_audit.json'}")
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except KeyboardInterrupt:
+        print("\nCancelled by user.", file=sys.stderr)
+        raise SystemExit(130)
+    except Exception as exc:
+        banner("FAILED")
+        print(f"{type(exc).__name__}: {exc}", file=sys.stderr)
+        print("\nFull technical error:", file=sys.stderr)
+        traceback.print_exc()
+        raise SystemExit(1)

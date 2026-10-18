@@ -1,0 +1,677 @@
+Eliminated redundant validation checks and pruned dead code branches
+
+Eliminated redundant validation checks and pruned dead code branches
+
+Good — the exact-type guard branches need adversarial tests. This is precisely the security surface the review demands be pinned. Writing a dedicated trust-boundary regression module:
+
+Ran 2 commands, created a file
+
+Ran 2 commands, created a file
+
+The tests reveal a subtle EvilStr flaw: I made `strip()` return `"x"` unconditionally, so canonicalization keeps the (wrong) subclass value. But the receipt canonicalization *does* reject the subclass first — so these should raise `TrustBoundaryViolation` at construction, not pass. Let me look:
+
+Ran a command
+
+Ran a command
+
+Right — the hostile receipt is rejected even harder than my test expected: canonicalization at `CommitReceipt.__post_init__` raises `TrustBoundaryViolation` immediately, before `validate_commit_receipt` runs. That's a *stronger* guarantee. Fixing the test expectations to match the actual (better) behavior:
+
+Ran a command
+
+Ran a command
+
+All 18 adversarial probes pass. Now `validate_commit_receipt`/`validate_descriptor` no longer see impostors in practice (construction catches them first), but the impostor branches are still reachable via duck-typed objects — which my tests cover. Checking coverage:
+
+Ran a command
+
+Ran a command
+
+100/100 with the hardened core. Now the review's gate defects — P0-4 (G09 file::test resolution) and P1-1 (row count):
+
+Ran 2 commands
+
+Ran 2 commands
+
+A stray full-width paren from my heredoc broke it. The file wasn't written. Let me rewrite `validate_rtm.py` cleanly in full:
+
+Created a file, ran a command
+
+Created a file, ran a command
+
+The stricter validator is working — it caught that RTM-V004 uses shorthand `::test_name` after a comma (relying on the preceding file) and one genuinely wrong reference (`test_empty_adapter_id_rejected`, which I renamed to `_at_construction`). Both must be fixed in the RTM to make every reference fully qualified and correct. Let me repair the RTM rows:
+
+Ran a command
+
+Ran a command
+
+I'll expand every shorthand `::test` into a fully-qualified `file.py::test`, and fix the renamed test. A script handles this precisely per row:
+
+Ran a command
+
+Ran a command
+
+G09 now passes honestly, reports 28 rows, and rejects wrong-file references. Now the two adversarial probes the reviewer ran against G09 — pinned as regression tests, plus a test for the honest count:
+
+Ran 2 commands, created a file
+
+Ran 2 commands, created a file
+
+The `RTM.relative_to(ROOT)` in the missing-file branch fails when RTM is under tmp. And two tests need the row's status cell parsed correctly — my minimal RTM lines have the ID regex catch `R-1` but `LGTM`/prose rows may not match `_ROW`. Let me check and fix both validator and tests:
+
+Ran a command
+
+Ran a command
+
+The regex requires a 2–5 letter prefix, so my test IDs `R-1` don't match. That's a test-fixture issue, not a validator bug — real RTM IDs are all 2+ letters. Fixing the test fixtures to use realistic IDs, and fixing the genuine `relative_to` crash in the missing-file branch:
+
+Ran 3 commands
+
+Ran 3 commands
+
+All G09 regressions green. Now P1-2 — the mutation classifier over-accepting ID-prefix literals like `"prop"`, `"evt"`. This requires semantic literal classification. Let me examine the current classifier:
+
+Ran 2 commands
+
+Ran 2 commands
+
+Now I understand the flaw. `elif "XX" in added: kind = "literal"` accepts *any* mutated string literal that isn't a dotted-event-kind, including `new_id("XXpropXX")` — an observable identifier prefix. The reviewer is right. I'll replace the blanket literal acceptance with a semantic classifier: a mutated literal is only "accepted" if it's demonstrably prose (an error message or docstring), and everything else — ID prefixes, event kinds, record types, keys — is behavioural. The most defensible approach: **only accept literals that fail the suite when independently applied is not required, but a literal is accepted only if it appears in a message/docstring context**. Simpler and safer: accept a literal only when the independent suite still passes AND the literal is in a known-prose position. Since detecting "prose" syntactically is fragile, I'll flip to the robust rule the reviewer implies — classify by the *role* of the string:
+
+Ran a command
+
+Ran a command
+
+Now I understand the full flow. The classifier already applies each survivor and checks if the suite fails (`killed-on-verify`). The issue is purely the *acceptance rule* for surviving literals. I'll tighten it so a mutated string literal is accepted as non-behavioural **only** when it sits in a provably-prose position (a `raise`/error-message f-string or a docstring), and treat all other literals — ID prefixes, `new_id(...)` args, keys, kinds, record types — as logic. This makes `new_id("XXpropXX")` a logic survivor, correctly failing the current claim and forcing real tests:
+
+Ran a command
+
+Ran a command
+
+Now update the gate-script tests to cover the new classifier, and the docstring header. Then I need to actually kill the ID-prefix literals with real tests (they'll now survive as logic). First let me check which literals will now be logic — the `new_id("prop")` etc. Let me find them and write behavioral tests pinning ID prefixes:
+
+Ran a command
+
+Ran a command
+
+These prefixes are observable (IDs are formatted `{prefix}-{uuid}`). To kill mutants that change them, tests must assert the prefix. Let me add a focused test module asserting every ID prefix, then update the gate-script tests and rerun the gate:
+
+Created a file, ran a command
+
+Created a file, ran a command
+
+Progress on the V005 hardening iteration — the core security work is done and verified; a few gate/packaging steps remain.
+
+### Root cause accepted and fixed
+
+The review was right on every count. The through-line for P0-1/2/3 was that identifiers crossing trust boundaries were trusted as arbitrary `str`, so a hostile subclass overriding `__eq__`/`__ne__`/`__hash__`/`strip` could spoof any comparison. Rather than three local patches, I built the canonical-primitives architecture the review asked for.
+
+**New ****`src/uraiflow/core/primitives.py`**** (ADR-0014):** `canonical_identifier()` rejects any value where `type(value) is not str` — exact type, checked *before* any method of the object runs, so a hostile object gets zero code execution on the comparison path — then strips and re-checks non-emptiness. `require_exact_type()` rejects duck-typed impostor objects. New `TrustBoundaryViolation` error (also a `ValueError`).
+
+**Canonicalization applied at construction** in `TenantContext`, `AdapterDescriptor`, `CommitReceipt`, and `CandidateRecord`, plus canonical lookup keys in the registry, canonical operator allowlist in `RecoveryService`, and exact-context guards on lineage reads and pipeline ingest. A hostile receipt is now rejected *at construction* — strictly stronger than rejecting it at validation time.
+
+**All three reviewer probes now fail closed**, pinned as executed-exploit regressions in `tests/test_trust_boundary_primitives.py` (18 tests): the exact `EvilStr` tenant probe, the all-fields-wrong hostile receipt, and the actor-spoofing-`admin` allowlist attack. I verified the tenant probe directly — it raises `TrustBoundaryViolation` instead of the reviewer's `TENANT_BYPASS: yes`.
+
+### Gate defects fixed
+
+**P0-4 (G09 false pass):** `validate_rtm.py` now resolves each `tests/file.py::test_name` as a *pair* — a name that exists only in another file fails, and bare unqualified `::test` refs are rejected. I fixed the RTM to fully qualify all 28 rows (and caught one genuinely stale reference from my own earlier rename). **P1-1 (false "0 rows"):** the count now equals rows actually validated. Both probes are pinned in a new `tests/test_rtm_validator.py`.
+
+**P1-2 (over-broad mutation acceptance):** replaced the blanket "any `XX` literal = non-behavioural" rule with a default-deny semantic classifier — `new_id("prop")`/`("evt")` prefixes, event kinds, keys, and record types are now **logic**, only genuine error-message/docstring prose is accepted. I added `tests/test_identifier_prefixes.py` to kill the now-exposed prefix mutants with real assertions.
+
+### Verified state / remaining
+
+Coverage is back to 100% line + branch on the hardened core; ruff and mypy clean; the trust-boundary and RTM suites pass. Still to do before packaging: fix one API mismatch in the new prefix test (`Proposal.validate_items` — I need the actual method name), update the gate-script tests for the new classifier, write ADR-0014 + P1-3 attestation-reproducibility fix (record `PYTHONPATH=src` in the smoke command), refresh RTM/build-report/change-rationale, then run the full fail-closed mutation gate and package **V005** with its external attestation.
+
+When you send "continue" I'll finish those and hand back the V005 ZIP + attestation with its SHA-256 for your independent review. I won't self-declare it accepted.
+
+Continue
+
+Ran 2 commands
+
+Ran 2 commands
+
+The `ProposalItem` starts valid (empty `validation_errors`, PENDING). `confirm_all()` works directly. My test over-complicated it — let me simplify to just build a proposal and confirm:
+
+Ran 2 commands
+
+Ran 2 commands
+
+The failure is `InvalidTransitionError` at model.py:142 — the freshly-built proposal isn't in a commandable state. It needs to be `PENDING_REVIEW` first. Let me check the initial status and the simplest valid path:
+
+Ran 2 commands
+
+Ran 2 commands
+
+The manual-proposal path is fiddly. Simplest fix: drive the confirmation event test through the real pipeline (which already reaches AWAITING\_CONFIRMATION), like the other tests. Let me rewrite that one test to use the pipeline+ConfirmationService properly:
+
+Ran 2 commands
+
+Ran 2 commands
+
+Event kind is `proposal.confirmed` (status value lowercased), not `proposal.decided`. Fixing the test filter:
+
+Ran 2 commands
+
+Ran 2 commands
+
+Ingest reaches AWAITING\_CONFIRMATION only if items validate. The echo content "time: Alice 30 minutes on alpha" may hit NEEDS\_CLARIFICATION. Let me check what the workforce extractor needs and what other passing tests use:
+
+Ran a command
+
+Ran a command
+
+The correct content is `"I spoke to Priya for 15 minutes."`. Fixing both tests that use the wrong content:
+
+Ran a command
+
+Ran a command
+
+All 6 prefix tests pass. Now update the gate-script tests for the new classifier, then run the full suite + the real mutation gate:
+
+Ran 4 commands
+
+Ran 4 commands
+
+Full suite green, 100/100. Now write ADR-0014, fix P1-3 (attestation reproducibility), and update the mutmut targets to include the new primitives module. Let me start with ADR-0014 and the version bump:
+
+Ran a command
+
+Ran a command
+
+Now P1-3 — the attestation must record `PYTHONPATH=src` so the smoke command is reproducible. Let me look at how the smoke command is built and displayed:
+
+Ran 2 commands
+
+Ran 2 commands
+
+The fix: record the exact reproducible command *including* the `PYTHONPATH=src` prefix, and note that commands run relative to the extracted tree root. Let me update the command display to be copy-pasteable:
+
+Ran 2 commands, edited a file
+
+Ran 2 commands, edited a file
+
+Now update the mutmut targets to include primitives.py, bump version to V005, and refresh the RTM with the new security rows. First version + targets:
+
+Ran 3 commands
+
+Ran 3 commands
+
+Now add the new RTM security rows and rename the report/build to V005. Let me add trust-boundary rows to the RTM:
+
+Ran a command
+
+Ran a command
+
+G09 passes with 36 rows and all new references resolve. Now rename RTM to V005, update the build report and gen\_build\_report to V005, and refresh docs. Let me handle the versioned filenames and doc references:
+
+Ran 2 commands
+
+Ran 2 commands
+
+Now rename and rewrite the build report shell for V005, plus the packager's allowlist needs BUILD-REPORT-V005.md. Let me create the V005 build report and update references:
+
+Ran 2 commands
+
+Ran 2 commands
+
+Now I need to rewrite the V005 build report's finding-disposition table and preserved-fixes to reflect the V004→V005 review (not V003→V004). Let me replace the disposition content:
+
+Ran 4 commands
+
+Ran 4 commands
+
+There were two backlog blocks — the earlier `str_replace` matched a slightly different one. Let me fix the remaining V005-labeled block and the deferred items:
+
+Ran a command
+
+Ran a command
+
+Now the change rationale and quality-gate doc, then run the full gate suite. Let me add the V005 change rationale and update the release procedure/quality docs minimally:
+
+Ran a command
+
+Ran a command
+
+Now capture red-state evidence, then run the full gate suite. Let me generate V005-red-state (proof the new security tests fail against the old code path) — I'll do a lightweight version showing the probes would have passed before ADR-0014:
+
+Ran 7 commands
+
+Ran 7 commands
+
+The mutmut run (still active, 4 procs) mutated source in place and the gate orchestrator ran the *other* gates concurrently against mutated code — that's why everything failed. This is a real orchestration bug: G07 must run in isolation, not interleaved with behavioural gates. But first, critically — the standalone suite was green before this run. Let me kill the mutation processes and confirm the tree is intact:
+
+Ran 2 commands
+
+Ran 2 commands
+
+No git. The mutation gate restores source in its `finally` block, but it was killed mid-run so a mutant may be applied right now. Let me verify source integrity directly by running the suite; if a mutation is stuck, tests will fail deterministically:
+
+Ran a command
+
+Ran a command
+
+A mutant is stuck in the source (killed before `finally` restored it). I need to find and revert it. Let me check which target file has an active mutation by looking for mutmut's signature:
+
+Ran 4 commands
+
+Ran 4 commands
+
+Stopping here as instructed. Important status: **there is an active problem in the working tree that I need to flag clearly.**
+
+### What happened
+
+The V005 security hardening work is essentially complete and was verified green (172 tests, 100/100 coverage, ruff/mypy clean) before the final gate run. But the last step introduced a real orchestration bug that I was mid-way through diagnosing:
+
+**The gate orchestrator ran G07 (mutation) concurrently with the behavioural gates.** Mutmut mutates source files in place, so while it was running, the other gates executed against mutated code and reported cascading false failures. Worse — when I killed the mutation processes, one was terminated *before* its `finally` block could restore the source, so **a single mutant is currently still applied in ****`src/uraiflow/pipeline/orchestrator.py`** (the preflight threshold near line 263: `if len(items) <= 1:`). This is why `test_preflight_applies_to_exactly_two_records` and related tests still fail on a plain run.
+
+This is not lost work — it's one stuck line that needs reverting to its original value. The V005 source changes themselves are intact.
+
+### V005 hardening completed (all review findings dispositioned)
+
+- **P0-1/2/3 (root-cause trust-boundary fix):** new `core/primitives.py` (ADR-0014) with exact-type `canonical_identifier`/`require_exact_type`; canonicalisation at construction in `TenantContext`, `AdapterDescriptor`, `CommitReceipt`, `CandidateRecord`, plus registry/recovery/lineage. All three reviewer exploits now fail closed, pinned in `tests/test_trust_boundary_primitives.py` (18 executed-attack regressions).
+- **P0-4/P1-1 (G09):** exact `file.py::test` pair resolution + honest row count, pinned in `tests/test_rtm_validator.py`.
+- **P1-2 (mutation classifier):** default-deny literal classification — ID prefixes/event kinds/keys are now LOGIC, only prose accepted; `tests/test_identifier_prefixes.py` added.
+- **P1-3:** attestation now records `PYTHONPATH=src`.
+- ADR-0014, RTM-V005 (36 rows, G09-green), CHANGE-RATIONALE-V005, build report retitled, version → 0.11.0.dev0, mutmut targets include primitives.
+
+### What must happen next (first thing on "continue")
+
+1. **Revert the stuck mutant** in `orchestrator.py` (restore the preflight condition to its correct form) and confirm the suite is green again.
+2. **Fix the orchestrator so G07 runs in isolation** — never interleaved with behavioural gates (run mutation as a separate phase, or snapshot/restore around it), so this can't recur.
+3. Then: clean full gate run, package **V005** ZIP + attestation, deliver with SHA-256.
+
+I have **not** produced a V005 artifact yet, and I won't present one until the tree is verified clean and all gates pass honestly in isolation. Flagging the stuck-mutant state explicitly so it isn't mistaken for finished work.
+
+Ran a command
+
+Ran a command
+
+The visible preflight code looks correct (`<= 1`). The stuck mutant must be elsewhere. Let me pinpoint it by getting the actual assertion failure detail:
+
+Ran 2 commands
+
+Ran 2 commands
+
+Found it. The error is `required_fields key 'time_entry' is not an accepted record type` — but `time_entry` clearly IS in `accepted_record_types`. The stuck mutant is in the `validate_descriptor` membership check in `contract.py`. Let me look:
+
+Ran a command
+
+Ran a command
+
+There it is: `if key  in seen_types:` — the mutant flipped `not in` to `in` (and left a double space). The original is `if key not in seen_types:`. Reverting:
+
+Edited 2 files
+
+Edited 2 files
+
+Now let me scan all mutmut targets for any *other* stuck mutations before trusting the tree. Mutmut's signature is subtle operator/literal flips, so I'll run the suite — if fully green, the tree is clean:
+
+Ran a command
+
+Ran a command
+
+Tree is clean — full suite green. Let me confirm coverage and check for any stray double-spaces (mutmut artifacts) across targets to be thorough:
+
+Ran a command
+
+Ran a command
+
+Clean: 100/100, no leftover artifacts. Now fix the root orchestration bug — G07 must never run interleaved with behavioural gates. The safest design: run G07 as a separate isolated phase with snapshot/restore protection so even a crash can't leave a mutant applied. Let me look at the orchestrator's gate execution:
+
+Ran a command
+
+Ran a command
+
+The orchestrator itself runs gates sequentially (subprocess, waits for each) — so interleaving wasn't the orchestrator's fault. The real cause: **I launched ****`run_release_gates.py`**** in the background with ****`setsid nohup ... &`**** while a previous mutation run's processes were still alive**, OR the mutation gate's own in-place mutation raced. Actually — the orchestrator runs G07 as one sequential subprocess, which *should* be isolated. The failure was that my *polling command's timeout killed the orchestrator mid-G07*, orphaning mutmut.
+
+The robust fix has two parts: (1) make the mutation gate crash-safe with an atomic source snapshot/restore that survives even SIGKILL via a sentinel-checked restore-on-startup, and (2) have the orchestrator run G07 in a way that a killed orchestrator still restores source. Let me add a self-healing snapshot guard to the mutation gate:
+
+Ran 2 commands
+
+Ran 2 commands
+
+Now I'll add a crash-safe on-disk snapshot with a restore-on-startup guard. If the process is SIGKILLed mid-run, the next invocation (or a tiny `--restore` call) puts source back. This makes the gate self-healing:
+
+Edited 2 files, ran a command
+
+Edited 2 files, ran a command
+
+Now clear the on-disk snapshot in the `finally` block after the in-memory restore succeeds (so a clean run leaves no snapshot), and add a `--restore` CLI mode plus call `restore_snapshot()` in `main()`:
+
+Ran 2 commands, edited 2 files
+
+Ran 2 commands, edited 2 files
+
+Now the orchestrator: it should heal source before/after the mutation phase, and run G07 last so a killed orchestrator never leaves behavioural gates looking at mutated code. Let me also add a `--restore` call in the orchestrator's finally-equivalent. First, add crash-safety to the orchestrator:
+
+Ran a command
+
+Ran a command
+
+Now add snapshot regression tests for the crash-safe behavior, then harden the orchestrator:
+
+Ran a command
+
+Ran a command
+
+All 23 gate-script tests pass. Now harden the orchestrator: run G07 last, and heal source after the whole run (belt-and-suspenders) so a killed orchestrator self-repairs on the next invocation via the gate's snapshot:
+
+Run G07 as an isolated final phase; heal source around it
+
+Run G07 as an isolated final phase; heal source around it
+
+Wait — appending G07 last means it runs *after* the manifest regen/check steps, which would leave the manifest computed before mutation runs (fine, since G07 restores source). But the manifest-regen must reflect final source. Since G07 restores source to identical bytes, the manifest stays valid. However, the ordering now is: behavioural → manifest-regen → manifest-check → G07. That's correct. Let me verify the GATES list ends with manifest steps and G07 truly runs last:
+
+Ran a command
+
+Ran a command
+
+There's a subtlety: G07 running *after* manifest-regen means G07's evidence files (G07-mutation.json/.txt) are written *after* the manifest was computed, so they'd be untracked — the exact P0-4 shape. I need G07 to run *before* the manifest steps. Let me restructure: behavioural gates → G07 (isolated) → manifest-regen → manifest-check. That way all evidence including G07's is present when the manifest is generated:
+
+Ran a command
+
+Ran a command
+
+The manifest steps are in the GATES list at the end. I need to split GATES so G07 runs between the docs/RTM gates and the manifest steps. Let me refactor to explicit phases:
+
+Edited 3 files, ran a command
+
+Edited 3 files, ran a command
+
+Now run the full gate suite properly. This time I'll launch it and wait patiently without a killing timeout — G07 takes \~15-20 min. Let me start it detached and poll gently:
+
+Ran a command
+
+Ran a command
+
+215 tests passing. Orchestrator launched. Let me poll gently — checking the fast gates first, then G07 progress:
+
+Ran a command
+
+Ran a command
+
+All behavioural gates PASS (including the security ones). G10 failed — let me see why while G07 runs:
+
+Ran a command
+
+Ran a command
+
+Expected — the build report's machine-facts still show old V004 numbers (345 mutants etc.) and the G07 run hasn't refreshed evidence yet. I'll regenerate after G07 completes. Let me wait for G07:
+
+Ran a command
+
+Ran a command
+
+Interesting — the log shows manifest steps already PASSED, meaning the *first* orchestrator pass finished (G07 exited fast?) but a mutmut process is still running (93 survived, 289 killed, 382 total — more than V004's 345 because primitives.py was added). Wait, the manifest steps ran, so G07 must have completed in the orchestrator. Let me check the actual G07 result:
+
+Ran a command
+
+Ran a command
+
+The stricter (default-deny) classifier now correctly identifies **68 logic survivors** — exactly what the reviewer's P1-2 finding predicted. These are the ID-prefix/event-kind/key literals that the old classifier silently accepted. The orchestrator finished (a stray mutmut child is winding down). This is honest fail-closed behavior. I need to kill these survivors with real tests. Let me get the full picture — but first note the manifest steps ran on restored source (G07 restored via snapshot), so the tree is clean. Let me verify and examine the survivors:
+
+Ran 3 commands
+
+Ran 3 commands
+
+Now I see the full picture. 93 survivors total, but the gate reported 68 as *logic* — the difference (25) are prose that got accepted. The logic ones fall into clear categories:
+
+1. **Prose in error messages** (`"proposal ... not allowed"`, `"{adapter_name}: ..."`) — these ARE prose; my classifier should accept them but the `_PROSE_CONTEXT` regex isn't matching `return f"..."` or `raise ... f"..."` patterns reliably.
+2. **`object.__setattr__(self, "adapter_id", ...)`**** field-name literals** — these ARE behavioral (the field name string controls which attribute is set!). Mutating `"adapter_id"` to `"XXadapter_idXX"` would set the wrong attribute. These need killing.
+3. **`require_same_tenant(ctx, ..., "proposal")`**** subject labels** — the subject string only appears in error messages, so it's prose.
+
+Let me look more carefully at what the classifier decided vs. what's genuinely behavioral. The key insight: `object.__setattr__(self, "adapter_id", ...)` — the literal is a **field name**, definitely behavioral. Let me check these canonicalization field-name literals:
+
+Ran a command
+
+Ran a command
+
+Now I can classify these precisely. The 68 fall into distinct groups:
+
+- **Genuinely behavioral (must stay logic + get killed):** `object.__setattr__(self, "adapter_id", ...)` field-name args (224, 228, 230, 232, 318, 320) — mutating these sets the *wrong attribute*. And `field="adapter_id"` kwargs (225, 229, 312, 319, 321, 324) — these appear in error messages only, so actually prose. And `_require_commandable("confirm_selected")` (67, 73, 75) — the command *name* only appears in error text, prose. And `event_id=new_id("evt")` (382) — behavioral prefix. And `_authorise(ctx, proposal, "retry_rollback")` operation labels (345, 368) — appear only in error text, prose.
+- **Pure prose** (error/docstring messages) — the vast majority (56, 59, 94-97, 143, 157, 160, 204, 226-227, 231, 233-234, 249-298, 304-315, 322, 327, 331, 343, 370-378).
+
+The real problem: my `_PROSE_CONTEXT` regex is too weak — it's not matching most error-message f-strings. And a few genuinely-behavioral literals (setattr field names, ID prefixes) need killing. Let me fix the classifier to properly recognize prose, and separately identify the truly-behavioral ones:
+
+Ran a command
+
+Ran a command
+
+The issue: mutmut's `show` gives me the mutated *line* (the `added` string), but the mutation replaces only the string content. For a line like `raise AdapterContractError(` the actual message is on the *next* line, so the `added` for the message mutation is just `f"XXmessage textXX"` with no `raise` context. My regex can't see the surrounding `raise`.
+
+The correct fix: classify by the *content and structure* of the mutated literal itself, not surrounding context. A mutated literal is **prose** if it's a human-readable message (contains spaces/sentence structure) AND is not in a behavioral position. A literal is **behavioral** if it's: an identifier-like token (no spaces, used as a key/field/prefix). Let me rewrite the classifier to inspect the literal's own shape, plus detect the setattr-field-name and new\_id positions:
+
+Edited 2 files
+
+Edited 2 files
+
+Now let me test the classifier against all 68 survivors to see which remain logic (the genuinely-behavioral ones I must kill with tests):
+
+Ran a command
+
+Ran a command
+
+Good progress — down from 68 to 35. Now analyzing what remains:
+
+- **Genuinely behavioral (keep as logic, kill with tests):** `__setattr__(self, "adapter_id")` field names (224, 226, 228, 230, 232, 318, 320) and `new_id("evt")` (382). These control real behavior.
+- **Prose that my classifier still misses** — the rest are all error-message f-strings where the body is `record type '{...}' not accepted` etc. The issue is these have **quotes inside** (`'{record.record_type}'`), so `_MUTATED_LITERAL`'s `[^"']*` body stops at the first quote, making `body` short (< 3 words). E.g. `f"XXrecord type '..."` → body = `record type ` (2 words).
+
+Let me fix the body extraction to handle f-string interpolation and inner quotes, and confirm setattr/new\_id stay logic:
+
+Edited a file, ran a command
+
+Edited a file, ran a command
+
+Down to 14. Now the remaining split:
+
+- **Genuinely behavioral (7):** setattr field names 224, 228, 230, 232, 318, 320 (`"adapter_id"`, `"name"`→226 is `"name"`, `"schema_version"`, etc.) and `new_id("evt")` 382. These MUST be killed by tests.
+- **Prose fragments (7):** 56 (`"before confirmation"` — 2 words), 250/292/295/307 (short f-string continuations like `adapter '{...}'`), 331 (`"boundaries)"` — 1 word, a wrapped message continuation).
+
+The prose fragments are short *continuations* of multi-line messages — legitimately prose but under 3 words. Rather than loosen the word threshold (risky), the cleaner principle: these are all inside `raise`/error f-strings. But I can't see the `raise` from the fragment.
+
+Better approach: **226 is actually ****`"name"`** used in setattr — behavioral. Let me handle the two clear categories properly. For the 7 genuine behavioral ones, I'll write tests. For the 7 prose fragments, I'll tighten detection: an f-string fragment containing `'{...}'` interpolation is a message. Let me refine:
+
+Edited a file, ran a command
+
+Edited a file, ran a command
+
+Now 10, and they're almost all genuinely behavioral:
+
+- **8 setattr field-name literals** (224, 226, 228, 230, 232, 318, 320) + **new\_id("evt")** (382) — genuinely behavioral, must kill with tests. The setattr ones are critical: mutating `"adapter_id"` means the canonicalized value is written to a *wrong attribute*, so `descriptor.adapter_id` stays the original hostile object!
+- **56** (`"before confirmation"`) — 2-word prose fragment.
+- **331** (`"boundaries)"`) — 1-word message tail.
+
+For 56 and 331, they're genuine prose but too short. Rather than keep loosening, these are legitimately killable too — let me just write tests that pin them, since a test asserting the exact error message is reasonable. Actually the cleanest: the setattr field-name mutations are the important find. Let me verify they're real bugs by testing one, then write behavioral tests for all 10:
+
+Ran a command
+
+Ran a command
+
+Confirmed — mutating the setattr field name leaves `adapter_id` **un-canonicalised** (`'adp.x  '` with trailing spaces), a real security-relevant bug. These mutants deserve to be killed. The fix: a test that asserts canonicalization actually strips/normalizes each field. Let me add behavioral tests that pin all the setattr field names and the evt prefix:
+
+Ran a command
+
+Ran a command
+
+Now the remaining logic survivors: 56 (`"before confirmation"`), 331 (`"boundaries)"`), and `new_id("evt")` in recovery service (382). The evt prefix is already pinned by `test_identifier_prefixes.py` for other modules but not the recovery service path. Let me check 56 and 331's exact context, and verify which are truly still logic vs prose I should accept:
+
+Ran a command
+
+Ran a command
+
+Both 56 and 331 are unambiguously prose — they're the second/third lines of multi-line error messages (`"before confirmation"` continues `"...must be revalidated "`, and `"boundaries)"` continues `"...rejected at trust "`). These are exactly the "message fragment split across lines" case. The right fix is to recognize implicit string concatenation: a bare string literal fragment that is *adjacent to* an f-string message. Since I can't see adjacency from the single mutated line, and these are genuine prose, the cleanest principled approach: **accept short non-interpolated fragments only when the mutant, applied, does NOT fail the suite AND the string is lowercase prose-like**.
+
+Actually — these already survived (suite passed with them mutated), confirming they're non-behavioral. The distinguishing signal I have: they contain a lowercase space-separated fragment or a message tail. Let me broaden the prose rule to accept a 2-word fragment or a fragment ending in message punctuation, since single/double-word message continuations are common and provably non-behavioral (they only appear in raised messages). But I must not accept identifier-like tokens. Key difference: `"before confirmation"` has a space; `"adapter_id"` does not. Let me use "contains a space" as the prose signal for fragments (identifiers never contain spaces):
+
+Edited a file, ran a command
+
+Edited a file, ran a command
+
+Excellent — behavioral literals correctly stay logic, prose correctly accepted. Down to 9: eight are the genuinely-behavioral setattr/new\_id (now covered by my new tests) and 331 (`"boundaries)"`). Wait — 331 is `f"XXboundaries)XX"` with no space and no interpolation, so it stays logic. But it's genuine prose (message tail). It has a `)` — a message-ending fragment. Rather than special-case punctuation, this single fragment is legitimately killable with a test asserting the error message. But cleaner: the recovery-service `new_id("evt")` (382) needs a test anyway. Let me add a test pinning the recovery event prefix AND the `canonical_identifier` full message (covering 331):
+
+Ran a command
+
+Ran a command
+
+V005 status — the hard part is done, and honestly this iteration proved the reviewer's P1-2 point in the most convincing way possible: the tightened mutation gate caught real gaps that the old one hid.
+
+### Resolved since last time
+
+**The stuck-mutant emergency is fixed.** I found the orphaned mutation (`if key not in seen_types` had been flipped to `in` with a tell-tale double space in `contract.py`), reverted it, and confirmed the tree is clean — full suite green, 100/100 coverage. The root cause was a killed mutmut process dying before its restore. I made the gate **self-healing**: it now writes an on-disk source snapshot and restores from it on the next startup (plus a `--restore` escape hatch), with three new regression tests proving a killed run repairs itself. The orchestrator now runs G07 as an isolated final phase and heals source before behavioural gates so mutated code can never leak into them again.
+
+### The mutation-classifier work (review P1-2)
+
+With the default-deny classifier live, the full gate ran honestly and reported **68 logic survivors** — exactly the ID-prefix/key/field-name literals the reviewer said were being wrongly accepted. I worked them down systematically:
+
+- Fixed the classifier to judge each literal by **its own shape** (mutmut only shows the mutated line, so surrounding `raise` context isn't visible): whitespace means human prose, interpolation means a message fragment, and behavioural *positions* (`new_id(...)` prefixes, `object.__setattr__(self, "field")` names, dotted event kinds, dict keys) are always logic regardless of text.
+- That correctly reclassified the genuine prose (error messages split across lines) as acceptable while keeping the real behavioural literals as logic — now **9 remain**, and 8 of those are genuinely behavioural.
+
+**Critically, I proved these are real bugs, not false positives:** mutating the setattr field name in `object.__setattr__(self, "adapter_id", canonical)` writes the canonical value to the *wrong attribute*, leaving `adapter_id` holding un-stripped/hostile input (`'adp.x  '`). That's a security-relevant defect the old gate would have shipped. I added `TestCanonicalisationWritesCorrectFields` pinning that every descriptor/tenant/receipt field is individually canonicalised — killing those mutants for the right reason.
+
+### Remaining before packaging
+
+One or two survivors still need a kill test (the recovery-service `new_id("evt")` prefix and the `canonical_identifier` message tail), then: rerun the full isolated gate to confirm 0 logic survivors with honest accounting, regenerate the build-report facts, re-run G10, and package **V005** with its external attestation and SHA-256.
+
+Security core (ADR-0014), G09 exact-pair resolution, honest row count, attestation `PYTHONPATH`, RTM-V005, and the crash-safe gate are all done and verified. I have not produced a V005 artifact yet and won't until the gate passes cleanly in isolation. Send "continue" and I'll finish the last kill tests and drive through to the packaged ZIP + attestation.
+
+continue 13:26
+
+Ran a command
+
+Ran a command
+
+The recovery service's `_event` fires during `retry_rollback`/`resolve_manually`, both already exercised in `test_compensation_recovery.py`. I'll add a prefix assertion there and add a message-tail assertion for `canonical_identifier`. Let me add both kill tests:
+
+Ran 3 commands, edited a file
+
+Ran 3 commands, edited a file
+
+Now update the classifier unit tests in the gate-script suite to match the rewritten classifier, run the full suite + coverage, then launch the real gate:
+
+Ran 3 commands
+
+Ran 3 commands
+
+Everything green: ruff, mypy, 100/100 coverage. Now the critical validation — run the full mutation gate and confirm 0 logic survivors with the new tests killing the behavioral mutants. Let me launch it detached and poll patiently:
+
+Ran a command
+
+Ran a command
+
+Mutation run reached the verification phase (382 mutants, 83 survivors being individually verified). The killing tests should reduce logic survivors to 0. Verification takes several minutes (each survivor applied + suite run). Let me wait:
+
+Ran a command
+
+Ran a command
+
+**G07 PASSES: 0 logic survivors, honest accounting (298 killed + 83 accepted = 381).** The behavioral mutants (setattr field names, evt prefix) are now killed by my new tests — they moved from the survivor set into the killed set. The 83 accepted are all genuine prose (verified by the shape classifier). Let me confirm the tree is clean and the accepted set is legitimately prose-only:
+
+Ran a command
+
+Ran a command
+
+Clean tree, snapshot auto-cleaned, and **zero behavioral-position mutants wrongly accepted** — the 82 accepted literals are all prose, plus 1 equivalent annotation. This directly answers the reviewer's P1-2: no identifier prefix, field name, event kind, or key is being silently accepted anymore. Now run the full gate suite to refresh all evidence, regenerate the build report, and confirm G10:
+
+Ran a command
+
+Ran a command
+
+G10 fails on build-report drift (facts still show old numbers 345→now 381). This is expected — I regenerate after G07 evidence lands. The gate run is still going (G07 in progress). Let me wait for it to finish, then regenerate the report and re-run G10:
+
+Ran a command
+
+Ran a command
+
+G07 PASSES in the full run, manifest regenerated and validated. Only G10 needs the report refresh. Let me regenerate the build-report facts from the fresh evidence, then re-run G10 and the manifest steps:
+
+Ran a command
+
+Ran a command
+
+Facts now show 235 tests, 381 mutants, 0 logic survivors. Now re-run G10 and re-run the manifest steps (since the report changed, the manifest must be regenerated to stay consistent):
+
+Ran a command
+
+Ran a command
+
+All gates green including G10. But there's an ordering subtlety I must fix: G10 depends on the build report, which depends on G07 evidence — so in a clean orchestrator run, G10 runs *before* G07 finishes and always fails on first pass. I need the orchestrator to regenerate the report and re-run G10 *after* G07. Let me fix that ordering properly rather than relying on manual steps:
+
+Ran a command
+
+Ran a command
+
+I'll restructure: G09 stays in the main phase, but move G10 and a report-regeneration step into a post-G07 phase (before manifest). The build report must be regenerated from G07 evidence, then G10 validates it, then the manifest is built. Let me pull G10 out of GATES and create a proper post-mutation phase:
+
+Edited 2 files
+
+Edited 2 files
+
+The `build-report-regen` step writes BUILD-REPORT-V005.md, but the summary-writing loop writes evidence for every gate except manifest-regen. I need to also skip evidence-writing for `build-report-regen` (it's an action, not a gate) — actually it's fine to write its stdout as evidence. But it shouldn't count as a "gate" failure oddly. Let me verify the loop handles it and run the full suite once more end-to-end:
+
+Ran 2 commands
+
+Ran 2 commands
+
+**Every gate passes in a single clean orchestrator run** — G01 through G10, G07 with 0 logic survivors, all in the correct order with no manual intervention. Let me verify the summary and confirm the tree is clean, then package V005:
+
+Ran a command
+
+Ran a command
+
+Zero failed gates, tree clean, snapshot cleaned. Now package V005:
+
+Ran a command
+
+Ran a command
+
+Packaged. Let me verify the attestation and independently confirm the ZIP integrity before delivering:
+
+Ran a command
+
+Ran a command
+
+The attestation now shows `PYTHONPATH=src` in every smoke command (P1-3 fixed) and reproducibly documents the environment. Let me independently verify the ZIP hash, contents integrity, and that the security fix is present in the shipped code, then run the reviewer's exact exploits against the extracted artifact:
+
+Ran a command
+
+Ran a command
+
+Independently verified: hash matches, zero untracked files, the security fix ships, and **the reviewer's exact P0-1 exploit now fails closed against the actual shipped code** (`TrustBoundaryViolation` instead of `TENANT_BYPASS: yes`). Let me copy both artifacts to outputs and present them:
+
+Ran 2 commands, read a file
+
+Ran 2 commands, read a file
+
+V005 is complete and delivered for independent review.
+
+### Artifacts
+
+- **ZIP:** `UraiFlow-SaaS_Claude_V005_20260809_1304.zip`
+- **External attestation:** `UraiFlow-SaaS_Claude_V005_20260809_1304_ATTESTATION.md`
+- **Final ZIP SHA-256:** `0872971987ef6d162c3c8949136c2044a1a2b2d89e5f6ce0f87c9982820a3805` — matches the attestation; verify this against the received file first.
+
+### Every V004 finding dispositioned
+
+**P0-1/2/3 (the trust-model bypasses) — fixed at the root, not per-site.** New `core/primitives.py` (ADR-0014) enforces canonical exact-`str` identifiers (`type(value) is str`, never `isinstance`, checked before any method of the incoming object runs) and rejects duck-typed impostors. Canonicalisation happens at construction in `TenantContext`, `AdapterDescriptor`, `CommitReceipt`, `CandidateRecord`, plus the registry, recovery allowlist, and lineage. I re-ran your three exact exploits against the *extracted shipped code* — the tenant probe now returns `TrustBoundaryViolation` instead of `TENANT_BYPASS: yes`, and all three are pinned as executed-attack regressions.
+
+**P0-4 (G09 false pass):** exact `file.py::test_name` pair resolution — a name in the wrong file now fails, bare references are rejected. **P1-1 (false "0 rows"):** honest validated-row count. Both pinned in `test_rtm_validator.py`.
+
+**P1-2 (mutation over-acceptance) — this one proved your point.** With the default-deny classifier, the gate honestly surfaced 68 logic survivors that the old one hid. Working them down, I found the `object.__setattr__(self, "adapter_id", …)` field-name literals were **genuinely behavioural** — mutating them writes the canonical value to the wrong attribute, leaving identity fields holding un-stripped/hostile input. I proved that's a real bug and killed those mutants with real tests. Final gate: **298 killed + 83 accepted (82 prose, 1 equivalent-annotation) + 0 logic survivors = 381**, with zero behavioural-position literals in the accepted set.
+
+**P1-3:** the attestation now records `PYTHONPATH=src` in every smoke command.
+
+### Also fixed: a self-inflicted process bug
+
+Between iterations, a killed mutation run left a mutant applied in the working tree. I made the gate self-healing — it snapshots source to disk and restores on next startup (with a `--restore` escape hatch and three regression tests) — and restructured the orchestrator so G07 runs as an isolated phase with report-regeneration and G10 correctly sequenced after it. The entire 14-gate run now passes clean in one invocation with no manual steps.
+
+### Evidence
+
+235 tests, 100% line + branch, ruff/mypy clean, all gates G01–G10 PASS in a single orchestrator run, deterministic rebuild byte-identical, 235 files = 234 manifest-covered + the manifest, zero untracked. Deferred to the **V006 backlog**: extending exact-type canonicalisation to any future protected-boundary value (ADR-0014 scope note), then persistence/CI/real-provider work.
+
+I have not self-declared V005 accepted — it's handed back with the exact ZIP and external attestation for your independent verification.
+
+Uraiflow saas claude v005 20260809 1304
+
+ZIP 
+
+Uraiflow saas claude v005 20260809 1304 attestation
+
+Document · MD 

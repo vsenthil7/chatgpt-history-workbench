@@ -1,0 +1,566 @@
+# TALKPROOF — INDEPENDENT PRODUCT OWNER REVIEW OF CLAUDE RECOVERY
+
+Act as the independent senior Product Owner, Requirements Auditor, Product Architect and adversarial reviewer for TalkProof.
+
+I have attached:
+
+1. The authoritative TalkProof requirement/planning source package.
+2. Claude's Requirement & Sprint Recovery analysis produced from those documents.
+
+Your job is NOT to continue Claude's work.
+
+Your job is to independently verify whether Claude understood the product and whether its proposed recovery is complete and correct.
+
+---
+
+# FIRST RULE — DO NOT TRUST CLAUDE OR YOUR OWN PREVIOUS MEMORY
+
+Do not assume Claude's conclusions are correct.
+
+Do not assume previous ChatGPT conclusions are correct.
+
+Do not answer from remembered TalkProof discussions where attached evidence exists.
+
+Read the authoritative source documents yourself.
+
+Then read Claude's output.
+
+Evaluate Claude claim-by-claim against the source.
+
+The source documents take precedence over either AI's narrative.
+
+---
+
+# DO NOT ACT
+
+Do NOT:
+
+- modify files;
+- write code;
+- create sprints;
+- update the Sprint Tracker;
+- rewrite PRD/FRD/NFRD;
+- reorder existing sprints;
+- delete historical information;
+- shrink scope;
+- create implementation instructions yet.
+
+This is an independent REVIEW GATE only.
+
+---
+
+# PRODUCT PRINCIPLE 1 — NO SCOPE SHRINK
+
+TalkProof is a reusable, multi-tenant SaaS product.
+
+Do not simplify the product merely because some capabilities are difficult or unfinished.
+
+Do not automatically recommend removing:
+
+- communications;
+- PSTN;
+- chat;
+- WhatsApp;
+- meetings/video;
+- notifications;
+- Telegram;
+- certification;
+- provider abstraction;
+- AI;
+- governance;
+- multi-tenancy;
+- white-label;
+- billing;
+- storage;
+- integrations.
+
+Determine intended scope from the source documents.
+
+If Claude proposes scope reduction, identify it.
+
+---
+
+# PRODUCT PRINCIPLE 2 — PROVIDER IMPLEMENTATION VS CONFIGURATION
+
+This distinction is critical.
+
+The intended model is NOT:
+
+provider selected
+→ create interface
+→ return fake ID
+→ mark feature DONE.
+
+The intended model is:
+
+provider capability
+→ provider-neutral interface
+→ production adapter implemented from provider API specification
+→ configurable provider/tenant settings
+→ runtime secret retrieval
+→ request construction
+→ authentication/signing
+→ response parsing
+→ provider-neutral mapping
+→ callbacks/webhooks
+→ errors/retries/timeouts/idempotency/rate limits where relevant
+→ observability/audit/metering
+→ contract tests using documented/sample responses
+→ deterministic mock/stub for automated testing
+→ real credentials supplied later
+→ live-provider verification
+→ product E2E verification.
+
+A test stub may replace the EXTERNAL PROVIDER.
+
+It must not replace the production adapter itself when implementation can reasonably be developed from the provider's published API specification.
+
+Audit whether Claude has fully understood this distinction.
+
+---
+
+# PRODUCT PRINCIPLE 3 — DEFINITION OF DONE
+
+Do not accept one-dimensional `DONE`.
+
+Review whether Claude properly distinguishes at least:
+
+D1 — SPECIFIED
+
+D2 — DESIGNED
+
+D3 — IMPLEMENTED
+
+D4 — CONTRACT VERIFIED
+
+D5 — LIVE INTEGRATED
+
+D6 — PRODUCT E2E VERIFIED
+
+D7 — PRODUCTION READY
+
+Check whether Claude accidentally treats mocked acceptance, interface existence or high unit-test coverage as product completion.
+
+---
+
+# PRODUCT PRINCIPLE 4 — AI IS BOTH CAPABILITY AND COMPETITION
+
+This is one of the most important review areas.
+
+Do not restrict competition to existing SaaS vendors.
+
+TalkProof also competes against the rapidly falling cost of BUILDING SOFTWARE.
+
+A prospective buyer, consultancy, BPO, startup or internal engineering team may combine:
+
+- Claude/Claude Code;
+- ChatGPT/Codex or equivalent;
+- autonomous coding agents;
+- open source;
+- LLM APIs;
+- voice APIs;
+- CPaaS;
+- workflow automation;
+- generated frontend/backend;
+- generated tests;
+- generated infrastructure
+
+and build a custom alternative.
+
+Review whether Claude genuinely incorporated this structural competitive change or merely added AI companies to a competitor table.
+
+Ask:
+
+**If code becomes dramatically cheaper to create, why should somebody buy TalkProof rather than generate/build it?**
+
+Evaluate implications for:
+
+- moat;
+- defensibility;
+- differentiation;
+- pricing;
+- build-vs-buy;
+- customisation;
+- provider neutrality;
+- switching costs;
+- evidence/trust;
+- proprietary data;
+- workflow depth;
+- compliance;
+- integrations;
+- distribution;
+- operational maturity;
+- continuous improvement.
+
+Clearly distinguish source evidence from inference and anything requiring current external research.
+
+---
+
+# PRODUCT PRINCIPLE 5 — HOW MUCH AI SHOULD TALKPROOF ITSELF USE?
+
+Do not treat AI merely as the existing 3-model voting mechanism.
+
+Review every major TalkProof capability and determine whether Claude examined where AI should now replace or augment:
+
+- manual configuration;
+- onboarding;
+- provider setup;
+- campaign setup;
+- script/policy creation;
+- policy verification;
+- QA;
+- compliance;
+- anomaly detection;
+- fraud detection;
+- transcript validation;
+- evidence analysis;
+- HiL prioritisation;
+- root-cause analysis;
+- support;
+- diagnostics;
+- testing;
+- regression analysis;
+- security review;
+- penetration/security analysis where safely automatable;
+- provider/API-change analysis;
+- performance optimisation;
+- cost optimisation;
+- observability;
+- incident analysis;
+- documentation;
+- customer reporting;
+- configuration generation;
+- migration assistance;
+- safe self-healing.
+
+AI should not be inserted merely because it exists.
+
+Each proposed AI capability should have:
+
+problem
+→ AI value
+→ deterministic alternative
+→ human control
+→ evidence/audit requirement
+→ failure risk
+→ fallback.
+
+---
+
+# PRODUCT PRINCIPLE 6 — FUTURE COMPETITION, NOT ONLY TODAY'S COMPETITION
+
+Check whether Claude's competitive analysis is future-facing.
+
+The product is being built into an environment where:
+
+- AI models improve;
+- coding agents improve;
+- voice models improve;
+- latency decreases;
+- model/API costs may fall;
+- providers add overlapping features;
+- open source improves;
+- customers gain internal AI-building capability.
+
+TalkProof requirements should not merely reproduce today's competitor checklist.
+
+Review whether Claude asks:
+
+**What becomes commodity?**
+
+**What remains difficult?**
+
+**What must TalkProof own to remain valuable?**
+
+**What should be configurable because the winning provider may change?**
+
+**What should never depend permanently on one provider?**
+
+---
+
+# PRODUCT PRINCIPLE 7 — COMPLETE PROOF CHAIN
+
+Independently evaluate whether Claude adequately handles TalkProof's central evidence/proof chain.
+
+Consider:
+
+interaction
+→ participants
+→ consent
+→ original recording/evidence
+→ evidence hash
+→ transcript
+→ transcript hash
+→ transcription provider/version
+→ policy/script/disclosure
+→ policy version
+→ AI reviews
+→ model/provider/version
+→ prompt/version
+→ voting/consensus
+→ human decision
+→ outcome
+→ root hash
+→ trusted timestamp
+→ external anchor
+→ certificate
+→ customer verification
+→ later independent verification.
+
+Do not assume this exact sequence is authoritative.
+
+Reconcile it against PRD/FRD/NFRD/architecture and identify where this session introduces a new requirement.
+
+---
+
+# PRODUCT PRINCIPLE 8 — HISTORICAL RECORD MUST REMAIN HONEST
+
+Do not allow Claude to rewrite history.
+
+If an old sprint was marked DONE but later analysis shows only a provider seam existed:
+
+retain historical DONE
++
+record recovered completion level/gap separately.
+
+Do not make historical documents falsely appear as though today's understanding existed originally.
+
+---
+
+# PRODUCT PRINCIPLE 9 — EXISTING ROADMAP FIRST
+
+Inspect existing later sprints carefully.
+
+Do not let Claude create a new sprint for a requirement already represented by an existing open/TODO sprint.
+
+Specifically check later architecture/modularisation/provider/de-politicisation work before accepting any proposed new sprint.
+
+Classify every proposed requirement as:
+
+1. already completely covered;
+2. already partially covered;
+3. existing sprint needs clarification;
+4. genuinely missing requirement;
+5. duplicate;
+6. contradiction;
+7. external research required.
+
+---
+
+# PRODUCT PRINCIPLE 10 — SPRINT-SPEC DISCIPLINE
+
+Evaluate Claude's proposed development-document model.
+
+The Sprint Tracker should remain the management/index document.
+
+Complex future sprints should have dedicated sprint specification documents containing enough information for a fresh AI coding session to implement them without relying on conversational memory.
+
+Check that the proposed model includes:
+
+- requirement IDs;
+- objective;
+- detailed scope;
+- non-scope;
+- architecture;
+- affected modules;
+- provider/API contracts;
+- configuration;
+- security;
+- tenancy;
+- data;
+- API;
+- UI;
+- observability;
+- audit;
+- failure behaviour;
+- migration/backward compatibility;
+- tests;
+- contract tests;
+- E2E tests;
+- acceptance criteria;
+- Definition-of-Done target;
+- evidence required for closure.
+
+---
+
+# REVIEW CLAUDE CLAIM-BY-CLAIM
+
+Create a review table:
+
+| Claude claim/proposal | Source evidence | Verdict | Severity | Correction |
+|---|---|---|---|---|
+
+Verdict must be one of:
+
+- CONFIRMED
+- PARTIALLY CONFIRMED
+- UNSUPPORTED
+- CONTRADICTED
+- MISSED REQUIREMENT
+- DUPLICATE
+- RESEARCH REQUIRED
+
+Severity:
+
+- P0 — changes product meaning / major requirement loss
+- P1 — major architecture/product gap
+- P2 — important completeness/quality issue
+- P3 — minor clarification
+
+Do not praise Claude generally.
+
+Verify it.
+
+---
+
+# PERFORM A MISSING-REQUIREMENT AUDIT
+
+After reviewing Claude, independently ask:
+
+**What did BOTH Claude and ChatGPT still fail to think about?**
+
+Do not limit yourself to the issues explicitly mentioned in the prompt.
+
+Systematically examine TalkProof from these perspectives:
+
+- customer;
+- agent;
+- supervisor;
+- compliance officer;
+- auditor;
+- tenant administrator;
+- platform operator;
+- developer/integrator;
+- support engineer;
+- security engineer;
+- finance/billing;
+- regulator;
+- external verifier;
+- AI agent;
+- AI software builder;
+- competitor;
+- malicious user;
+- provider outage;
+- provider API change;
+- model degradation;
+- scale;
+- disaster recovery;
+- data portability;
+- vendor exit/replacement.
+
+But do not invent requirements without labelling them as new proposals/inference.
+
+---
+
+# REQUIRED OUTPUT
+
+Produce:
+
+## A. Executive verdict
+
+Is Claude's recovery:
+
+- ACCEPT
+- ACCEPT WITH CORRECTIONS
+- MAJOR REVISION REQUIRED
+- REJECT
+
+Give one answer.
+
+## B. Claude claim-by-claim audit
+
+Use the required evidence table.
+
+## C. Requirements Claude correctly recovered
+
+## D. Requirements Claude misunderstood
+
+## E. Requirements Claude missed entirely
+
+## F. Provider/stub audit
+
+Specifically test whether Claude understood that the production adapter must be coded even when live credentials are unavailable.
+
+## G. AI-as-competitor audit
+
+Determine whether Claude understood AI software creation as structural competition rather than another vendor category.
+
+## H. AI-inside-TalkProof audit
+
+Identify material AI opportunities Claude missed or added without justification.
+
+## I. Proof/evidence-chain audit
+
+## J. Existing-sprint overlap audit
+
+Identify proposed work that already exists in S47+ or elsewhere.
+
+## K. New-requirement audit
+
+Identify genuinely new requirements only.
+
+## L. Definition-of-Done audit
+
+## M. Sprint-document model audit
+
+## N. Historical-integrity audit
+
+## O. Top P0/P1 corrections before ANY document is modified
+
+## P. Final Product Owner decision
+
+State exactly what Claude should change in its proposal before it is allowed to update Sprint Tracker/requirements.
+
+---
+
+# EVIDENCE DISCIPLINE
+
+For every important statement label the basis:
+
+`[SOURCE — filename/section]`
+
+`[CLAUDE CLAIM]`
+
+`[INFERENCE]`
+
+`[USER REQUIREMENT — 04/10/2026]`
+
+`[EXTERNAL RESEARCH REQUIRED]`
+
+Do not silently merge these categories.
+
+If evidence is unavailable, say:
+
+**NOT ESTABLISHED FROM ATTACHED MATERIAL.**
+
+Do not compensate with confident general knowledge.
+
+---
+
+# MOST IMPORTANT QUESTION
+
+At the end answer this separately:
+
+> **If TalkProof were designed from scratch today, knowing that AI can increasingly write the software itself, what requirements in the recovered product are still genuinely defensible and difficult to replace — and which are becoming commodity?**
+
+Do NOT redesign the product yet.
+
+Use this question only to test whether the recovered requirements are future-ready.
+
+---
+
+# STOP CONDITION
+
+After completing the independent review:
+
+STOP.
+
+Do not update any document.
+
+Do not generate new sprint files.
+
+Do not write code.
+
+Do not ask to start implementation.
+
+The next action requires Senthil's explicit decision.

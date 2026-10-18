@@ -1,0 +1,319 @@
+PS C:\platform-tools> date
+
+10 October 2026 17:03:47
+
+
+PS C:\platform-tools>
+PS C:\platform-tools> Write-Host "`n=== CURRENT RESET / BOOT PROPERTIES ==="
+
+=== CURRENT RESET / BOOT PROPERTIES ===
+PS C:\platform-tools> .\adb.exe shell getprop |
+>>     Select-String -Pattern "bootreason|boot.reason|reset|shutdown|powerctl"
+
+[init.svc.resetreason]: [stopped]
+[persist.sys.boot.reason]: []
+[persist.sys.boot.reason.history]: [reboot,1672574408
+[ril.cpreset]: [0]
+[ril.rildreset_state]: [0]
+[ro.boot.bootreason]: [reboot]
+[ro.omc.changetype]: [DATA_RESET_ON,TRUE]
+[ro.sys.kernelmemory.umr.reclaimer.damon.50.quota_reset_interval_ms]: [1000]
+[sys.boot.reason]: [reboot]
+[sys.boot.reason.last]: [reboot]
+[sys.is_vold_shutdown]: [0]
+[sys.reset_reason]: []
+
+
+PS C:\platform-tools>
+PS C:\platform-tools> Write-Host "`n=== SAMSUNG RESET FILE — LAST 40 ==="
+
+=== SAMSUNG RESET FILE — LAST 40 ===
+PS C:\platform-tools> .\adb.exe shell tail -n 40 /data/log/power_off_reset_reason.txt
+26/10/06 03:50:02
+reason : no power
+java.lang.Exception: It is not an exception!! just save the trace for process which called shutdown thread!! ShutdownThread.shutdown
+        at com.android.server.power.ShutdownThread.shutdownInner(qb/113419284 f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:426)
+        at com.android.server.power.ShutdownThread.systemShutdown(qb/113419284 f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:34)
+        at com.android.server.BatteryService$13.run(qb/113419284 f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:195)
+        at android.os.Handler.handleCallback(Handler.java:1070)
+        at android.os.Handler.dispatchMessage(Handler.java:125)
+        at android.os.Looper.dispatchMessage(Looper.java:358)
+        at android.os.Looper.loopOnce(Looper.java:288)
+        at android.os.Looper.loop(Looper.java:392)
+        at com.android.server.SystemServer.main(qb/113419284 f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:898)
+        at java.lang.reflect.Method.invoke(Native Method)
+        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:638)
+        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:950)
+03:50:06  2026-10-06 03:50:06+0100 | SHUTDOWN |       | REASON: no power [446]
+03:50:06  terminating init service start
+03:50:11  terminating init service end
+03:50:11  volume shutdown start
+03:50:13  sync() before umount...
+03:50:13  sync() before umount took
+03:50:13  zram start
+03:50:14  zram end
+03:50:14  disable vlu...
+03:50:14  disable vlu took...
+03:50:15  TryUmount start
+2026-10-06 06:13:58+0000 |          | NP    | OFFSRC: PWRHOLD / ONSRC: ACOKB / RSTSTAT: PINRESET PORESET [448] / 3885mV (0%)
+
+2026-10-06 06:13:58+0000 |   LPM    |       |
+
+2026-10-06 07:14:39+0100 |    ON    | RP    | S921BXXSHDZH3 [449]
+
+2023-01-01 12:00:10+0000 |          | NP    | OFFSRC: - / ONSRC: ACOKB / RSTSTAT: PINRESET PORESET [450] / 4141mV (62%)
+
+2023-01-01 12:00:10+0000 |   LPM    |       |
+
+2026-10-09 14:37:07+0100 |    ON    | RP    | S921BXXSHDZH3 [451]/ apex_updated
+
+2026-10-10 16:39:36+0100 |    ON    | NP    | S921BXXSHDZH3 / OFFSRC: (M)PWRHOLD (S)PWRHOLD,PWROND / ONSRC: PWRON / RST_STAT: PIN,RSVD31 [453]
+
+PS C:\platform-tools>
+PS C:\platform-tools> Write-Host "`n=== PREVIOUS DUMP — SEARCH TODAY'S EVENT ==="
+
+=== PREVIOUS DUMP — SEARCH TODAY'S EVENT ===
+PS C:\platform-tools> .\adb.exe shell "grep -inE '16:39|PWRHOLD|PWROND|RSVD31|reset|reboot|shutdown|panic|watchdog|fatal' /data/log/prev_dump.log 2>/dev/null | tail -n 200"
+
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+Binary file /data/log/prev_dump.log matches
+PS C:\platform-tools>
+PS C:\platform-tools> Write-Host "`n=== EWLOG AROUND RESET ==="
+
+=== EWLOG AROUND RESET ===
+PS C:\platform-tools> .\adb.exe shell "ls -lAt /data/log/ewlogd | head -30"
+total 82604
+-rw-r--r-- 1 system system 1292359 2026-10-10 16:59 ewlog0_20261010_165905832341.log
+-rw-r--r-- 1 system system  508775 2026-10-10 16:59 ewlog2_20261010_165904158983.log
+-rw-r--r-- 1 system system  230636 2026-10-10 16:55 ewlog3_20261010_165501332394.log
+-rw-r--r-- 1 system system   23202 2026-10-10 16:40 ewlog1_20261010_163936087551.log
+-rw-r--r-- 1 system system 2483587 2026-10-10 16:38 ewlog0_20261010_140350629129.log
+-rw-r--r-- 1 system system  677573 2026-10-10 16:38 ewlog2_20261010_144758599953.log
+-rw-r--r-- 1 system system  861104 2026-10-10 16:37 ewlog3_20261010_084822436179.log
+-rw-r--r-- 1 system system  156376 2026-10-10 16:36 ewlog1_20261010_134835152614.log
+-rw-r--r-- 1 system system 4034957 2026-10-10 14:47 ewlog2_20261010_034550709057.log
+-rw-r--r-- 1 system system 3714527 2026-10-10 14:03 ewlog0_20261010_084502750050.log
+-rw-r--r-- 1 system system  223650 2026-10-10 13:44 ewlog1_20261010_091034546267.log
+-rw-r--r-- 1 system system  248055 2026-10-10 08:55 ewlog1_20261009_143708078855.log
+-rw-r--r-- 1 system system 3644270 2026-10-10 08:40 ewlog0_20261009_234702057597.log
+-rw-r--r-- 1 system system 1180760 2026-10-10 08:39 ewlog3_20261010_083901914806.log
+-rw-r--r-- 1 system system 4277475 2026-10-10 03:31 ewlog2_20261010_033140098595.log
+-rw-r--r-- 1 system system 4034971 2026-10-09 23:46 ewlog0_20261009_194636546871.log
+-rw-r--r-- 1 system system 3444696 2026-10-09 19:45 ewlog0_20261009_194543206620.log
+-rw-r--r-- 1 system system 3169593 2026-10-09 14:35 ewlog2_20261009_093302437532.log
+-rw-r--r-- 1 system system 2541500 2026-10-09 14:35 ewlog0_20261009_113353713301.log
+-rw-r--r-- 1 system system  185808 2026-10-09 14:34 ewlog3_20261009_130651159256.log
+-rw-r--r-- 1 system system   37142 2026-10-09 14:30 ewlog1_20261009_134723800144.log
+-rw-r--r-- 1 system system  241859 2026-10-09 13:37 ewlog1_20261008_172705889780.log
+-rw-r--r-- 1 system system 1239584 2026-10-09 13:05 ewlog3_20261008_175542085188.log
+-rw-r--r-- 1 system system 2663825 2026-10-09 11:33 ewlog0_20261009_074252667842.log
+-rw-r--r-- 1 system system 4132771 2026-10-09 09:26 ewlog2_20261008_165503585795.log
+-rw-r--r-- 1 system system 3384271 2026-10-09 07:42 ewlog0_20261008_224959199378.log
+-rw-r--r-- 1 system system 3989873 2026-10-08 22:16 ewlog0_20261008_162059446076.log
+-rw-r--r-- 1 system system 1005306 2026-10-08 17:52 ewlog3_20261008_061006108629.log
+-rw-r--r-- 1 system system  223113 2026-10-08 17:22 ewlog1_20261008_131806480698.log
+PS C:\platform-tools>
+PS C:\platform-tools> date
+
+10 October 2026 17:03:52
+
+
+PS C:\platform-tools>

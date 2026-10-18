@@ -1,0 +1,2028 @@
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git status -sb; git log -5 --oneline --decorate; git stash list; docker ps --format '{{.Names}} {{.Status}}' | Select-String talkproof\""
+}
+Response
+
+## master...origin/master
+
+Clean at cab5e4f. Active WP: WP-05 (vault read path + provider-router result). Reading FR-028/FR-030 and the code E-01 cited.
+
+Request
+
+{
+  "content": "Set-Location 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'\nforeach ($fr in 'FR-028','FR-030') { Select-String docs\\02_requirements\\FRD.md -Pattern \"### $fr\" -Context 0,12 | ForEach-Object { $_.Line; $_.Context.PostContext | Where-Object { $_ -match 'Description|Processing|Business Rules|Outputs' } } }\n\"=== crypto.py\"\n$l = Get-Content services\\api\\app\\core\\crypto.py; for ($i=0; $i -lt $l.Count; $i++) { \"{0,4}: {1}\" -f ($i+1), $l[$i] }\n\"=== ProviderRouter (provider_service.py) resolve/charge\"\nSelect-String services\\api\\app\\services\\provider_service.py -Pattern 'class ProviderRouter|def resolve|def charge|def _usable|return |encrypted_key|decrypt' | ForEach-Object { \"{0}: {1}\" -f $_.LineNumber, $_.Line.Trim() }\n\"=== callers of ProviderRouter.resolve\"\nGet-ChildItem services\\api\\app -Recurse -Filter *.py | Select-String -Pattern '\\.resolve\\(|ProviderRouter\\(' | ForEach-Object { \"{0}:{1}: {2}\" -f $_.Path.Substring((Get-Location).Path.Length+1), $_.LineNumber, $_.Line.Trim() }\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\wp05_read.ps1"
+}
+
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\wp05_read.ps1
+
+Request
+
+{
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\wp05_read.ps1\""
+}
+
+Response
+
+### FR-028 - Provider API Key Storage
+| **Description** | Tenant admins must be able to store provider API keys (OpenAI, Anthropic, Gemini, Twilio, Telnyx, Vonage, BYO STT, LiveKit) via `talkproof-admin`. Keys are encrypted at rest and never returned in plaintext. |
+| **Processing** | KMS envelope encryption: generate per-key AES-256-GCM DEK; wrap DEK with tenant CMK; store `{ ciphertext, encrypted_dek_ref, provider, masked_key, label }`. `masked_key = key[:4] + '****' + key[-4:]`. |
+| **Outputs** | Key stored; masked representation returned; raw key never returned after creation |
+| **Business Rules** | No GET endpoint may return the raw key. Masking applied before JSON serialisation. `talkproof-admin` must display only the masked key. |
+### FR-030 - Provider Router & Fallback
+| **Description** | For each external provider call, the backend must route to the tenant's BYO key if configured, otherwise fall back to the platform key (metered). |
+| **Processing** | Resolve key: (1) tenant BYO key for provider; (2) platform fallback key. Check spend cap before dispatching. Log to `provider_usage`. |
+| **Outputs** | API call executed; `provider_usage` record written |
+| **Business Rules** | If both BYO and platform keys are unavailable: HTTP 503 `{ error: "provider_unavailable" }`. Spend cap check must be synchronous (before the call). |
+=== crypto.py
+   1: """TalkProof -- M05 secret encryption (Fernet) + masking for BYO keys.
+   2: 
+   3: Provider API keys are encrypted at rest with Fernet (AES-128-CBC + HMAC). The
+   4: plaintext is never persisted or returned by the API; reads return a masked
+   5: preview only (e.g. "sk-te***1234").
+   6: """
+   7: 
+   8: from __future__ import annotations
+   9: 
+  10: import base64
+  11: import hashlib
+  12: from functools import lru_cache
+  13: 
+  14: from cryptography.fernet import Fernet, InvalidToken
+  15: 
+  16: from app.core.config import get_settings
+  17: 
+  18: 
+  19: @lru_cache
+  20: def _fernet() -> Fernet:
+  21:     """Build the Fernet cipher from configured key or a derived dev/test key."""
+  22:     settings = get_settings()
+  23:     key = settings.byo_encryption_key
+  24:     if not key:
+  25:         # Derive a deterministic 32-byte urlsafe key from the JWT secret so
+  26:         # local/CI work without extra config. Production sets byo_encryption_key.
+  27:         digest = hashlib.sha256(settings.jwt_secret_key.encode("utf-8")).digest()
+  28:         key = base64.urlsafe_b64encode(digest).decode("ascii")
+  29:     return Fernet(key.encode("utf-8") if isinstance(key, str) else key)
+  30: 
+  31: 
+  32: def encrypt_secret(plaintext: str) -> str:
+  33:     """Encrypt a secret; returns a urlsafe token string."""
+  34:     return _fernet().encrypt(plaintext.encode("utf-8")).decode("ascii")
+  35: 
+  36: 
+  37: def decrypt_secret(token: str) -> str:
+  38:     """Decrypt a Fernet token back to plaintext.
+  39: 
+  40:     Raises:
+  41:         InvalidToken: if the token is corrupt or was encrypted with another key.
+  42:     """
+  43:     return _fernet().decrypt(token.encode("utf-8")).decode("utf-8")
+  44: 
+  45: 
+  46: def mask_secret(plaintext: str) -> str:
+  47:     """Return a masked preview safe to show in API responses.
+  48: 
+  49:     Keeps a short prefix and suffix, masks the middle. Short secrets are fully
+  50:     masked.
+  51:     """
+  52:     if not plaintext:
+  53:         return ""
+  54:     n = len(plaintext)
+  55:     if n <= 8:
+  56:         return "*" * n
+  57:     return f"{plaintext[:5]}***{plaintext[-4:]}"
+  58: 
+  59: 
+  60: __all__ = ["encrypt_secret", "decrypt_secret", "mask_secret", "InvalidToken"]
+=== ProviderRouter (provider_service.py) resolve/charge
+45: return provider
+57: return self._repo.list_for_tenant(tenant_id, provider)
+83: encrypted_key=encrypt_secret(plaintext_key),
+98: return row
+117: encrypted_key=encrypt_secret(new_plaintext_key),
+132: return key
+148: return key
+158: return self._probe(provider, plaintext_key)
+160: return False, str(exc)
+170: return False, "key too short"
+171: return True, ""
+180: return key
+183: class ProviderRouter:
+193: """Return spend vs cap status for a key (None cap -> unlimited)."""
+200: return {"spent": spent, "cap": cap, "alert": alert, "exceeded": exceeded}
+202: def resolve(
+205: """Return (key, used_platform) for the first usable key in the chain.
+213: return key, False
+214: return None, True
+226: return self._usage.record(
+235: def charge(
+238: """Resolve a key, enforce spend cap, meter the usage, return a summary.
+262: return result
+=== callers of ProviderRouter.resolve
+services\api\app\services\ai_service.py:55: self._router = ProviderRouter(db)
+services\api\app\services\provider_service.py:243: key, used_platform = self.resolve(tenant_id, provider)
+services\api\app\services\telephony_service.py:58: self._router = ProviderRouter(db)
+services\api\app\services\whatsapp_service.py:67: self._router = ProviderRouter(db)
+services\api\app\services\campaign_carrier\resolver.py:107: ProviderRouter(db).resolve(tenant_id, "exotel")
+services\api\app\services\campaign_carrier\resolver.py:114: ProviderRouter(db).resolve(tenant_id, "twilio")
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; $l=Get-Content app\\services\\provider_service.py; for($i=182;$i -lt 265;$i++){ '{0,4}: {1}' -f ($i+1),$l[$i] }; '=== resolver.py 95-125'; $l=Get-Content app\\services\\campaign_carrier\\resolver.py; for($i=94;$i -lt 125;$i++){ '{0,4}: {1}' -f ($i+1),$l[$i] }; '=== platform key service: platform fallback key + decrypt?'; Select-String app\\services\\platform_key_service.py -Pattern 'def |encrypted_key|decrypt' | % { $_.LineNumber.ToString() + ': ' + $_.Line.Trim() } | Select -First 14\""
+}
+
+Response
+
+ 183: class ProviderRouter:
+ 184:     """Resolves a usable key for a provider with fallback + metering (M05-T03/T04/T05)."""
+ 185: 
+ 186:     def __init__(self, db: Session, *, alert_threshold: float = 0.9) -> None:
+ 187:         self._db = db
+ 188:         self._keys = ProviderKeyRepository(db)
+ 189:         self._usage = UsageRepository(db)
+ 190:         self._alert_threshold = alert_threshold
+ 191: 
+ 192:     def spend_status(self, tenant_id: UUID, provider: str, key: ProviderAPIKey) -> dict:
+ 193:         """Return spend vs cap status for a key (None cap -> unlimited)."""
+ 194:         spent = self._usage.total_spend(tenant_id, provider)
+ 195:         cap = Decimal(str(key.spend_cap)) if key.spend_cap is not None else None
+ 196:         alert = bool(
+ 197:             cap is not None and spent >= cap * Decimal(str(self._alert_threshold))
+ 198:         )
+ 199:         exceeded = bool(cap is not None and spent >= cap)
+ 200:         return {"spent": spent, "cap": cap, "alert": alert, "exceeded": exceeded}
+ 201: 
+ 202:     def resolve(
+ 203:         self, tenant_id: UUID, provider: str
+ 204:     ) -> tuple[Optional[ProviderAPIKey], bool]:
+ 205:         """Return (key, used_platform) for the first usable key in the chain.
+ 206: 
+ 207:         Skips keys whose spend cap is exceeded. If no tenant key is usable,
+ 208:         returns (None, True) meaning the platform key should be used.
+ 209:         """
+ 210:         _validate_provider(provider)
+ 211:         for key in self._keys.active_chain(tenant_id, provider):
+ 212:             if not self.spend_status(tenant_id, provider, key)["exceeded"]:
+ 213:                 return key, False
+ 214:         return None, True
+ 215: 
+ 216:     def meter(
+ 217:         self,
+ 218:         *,
+ 219:         tenant_id: UUID,
+ 220:         provider: str,
+ 221:         key: Optional[ProviderAPIKey],
+ 222:         units: int,
+ 223:         cost: Decimal,
+ 224:     ):
+ 225:         """Record a usage_event for a call (BYO key or platform fallback)."""
+ 226:         return self._usage.record(
+ 227:             tenant_id=tenant_id,
+ 228:             provider=provider,
+ 229:             provider_key_id=key.id if key else None,
+ 230:             used_platform_key=key is None,
+ 231:             units=units,
+ 232:             cost=cost,
+ 233:         )
+ 234: 
+ 235:     def charge(
+ 236:         self, *, tenant_id: UUID, provider: str, units: int, cost: Decimal
+ 237:     ) -> dict:
+ 238:         """Resolve a key, enforce spend cap, meter the usage, return a summary.
+ 239: 
+ 240:         Raises SpendCapExceeded (HTTP 402) if every BYO key for the provider is
+ 241:         capped out (platform fallback still meters but a tenant key cap blocks).
+ 242:         """
+ 243:         key, used_platform = self.resolve(tenant_id, provider)
+ 244:         if key is not None:
+ 245:             status_info = self.spend_status(tenant_id, provider, key)
+ 246:             # Block if adding this charge would cross the cap.
+ 247:             if status_info["cap"] is not None and (
+ 248:                 status_info["spent"] + cost > status_info["cap"]
+ 249:             ):
+ 250:                 raise SpendCapExceeded()
+ 251:         event = self.meter(
+ 252:             tenant_id=tenant_id, provider=provider, key=key, units=units, cost=cost
+ 253:         )
+ 254:         result = {
+ 255:             "used_platform_key": used_platform,
+ 256:             "key_id": str(key.id) if key else None,
+ 257:             "usage_event_id": str(event.id),
+ 258:             "alert": False,
+ 259:         }
+ 260:         if key is not None:
+ 261:             result["alert"] = self.spend_status(tenant_id, provider, key)["alert"]
+ 262:         return result
+ 263: 
+ 264: 
+ 265: 
+=== resolver.py 95-125
+  95: ) -> CampaignCarrierProvider:
+  96:     """Build the concrete adapter for a (validated) carrier id.
+  97: 
+  98:     Uses the M05 ProviderRouter to resolve the tenant's BYO key for the carrier
+  99:     (None -> platform/sandbox credentials). Carriers without an adapter yet
+ 100:     raise CampaignCarrierError (config may name them before the adapter lands).
+ 101:     """
+ 102:     settings = get_settings()
+ 103:     if carrier_id == "exotel":
+ 104:         # Exercise the M05 BYO-key chain for this carrier. In production the
+ 105:         # resolved key's encrypted secret is decrypted at the carrier I/O seam;
+ 106:         # the sandbox builds with the platform/stub credentials either way.
+ 107:         ProviderRouter(db).resolve(tenant_id, "exotel")
+ 108:         return ExotelService(
+ 109:             api_key=getattr(settings, "exotel_api_key", ""),
+ 110:             api_secret=getattr(settings, "exotel_api_secret", ""),
+ 111:             account_sid=getattr(settings, "exotel_account_sid", ""),
+ 112:         )
+ 113:     if carrier_id == "twilio":
+ 114:         ProviderRouter(db).resolve(tenant_id, "twilio")
+ 115:         return TwilioCampaignCarrier(
+ 116:             account_sid=getattr(settings, "twilio_account_sid", ""),
+ 117:             auth_token=getattr(settings, "twilio_auth_token", ""),
+ 118:         )
+ 119:     raise CampaignCarrierError(
+ 120:         f"no campaign-carrier adapter built for '{carrier_id}' yet"
+ 121:     )
+ 122: 
+ 123: 
+ 124: def resolve_campaign_carrier(
+ 125:     db: Session, tenant_id: UUID, campaign_id: Optional[UUID] = None
+=== platform key service: platform fallback key + decrypt?
+28: def __init__(self, message: str, status_code: int = 400) -> None:
+34: def _validate_provider(provider: str) -> str:
+41: def __init__(self, db: Session) -> None:
+45: def list_keys(self, provider: Optional[str] = None) -> list[PlatformProviderKey]:
+52: def _find_by_label(
+62: def create_key(
+80: encrypted_key=encrypt_secret(plaintext_key),
+101: def _require(self, key_id: UUID) -> PlatformProviderKey:
+107: def rotate_key(
+118: row.encrypted_key = encrypt_secret(new_plaintext_key)
+133: def revoke_key(
+149: def resolve_active(self, provider: str) -> Optional[PlatformProviderKey]:
+
+Reviewing the acceptance criteria for a key-handling build gate.
+
+Scoping how credential resolution should integrate with carrier adapters.
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; $l=Get-Content app\\services\\provider_service.py; for($i=0;$i -lt 45;$i++){ '{0,4}: {1}' -f ($i+1),$l[$i] }; '=== SpendCapExceeded handling'; Get-ChildItem app -Recurse -Filter *.py | Select-String -Pattern 'SpendCapExceeded' | ? { $_.Path -notmatch 'provider_service.py' } | % { $_.Path.Substring((Get-Location).Path.Length+1) + ':' + $_.LineNumber + ': ' + $_.Line.Trim() } | Select -First 8; '=== platform_key_service imports'; Select-String app\\services\\platform_key_service.py -Pattern '^from|^import' | % { $_.Line }; Select-String app\\services\\platform_key_service.py -Pattern 'def resolve_active' -Context 0,12 | % { $_.Context.PostContext }\""
+}
+
+Response
+
+   1: """TalkProof -- M05 BYO provider-key service + provider router.
+   2: 
+   3: ProviderKeyService: CRUD, test-connection, rotation (audited). Plaintext keys
+   4: are encrypted on write and never returned (only masked previews).
+   5: 
+   6: ProviderRouter: resolves the per-tenant fallback chain for a provider, enforces
+   7: spend caps, meters usage, and falls back to the platform key when a tenant has
+   8: no usable BYO key (billed to the tenant at the platform rate).
+   9: """
+  10: 
+  11: from __future__ import annotations
+  12: 
+  13: from datetime import datetime
+  14: from decimal import Decimal
+  15: from typing import Optional
+  16: from uuid import UUID
+  17: 
+  18: import structlog
+  19: from fastapi import HTTPException, status
+  20: from sqlalchemy.orm import Session
+  21: 
+  22: from app.core.crypto import encrypt_secret, mask_secret
+  23: from app.repositories.audit_repo import AuditRepository
+  24: from app.repositories.provider_repo import ProviderKeyRepository, UsageRepository
+  25: from app.models.provider import PROVIDERS, ProviderAPIKey
+  26: 
+  27: log = structlog.get_logger()
+  28: 
+  29: 
+  30: class ProviderError(Exception):
+  31:     def __init__(self, message: str, status_code: int = 400) -> None:
+  32:         super().__init__(message)
+  33:         self.message = message
+  34:         self.status_code = status_code
+  35: 
+  36: 
+  37: class SpendCapExceeded(ProviderError):
+  38:     def __init__(self, message: str = "spend_cap_exceeded") -> None:
+  39:         super().__init__(message, status_code=402)
+  40: 
+  41: 
+  42: def _validate_provider(provider: str) -> str:
+  43:     if provider not in PROVIDERS:
+  44:         raise ProviderError(f"unsupported provider; one of {sorted(PROVIDERS)}")
+  45:     return provider
+=== SpendCapExceeded handling
+app\services\telephony_service.py:30: from app.services.provider_service import ProviderRouter, SpendCapExceeded
+app\services\telephony_service.py:321: except SpendCapExceeded as exc:
+app\services\whatsapp_service.py:35: from app.services.provider_service import ProviderRouter, SpendCapExceeded
+app\services\whatsapp_service.py:338: (``ProviderRouter.charge`` -> ``SpendCapExceeded`` 402), calls the
+app\services\whatsapp_service.py:359: except SpendCapExceeded as exc:
+app\services\whatsapp_service.py:473: except SpendCapExceeded:
+=== platform_key_service imports
+from __future__ import annotations
+from typing import Optional
+from uuid import UUID
+import structlog
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+from app.core.crypto import encrypt_secret, mask_secret
+from app.models.platform_provider_key import PlatformProviderKey
+from app.models.provider import PROVIDERS
+from app.repositories.audit_repo import AuditRepository
+        """Return the most-recent active platform key for a provider, if any."""
+        _validate_provider(provider)
+        return self._db.scalars(
+            select(PlatformProviderKey)
+            .where(
+                PlatformProviderKey.provider == provider,
+                PlatformProviderKey.status == "active",
+            )
+            .order_by(PlatformProviderKey.created_at.desc())
+            .limit(1)
+        ).first()
+
+Implementing ProviderRouter.resolve_credential (BYO decrypt → platform-vault decrypt → 503 provider_unavailable), with synchronous spend-cap enforcement reused.
+
+Request
+
+{
+  "edits": [
+    {
+      "newText": "from __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom datetime import datetime\nfrom decimal import Decimal\nfrom typing import Optional\nfrom uuid import UUID\n\nimport structlog\nfrom fastapi import HTTPException, status\nfrom sqlalchemy.orm import Session\n\nfrom app.core.crypto import InvalidToken, decrypt_secret, encrypt_secret, mask_secret\n",
+      "oldText": "from __future__ import annotations\n\nfrom datetime import datetime\nfrom decimal import Decimal\nfrom typing import Optional\nfrom uuid import UUID\n\nimport structlog\nfrom fastapi import HTTPException, status\nfrom sqlalchemy.orm import Session\n\nfrom app.core.crypto import encrypt_secret, mask_secret\n"
+    },
+    {
+      "newText": "class SpendCapExceeded(ProviderError):\n    def __init__(self, message: str = \"spend_cap_exceeded\") -> None:\n        super().__init__(message, status_code=402)\n\n\nclass ProviderUnavailable(ProviderError):\n    \"\"\"FR-030: neither a usable BYO key nor a platform key exists -> 503.\"\"\"\n\n    def __init__(self, message: str = \"provider_unavailable\") -> None:\n        super().__init__(message, status_code=503)\n\n\n@dataclass(frozen=True)\nclass ResolvedCredential:\n    \"\"\"A decrypted provider secret handed to a provider call site (WP-05).\n\n    ``secret`` is plaintext for the duration of the call only; it is never\n    persisted, logged or returned by any API (FR-028). ``source`` is\n    ``\"byo\"`` (tenant key) or ``\"platform\"`` (platform fallback, metered).\n    \"\"\"\n\n    provider: str\n    secret: str\n    source: str\n    key_id: UUID\n\n    def __repr__(self) -> str:\n        return (\n            f\"<ResolvedCredential provider={self.provider} source={self.source} \"\n            f\"key_id={self.key_id} secret={mask_secret(self.secret)}>\"\n        )\n",
+      "oldText": "class SpendCapExceeded(ProviderError):\n    def __init__(self, message: str = \"spend_cap_exceeded\") -> None:\n        super().__init__(message, status_code=402)\n"
+    },
+    {
+      "newText": "        return None, True\n\n    def resolve_credential(self, tenant_id: UUID, provider: str) -> ResolvedCredential:\n        \"\"\"FR-030 read path: the decrypted secret a provider call must use.\n\n        Order: (1) first usable tenant BYO key (spend cap not exceeded);\n        (2) the active platform key for the provider (platform fallback);\n        (3) neither -> ProviderUnavailable (HTTP 503 ``provider_unavailable``).\n        A key that cannot be decrypted (rotated encryption key, corrupt row)\n        is treated as unavailable and logged; the plaintext is never logged.\n        \"\"\"\n        from app.services.platform_key_service import PlatformKeyService\n\n        key, _used_platform = self.resolve(tenant_id, provider)\n        if key is not None:\n            return ResolvedCredential(\n                provider=provider,\n                [REDACTED:assigned-value:sha256-b25516eaf2f2](key.encrypted_key, provider, str(key.id)),\n                source=\"byo\",\n                key_id=key.id,\n            )\n        platform = PlatformKeyService(self._db).resolve_active(provider)\n        if platform is None:\n            log.warning(\n                \"provider_unavailable\", tenant_id=str(tenant_id), provider=provider\n            )\n            raise ProviderUnavailable()\n        return ResolvedCredential(\n            provider=provider,\n            [REDACTED:assigned-value:sha256-b25516eaf2f2](platform.encrypted_key, provider, str(platform.id)),\n            source=\"platform\",\n            key_id=platform.id,\n        )\n\n    @staticmethod\n    def _decrypt(encrypted_key: str, provider: str, key_id: str) -> str:\n        try:\n            return decrypt_secret(encrypted_key)\n        except InvalidToken as exc:\n            log.error(\"provider_key_undecryptable\", provider=provider, key_id=key_id)\n            raise ProviderUnavailable(\"provider_key_undecryptable\") from exc\n",
+      "oldText": "        return None, True\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\app\\services\\provider_service.py"
+}
+
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\services\provider_service.py
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\services\provider_service.py	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\services\provider_service.py	modified
+@@ -9,8 +9,9 @@
+ """
+ 
+ from __future__ import annotations
+ 
++from dataclasses import dataclass
+ from datetime import datetime
+ from decimal import Decimal
+ from typing import Optional
+ from uuid import UUID
+@@ -18,9 +19,9 @@
+ import structlog
+ from fastapi import HTTPException, status
+ from sqlalchemy.orm import Session
+ 
+-from app.core.crypto import encrypt_secret, mask_secret
++from app.core.crypto import InvalidToken, decrypt_secret, encrypt_secret, mask_secret
+ from app.repositories.audit_repo import AuditRepository
+ from app.repositories.provider_repo import ProviderKeyRepository, UsageRepository
+ from app.models.provider import PROVIDERS, ProviderAPIKey
+ 
+@@ -38,8 +39,36 @@
+     def __init__(self, message: str = "spend_cap_exceeded") -> None:
+         super().__init__(message, status_code=402)
+ 
+ 
++class ProviderUnavailable(ProviderError):
++    """FR-030: neither a usable BYO key nor a platform key exists -> 503."""
++
++    def __init__(self, message: str = "provider_unavailable") -> None:
++        super().__init__(message, status_code=503)
++
++
++@dataclass(frozen=True)
++class ResolvedCredential:
++    """A decrypted provider secret handed to a provider call site (WP-05).
++
++    ``secret`` is plaintext for the duration of the call only; it is never
++    persisted, logged or returned by any API (FR-028). ``source`` is
++    ``"byo"`` (tenant key) or ``"platform"`` (platform fallback, metered).
++    """
++
++    provider: str
++    secret: str
++    source: str
++    key_id: UUID
++
++    def __repr__(self) -> str:
++        return (
++            f"<ResolvedCredential provider={self.provider} source={self.source} "
++            f"key_id={self.key_id} secret={mask_secret(self.secret)}>"
++        )
++
++
+ def _validate_provider(provider: str) -> str:
+     if provider not in PROVIDERS:
+         raise ProviderError(f"unsupported provider; one of {sorted(PROVIDERS)}")
+     return provider
+@@ -212,8 +241,48 @@
+             if not self.spend_status(tenant_id, provider, key)["exceeded"]:
+                 return key, False
+         return None, True
+ 
++    def resolve_credential(self, tenant_id: UUID, provider: str) -> ResolvedCredential:
++        """FR-030 read path: the decrypted secret a provider call must use.
++
++        Order: (1) first usable tenant BYO key (spend cap not exceeded);
++        (2) the active platform key for the provider (platform fallback);
++        (3) neither -> ProviderUnavailable (HTTP 503 ``provider_unavailable``).
++        A key that cannot be decrypted (rotated encryption key, corrupt row)
++        is treated as unavailable and logged; the plaintext is never logged.
++        """
++        from app.services.platform_key_service import PlatformKeyService
++
++        key, _used_platform = self.resolve(tenant_id, provider)
++        if key is not None:
++            return ResolvedCredential(
++                provider=provider,
++                [REDACTED:assigned-value:sha256-b25516eaf2f2](key.encrypted_key, provider, str(key.id)),
++                source="byo",
++                key_id=key.id,
++            )
++        platform = PlatformKeyService(self._db).resolve_active(provider)
++        if platform is None:
++            log.warning(
++                "provider_unavailable", tenant_id=str(tenant_id), provider=provider
++            )
++            raise ProviderUnavailable()
++        return ResolvedCredential(
++            provider=provider,
++            [REDACTED:assigned-value:sha256-b25516eaf2f2](platform.encrypted_key, provider, str(platform.id)),
++            source="platform",
++            key_id=platform.id,
++        )
++
++    @staticmethod
++    def _decrypt(encrypted_key: str, provider: str, key_id: str) -> str:
++        try:
++            return decrypt_secret(encrypted_key)
++        except InvalidToken as exc:
++            log.error("provider_key_undecryptable", provider=provider, key_id=key_id)
++            raise ProviderUnavailable("provider_key_undecryptable") from exc
++
+     def meter(
+         self,
+         *,
+         tenant_id: UUID,
+```
+
+
+Investigating how platform provider keys are created and tested.
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; Select-String app\\services\\provider_service.py -Pattern 'def create_key' -Context 0,12 | % { $_.Line; $_.Context.PostContext }; Select-String app\\services\\platform_key_service.py -Pattern 'def create_key' -Context 0,10 | % { $_.Line; $_.Context.PostContext }; Select-String app\\models\\provider.py -Pattern '^PROVIDERS' -Context 0,6 | % { $_.Line; $_.Context.PostContext }\""
+}
+
+Response
+
+    def create_key(
+        self,
+        *,
+        tenant_id: UUID,
+        provider: str,
+        plaintext_key: str,
+        label: str = "default",
+        priority: int = 100,
+        spend_cap: Optional[Decimal] = None,
+        expires_at: Optional[datetime] = None,
+        actor_user_id: Optional[UUID],
+        test_first: bool = True,
+    ) -> ProviderAPIKey:
+    def create_key(
+        self,
+        *,
+        provider: str,
+        plaintext_key: str,
+        label: str = "default",
+        actor_user_id: Optional[UUID] = None,
+    ) -> PlatformProviderKey:
+        _validate_provider(provider)
+        if not plaintext_key or not plaintext_key.strip():
+            raise PlatformKeyError("plaintext_key is required")
+PROVIDERS = (
+    "openai",
+    "anthropic",
+    "google",
+    "elevenlabs",
+    "twilio",
+    "exotel",
+
+Request
+
+{
+  "content": "\"\"\"WP-05 / FR-028, FR-030 -- vault read path: ProviderRouter.resolve_credential.\n\nThe encrypted BYO/platform key is decrypted for the provider call site, in the\nFR-030 order (tenant BYO key -> platform key -> 503 provider_unavailable),\nwith the spend cap applied synchronously to the BYO chain. Plaintext is\nnever persisted, never in repr/logs, and FR-028 read surfaces stay masked.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport uuid\nfrom decimal import Decimal\n\nimport pytest\n\nfrom app.models.provider import ProviderAPIKey, UsageEvent\nfrom app.models.tenant import Tenant\nfrom app.services.platform_key_service import PlatformKeyService\nfrom app.services.provider_service import (\n    ProviderKeyService,\n    ProviderRouter,\n    ProviderUnavailable,\n    ResolvedCredential,\n)\n\n\ndef _tenant(db) -> Tenant:\n    t = Tenant(\n        id=uuid.uuid4(),\n        name=\"WP05 T\",\n        slug=f\"wp05-{uuid.uuid4().hex[:8]}\",\n        status=\"active\",\n        plan_tier=\"standard\",\n        isolation_tier=\"A\",\n        is_generic_client=False,\n        branding={},\n        quotas={},\n        config_overrides={},\n    )\n    db.add(t)\n    db.flush()\n    return t\n\n\ndef _byo(db, tenant_id, plaintext, *, cap=None, priority=100):\n    return ProviderKeyService(db).create_key(\n        tenant_id=tenant_id,\n        provider=\"openai\",\n        plaintext_key=plaintext,\n        label=f\"k-{priority}\",\n        priority=priority,\n        spend_cap=cap,\n        actor_user_id=None,\n        test_first=False,\n    )\n\n\nclass TestResolveCredential:\n    def test_byo_key_is_decrypted_for_the_caller(self, db_session):\n        t = _tenant(db_session)\n        key = _byo(db_session, t.id, \"[REDACTED:openai-anthropic-key:sha256-5d12d217919f]\")\n        cred = ProviderRouter(db_session).resolve_credential(t.id, \"openai\")\n        assert isinstance(cred, ResolvedCredential)\n        assert cred.secret == \"[REDACTED:openai-anthropic-key:sha256-5d12d217919f]\"\n        assert cred.source == \"byo\"\n        assert cred.key_id == key.id\n        # Stored form stays encrypted; FR-028 read surface stays masked.\n        assert key.encrypted_key != cred.secret\n        assert \"[REDACTED:openai-anthropic-key:sha256-5d12d217919f]\" not in key.masked_key\n\n    def test_platform_key_used_when_tenant_has_none(self, db_session):\n        t = _tenant(db_session)\n        pk = PlatformKeyService(db_session).create_key(\n            provider=\"openai\", plaintext_key=\"[REDACTED:openai-anthropic-key:sha256-30f389a0a822]\"\n        )\n        cred = ProviderRouter(db_session).resolve_credential(t.id, \"openai\")\n        assert cred.secret == \"[REDACTED:openai-anthropic-key:sha256-30f389a0a822]\"\n        assert cred.source == \"platform\"\n        assert cred.key_id == pk.id\n\n    def test_no_key_anywhere_is_503_provider_unavailable(self, db_session):\n        t = _tenant(db_session)\n        with pytest.raises(ProviderUnavailable) as exc:\n            ProviderRouter(db_session).resolve_credential(t.id, \"openai\")\n        assert exc.value.status_code == 503\n        assert exc.value.message == \"provider_unavailable\"\n\n    def test_capped_byo_key_falls_back_to_platform(self, db_session):\n        # Spend cap is checked synchronously before the key is handed out:\n        # an exhausted BYO key is skipped and the platform key used instead.\n        t = _tenant(db_session)\n        key = _byo(db_session, t.id, \"sk-byo-capped\", cap=Decimal(\"1.00\"))\n        db_session.add(\n            UsageEvent(\n                id=uuid.uuid4(),\n                tenant_id=t.id,\n                provider=\"openai\",\n                provider_key_id=key.id,\n                used_platform_key=False,\n                units=1,\n                cost=Decimal(\"1.00\"),\n            )\n        )\n        db_session.flush()\n        PlatformKeyService(db_session).create_key(\n            provider=\"openai\", plaintext_key=\"sk-platform-after-cap\"\n        )\n        cred = ProviderRouter(db_session).resolve_credential(t.id, \"openai\")\n        assert cred.source == \"platform\"\n        assert cred.secret == \"sk-platform-after-cap\"\n\n    def test_priority_chain_picks_first_usable_byo_key(self, db_session):\n        t = _tenant(db_session)\n        _byo(db_session, t.id, \"sk-second\", priority=200)\n        first = _byo(db_session, t.id, \"sk-first\", priority=10)\n        cred = ProviderRouter(db_session).resolve_credential(t.id, \"openai\")\n        assert cred.key_id == first.id\n        assert cred.secret == \"sk-first\"\n\n    def test_other_tenants_key_is_never_resolved(self, db_session):\n        a = _tenant(db_session)\n        b = _tenant(db_session)\n        _byo(db_session, a.id, \"sk-tenant-a-only\")\n        with pytest.raises(ProviderUnavailable):\n            ProviderRouter(db_session).resolve_credential(b.id, \"openai\")\n\n    def test_undecryptable_key_is_unavailable_not_a_crash(self, db_session):\n        t = _tenant(db_session)\n        key = _byo(db_session, t.id, \"sk-will-be-corrupted\")\n        key.encrypted_key = \"not-a-fernet-token\"\n        db_session.flush()\n        with pytest.raises(ProviderUnavailable) as exc:\n            ProviderRouter(db_session).resolve_credential(t.id, \"openai\")\n        assert exc.value.message == \"provider_key_undecryptable\"\n\n    def test_repr_masks_secret(self, db_session):\n        cred = ResolvedCredential(\n            provider=\"openai\",\n            secret=\"sk-abcdefghijklmnop\",\n            source=\"byo\",\n            key_id=uuid.uuid4(),\n        )\n        assert \"sk-abcdefghijklmnop\" not in repr(cred)\n        assert \"mnop\" in repr(cred)  # masked preview only\n\n    def test_unsupported_provider_rejected(self, db_session):\n        from app.services.provider_service import ProviderError\n\n        t = _tenant(db_session)\n        with pytest.raises(ProviderError):\n            ProviderRouter(db_session).resolve_credential(t.id, \"not-a-provider\")\n\n\nclass TestKeyModelUnchanged:\n    def test_byo_row_never_stores_plaintext(self, db_session):\n        t = _tenant(db_session)\n        key = _byo(db_session, t.id, \"sk-plaintext-check\")\n        row = db_session.get(ProviderAPIKey, key.id)\n        assert \"sk-plaintext-check\" not in row.encrypted_key\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\tests\\unit\\test_wp05_provider_credential.py"
+}
+
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\unit\test_wp05_provider_credential.py
+Snapshot before executing (visible sequence).
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git status --short; git diff --stat; git diff; 'INTENDED COMMIT: WP-05 | ProviderRouter.resolve_credential vault read path + tests — first attempt, unexecuted'; git add services/api/app/services/provider_service.py services/api/tests/unit/test_wp05_provider_credential.py; git status --short; git diff --cached --stat\""
+}
+
+Response
+
+ M services/api/app/services/provider_service.py
+?? services/api/tests/unit/test_wp05_provider_credential.py
+ services/api/app/services/provider_service.py | 71 ++++++++++++++++++++++++++-
+ 1 file changed, 70 insertions(+), 1 deletion(-)
+diff --git a/services/api/app/services/provider_service.py b/services/api/app/services/provider_service.py
+index 4869a4d..1563192 100644
+--- a/services/api/app/services/provider_service.py
++++ b/services/api/app/services/provider_service.py
+@@ -10,6 +10,7 @@ no usable BYO key (billed to the tenant at the platform rate).
+ 
+ from __future__ import annotations
+ 
++from dataclasses import dataclass
+ from datetime import datetime
+ from decimal import Decimal
+ from typing import Optional
+@@ -19,7 +20,7 @@ import structlog
+ from fastapi import HTTPException, status
+ from sqlalchemy.orm import Session
+ 
+-from app.core.crypto import encrypt_secret, mask_secret
++from app.core.crypto import InvalidToken, decrypt_secret, encrypt_secret, mask_secret
+ from app.repositories.audit_repo import AuditRepository
+ from app.repositories.provider_repo import ProviderKeyRepository, UsageRepository
+ from app.models.provider import PROVIDERS, ProviderAPIKey
+@@ -39,6 +40,34 @@ class SpendCapExceeded(ProviderError):
+         super().__init__(message, status_code=402)
+ 
+ 
++class ProviderUnavailable(ProviderError):
++    """FR-030: neither a usable BYO key nor a platform key exists -> 503."""
++
++    def __init__(self, message: str = "provider_unavailable") -> None:
++        super().__init__(message, status_code=503)
++
++
++@dataclass(frozen=True)
++class ResolvedCredential:
++    """A decrypted provider secret handed to a provider call site (WP-05).
++
++    ``secret`` is plaintext for the duration of the call only; it is never
++    persisted, logged or returned by any API (FR-028). ``source`` is
++    ``"byo"`` (tenant key) or ``"platform"`` (platform fallback, metered).
++    """
++
++    provider: str
++    secret: str
++    source: str
++    key_id: UUID
++
++    def __repr__(self) -> str:
++        return (
++            f"<ResolvedCredential provider={self.provider} source={self.source} "
++            f"key_id={self.key_id} secret={mask_secret(self.secret)}>"
++        )
++
++
+ def _validate_provider(provider: str) -> str:
+     if provider not in PROVIDERS:
+         raise ProviderError(f"unsupported provider; one of {sorted(PROVIDERS)}")
+@@ -213,6 +242,46 @@ class ProviderRouter:
+                 return key, False
+         return None, True
+ 
++    def resolve_credential(self, tenant_id: UUID, provider: str) -> ResolvedCredential:
++        """FR-030 read path: the decrypted secret a provider call must use.
++
++        Order: (1) first usable tenant BYO key (spend cap not exceeded);
++        (2) the active platform key for the provider (platform fallback);
++        (3) neither -> ProviderUnavailable (HTTP 503 ``provider_unavailable``).
++        A key that cannot be decrypted (rotated encryption key, corrupt row)
++        is treated as unavailable and logged; the plaintext is never logged.
++        """
++        from app.services.platform_key_service import PlatformKeyService
++
++        key, _used_platform = self.resolve(tenant_id, provider)
++        if key is not None:
++            return ResolvedCredential(
++                provider=provider,
++                [REDACTED:assigned-value:sha256-b25516eaf2f2](key.encrypted_key, provider, str(key.id)),
++                source="byo",
++                key_id=key.id,
++            )
++        platform = PlatformKeyService(self._db).resolve_active(provider)
++        if platform is None:
++            log.warning(
++                "provider_unavailable", tenant_id=str(tenant_id), provider=provider
++            )
++            raise ProviderUnavailable()
++        return ResolvedCredential(
++            provider=provider,
++            [REDACTED:assigned-value:sha256-b25516eaf2f2](platform.encrypted_key, provider, str(platform.id)),
++            source="platform",
++            key_id=platform.id,
++        )
++
++    @staticmethod
++    def _decrypt(encrypted_key: str, provider: str, key_id: str) -> str:
++        try:
++            return decrypt_secret(encrypted_key)
++        except InvalidToken as exc:
++            log.error("provider_key_undecryptable", provider=provider, key_id=key_id)
++            raise ProviderUnavailable("provider_key_undecryptable") from exc
++
+     def meter(
+         self,
+         *,
+INTENDED COMMIT: WP-05 | ProviderRouter.resolve_credential vault read path + tests - first attempt, unexecuted
+M  services/api/app/services/provider_service.py
+A  services/api/tests/unit/test_wp05_provider_credential.py
+ services/api/app/services/provider_service.py      |  71 ++++++++-
+ .../tests/unit/test_wp05_provider_credential.py    | 159 +++++++++++++++++++++
+ 2 files changed, 229 insertions(+), 1 deletion(-)
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git commit -m 'audit(WP-05): initial AI implementation — unverified' -m 'FR-028 / FR-030 (CD-04): vault read path. ProviderRouter.resolve_credential(tenant_id, provider) returns a ResolvedCredential (decrypted secret, source byo|platform, key_id) in FR-030 order: first usable tenant BYO key (spend cap applied synchronously via resolve) -> active platform key -> ProviderUnavailable (503 provider_unavailable). Undecryptable rows map to 503 provider_key_undecryptable and are logged without plaintext; repr masks the secret. decrypt_secret now has a production caller. Call sites (campaign-carrier resolver, AI gateway, keys-to-vault) are NOT rewired here: carrier adapters take sid+token pairs while the BYO key stores one secret (DEPENDENCY for WP-17/WP-20).' -m 'Intended tests: tests/unit/test_wp05_provider_credential.py (10). Snapshot taken BEFORE executing them. Full verification NOT RUN.' 2>&1 | % { \\\"$_\\\" }; git show --stat --oneline HEAD; git status --short; git push origin master 2>&1 | % { \\\"$_\\\" }; git status -sb; git log -3 --oneline --decorate\""
+}
+
+Response
+
+[master 2b9ba26] audit(WP-05): initial AI implementation — unverified
+ 2 files changed, 229 insertions(+), 1 deletion(-)
+ create mode 100644 services/api/tests/unit/test_wp05_provider_credential.py
+2b9ba26 audit(WP-05): initial AI implementation — unverified
+ services/api/app/services/provider_service.py      |  71 ++++++++-
+ .../tests/unit/test_wp05_provider_credential.py    | 159 +++++++++++++++++++++
+ 2 files changed, 229 insertions(+), 1 deletion(-)
+To https://github.com/vsenthil7/talkproof-backend.git
+   cab5e4f..2b9ba26  master -> master
+## master...origin/master
+2b9ba26 (HEAD -> master, origin/master, origin/HEAD) audit(WP-05): initial AI implementation — unverified
+cab5e4f fix(WP-03): concurrency test — genesis first row and committed-row cleanup
+c8e47d2 audit(WP-03): initial AI implementation — unverified
+Executing WP-05 tests plus the M05 neighbours.
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh -c 'cd /app && ls tests/*/test_m05* tests/*/*provider* tests/*/*platform_key* 2>/dev/null | tr \\\"\\n\\\" \\\" \\\" > /tmp/wp05files; cat /tmp/wp05files'; docker exec talkproof_api sh -c 'cd /app && sh /tmp/run.sh \\\"tests/unit/test_wp05_provider_credential.py $(cat /tmp/wp05files)\\\"'\""
+}
+
+Response
+
+  /usr/local/lib/python3.11/site-packages/pydantic/_internal/_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
+10 passed, 2 warnings in 2.34s
+10/10 WP-05 tests pass on first execution. Finding and running the M05 neighbours (the glob found none).
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; $f = (Get-ChildItem tests -Recurse -Filter *.py | Select-String -Pattern 'ProviderRouter|PlatformKeyService|ProviderKeyService' | % { $_.Path.Substring((Get-Location).Path.Length+1).Replace('\\','/') } | Sort-Object -Unique) -join ' '; $f; docker exec talkproof_api sh /tmp/run.sh \\\"$f\\\" | Select-Object -Last 2; docker exec talkproof_api sh -c 'cd /app && black --check -q app/services/provider_service.py tests/unit/test_wp05_provider_credential.py && echo BLACK_OK; flake8 app/services/provider_service.py tests/unit/test_wp05_provider_credential.py && echo FLAKE8_OK'\""
+}
+
+Response
+
+tests/integration/test_m05_byo_keys.py tests/unit/test_campaign_carrier_resolver.py tests/unit/test_m05_providers.py tests/unit/test_m22_ai_ledger.py tests/unit/test_wp05_provider_credential.py
+  /usr/local/lib/python3.11/site-packages/pydantic/_internal/_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
+88 passed, 3 warnings in 6.71s
+BLACK_OK
+FLAKE8_OK
+Reviewing security details in the final test pass.
+
+88 passed, lint clean, no defects on first execution. Review check: are the new lines fully covered (no execution-only gaps)?
+
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh -c 'cd /app && COVERAGE_FILE=/tmp/.c python -m pytest -p no:cacheprovider -q -o addopts= tests/unit/test_wp05_provider_credential.py tests/unit/test_m05_providers.py tests/integration/test_m05_byo_keys.py --cov=app.services.provider_service --cov-report=term-missing --cov-fail-under=0 2>&1 | grep -E \\\"provider_service|passed\\\"'\""
+}
+Response
+
+ExecaError: Command failed with exit code 255: "powershell -NoProfile -Command ""docker exec talkproof_api sh -c 'cd /app && COVERAGE_FILE=/tmp/.c python -m pytest -p no:cacheprovider -q -o addopts= tests/unit/test_wp05_provider_credential.py tests/unit/test_m05_providers.py tests/integration/test_m05_byo_keys.py --cov=app.services.provider_service --cov-report=term-missing --cov-fail-under=0 2>&1 | grep -E \""provider_service|passed\""'"""
+
+The system cannot find the path specified.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"$a='C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis'; docker cp \\\"$a\\narrow.ps1\\\" talkproof_api:/tmp/x.txt | Out-Null; & \\\"$a\\narrow.ps1\\\" -Tests 'tests/unit/test_wp05_provider_credential.py tests/unit/test_m05_providers.py tests/integration/test_m05_byo_keys.py' -Cov 'app.services.provider_service' | Select-String 'provider_service|passed'\""
+}
+Response
+
+
+app/services/provider_service.py     136      0   100%
+52 passed, 3 warnings in 5.88s
+
+Flagging dependency blocking the remaining call-site updates.
+Completing WP-05 and starting WP-08 secret defaults removal
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; Select-String docs\\02_requirements\\NFRD.md -Pattern '### NFR-025' -Context 0,8 | % { $_.Line; $_.Context.PostContext | ? { $_ -match 'Requirement|Measurement' } }; '=== webhooks.py 1-60'; $l=Get-Content services\\api\\app\\api\\v1\\routes\\webhooks.py; for($i=0;$i -lt 60;$i++){ '{0,4}: {1}' -f ($i+1),$l[$i] }; '=== other dev-default secrets in app'; Get-ChildItem services\\api\\app -Recurse -Filter *.py | Select-String -Pattern 'dev-secret|dev-stripe|\\\"changeme\\\"|or \\\"dev' | % { $_.Path.Substring((Get-Location).Path.Length+1) + ':' + $_.LineNumber + ': ' + $_.Line.Trim() }; '=== config fields for these'; Select-String services\\api\\app\\core\\config.py -Pattern 'webhook_secret|stripe' | % { $_.LineNumber.ToString() + ': ' + $_.Line.Trim() }\""
+}
+Response
+
+ExecaError: Command failed with exit code 255: "powershell -NoProfile -Command ""cd 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend'; Select-String docs\02_requirements\NFRD.md -Pattern '### NFR-025' -Context 0,8 | % { $_.Line; $_.Context.PostContext | ? { $_ -match 'Requirement|Measurement' } }; '=== webhooks.py 1-60'; $l=Get-Content services\api\app\api\v1\routes\webhooks.py; for($i=0;$i -lt 60;$i++){ '{0,4}: {1}' -f ($i+1),$l[$i] }; '=== other dev-default secrets in app'; Get-ChildItem services\api\app -Recurse -Filter *.py | Select-String -Pattern 'dev-secret|dev-stripe|\""changeme\""|or \""dev' | % { $_.Path.Substring((Get-Location).Path.Length+1) + ':' + $_.LineNumber + ': ' + $_.Line.Trim() }; '=== config fields for these'; Select-String services\api\app\core\config.py -Pattern 'webhook_secret|stripe' | % { $_.LineNumber.ToString() + ': ' + $_.Line.Trim() }"""
+
+'%' is not recognized as an internal or external command,\r
+operable program or batch file.
+Request
+
+{
+  "content": "Set-Location 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'\nSelect-String docs\\02_requirements\\NFRD.md -Pattern '### NFR-025' -Context 0,8 | ForEach-Object { $_.Line; $_.Context.PostContext | Where-Object { $_ -match 'Requirement|Measurement' } }\n\"=== webhooks.py 1-60\"\n$l = Get-Content services\\api\\app\\api\\v1\\routes\\webhooks.py; for ($i=0; $i -lt 60; $i++) { \"{0,4}: {1}\" -f ($i+1), $l[$i] }\n\"=== dev-default secrets in app\"\nGet-ChildItem services\\api\\app -Recurse -Filter *.py | Select-String -Pattern 'dev-secret|dev-stripe|\"changeme\"|or \"dev' | ForEach-Object { \"{0}:{1}: {2}\" -f $_.Path.Substring((Get-Location).Path.Length+1), $_.LineNumber, $_.Line.Trim() }\n\"=== config fields\"\nSelect-String services\\api\\app\\core\\config.py -Pattern 'webhook_secret|stripe|whatsapp' | ForEach-Object { \"{0}: {1}\" -f $_.LineNumber, $_.Line.Trim() }\n\"=== tests referencing dev-secret\"\nGet-ChildItem services\\api\\tests -Recurse -Filter *.py | Select-String -Pattern 'dev-secret|WHATSAPP_WEBHOOK_SECRET|EXOTEL_WEBHOOK_SECRET|exotel_webhook_secret' | ForEach-Object { \"{0}:{1}: {2}\" -f (Split-Path $_.Path -Leaf), $_.LineNumber, $_.Line.Trim() }\n\"=== .env.example webhook lines\"\nSelect-String services\\api\\.env.example -Pattern 'WEBHOOK' | ForEach-Object { $_.Line }\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\wp08_read.ps1"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\wp08_read.ps1
+Request
+
+{
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\wp08_read.ps1\""
+}
+Response
+
+### NFR-025 - Secret Management
+| **Requirement** | No secrets (API keys, database credentials, JWT signing keys, provider keys) may be committed to any Git repository. All secrets must be injected at runtime via environment variables from a secrets manager (HashiCorp Vault / AWS Secrets Manager / DigitalOcean App Platform secrets). `.env.example` files must contain only placeholder values. |
+| **Measurement** | `git-secrets` / `truffleHog` / `gitleaks` pre-commit hooks and CI scans; block merge on any detected secret. |
+=== webhooks.py 1-60
+   1: """
+   2: Webhooks routes -- receive Exotel call completion webhook.
+   3: HMAC-SHA256 signature validation (not JWT).
+   4: Returns 200 immediately -- never block Exotel.
+   5: """
+   6: 
+   7: from __future__ import annotations
+   8: 
+   9: import hashlib
+  10: import hmac
+  11: import json
+  12: import os
+  13: from urllib.parse import parse_qs
+  14: 
+  15: import structlog
+  16: from fastapi import APIRouter, Depends, HTTPException, Request, status
+  17: from fastapi.responses import JSONResponse
+  18: from sqlalchemy.orm import Session
+  19: 
+  20: from app.core.db import get_db
+  21: from app.schemas.webhooks import WebhookResponse
+  22: from app.services.pipeline_service import PipelineService
+  23: from app.services.telephony_service import TelephonyError, TelephonyService
+  24: from app.services.whatsapp_service import WhatsAppError, WhatsAppService
+  25: 
+  26: log = structlog.get_logger()
+  27: router = APIRouter(tags=["webhooks"])
+  28: 
+  29: # Empty string in env means use default -- or operator handles this
+  30: WEBHOOK_SECRET = os.environ.get("EXOTEL_WEBHOOK_SECRET") or "dev-secret"
+  31: # WhatsApp Business API (Meta) app secret for X-Hub-Signature-256 validation.
+  32: WHATSAPP_WEBHOOK_SECRET = os.environ.get("WHATSAPP_WEBHOOK_SECRET") or "dev-secret"
+  33: 
+  34: 
+  35: def _validate_hmac(signature: str | None, body: bytes) -> bool:
+  36:     """Validate Exotel HMAC-SHA256 signature."""
+  37:     if not signature:
+  38:         return False
+  39:     expected = hmac.new(
+  40:         WEBHOOK_SECRET.encode(),
+  41:         body,
+  42:         hashlib.sha256,
+  43:     ).hexdigest()
+  44:     return hmac.compare_digest(expected, signature)
+  45: 
+  46: 
+  47: def _parse_form(body: bytes) -> dict:
+  48:     """Parse URL-encoded form body into a flat dict (first value per key)."""
+  49:     parsed = parse_qs(body.decode("utf-8", errors="replace"))
+  50:     return {k: v[0] for k, v in parsed.items()}
+  51: 
+  52: 
+  53: def _validate_whatsapp_hmac(signature: str | None, body: bytes) -> bool:
+  54:     """Validate the WhatsApp/Meta ``X-Hub-Signature-256`` (``sha256=<hex>``)."""
+  55:     if not signature:
+  56:         return False
+  57:     sig = signature[7:] if signature.startswith("sha256=") else signature
+  58:     expected = hmac.new(
+  59:         WHATSAPP_WEBHOOK_SECRET.encode(),
+  60:         body,
+=== dev-default secrets in app
+services\api\app\api\v1\routes\billing.py:37: STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET") or "dev-stripe-secret"
+services\api\app\api\v1\routes\webhooks.py:30: WEBHOOK_SECRET = os.environ.get("EXOTEL_WEBHOOK_SECRET") or "dev-secret"
+services\api\app\api\v1\routes\webhooks.py:32: WHATSAPP_WEBHOOK_SECRET = os.environ.get("WHATSAPP_WEBHOOK_SECRET") or "dev-secret"
+services\api\app\core\config.py:26: postgres_password: str = "changeme"
+=== config fields
+57: exotel_webhook_secret: Optional[str] = None
+=== tests referencing dev-secret
+test_s34c_whatsapp_webhook.py:17: # Mirrors the dev fallback in routes/webhooks.py (WHATSAPP_WEBHOOK_SECRET).
+test_s34c_whatsapp_webhook.py:18: _SECRET = "dev-secret"
+test_s34f_whatsapp_acceptance.py:19: _SECRET = "dev-secret"  # mirrors WHATSAPP_WEBHOOK_SECRET dev fallback
+test_webhooks_exotel.py:16: SECRET = "dev-secret"
+=== .env.example webhook lines
+EXOTEL_WEBHOOK_SECRET=
+Scoping the webhook secrets covered by this work item.
+
+Weighing startup checks against test and config requirements.
+
+Scoping webhook secret handling for WP-08
+Request
+
+{
+  "edits": [
+    {
+      "newText": "    exotel_webhook_secret: Optional[str] = None\n    # WP-08 / NFR-025: webhook signing secrets have no in-code defaults; both\n    # must be injected at runtime (see routes/webhooks.verify_webhook_secrets).\n    whatsapp_webhook_secret: Optional[str] = None\n",
+      "oldText": "    exotel_webhook_secret: Optional[str] = None\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\app\\core\\config.py"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\core\config.py
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\core\config.py	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\core\config.py	modified
+@@ -54,8 +54,11 @@
+     exotel_api_key: Optional[str] = None
+     exotel_api_secret: Optional[str] = None
+     exotel_sid: Optional[str] = None
+     exotel_webhook_secret: Optional[str] = None
++    # WP-08 / NFR-025: webhook signing secrets have no in-code defaults; both
++    # must be injected at runtime (see routes/webhooks.verify_webhook_secrets).
++    whatsapp_webhook_secret: Optional[str] = None
+ 
+     # --- OpenAI ---
+     openai_api_key: Optional[str] = None
+ 
+```
+
+Request
+
+{
+  "edits": [
+    {
+      "newText": "import hashlib\nimport hmac\nimport json\nfrom urllib.parse import parse_qs\n\nimport structlog\nfrom fastapi import APIRouter, Depends, HTTPException, Request, status\nfrom fastapi.responses import JSONResponse\nfrom sqlalchemy.orm import Session\n\nfrom app.core.config import get_settings\nfrom app.core.db import get_db\nfrom app.schemas.webhooks import WebhookResponse\nfrom app.services.pipeline_service import PipelineService\nfrom app.services.telephony_service import TelephonyError, TelephonyService\nfrom app.services.whatsapp_service import WhatsAppError, WhatsAppService\n\nlog = structlog.get_logger()\nrouter = APIRouter(tags=[\"webhooks\"])\n\n\nclass WebhookSecretNotConfigured(RuntimeError):\n    \"\"\"WP-08 / NFR-025: a webhook signing secret is missing at runtime.\"\"\"\n\n\ndef _secret(name: str) -> str | None:\n    \"\"\"Return the configured webhook secret (no in-code default).\"\"\"\n    return getattr(get_settings(), name) or None\n\n\ndef verify_webhook_secrets() -> None:\n    \"\"\"Startup gate: refuse to start unless both webhook secrets are set.\n\n    Called from the application lifespan. Without a secret the verifiers\n    below fail closed (every webhook rejected), but a service that cannot\n    accept any carrier/WhatsApp callback should not start at all.\n    \"\"\"\n    missing = [\n        env\n        for env, name in (\n            (\"EXOTEL_WEBHOOK_SECRET\", \"exotel_webhook_secret\"),\n            (\"WHATSAPP_WEBHOOK_SECRET\", \"whatsapp_webhook_secret\"),\n        )\n        if not _secret(name)\n    ]\n    if missing:\n        raise WebhookSecretNotConfigured(\n            \"webhook secrets must be injected at runtime (NFR-025); missing: \"\n            + \", \".join(missing)\n        )\n\n\ndef _validate_hmac(signature: str | None, body: bytes) -> bool:\n    \"\"\"Validate Exotel HMAC-SHA256 signature (fails closed if no secret).\"\"\"\n    secret = _secret(\"exotel_webhook_secret\")\n    if not signature or not secret:\n        if not secret:\n            log.error(\"webhook_secret_missing\", webhook=\"exotel\")\n        return False\n    expected = hmac.new(\n        secret.encode(),\n        body,\n        hashlib.sha256,\n    ).hexdigest()\n    return hmac.compare_digest(expected, signature)\n",
+      "oldText": "import hashlib\nimport hmac\nimport json\nimport os\nfrom urllib.parse import parse_qs\n\nimport structlog\nfrom fastapi import APIRouter, Depends, HTTPException, Request, status\nfrom fastapi.responses import JSONResponse\nfrom sqlalchemy.orm import Session\n\nfrom app.core.db import get_db\nfrom app.schemas.webhooks import WebhookResponse\nfrom app.services.pipeline_service import PipelineService\nfrom app.services.telephony_service import TelephonyError, TelephonyService\nfrom app.services.whatsapp_service import WhatsAppError, WhatsAppService\n\nlog = structlog.get_logger()\nrouter = APIRouter(tags=[\"webhooks\"])\n\n# Empty string in env means use default -- or operator handles this\nWEBHOOK_SECRET = os.environ.get(\"EXOTEL_WEBHOOK_SECRET\") or \"dev-secret\"\n# WhatsApp Business API (Meta) app secret for X-Hub-Signature-256 validation.\nWHATSAPP_WEBHOOK_SECRET = os.environ.get(\"WHATSAPP_WEBHOOK_SECRET\") or \"dev-secret\"\n\n\ndef _validate_hmac(signature: str | None, body: bytes) -> bool:\n    \"\"\"Validate Exotel HMAC-SHA256 signature.\"\"\"\n    if not signature:\n        return False\n    expected = hmac.new(\n        WEBHOOK_SECRET.encode(),\n        body,\n        hashlib.sha256,\n    ).hexdigest()\n    return hmac.compare_digest(expected, signature)\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\app\\api\\v1\\routes\\webhooks.py"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\api\v1\routes\webhooks.py
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\api\v1\routes\webhooks.py	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\api\v1\routes\webhooks.py	modified
+@@ -8,16 +8,16 @@
+ 
+ import hashlib
+ import hmac
+ import json
+-import os
+ from urllib.parse import parse_qs
+ 
+ import structlog
+ from fastapi import APIRouter, Depends, HTTPException, Request, status
+ from fastapi.responses import JSONResponse
+ from sqlalchemy.orm import Session
+ 
++from app.core.config import get_settings
+ from app.core.db import get_db
+ from app.schemas.webhooks import WebhookResponse
+ from app.services.pipeline_service import PipelineService
+ from app.services.telephony_service import TelephonyError, TelephonyService
+@@ -25,20 +25,49 @@
+ 
+ log = structlog.get_logger()
+ router = APIRouter(tags=["webhooks"])
+ 
+-# Empty string in env means use default -- or operator handles this
+-WEBHOOK_SECRET = os.environ.get("EXOTEL_WEBHOOK_SECRET") or "dev-secret"
+-# WhatsApp Business API (Meta) app secret for X-Hub-Signature-256 validation.
+-WHATSAPP_WEBHOOK_SECRET = os.environ.get("WHATSAPP_WEBHOOK_SECRET") or "dev-secret"
+ 
++class WebhookSecretNotConfigured(RuntimeError):
++    """WP-08 / NFR-025: a webhook signing secret is missing at runtime."""
+ 
++
++def _secret(name: str) -> str | None:
++    """Return the configured webhook secret (no in-code default)."""
++    return getattr(get_settings(), name) or None
++
++
++def verify_webhook_secrets() -> None:
++    """Startup gate: refuse to start unless both webhook secrets are set.
++
++    Called from the application lifespan. Without a secret the verifiers
++    below fail closed (every webhook rejected), but a service that cannot
++    accept any carrier/WhatsApp callback should not start at all.
++    """
++    missing = [
++        env
++        for env, name in (
++            ("EXOTEL_WEBHOOK_SECRET", "exotel_webhook_secret"),
++            ("WHATSAPP_WEBHOOK_SECRET", "whatsapp_webhook_secret"),
++        )
++        if not _secret(name)
++    ]
++    if missing:
++        raise WebhookSecretNotConfigured(
++            "webhook secrets must be injected at runtime (NFR-025); missing: "
++            + ", ".join(missing)
++        )
++
++
+ def _validate_hmac(signature: str | None, body: bytes) -> bool:
+-    """Validate Exotel HMAC-SHA256 signature."""
+-    if not signature:
++    """Validate Exotel HMAC-SHA256 signature (fails closed if no secret)."""
++    secret = _secret("exotel_webhook_secret")
++    if not signature or not secret:
++        if not secret:
++            log.error("webhook_secret_missing", webhook="exotel")
+         return False
+     expected = hmac.new(
+-        WEBHOOK_SECRET.encode(),
++        secret.encode(),
+         body,
+         hashlib.sha256,
+     ).hexdigest()
+     return hmac.compare_digest(expected, signature)
+```
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; $l=Get-Content app\\api\\v1\\routes\\webhooks.py; for($i=79;$i -lt 95;$i++){ '{0,4}: {1}' -f ($i+1),$l[$i] }; Select-String app\\api\\v1\\routes\\webhooks.py -Pattern 'WHATSAPP_WEBHOOK_SECRET|WEBHOOK_SECRET\\b' | % { $_.LineNumber.ToString() + ': ' + $_.Line.Trim() }\""
+}
+Response
+
+  80: 
+  81: 
+  82: def _validate_whatsapp_hmac(signature: str | None, body: bytes) -> bool:
+  83:     """Validate the WhatsApp/Meta ``X-Hub-Signature-256`` (``sha256=<hex>``)."""
+  84:     if not signature:
+  85:         return False
+  86:     sig = signature[7:] if signature.startswith("sha256=") else signature
+  87:     expected = hmac.new(
+  88:         WHATSAPP_WEBHOOK_SECRET.encode(),
+  89:         body,
+  90:         hashlib.sha256,
+  91:     ).hexdigest()
+  92:     return hmac.compare_digest(expected, sig)
+  93: 
+  94: 
+  95: def _extract_whatsapp_message(payload: dict) -> dict | None:
+49: ("EXOTEL_WEBHOOK_SECRET", "exotel_webhook_secret"),
+50: ("WHATSAPP_WEBHOOK_SECRET", "whatsapp_webhook_secret"),
+63: secret = _secret("exotel_webhook_secret")
+88: WHATSAPP_WEBHOOK_SECRET.encode(),
+Request
+
+{
+  "edits": [
+    {
+      "newText": "def _validate_whatsapp_hmac(signature: str | None, body: bytes) -> bool:\n    \"\"\"Validate the WhatsApp/Meta ``X-Hub-Signature-256`` (``sha256=<hex>``).\n\n    Fails closed when no secret is configured.\n    \"\"\"\n    secret = _secret(\"whatsapp_webhook_secret\")\n    if not signature or not secret:\n        if not secret:\n            log.error(\"webhook_secret_missing\", webhook=\"whatsapp\")\n        return False\n    sig = signature[7:] if signature.startswith(\"sha256=\") else signature\n    expected = hmac.new(\n        secret.encode(),\n        body,\n        hashlib.sha256,\n    ).hexdigest()\n    return hmac.compare_digest(expected, sig)\n",
+      "oldText": "def _validate_whatsapp_hmac(signature: str | None, body: bytes) -> bool:\n    \"\"\"Validate the WhatsApp/Meta ``X-Hub-Signature-256`` (``sha256=<hex>``).\"\"\"\n    if not signature:\n        return False\n    sig = signature[7:] if signature.startswith(\"sha256=\") else signature\n    expected = hmac.new(\n        WHATSAPP_WEBHOOK_SECRET.encode(),\n        body,\n        hashlib.sha256,\n    ).hexdigest()\n    return hmac.compare_digest(expected, sig)\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\app\\api\\v1\\routes\\webhooks.py"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\api\v1\routes\webhooks.py
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\api\v1\routes\webhooks.py	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\api\v1\routes\webhooks.py	modified
+@@ -79,14 +79,20 @@
+     return {k: v[0] for k, v in parsed.items()}
+ 
+ 
+ def _validate_whatsapp_hmac(signature: str | None, body: bytes) -> bool:
+-    """Validate the WhatsApp/Meta ``X-Hub-Signature-256`` (``sha256=<hex>``)."""
+-    if not signature:
++    """Validate the WhatsApp/Meta ``X-Hub-Signature-256`` (``sha256=<hex>``).
++
++    Fails closed when no secret is configured.
++    """
++    secret = _secret("whatsapp_webhook_secret")
++    if not signature or not secret:
++        if not secret:
++            log.error("webhook_secret_missing", webhook="whatsapp")
+         return False
+     sig = signature[7:] if signature.startswith("sha256=") else signature
+     expected = hmac.new(
+-        WHATSAPP_WEBHOOK_SECRET.encode(),
++        secret.encode(),
+         body,
+         hashlib.sha256,
+     ).hexdigest()
+     return hmac.compare_digest(expected, sig)
+```
+
+Now the startup gate in main.py, then the test changes (existing tests must configure the secret instead of relying on the removed default) and new negative tests.
+
+Request
+
+{
+  "edits": [
+    {
+      "newText": "from app.api.v1.routes.webhooks import router as webhooks_router\nfrom app.api.v1.routes.webhooks import verify_webhook_secrets\n",
+      "oldText": "from app.api.v1.routes.webhooks import router as webhooks_router\n"
+    },
+    {
+      "newText": "    verify_jwt_configuration()\n    # WP-08 / NFR-025: no in-code webhook secret defaults; refuse to start\n    # unless both webhook signing secrets were injected at runtime.\n    verify_webhook_secrets()\n",
+      "oldText": "    verify_jwt_configuration()\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\app\\main.py"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\main.py
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\main.py	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\main.py	modified
+@@ -38,8 +38,9 @@
+ from app.api.v1.routes.tenants import router as tenants_router
+ from app.api.v1.routes.users_admin import router as users_admin_router
+ from app.api.v1.routes.contacts import router as contacts_router
+ from app.api.v1.routes.webhooks import router as webhooks_router
++from app.api.v1.routes.webhooks import verify_webhook_secrets
+ from app.api.v1.routes.whatsapp import router as whatsapp_router
+ from app.api.v1.routes.whitelabel import router as whitelabel_router
+ from app.core.auth import verify_jwt_configuration
+ from app.core.config import get_settings
+@@ -61,8 +62,11 @@
+         raise RuntimeError("Cannot connect to database on startup")
+     # WP-01 / FR-012, NFR-014: refuse to start on a non-RS256 or key-less JWT
+     # configuration instead of failing every request at verify time.
+     verify_jwt_configuration()
++    # WP-08 / NFR-025: no in-code webhook secret defaults; refuse to start
++    # unless both webhook signing secrets were injected at runtime.
++    verify_webhook_secrets()
+     logger.info("talkproof_started", env=settings.app_env)
+     yield
+     logger.info("talkproof_shutdown")
+ 
+```
+
+Setting up shared test fixtures for consistent secret configuration.
+Updating webhook tests with injected secret fixture and new negative cases
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; $l=Get-Content tests\\conftest.py; for($i=0;$i -lt 32;$i++){ '{0,4}: {1}' -f ($i+1),$l[$i] }\""
+}
+Response
+
+   1: """TalkProof -- pytest fixtures for all tests.
+   2: 
+   3: Shared fixtures:
+   4: - db_session: transactional session rolled back after each test (never pollutes DB)
+   5: - test_tenant: a real Tenant row in talkproof_test DB
+   6: - test_user_admin: a TenantAdmin user
+   7: - test_user_agent: an OpsAgent user (with phone -- required for call initiation)
+   8: - test_tenant_b: second tenant for isolation tests
+   9: - test_user_super_admin: a WE super admin (tenant_id=None)
+  10: - super_admin_token: JWT for super admin
+  11: - supervisor_token / agent_token_b: for role-based 403 tests
+  12: - client: FastAPI TestClient with auth headers
+  13: """
+  14: 
+  15: import uuid
+  16: from typing import Generator
+  17: 
+  18: import pytest
+  19: from fastapi.testclient import TestClient
+  20: from sqlalchemy import create_engine
+  21: from sqlalchemy.orm import Session, sessionmaker
+  22: 
+  23: from app.core.auth import create_access_token, hash_password
+  24: from app.core.config import get_settings
+  25: from app.core.db import Base, get_db
+  26: from app.main import app
+  27: from app.models.campaign import Campaign
+  28: from app.models.tenant import Tenant
+  29: from app.models.user import User
+  30: 
+  31: settings = get_settings()
+  32: 
+Request
+
+{
+  "edits": [
+    {
+      "newText": "settings = get_settings()\n\n\n# WP-08 / NFR-025: webhook signing secrets have no in-code default any more.\n# Tests inject a known test secret at runtime (the same way a deployment\n# injects a real one); tests that need the unset state override this.\n@pytest.fixture(autouse=True)\ndef _webhook_test_secrets(monkeypatch):\n    monkeypatch.setattr(settings, \"exotel_webhook_secret\", \"dev-secret\")\n    monkeypatch.setattr(settings, \"whatsapp_webhook_secret\", \"dev-secret\")\n",
+      "oldText": "settings = get_settings()\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\tests\\conftest.py"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\conftest.py
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\conftest.py	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\conftest.py	modified
+@@ -29,8 +29,17 @@
+ from app.models.user import User
+ 
+ settings = get_settings()
+ 
++
++# WP-08 / NFR-025: webhook signing secrets have no in-code default any more.
++# Tests inject a known test secret at runtime (the same way a deployment
++# injects a real one); tests that need the unset state override this.
++@pytest.fixture(autouse=True)
++def _webhook_test_secrets(monkeypatch):
++    monkeypatch.setattr(settings, "exotel_webhook_secret", "dev-secret")
++    monkeypatch.setattr(settings, "whatsapp_webhook_secret", "dev-secret")
++
+ # --- Test engine (uses talkproof_test DB) ---
+ TEST_DB_URL = settings.database_test_url or settings.database_url.replace(
+     "talkproof_dev", "talkproof_test"
+ )
+```
+
+Request
+
+{
+  "content": "\"\"\"WP-08 / NFR-025 (CD-05) -- no in-code webhook secret defaults.\n\nThe Exotel and WhatsApp webhook signing secrets come only from runtime\nconfiguration. Unset: signature validation fails closed (403 for a signed\nrequest that would otherwise be valid) and the application refuses to start\n(verify_webhook_secrets raises, naming the missing variables).\n\"\"\"\n\nfrom __future__ import annotations\n\nimport hashlib\nimport hmac\nimport json\n\nimport pytest\n\nfrom app.api.v1.routes import webhooks\nfrom app.core.config import get_settings\n\nsettings = get_settings()\n\n\ndef _hmac(secret: str, body: bytes) -> str:\n    return hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()\n\n\nclass TestNoDefaults:\n    def test_module_has_no_hardcoded_secret(self):\n        import inspect\n\n        src = inspect.getsource(webhooks)\n        assert \"dev-secret\" not in src\n        assert 'os.environ.get(\"EXOTEL_WEBHOOK_SECRET\")' not in src\n\n    def test_validators_fail_closed_when_unset(self, monkeypatch):\n        monkeypatch.setattr(settings, \"exotel_webhook_secret\", None)\n        monkeypatch.setattr(settings, \"whatsapp_webhook_secret\", None)\n        body = b\"CallSid=abc&Status=completed\"\n        # Even a signature computed with the old default must be rejected.\n        assert webhooks._validate_hmac(_hmac(\"dev-secret\", body), body) is False\n        assert (\n            webhooks._validate_whatsapp_hmac(\"sha256=\" + _hmac(\"dev-secret\", body), body)\n            is False\n        )\n\n    def test_empty_string_counts_as_unset(self, monkeypatch):\n        monkeypatch.setattr(settings, \"exotel_webhook_secret\", \"\")\n        body = b\"x=1\"\n        assert webhooks._validate_hmac(_hmac(\"\", body), body) is False\n\n    def test_configured_secret_validates(self, monkeypatch):\n        monkeypatch.setattr(settings, \"exotel_webhook_secret\", \"runtime-secret-1\")\n        monkeypatch.setattr(settings, \"whatsapp_webhook_secret\", \"runtime-secret-2\")\n        body = b\"CallSid=abc\"\n        assert webhooks._validate_hmac(_hmac(\"runtime-secret-1\", body), body) is True\n        assert webhooks._validate_hmac(_hmac(\"dev-secret\", body), body) is False\n        assert (\n            webhooks._validate_whatsapp_hmac(\n                \"sha256=\" + _hmac(\"runtime-secret-2\", body), body\n            )\n            is True\n        )\n\n\nclass TestStartupGate:\n    def test_refuses_to_start_when_either_secret_missing(self, monkeypatch):\n        monkeypatch.setattr(settings, \"exotel_webhook_secret\", \"set\")\n        monkeypatch.setattr(settings, \"whatsapp_webhook_secret\", None)\n        with pytest.raises(webhooks.WebhookSecretNotConfigured) as exc:\n            webhooks.verify_webhook_secrets()\n        assert \"WHATSAPP_WEBHOOK_SECRET\" in str(exc.value)\n        assert \"EXOTEL_WEBHOOK_SECRET\" not in str(exc.value)\n\n    def test_names_every_missing_secret(self, monkeypatch):\n        monkeypatch.setattr(settings, \"exotel_webhook_secret\", None)\n        monkeypatch.setattr(settings, \"whatsapp_webhook_secret\", \"\")\n        with pytest.raises(webhooks.WebhookSecretNotConfigured) as exc:\n            webhooks.verify_webhook_secrets()\n        assert \"EXOTEL_WEBHOOK_SECRET\" in str(exc.value)\n        assert \"WHATSAPP_WEBHOOK_SECRET\" in str(exc.value)\n\n    def test_starts_when_both_set(self, monkeypatch):\n        monkeypatch.setattr(settings, \"exotel_webhook_secret\", \"a\")\n        monkeypatch.setattr(settings, \"whatsapp_webhook_secret\", \"b\")\n        webhooks.verify_webhook_secrets()  # does not raise\n\n\nclass TestRoutesFailClosed:\n    def test_whatsapp_webhook_403_when_secret_unset(\n        self, client, monkeypatch, db_session, test_tenant, test_user_admin\n    ):\n        monkeypatch.setattr(settings, \"whatsapp_webhook_secret\", None)\n        body = json.dumps({\"object\": \"whatsapp_business_account\", \"entry\": []}).encode()\n        r = client.post(\n            \"/webhooks/whatsapp\",\n            content=body,\n            headers={\"X-Hub-Signature-256\": \"sha256=\" + _hmac(\"dev-secret\", body)},\n        )\n        assert r.status_code == 403\n\n    def test_exotel_webhook_403_when_secret_unset(self, client, monkeypatch):\n        monkeypatch.setattr(settings, \"exotel_webhook_secret\", None)\n        body = b\"CallSid=abc&Status=completed\"\n        r = client.post(\n            \"/webhooks/exotel\",\n            content=body,\n            headers={\n                \"X-Exotel-Signature\": _hmac(\"dev-secret\", body),\n                \"Content-Type\": \"application/x-www-form-urlencoded\",\n            },\n        )\n        assert r.status_code == 403\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\tests\\unit\\test_wp08_webhook_secrets.py"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\unit\test_wp08_webhook_secrets.py
+Adding the missing webhook secret to env files
+Request
+
+{
+  "edits": [
+    {
+      "newText": "EXOTEL_WEBHOOK_SECRET=\n# WP-08 / NFR-025: both webhook signing secrets are REQUIRED at runtime (no\n# in-code default; the service refuses to start without them).\nWHATSAPP_WEBHOOK_SECRET=\n",
+      "oldText": "EXOTEL_WEBHOOK_SECRET=\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\.env.example"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\.env.example
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\.env.example	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\.env.example	modified
+@@ -32,8 +32,11 @@
+ EXOTEL_API_KEY=
+ EXOTEL_API_SECRET=
+ EXOTEL_SID=
+ EXOTEL_WEBHOOK_SECRET=
++# WP-08 / NFR-025: both webhook signing secrets are REQUIRED at runtime (no
++# in-code default; the service refuses to start without them).
++WHATSAPP_WEBHOOK_SECRET=
+ 
+ # --- AI providers (multi-model consensus verification) ---
+ # OpenAI (Whisper STT + GPT-4o)
+ OPENAI_API_KEY=
+```
+
+Snapshot (visible), then execute.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git status --short; git diff --stat; git diff -- services/api/app/main.py services/api/app/core/config.py services/api/tests/conftest.py services/api/.env.example; 'INTENDED COMMIT: WP-08 | remove dev-secret defaults, settings-sourced webhook secrets, fail-closed + startup gate, tests — first attempt, unexecuted'; git add services/api/app/api/v1/routes/webhooks.py services/api/app/core/config.py services/api/app/main.py services/api/tests/conftest.py services/api/tests/unit/test_wp08_webhook_secrets.py services/api/.env.example; git status --short; git diff --cached --stat\""
+}
+Response
+
+ M services/api/.env.example
+ M services/api/app/api/v1/routes/webhooks.py
+ M services/api/app/core/config.py
+ M services/api/app/main.py
+ M services/api/tests/conftest.py
+?? services/api/tests/unit/test_wp08_webhook_secrets.py
+ services/api/.env.example                  |  3 ++
+ services/api/app/api/v1/routes/webhooks.py | 57 ++++++++++++++++++++++++------
+ services/api/app/core/config.py            |  3 ++
+ services/api/app/main.py                   |  4 +++
+ services/api/tests/conftest.py             |  9 +++++
+ 5 files changed, 65 insertions(+), 11 deletions(-)
+diff --git a/services/api/.env.example b/services/api/.env.example
+index 527ae1d..60e6990 100644
+--- a/services/api/.env.example
++++ b/services/api/.env.example
+@@ -33,6 +33,9 @@ EXOTEL_API_KEY=
+ EXOTEL_API_SECRET=
+ EXOTEL_SID=
+ EXOTEL_WEBHOOK_SECRET=
++# WP-08 / NFR-025: both webhook signing secrets are REQUIRED at runtime (no
++# in-code default; the service refuses to start without them).
++WHATSAPP_WEBHOOK_SECRET=
+ 
+ # --- AI providers (multi-model consensus verification) ---
+ # OpenAI (Whisper STT + GPT-4o)
+diff --git a/services/api/app/core/config.py b/services/api/app/core/config.py
+index a924e37..c7f14ed 100644
+--- a/services/api/app/core/config.py
++++ b/services/api/app/core/config.py
+@@ -55,6 +55,9 @@ class Settings(BaseSettings):
+     exotel_api_secret: Optional[str] = None
+     exotel_sid: Optional[str] = None
+     exotel_webhook_secret: Optional[str] = None
++    # WP-08 / NFR-025: webhook signing secrets have no in-code defaults; both
++    # must be injected at runtime (see routes/webhooks.verify_webhook_secrets).
++    whatsapp_webhook_secret: Optional[str] = None
+ 
+     # --- OpenAI ---
+     openai_api_key: Optional[str] = None
+diff --git a/services/api/app/main.py b/services/api/app/main.py
+index 925a3a8..493208a 100644
+--- a/services/api/app/main.py
++++ b/services/api/app/main.py
+@@ -39,6 +39,7 @@ from app.api.v1.routes.tenants import router as tenants_router
+ from app.api.v1.routes.users_admin import router as users_admin_router
+ from app.api.v1.routes.contacts import router as contacts_router
+ from app.api.v1.routes.webhooks import router as webhooks_router
++from app.api.v1.routes.webhooks import verify_webhook_secrets
+ from app.api.v1.routes.whatsapp import router as whatsapp_router
+ from app.api.v1.routes.whitelabel import router as whitelabel_router
+ from app.core.auth import verify_jwt_configuration
+@@ -62,6 +63,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+     # WP-01 / FR-012, NFR-014: refuse to start on a non-RS256 or key-less JWT
+     # configuration instead of failing every request at verify time.
+     verify_jwt_configuration()
++    # WP-08 / NFR-025: no in-code webhook secret defaults; refuse to start
++    # unless both webhook signing secrets were injected at runtime.
++    verify_webhook_secrets()
+     logger.info("talkproof_started", env=settings.app_env)
+     yield
+     logger.info("talkproof_shutdown")
+diff --git a/services/api/tests/conftest.py b/services/api/tests/conftest.py
+index 8cc5d99..db5792c 100644
+--- a/services/api/tests/conftest.py
++++ b/services/api/tests/conftest.py
+@@ -30,6 +30,15 @@ from app.models.user import User
+ 
+ settings = get_settings()
+ 
++
++# WP-08 / NFR-025: webhook signing secrets have no in-code default any more.
++# Tests inject a known test secret at runtime (the same way a deployment
++# injects a real one); tests that need the unset state override this.
++@pytest.fixture(autouse=True)
++def _webhook_test_secrets(monkeypatch):
++    monkeypatch.setattr(settings, "exotel_webhook_secret", "dev-secret")
++    monkeypatch.setattr(settings, "whatsapp_webhook_secret", "dev-secret")
++
+ # --- Test engine (uses talkproof_test DB) ---
+ TEST_DB_URL = settings.database_test_url or settings.database_url.replace(
+     "talkproof_dev", "talkproof_test"
+INTENDED COMMIT: WP-08 | remove dev-secret defaults, settings-sourced webhook secrets, fail-closed + startup gate, tests - first attempt, unexecuted
+M  services/api/.env.example
+M  services/api/app/api/v1/routes/webhooks.py
+M  services/api/app/core/config.py
+M  services/api/app/main.py
+M  services/api/tests/conftest.py
+A  services/api/tests/unit/test_wp08_webhook_secrets.py
+ services/api/.env.example                          |   3 +
+ services/api/app/api/v1/routes/webhooks.py         |  57 +++++++++--
+ services/api/app/core/config.py                    |   3 +
+ services/api/app/main.py                           |   4 +
+ services/api/tests/conftest.py                     |   9 ++
+ .../api/tests/unit/test_wp08_webhook_secrets.py    | 112 +++++++++++++++++++++
+ 6 files changed, 177 insertions(+), 11 deletions(-)
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git commit -m 'audit(WP-08): initial AI implementation — unverified' -m 'NFR-025 (CD-05): routes/webhooks.py no longer carries dev-secret defaults. Exotel and WhatsApp signing secrets are read from settings at validation time (exotel_webhook_secret, new whatsapp_webhook_secret); unset -> validators fail closed (403) and log webhook_secret_missing; verify_webhook_secrets() in the lifespan refuses to start, naming the missing variables. .env.example documents both as required. tests/conftest.py injects a test secret at runtime (autouse) so existing signed-webhook tests keep their meaning. billing.py dev-stripe-secret is WP-07 (not in queue) and untouched.' -m 'Intended tests: tests/unit/test_wp08_webhook_secrets.py (9). Snapshot taken BEFORE executing. Full verification NOT RUN.' 2>&1 | % { \\\"$_\\\" }; git show --stat --oneline HEAD; git push origin master 2>&1 | % { \\\"$_\\\" }; git status -sb; git log -3 --oneline --decorate\""
+}
+Response
+
+[master 40c2d19] audit(WP-08): initial AI implementation — unverified
+ 6 files changed, 177 insertions(+), 11 deletions(-)
+ create mode 100644 services/api/tests/unit/test_wp08_webhook_secrets.py
+40c2d19 audit(WP-08): initial AI implementation — unverified
+ services/api/.env.example                          |   3 +
+ services/api/app/api/v1/routes/webhooks.py         |  57 +++++++++--
+ services/api/app/core/config.py                    |   3 +
+ services/api/app/main.py                           |   4 +
+ services/api/tests/conftest.py                     |   9 ++
+ .../api/tests/unit/test_wp08_webhook_secrets.py    | 112 +++++++++++++++++++++
+ 6 files changed, 177 insertions(+), 11 deletions(-)
+To https://github.com/vsenthil7/talkproof-backend.git
+   2b9ba26..40c2d19  master -> master
+## master...origin/master
+40c2d19 (HEAD -> master, origin/master, origin/HEAD) audit(WP-08): initial AI implementation — unverified
+2b9ba26 audit(WP-05): initial AI implementation — unverified
+cab5e4f fix(WP-03): concurrency test — genesis first row and committed-row cleanup
+Executing WP-08 tests plus the webhook neighbours.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh /tmp/run.sh 'tests/unit/test_wp08_webhook_secrets.py tests/integration/test_webhooks_exotel.py tests/integration/test_s34c_whatsapp_webhook.py tests/integration/test_s34f_whatsapp_acceptance.py'\""
+}
+Response
+
+  /usr/local/lib/python3.11/site-packages/pydantic/_internal/_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
+28 passed, 3 warnings in 4.70s
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh -c 'cd /app && black --check -q app/api/v1/routes/webhooks.py app/core/config.py app/main.py tests/conftest.py tests/unit/test_wp08_webhook_secrets.py && echo BLACK_OK; flake8 app/api/v1/routes/webhooks.py app/core/config.py app/main.py tests/conftest.py tests/unit/test_wp08_webhook_secrets.py && echo FLAKE8_OK; python -c \\\"import app.main\\\" && echo IMPORT_OK'; cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; Select-String .env -Pattern '^WHATSAPP_WEBHOOK_SECRET|^EXOTEL_WEBHOOK_SECRET=.' | % { ($_.Line -split '=')[0] + '=<set>' }\""
+}
+Response
+
+tests/conftest.py:43:1: E305 expected 2 blank lines after class or function definition, found 1
+EXOTEL_WEBHOOK_SECRET=<set>
+Diagnosing lint and formatting failures across test files.
+Fixing lint errors and a missing environment variable
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh -c 'cd /app && black --check app/api/v1/routes/webhooks.py app/core/config.py app/main.py tests/conftest.py tests/unit/test_wp08_webhook_secrets.py 2>&1 | grep reformat; black -q tests/conftest.py tests/unit/test_wp08_webhook_secrets.py app/api/v1/routes/webhooks.py; black --check -q app/api/v1/routes/webhooks.py app/core/config.py app/main.py tests/conftest.py tests/unit/test_wp08_webhook_secrets.py && echo BLACK_OK; flake8 app/api/v1/routes/webhooks.py app/core/config.py app/main.py tests/conftest.py tests/unit/test_wp08_webhook_secrets.py && echo FLAKE8_OK'; docker exec talkproof_api python -c 'import app.main; print(\\\"IMPORT_OK\\\")'\""
+}
+Response
+
+ExecaError: Command failed with exit code 1: "powershell -NoProfile -Command ""docker exec talkproof_api sh -c 'cd /app && black --check app/api/v1/routes/webhooks.py app/core/config.py app/main.py tests/conftest.py tests/unit/test_wp08_webhook_secrets.py 2>&1 | grep reformat; black -q tests/conftest.py tests/unit/test_wp08_webhook_secrets.py app/api/v1/routes/webhooks.py; black --check -q app/api/v1/routes/webhooks.py app/core/config.py app/main.py tests/conftest.py tests/unit/test_wp08_webhook_secrets.py && echo BLACK_OK; flake8 app/api/v1/routes/webhooks.py app/core/config.py app/main.py tests/conftest.py tests/unit/test_wp08_webhook_secrets.py && echo FLAKE8_OK'; docker exec talkproof_api python -c 'import app.main; print(\""IMPORT_OK\"")'"""
+
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+NameError: name 'IMPORT_OK' is not defined
+
+would reformat tests/unit/test_wp08_webhook_secrets.py
+would reformat tests/conftest.py
+would reformat app/api/v1/routes/webhooks.py
+3 files would be reformatted, 2 files would be left unchanged.
+BLACK_OK
+FLAKE8_OK
+Applying formatting tools and verifying the diff stays limited.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git diff --stat; git diff -- services/api/app/api/v1/routes/webhooks.py services/api/tests/conftest.py\""
+}
+Response
+
+ services/api/app/api/v1/routes/webhooks.py           | 8 +++++---
+ services/api/tests/conftest.py                       | 1 +
+ services/api/tests/unit/test_wp08_webhook_secrets.py | 4 +++-
+ 3 files changed, 9 insertions(+), 4 deletions(-)
+diff --git a/services/api/app/api/v1/routes/webhooks.py b/services/api/app/api/v1/routes/webhooks.py
+index b48079f..ed63687 100644
+--- a/services/api/app/api/v1/routes/webhooks.py
++++ b/services/api/app/api/v1/routes/webhooks.py
+@@ -114,9 +114,11 @@ def _extract_whatsapp_message(payload: dict) -> dict | None:
+                 continue
+             business_number = value.get("metadata", {}).get("display_phone_number")
+             msg = messages[0]
+-            text = msg.get("text", {}).get("body") if isinstance(
+-                msg.get("text"), dict
+-            ) else None
++            text = (
++                msg.get("text", {}).get("body")
++                if isinstance(msg.get("text"), dict)
++                else None
++            )
+             return {
+                 "business_number": business_number,
+                 "from": msg.get("from"),
+diff --git a/services/api/tests/conftest.py b/services/api/tests/conftest.py
+index db5792c..0ca6ea2 100644
+--- a/services/api/tests/conftest.py
++++ b/services/api/tests/conftest.py
+@@ -39,6 +39,7 @@ def _webhook_test_secrets(monkeypatch):
+     monkeypatch.setattr(settings, "exotel_webhook_secret", "dev-secret")
+     monkeypatch.setattr(settings, "whatsapp_webhook_secret", "dev-secret")
+ 
++
+ # --- Test engine (uses talkproof_test DB) ---
+ TEST_DB_URL = settings.database_test_url or settings.database_url.replace(
+     "talkproof_dev", "talkproof_test"
+Reviewing an unrelated formatting change in a webhook file.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git checkout -- services/api/app/api/v1/routes/webhooks.py; git status --short; $f='services\\api\\.env'; $t=[IO.File]::ReadAllText($f); if($t -notmatch '(?m)^WHATSAPP_WEBHOOK_SECRET='){ $nl = if($t.Contains(\\\"`r`n\\\")){\\\"`r`n\\\"}else{\\\"`n\\\"}; if(-not $t.EndsWith($nl)){$t+=$nl}; $t += 'WHATSAPP_WEBHOOK_SECRET=dev-whatsapp-webhook-secret-local' + $nl; [IO.File]::WriteAllText($f,$t,(New-Object Text.UTF8Encoding($false))); 'local .env: WHATSAPP_WEBHOOK_SECRET added (dev value)' }\""
+}
+Response
+
+ M services/api/tests/conftest.py
+ M services/api/tests/unit/test_wp08_webhook_secrets.py
+local .env: WHATSAPP_WEBHOOK_SECRET added (dev value)
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker compose -f 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\docker-compose.yml' up -d api 2>&1 | Select -Last 1; Start-Sleep 10; docker logs talkproof_api --since 40s 2>&1 | Select-String 'talkproof_started|Error|raise|WebhookSecret' | Select -First 4; $a='C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis'; foreach($s in 'run.sh','quick.sh'){ docker cp \\\"$a\\$s\\\" talkproof_api:/tmp/$s }; docker exec talkproof_api sh /tmp/run.sh 'tests/unit/test_wp08_webhook_secrets.py tests/integration/test_webhooks_exotel.py tests/integration/test_s34c_whatsapp_webhook.py tests/integration/test_s34f_whatsapp_acceptance.py tests/unit/test_wp01_rs256.py' | Select -Last 1; docker exec talkproof_api sh -c 'cd /app && black --check -q tests/conftest.py tests/unit/test_wp08_webhook_secrets.py app/core/config.py app/main.py && flake8 tests/conftest.py tests/unit/test_wp08_webhook_secrets.py app/core/config.py app/main.py app/api/v1/routes/webhooks.py && echo LINT_OK'\""
+}
+Response
+
+
+ERROR:    Traceback (most recent call last):
+    raise WebhookSecretNotConfigured(
+app.api.v1.routes.webhooks.WebhookSecretNotConfigured: webhook secrets must be injected at runtime (NFR-025); missing: 
+WHATSAPP_WEBHOOK_SECRET
+ERROR:    Application startup failed. Exiting.
+36 passed, 3 warnings in 5.35s
+LINT_OK
+
+Debugging why the container isn't picking up updated environment variables.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh -c 'echo WHATSAPP set: $([ -n \\\"$WHATSAPP_WEBHOOK_SECRET\\\" ] && echo yes || echo no)'; docker ps --format '{{.Names}} {{.Status}}' | Select-String talkproof_api; docker logs talkproof_api --since 60s 2>&1 | Select-String 'talkproof_started|startup failed' | Select -Last 2\""
+}
+Response
+
+ExecaError: Command failed with exit code 1: "powershell -NoProfile -Command ""docker exec talkproof_api sh -c 'echo WHATSAPP set: $([ -n \""$WHATSAPP_WEBHOOK_SECRET\"" ] && echo yes || echo no)'; docker ps --format '{{.Names}} {{.Status}}' | Select-String talkproof_api; docker logs talkproof_api --since 60s 2>&1 | Select-String 'talkproof_started|startup failed' | Select -Last 2"""
+
+WHATSAPP set: yes
+\r
+talkproof_api Up 31 minutes\r
+ERROR:    Application startup failed. Exiting.\r
+ERROR:    Application startup failed. Exiting.\r
+Checking whether the container actually picked up the new environment setting.
+Recreating the api container to pick up the new env variable
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker compose -f 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\docker-compose.yml' up -d --force-recreate api 2>&1 | % { \\\"$_\\\" } | Select -Last 2; Start-Sleep 12; docker ps --format '{{.Names}} {{.Status}}' | Select-String talkproof_api; docker logs talkproof_api 2>&1 | Select-String 'talkproof_started|startup failed|jwt_ephemeral' | Select -Last 3; $a='C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis'; foreach($s in 'run.sh','quick.sh'){ docker cp \\\"$a\\$s\\\" talkproof_api:/tmp/$s }\""
+}
+Response
+
+ Container talkproof_api Starting 
+ Container talkproof_api Started 
+
+talkproof_api Up 12 seconds
+{"component": "auth", "app_env": "development", "msg": "no JWT_PRIVATE_KEY/JWT_PUBLIC_KEY configured; using a 
+per-process key pair", "event": "jwt_ephemeral_rsa_keypair", "level": "warning", "logger": "app.core.auth", 
+"timestamp": "2026-10-04T23:49:52.086008Z"}
+ERROR:    Application startup failed. Exiting.
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker logs talkproof_api 2>&1 | Select-String -Pattern 'Error|raise|Exception' | Select -Last 6\""
+}
+Response
+
+ExecaError: Command failed with exit code 1: "powershell -NoProfile -Command ""docker logs talkproof_api 2>&1 | Select-String -Pattern 'Error|raise|Exception' | Select -Last 6"""
+
+\r
+ERROR:    Traceback (most recent call last):\r
+    raise WebhookSecretNotConfigured(\r
+System.Management.Automation.RemoteException\r
+ERROR:    Application startup failed. Exiting.\r
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker logs talkproof_api 2>&1 | Select-String -Pattern 'missing:' -Context 0,1 | Select -Last 1 | % { $_.Line; $_.Context.PostContext }; docker exec talkproof_api sh -c 'env | grep -c WEBHOOK_SECRET; grep -c WEBHOOK_SECRET /app/.env'; cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; Select-String .env -Pattern 'WEBHOOK_SECRET' | % { ($_.Line -split '=')[0] + ' len=' + (($_.Line -split '=',2)[1]).Length }\""
+}
+Response
+
+app.api.v1.routes.webhooks.WebhookSecretNotConfigured: webhook secrets must be injected at runtime (NFR-025); missing: WHATSAPP_WEBHOOK_SECRET
+System.Management.Automation.RemoteException
+1
+1
+EXOTEL_WEBHOOK_SECRET len=10
+Investigating why the environment file change didn't save.
+Fixing stray .env file by using absolute path instead
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; 'process cwd: ' + [Environment]::CurrentDirectory; $stray = Join-Path ([Environment]::CurrentDirectory) 'services\\api\\.env'; if (Test-Path $stray) { 'stray content: ' + ((Get-Content $stray) -join ' | '); Remove-Item $stray; $d=Split-Path $stray; if ((Get-ChildItem $d -Force | Measure-Object).Count -eq 0) { Remove-Item $d; $d2=Split-Path $d; if ((Get-ChildItem $d2 -Force | Measure-Object).Count -eq 0) { Remove-Item $d2 } }; 'stray removed' } else { 'no stray file at ' + $stray }\""
+}
+Response
+
+process cwd: C:\Users\v_sen\AppData\Local\AnthropicClaude\app-2.19675.0
+no stray file at C:\Users\v_sen\AppData\Local\AnthropicClaude\app-2.19675.0\services\api\.env
+Troubleshooting why the environment file isn't updating correctly.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"$hits = Get-ChildItem -Path 'C:\\Users\\v_sen' -Recurse -Force -Filter '.env' -ErrorAction SilentlyContinue | ? { $_.LastWriteTime -gt (Get-Date).AddMinutes(-15) }; $hits | % { $_.FullName + '  ' + $_.LastWriteTime }; foreach($h in $hits){ if((Select-String $h.FullName -Pattern 'dev-whatsapp-webhook-secret-local' -Quiet)){ 'STRAY: ' + $h.FullName } }\""
+}
+Response
+
+Tracking down where the file write actually landed.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"$f='C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\.env'; $t=[IO.File]::ReadAllText($f); if($t -notmatch '(?m)^WHATSAPP_WEBHOOK_SECRET='){ $nl = if($t.Contains(\\\"`r`n\\\")){\\\"`r`n\\\"}else{\\\"`n\\\"}; if(-not $t.EndsWith($nl)){$t+=$nl}; $t += 'WHATSAPP_WEBHOOK_SECRET=dev-whatsapp-webhook-secret-local' + $nl; [IO.File]::WriteAllText($f,$t,(New-Object Text.UTF8Encoding($false))) }; (Select-String $f -Pattern 'WEBHOOK_SECRET=' | % { ($_.Line -split '=')[0] }) -join ', '; docker compose -f 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\docker-compose.yml' up -d --force-recreate api 2>&1 | Select -Last 1; Start-Sleep 12; docker logs talkproof_api 2>&1 | Select-String 'talkproof_started|startup failed' | Select -Last 1; $a='C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis'; foreach($s in 'run.sh','quick.sh'){ docker cp \\\"$a\\$s\\\" talkproof_api:/tmp/$s }\""
+}
+Response
+
+EXOTEL_WEBHOOK_SECRET, WHATSAPP_WEBHOOK_SECRET
+
+{"component": "api", "env": "development", "event": "talkproof_started", "level": "info", "logger": "app.main", 
+"timestamp": "2026-10-04T23:53:24.377575Z"}
+
+API started with both secrets. Now the fix commit for the two black/flake8 items (visible sequence).
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; docker exec talkproof_api sh /tmp/run.sh 'tests/unit/test_wp08_webhook_secrets.py tests/integration/test_webhooks_exotel.py tests/integration/test_s34c_whatsapp_webhook.py' | Select -Last 1; git status --short; git diff; 'INTENDED COMMIT: WP-08 | flake8 E305 in conftest fixture + black on new test file'; git add services/api/tests/conftest.py services/api/tests/unit/test_wp08_webhook_secrets.py; git diff --cached --stat\""
+}
+Response
+
+27 passed, 3 warnings in 4.75s
+ M services/api/tests/conftest.py
+ M services/api/tests/unit/test_wp08_webhook_secrets.py
+diff --git a/services/api/tests/conftest.py b/services/api/tests/conftest.py
+index db5792c..0ca6ea2 100644
+--- a/services/api/tests/conftest.py
++++ b/services/api/tests/conftest.py
+@@ -39,6 +39,7 @@ def _webhook_test_secrets(monkeypatch):
+     monkeypatch.setattr(settings, "exotel_webhook_secret", "dev-secret")
+     monkeypatch.setattr(settings, "whatsapp_webhook_secret", "dev-secret")
+ 
++
+ # --- Test engine (uses talkproof_test DB) ---
+ TEST_DB_URL = settings.database_test_url or settings.database_url.replace(
+     "talkproof_dev", "talkproof_test"
+diff --git a/services/api/tests/unit/test_wp08_webhook_secrets.py b/services/api/tests/unit/test_wp08_webhook_secrets.py
+index fee7c71..6f150fb 100644
+--- a/services/api/tests/unit/test_wp08_webhook_secrets.py
++++ b/services/api/tests/unit/test_wp08_webhook_secrets.py
+@@ -39,7 +39,9 @@ class TestNoDefaults:
+         # Even a signature computed with the old default must be rejected.
+         assert webhooks._validate_hmac(_hmac("dev-secret", body), body) is False
+         assert (
+-            webhooks._validate_whatsapp_hmac("sha256=" + _hmac("dev-secret", body), body)
++            webhooks._validate_whatsapp_hmac(
++                "sha256=" + _hmac("dev-secret", body), body
++            )
+             is False
+         )
+ 
+INTENDED COMMIT: WP-08 | flake8 E305 in conftest fixture + black on new test file
+ services/api/tests/conftest.py                       | 1 +
+ services/api/tests/unit/test_wp08_webhook_secrets.py | 4 +++-
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git commit -m 'fix(WP-08): lint — E305 after conftest fixture; black on new test' -m 'TEST_DEFECT (formatting only): flake8 E305 on the autouse webhook-secret fixture in tests/conftest.py; black line-wrap in test_wp08_webhook_secrets.py. No behaviour change. Also recorded: ENVIRONMENT — local untracked services/api/.env lacked WHATSAPP_WEBHOOK_SECRET; the startup gate refused to start the recreated container exactly as designed; a dev value was added by hand and the api container recreated (talkproof_started). Pre-existing black debt in routes/webhooks.py (_extract_whatsapp_message) deliberately left untouched to keep the WP boundary. Narrow: wp08 + exotel + whatsapp webhook tests: 27 passed.' 2>&1 | % { \\\"$_\\\" }; git show --stat --oneline HEAD; git push origin master 2>&1 | % { \\\"$_\\\" }; git status -sb; git log -3 --oneline --decorate\""
+}
+Response
+
+[master a857cea] fix(WP-08): lint — E305 after conftest fixture; black on new test
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+a857cea fix(WP-08): lint — E305 after conftest fixture; black on new test
+ services/api/tests/conftest.py                       | 1 +
+ services/api/tests/unit/test_wp08_webhook_secrets.py | 4 +++-
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+To https://github.com/vsenthil7/talkproof-backend.git
+   40c2d19..a857cea  master -> master
+## master...origin/master
+a857cea (HEAD -> master, origin/master, origin/HEAD) fix(WP-08): lint — E305 after conftest fixture; black on new test
+40c2d19 audit(WP-08): initial AI implementation — unverified
+2b9ba26 audit(WP-05): initial AI implementation — unverified
+Reviewing CI configuration for webhook secret handling gaps.
+Fixing missing secret declarations in staging config
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git grep -n 'WEBHOOK_SECRET' -- deploy .github docs/15_deployment docker-compose.yml\""
+}
+Response
+
+deploy/staging.env:39:EXOTEL_WEBHOOK_SECRET=
+docs/15_deployment/DEPLOYMENT.md:320:EXOTEL_WEBHOOK_SECRET=
+docs/15_deployment/DEPLOYMENT.md:555:| `EXOTEL_WEBHOOK_SECRET` | HMAC validation for Exotel webhooks | Provided by Exotel |
+docs/15_deployment/DEPLOYMENT.md:569:| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | Billing |
+docs/15_deployment/DEPLOYMENT.md:602:EXOTEL_WEBHOOK_SECRET=
+docs/15_deployment/DEPLOYMENT.md:613:STRIPE_WEBHOOK_SECRET=
+Request
+
+{
+  "edits": [
+    {
+      "newText": "EXOTEL_WEBHOOK_SECRET=\n# WP-08 / NFR-025: REQUIRED — the service refuses to start without both webhook secrets\nWHATSAPP_WEBHOOK_SECRET=\n",
+      "oldText": "EXOTEL_WEBHOOK_SECRET=\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\deploy\\staging.env"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\deploy\staging.env
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\deploy\staging.env	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\deploy\staging.env	modified
+@@ -36,8 +36,10 @@
+ EXOTEL_API_KEY=
+ EXOTEL_API_SECRET=
+ EXOTEL_SID=
+ EXOTEL_WEBHOOK_SECRET=
++# WP-08 / NFR-025: REQUIRED — the service refuses to start without both webhook secrets
++WHATSAPP_WEBHOOK_SECRET=
+ 
+ # --- AI providers — optional for API smoke testing; add to exercise consensus pipeline ---
+ OPENAI_API_KEY=
+ ANTHROPIC_API_KEY=
+```
+
+Request
+
+{
+  "edits": [
+    {
+      "newText": "EXOTEL_WEBHOOK_SECRET=\nWHATSAPP_WEBHOOK_SECRET=\n",
+      "oldText": "EXOTEL_WEBHOOK_SECRET=\n"
+    },
+    {
+      "newText": "| `EXOTEL_WEBHOOK_SECRET` | HMAC validation for Exotel webhooks (required at startup) | Provided by Exotel |\n| `WHATSAPP_WEBHOOK_SECRET` | HMAC validation for WhatsApp/Meta webhooks (required at startup, NFR-025) | Meta app secret |\n",
+      "oldText": "| `EXOTEL_WEBHOOK_SECRET` | HMAC validation for Exotel webhooks | Provided by Exotel |\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\docs\\15_deployment\\DEPLOYMENT.md"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\docs\15_deployment\DEPLOYMENT.md
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\docs\15_deployment\DEPLOYMENT.md	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\docs\15_deployment\DEPLOYMENT.md	modified
+@@ -317,8 +317,9 @@
+ EXOTEL_API_KEY=
+ EXOTEL_API_SECRET=
+ EXOTEL_SID=
+ EXOTEL_WEBHOOK_SECRET=
++WHATSAPP_WEBHOOK_SECRET=
+ 
+ # --- OpenAI ---
+ OPENAI_API_KEY=
+ 
+@@ -551,9 +552,10 @@
+ |---|---|---|
+ | `JWT_SECRET_KEY` | Derives the dev/test BYO vault key (no longer signs JWTs) | `openssl rand -hex 32` |
+ | `JWT_PRIVATE_KEY_PATH` / `JWT_PUBLIC_KEY_PATH` | RS256 JWT signing key pair (PEM); required when `APP_ENV` is not development/test (FR-012, NFR-014) | `openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out jwt.key && openssl pkey -in jwt.key -pubout -out jwt.pub` |
+ | `POSTGRES_PASSWORD` | Database password | `openssl rand -base64 32` |
+-| `EXOTEL_WEBHOOK_SECRET` | HMAC validation for Exotel webhooks | Provided by Exotel |
++| `EXOTEL_WEBHOOK_SECRET` | HMAC validation for Exotel webhooks (required at startup) | Provided by Exotel |
++| `WHATSAPP_WEBHOOK_SECRET` | HMAC validation for WhatsApp/Meta webhooks (required at startup, NFR-025) | Meta app secret |
+ | `OPENAI_API_KEY` | GPT-4o + Whisper | OpenAI dashboard |
+ | `ANTHROPIC_API_KEY` | Claude | Anthropic console |
+ | `GOOGLE_API_KEY` | Gemini | Google Cloud console |
+ 
+```
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git status --short; git diff --stat; 'INTENDED COMMIT: WP-08 | review finding: staging env template and deployment doc must declare the required WHATSAPP_WEBHOOK_SECRET'; git add deploy/staging.env docs/15_deployment/DEPLOYMENT.md; git diff --cached --stat; git commit -m 'fix(WP-08): declare WHATSAPP_WEBHOOK_SECRET in staging env template and deployment doc' -m 'Review-discovered configuration consequence: with the startup gate, a staging deployment built from deploy/staging.env would refuse to start because the template did not declare WHATSAPP_WEBHOOK_SECRET. Added to the template (placeholder only, NFR-025) and to the DEPLOYMENT.md required-variables table/example. CI (.github/workflows/ci.yml) needs no change: tests inject the secret via conftest and CI does not start the server.' 2>&1 | % { \\\"$_\\\" }; git show --stat --oneline HEAD; git push origin master 2>&1 | % { \\\"$_\\\" }; git status -sb; git log -3 --oneline --decorate\""
+}
+Response
+
+ M deploy/staging.env
+ M docs/15_deployment/DEPLOYMENT.md
+ deploy/staging.env               | 2 ++
+ docs/15_deployment/DEPLOYMENT.md | 4 +++-
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+INTENDED COMMIT: WP-08 | review finding: staging env template and deployment doc must declare the required WHATSAPP_WEBHOOK_SECRET
+ deploy/staging.env               | 2 ++
+ docs/15_deployment/DEPLOYMENT.md | 4 +++-
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+[master 80112eb] fix(WP-08): declare WHATSAPP_WEBHOOK_SECRET in staging env template and deployment doc
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+80112eb fix(WP-08): declare WHATSAPP_WEBHOOK_SECRET in staging env template and deployment doc
+ deploy/staging.env               | 2 ++
+ docs/15_deployment/DEPLOYMENT.md | 4 +++-
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+To https://github.com/vsenthil7/talkproof-backend.git
+   a857cea..80112eb  master -> master
+## master...origin/master
+80112eb (HEAD -> master, origin/master, origin/HEAD) fix(WP-08): declare WHATSAPP_WEBHOOK_SECRET in staging env template and deployment doc
+a857cea fix(WP-08): lint — E305 after conftest fixture; black on new test
+40c2d19 audit(WP-08): initial AI implementation — unverified
+Working through consent and do-not-contact rules for outreach features.
+Request
+
+{
+  "content": "Set-Location 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'\nSelect-String docs\\02_requirements\\FRD.md -Pattern '### FR-078' -Context 0,12 | ForEach-Object { $_.Line; $_.Context.PostContext | Where-Object { $_ -match 'Description|Inputs|Processing|Business Rules|Outputs' } }\nSelect-String docs\\02_requirements\\NFRD.md -Pattern '### NFR-030' -Context 0,8 | ForEach-Object { $_.Line; $_.Context.PostContext | Where-Object { $_ -match 'Requirement|Measurement' } }\n\"=== compliance_service consent API\"\nSelect-String services\\api\\app\\services\\compliance_service.py -Pattern 'def |class |451|ConsentRequired|dnc|do_not_call' | ForEach-Object { \"{0}: {1}\" -f $_.LineNumber, $_.Line.Trim() }\n\"=== consent model\"\nGet-ChildItem services\\api\\app\\models -Filter *.py | Select-String -Pattern 'class ConsentRecord|class .*DoNotCall|class .*Dnc|consent_id|revoked' | ForEach-Object { \"{0}:{1}: {2}\" -f (Split-Path $_.Path -Leaf), $_.LineNumber, $_.Line.Trim() }\n\"=== callers of require_consent / consent in services\"\nGet-ChildItem services\\api\\app -Recurse -Filter *.py | Select-String -Pattern 'require_consent|ConsentRequired' | ForEach-Object { \"{0}:{1}: {2}\" -f $_.Path.Substring((Get-Location).Path.Length+1), $_.LineNumber, $_.Line.Trim() }\n\"=== initiation paths\"\nSelect-String services\\api\\app\\services\\call_service.py -Pattern 'def ' | ForEach-Object { \"call_service:{0}: {1}\" -f $_.LineNumber, $_.Line.Trim() }\nSelect-String services\\api\\app\\services\\telephony_service.py -Pattern 'def place_outbound_call' | ForEach-Object { \"telephony:{0}: {1}\" -f $_.LineNumber, $_.Line.Trim() }\nSelect-String services\\api\\app\\services\\whatsapp_service.py -Pattern 'def send_outbound|def enqueue_scheduled|def dispatch_due' | ForEach-Object { \"whatsapp:{0}: {1}\" -f $_.LineNumber, $_.Line.Trim() }\n\"=== call model has consent fields?\"\nGet-ChildItem services\\api\\app\\models -Filter *.py | Select-String -Pattern 'consent' | ForEach-Object { \"{0}:{1}: {2}\" -f (Split-Path $_.Path -Leaf), $_.LineNumber, $_.Line.Trim() }\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\wp09_read.ps1"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\wp09_read.ps1
+Request
+
+{
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\wp09_read.ps1\""
+}
+Response
+
+### FR-078 - TCPA Outbound Consent Enforcement
+| **Description** | Before initiating any outbound PSTN call to a US phone number, the backend must verify a valid consent record exists. |
+| **Inputs** | `POST /api/v1/calls/outbound` for a US E.164 number |
+| **Processing** | Check `ConsentRecord`: `phone = target_number`, `consent_type includes outbound_call`, `revoked = false`. Check DNC list (national registry integration + platform DNC list). Block if consent absent or DNC listed. |
+| **Outputs** | Call permitted or HTTP 403 `tcpa_consent_required` / `dnc_listed` |
+| **Business Rules** | Consent record must capture: timestamp, IP of consent giver, exact consent text version. Revocation immediate. Flutter dialer receives HTTP 403 and surfaces a clear error to the agent. |
+### NFR-030 - TCPA Compliance
+| **Requirement** | For outbound calls to US phone numbers: (a) consent record with timestamp, IP, and verbatim consent text must exist before any call is placed, (b) DNC list checked before each call, (c) revocation of consent must take effect immediately (= 1 second), (d) the platform must capture and store the exact verbatim disclosure text delivered, (e) call recording and transcript must be linked to the consent record for the entire retention period. |
+| **Measurement** | Integration tests verify consent check blocks calls; revocation propagates within 1 second; automated TCPA audit report generated per campaign. |
+=== compliance_service consent API
+29: class ComplianceError(Exception):
+30: def __init__(self, message: str, status_code: int = 400) -> None:
+36: class ConsentRequired(ComplianceError):
+37: def __init__(self, message: str = "consent_required") -> None:
+38: super().__init__(message, status_code=451)
+41: class ComplianceService:
+42: def __init__(self, db: Session) -> None:
+49: def _require_user(self, tenant_id: UUID, user_id: UUID) -> User:
+57: def export_user(
+86: def erase_user(
+116: def set_consent(
+161: def has_consent(self, *, tenant_id: UUID, subject: str, channel: str) -> bool:
+171: def require_consent(self, *, tenant_id: UUID, subject: str, channel: str) -> None:
+172: """Raise ConsentRequired (451) if the subject has not opted in."""
+174: raise ConsentRequired(f"no {channel} consent on record for {subject}")
+=== consent model
+auth.py:51: revoked_at: Mapped[datetime | None] = mapped_column(
+certified_voice.py:8: Lifecycle: ``draft`` -> (HiL approval) -> ``issued`` ; ``revoked`` is terminal.
+certified_voice.py:22: CERTIFICATE_STATUSES = ("draft", "issued", "revoked")
+compliance.py:19: CONSENT_STATUSES = ("granted", "revoked")
+compliance.py:22: class ConsentRecord(Base, TenantMixin, TimestampMixin):
+compliance.py:42: revoked_at: Mapped[datetime | None] = mapped_column(
+platform_provider_key.py:41: )  # active | revoked
+provider.py:74: )  # active | revoked
+=== callers of require_consent / consent in services
+services\api\app\services\compliance_service.py:36: class ConsentRequired(ComplianceError):
+services\api\app\services\compliance_service.py:171: def require_consent(self, *, tenant_id: UUID, subject: str, channel: str) -> None:
+services\api\app\services\compliance_service.py:172: """Raise ConsentRequired (451) if the subject has not opted in."""
+services\api\app\services\compliance_service.py:174: raise ConsentRequired(f"no {channel} consent on record for {subject}")
+=== initiation paths
+call_service:38: def __init__(
+call_service:49: def initiate(
+call_service:142: def get_status(
+call_service:176: def _get_contact_for_agent(
+call_service:188: def _get_agent_phone(self, agent_id: UUID) -> str | None:
+telephony:124: def place_outbound_call(
+whatsapp:325: def send_outbound(
+whatsapp:395: def enqueue_scheduled(
+whatsapp:432: def dispatch_due(self, *, now: Optional[datetime] = None) -> int:
+=== call model has consent fields?
+compliance.py:3: TCPA/consent records for outbound calling (BR-08). GDPR export/erase operate
+compliance.py:4: over existing tables and are recorded in the audit log; only consent needs its
+compliance.py:18: CONSENT_CHANNELS = ("voice", "sms", "email")
+compliance.py:19: CONSENT_STATUSES = ("granted", "revoked")
+compliance.py:22: class ConsentRecord(Base, TenantMixin, TimestampMixin):
+compliance.py:23: """A TCPA-style consent decision for contacting a phone/email (M20-T02)."""
+compliance.py:25: __tablename__ = "consent_records"
+compliance.py:28: "tenant_id", "subject", "channel", name="uq_consent_subject_channel"
+compliance.py:47: return f"<ConsentRecord {self.subject} {self.channel} status={self.status}>"
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; $l=Get-Content app\\services\\compliance_service.py; for($i=115;$i -lt 178;$i++){ '{0,4}: {1}' -f ($i+1),$l[$i] }; '=== models/compliance.py'; Get-Content app\\models\\compliance.py | Select -Skip 20 -First 28; '=== call_service.initiate 49-140'; $l=Get-Content app\\services\\call_service.py; for($i=48;$i -lt 141;$i++){ '{0,4}: {1}' -f ($i+1),$l[$i] }\""
+}
+Response
+
+ 116:     def set_consent(
+ 117:         self,
+ 118:         *,
+ 119:         tenant_id: UUID,
+ 120:         subject: str,
+ 121:         channel: str,
+ 122:         granted: bool,
+ 123:         source: Optional[str],
+ 124:         actor_user_id: Optional[UUID],
+ 125:     ) -> ConsentRecord:
+ 126:         if channel not in CONSENT_CHANNELS:
+ 127:             raise ComplianceError(f"channel must be one of {sorted(CONSENT_CHANNELS)}")
+ 128:         row = self._db.execute(
+ 129:             select(ConsentRecord).where(
+ 130:                 ConsentRecord.tenant_id == tenant_id,
+ 131:                 ConsentRecord.subject == subject,
+ 132:                 ConsentRecord.channel == channel,
+ 133:             )
+ 134:         ).scalar_one_or_none()
+ 135:         status = "granted" if granted else "revoked"
+ 136:         if row is None:
+ 137:             row = ConsentRecord(
+ 138:                 tenant_id=tenant_id,
+ 139:                 subject=subject,
+ 140:                 channel=channel,
+ 141:                 status=status,
+ 142:                 source=source,
+ 143:                 revoked_at=None if granted else datetime.now(timezone.utc),
+ 144:             )
+ 145:             self._db.add(row)
+ 146:         else:
+ 147:             row.status = status
+ 148:             row.source = source
+ 149:             row.revoked_at = None if granted else datetime.now(timezone.utc)
+ 150:         self._db.flush()
+ 151:         self._audit.write(
+ 152:             action="set_consent",
+ 153:             entity_type="consent_record",
+ 154:             entity_id=row.id,
+ 155:             user_id=actor_user_id,
+ 156:             tenant_id=tenant_id,
+ 157:             new_value={"subject": subject, "channel": channel, "status": status},
+ 158:         )
+ 159:         return row
+ 160: 
+ 161:     def has_consent(self, *, tenant_id: UUID, subject: str, channel: str) -> bool:
+ 162:         row = self._db.execute(
+ 163:             select(ConsentRecord).where(
+ 164:                 ConsentRecord.tenant_id == tenant_id,
+ 165:                 ConsentRecord.subject == subject,
+ 166:                 ConsentRecord.channel == channel,
+ 167:             )
+ 168:         ).scalar_one_or_none()
+ 169:         return row is not None and row.status == "granted"
+ 170: 
+ 171:     def require_consent(self, *, tenant_id: UUID, subject: str, channel: str) -> None:
+ 172:         """Raise ConsentRequired (451) if the subject has not opted in."""
+ 173:         if not self.has_consent(tenant_id=tenant_id, subject=subject, channel=channel):
+ 174:             raise ConsentRequired(f"no {channel} consent on record for {subject}")
+ 175: 
+ 176: 
+ 177: 
+ 178: 
+=== models/compliance.py
+
+class ConsentRecord(Base, TenantMixin, TimestampMixin):
+    """A TCPA-style consent decision for contacting a phone/email (M20-T02)."""
+
+    __tablename__ = "consent_records"
+    __table_args__ = (
+        UniqueConstraint(
+            "tenant_id", "subject", "channel", name="uq_consent_subject_channel"
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    # The contacted identifier (E.164 phone or email).
+    subject: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    channel: Mapped[str] = mapped_column(String(10), nullable=False)
+    status: Mapped[str] = mapped_column(
+        String(10), nullable=False, default="granted", index=True
+    )
+    source: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    revoked_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    def __repr__(self) -> str:
+        return f"<ConsentRecord {self.subject} {self.channel} status={self.status}>"
+=== call_service.initiate 49-140
+  49:     def initiate(
+  50:         self,
+  51:         request: CallInitiateRequest,
+  52:         tenant_id: UUID,
+  53:         agent_id: UUID,
+  54:     ) -> CallInitiateResponse:
+  55:         """Initiate a call to a contact."""
+  56:         # --- Idempotency check ---
+  57:         existing = self._call_repo.find_by_idempotency_key(
+  58:             tenant_id, agent_id, request.idempotency_key
+  59:         )
+  60:         if existing:
+  61:             log.info("call_initiate_idempotent", call_id=str(existing.id))
+  62:             return CallInitiateResponse(
+  63:                 call_id=existing.id,
+  64:                 status=existing.status,
+  65:                 telecom_call_sid=existing.telecom_call_sid or "",
+  66:             )
+  67: 
+  68:         # --- Contact ownership check ---
+  69:         contact = self._get_contact_for_agent(tenant_id, agent_id, request.contact_id)
+  70:         if contact is None:
+  71:             raise HTTPException(
+  72:                 status_code=status.HTTP_403_FORBIDDEN,
+  73:                 detail={
+  74:                     "error_code": "FORBIDDEN",
+  75:                     "message": "Contact not in your assigned list",
+  76:                 },
+  77:             )
+  78: 
+  79:         # --- Already called check ---
+  80:         if contact.call_status in ("completed", "called"):
+  81:             raise HTTPException(
+  82:                 status_code=status.HTTP_409_CONFLICT,
+  83:                 detail={"error_code": "CONFLICT", "message": "Contact already called"},
+  84:             )
+  85: 
+  86:         # --- Look up agent phone from users table (Phase 1.3) ---
+  87:         agent_phone = self._get_agent_phone(agent_id)
+  88:         if not agent_phone:
+  89:             raise HTTPException(
+  90:                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+  91:                 detail={
+  92:                     "error_code": "NO_AGENT_PHONE",
+  93:                     "message": "Agent has no phone number configured",
+  94:                 },
+  95:             )
+  96: 
+  97:         # --- Virtual number from env (Phase 1) -- Phase 2: from campaign config ---
+  98:         virtual_number = _DEFAULT_VIRTUAL_NUMBER
+  99: 
+ 100:         # --- Resolve the campaign carrier by config (M25-T03) ---
+ 101:         # campaign->tenant->platform->default exotel. An explicitly injected
+ 102:         # carrier (tests) takes precedence and skips resolution.
+ 103:         carrier = self._carrier or resolve_campaign_carrier(
+ 104:             self._db, tenant_id, contact.campaign_id
+ 105:         )
+ 106: 
+ 107:         # --- Create call record BEFORE the carrier call ---
+ 108:         call = self._call_repo.create(
+ 109:             tenant_id=tenant_id,
+ 110:             campaign_id=contact.campaign_id,
+ 111:             voter_id=contact.id,
+ 112:             agent_id=agent_id,
+ 113:             idempotency_key=request.idempotency_key,
+ 114:         )
+ 115: 
+ 116:         # --- Call the carrier ---
+ 117:         try:
+ 118:             call_sid = carrier.initiate_call(
+ 119:                 agent_phone=agent_phone,
+ 120:                 contact_phone=contact.phone or "",
+ 121:                 virtual_number=virtual_number,
+ 122:                 status_callback_url="/webhooks/exotel",
+ 123:             )
+ 124:             self._call_repo.update_status(call.id, "initiated", call_sid)
+ 125:             log.info("call_initiated", call_id=str(call.id), call_sid=call_sid)
+ 126:             return CallInitiateResponse(
+ 127:                 call_id=call.id,
+ 128:                 status="initiated",
+ 129:                 telecom_call_sid=call_sid,
+ 130:             )
+ 131:         except CampaignCarrierError as exc:
+ 132:             self._call_repo.update_status(call.id, "failed")
+ 133:             log.error("call_initiation_failed", call_id=str(call.id), error=str(exc))
+ 134:             raise HTTPException(
+ 135:                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+ 136:                 detail={
+ 137:                     "error_code": "CARRIER_ERROR",
+ 138:                     "message": "Call service unavailable",
+ 139:                 },
+ 140:             )
+ 141: 
+Tool limit reached at a clean, pushed checkpoint (80112eb, master == origin/master, working tree clean). Handoff per §16.
+
+Progress this run
+WP	FIRST-ATTEMPT COMMIT	DEFECTS FOUND	FIX COMMITS	TESTS RUN	CURRENT STATE	BLOCKER
+WP-02	b604230 (boundary tests)	PRE_EXISTING_DEFECT: after a served lockout the stale counter re-locked indefinitely	274e2e3	56 narrow green	verified: exactly 5 failures → 30-min lock; before/after-expiry boundaries; 120 accepted / 121 rejected (service + schema); impersonation security intact	FR-011 15-minute window = REQUIREMENT_GAP (needs persisted timing)
+WP-13	2dfa4b5 (tests)	review: test tidy	8e1b13e	11/11 + 53 with neighbours	application half verified (set inside tx, transaction-local, pool-safe, unauth/super-admin/worker unset, cleanup on exception, e2e via middleware)	BLOCKED policy half — users in RLS_TABLES, tenant-less login, no platform bypass, dev role SUPERUSER/BYPASSRLS → design decision
+WP-03	c8e47d2	TEST_DEFECT ×2 (genesis first row; committed-row pollution)	cab5e4f	38 green in both orders	advisory-lock serialisation verified; all chain writers go through AuditRepository	none (deadlock-on-row-lock trade-off noted)
+WP-05	2b9ba26	none on first execution	—	88 neighbours green; provider_service.py 100%	resolve_credential read path verified (BYO → platform → 503, cap-aware, tenant-isolated, undecryptable → 503, repr masked)	DEPENDENCY → WP-17/WP-20: carrier adapters need sid+token pairs; BYO key holds one secret, so call sites not rewired
+WP-08	40c2d19	TEST_DEFECT (lint), ENVIRONMENT (local .env lacked the new secret — gate refused start as designed), review: staging template/doc	a857cea, 80112eb	27–36 narrow green; container restarted with talkproof_started	no in-code webhook defaults; fail-closed; startup gate; .env.example, staging.env, DEPLOYMENT.md updated	billing.py dev-stripe-secret is WP-07 (not in queue); pre-existing black debt in webhooks.py left untouched
+WP-09	—	—	—	—	requirement + code read only; nothing changed	not started
+Process fault recorded: the three WP-01 fix commits (4910841, d90fbe9, 0253317) carry a literal $(Get-Content …) subject from my helper script. Not amended; intended messages attached as git notes (refs/notes/commits, pushed). All later checkpoints used visible Git only. A second slip (relative-path .env write) wrote nothing and was corrected with an absolute path.
+
+WP-09 findings (read-only, for the next action)
+FR-078/NFR-030 require: consent check (ConsentRecord granted, channel voice) for US numbers before any outbound PSTN call → 403 tcpa_consent_required; DNC check → 403 dnc_listed; consent id recorded on the call; revocation effective immediately.
+Code: ComplianceService.require_consent exists (raises 451, no caller). No DNC model/table exists → a migration is clearly required by FR-078 (author only; do not run destructively). Initiation paths to wire: call_service.initiate (L49, before _call_repo.create), telephony_service.place_outbound_call (L124), whatsapp_service.send_outbound/dispatch_due (channel sms-equivalent — confirm against FR-078 scope, which names PSTN). Call model has no consent-id column → migration needed for "consent id recorded on the call".
+Note: FR-078 says 403 while the existing ConsentRequired uses 451 — resolve in favour of the FRD (403 with the named error codes).
+REMAINING WORK: WP-09, WP-10; full regression + 100% gate on a toolchain that traces async (Py 3.11 image artefact still DEFERRED); WP-22 Protocol ... decision; ops/backend.ps1 --cov-fail-under=99; test DB role is SUPERUSER (append-only can't be exercised).
+
+NEXT EXACT ACTION: WP-09 — add DoNotCallEntry model + Alembic migration (also calls.consent_record_id FK), wire ComplianceService.require_consent/DNC check + US-number detection into call_service.initiate and place_outbound_call with 403 tcpa_consent_required / dnc_listed, write the positive/negative/revocation-timing tests, snapshot audit(WP-09): initial AI implementation — unverified, push, then execute.
+
+Last Git state observed: ## master...origin/master (clean); 80112eb fix(WP-08) ← a857cea fix(WP-08) ← 40c2d19 audit(WP-08) ← 2b9ba26 audit(WP-05) ← cab5e4f fix(WP-03) ← c8e47d2 audit(WP-03) ← 8e1b13e test(WP-13) ← 2dfa4b5 test(WP-13) ← 274e2e3 fix(WP-02) ← b604230 test(WP-02). S47-B stash, TC-1..TC-12 and governance artifacts untouched.
+
+Claude reached its tool-use limit for this turn.
+
+conitnue 00:57

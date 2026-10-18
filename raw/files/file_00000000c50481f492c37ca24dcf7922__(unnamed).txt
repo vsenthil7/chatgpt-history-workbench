@@ -1,0 +1,649 @@
+# TALKPROOF --- INDEPENDENT PREBUILD PACKAGE REVIEW
+
+**Review date:** 04/10/2026 23:34\
+**File created:** 04/10/2026 22:39 (user-requested Git-trackable copy)\
+**Role:** Independent Product Owner, requirements auditor, architecture
+reviewer and build-readiness evidence auditor\
+**Gate:** Final independent review before coding resumes\
+**Source package:**
+`TALKPROOF_PREBUILD_REVIEW_INPUT_V001_20261004_2230.zip` plus
+backend/admin/Flutter repositories and supplied V6/D-scale/decision/test
+evidence.
+
+------------------------------------------------------------------------
+
+## A. VERDICT
+
+# PASS WITH CORRECTIONS
+
+**One correction iteration is sufficient before coding resumes.**
+
+I would **not authorise the current "First Build Batch" exactly as
+written**. The package is fundamentally recoverable and mostly
+disciplined, but several material cross-artifact/governance defects and
+two build-readiness defects should be corrected before the first
+production-code commit.
+
+The frozen V6 governance remains sound: V6 explicitly says it is
+reconciliation-only, makes no PO decisions, issues no FR/NFR IDs, and
+preserves tracker-attested state separately from code-verified state.
+
+------------------------------------------------------------------------
+
+## B. MATERIAL FINDINGS
+
+  --------------------------------------------------------------------------
+  ID                Severity          Finding            Blocks coding?
+  ----------------- ----------------- ------------------ -------------------
+  **R-01**          **BLOCKER**       New PO authority   **Yes, until
+                                      is asserted but    authority is
+                                      the actual 22:02   attached/quoted**
+                                      PO decision        
+                                      message is not     
+                                      contained in the   
+                                      package            
+
+  **R-02**          **MAJOR**         CR-07 was expanded No, if
+                                      although its D-16  removed/corrected
+                                      condition is still before CR work
+                                      not satisfied      
+
+  **R-03**          **MAJOR**         WhatsApp inbound   No for Batch 1
+                                      D4 is internally   
+                                      inconsistent and,  
+                                      on fresh code      
+                                      inspection, not    
+                                      fully justified    
+
+  **R-04**          **MAJOR**         WP-10 would wire a **Yes for WP-10**
+                                      rate limiter that  
+                                      does **not conform 
+                                      to FR-080**        
+
+  **R-05**          **MAJOR**         S21                Yes for claiming
+                                      security-header    S21 conformance
+                                      non-conformance    
+                                      was missed         
+
+  **R-06**          **MAJOR**         WP-21 is labelled  Yes for WP-21
+                                      build-ready        
+                                      despite unresolved 
+                                      BRD OOS-02 ↔       
+                                      tracker BR-14      
+                                      authority conflict 
+
+  **R-07**          **MAJOR**         WP-23 appears in   Yes for WP-23
+                                      Batch 1 although   
+                                      it explicitly      
+                                      requires PO        
+                                      acceptance of      
+                                      TC-1..TC-12        
+
+  **R-08**          **MAJOR**         Certificate        No for Batch 1; yes
+                                      lifecycle          before proof-chain
+                                      overstates what    build
+                                      E-02 actually      
+                                      proved and needs   
+                                      an offline-status  
+                                      distinction        
+
+  **R-09**          **MINOR**         Master Index does  No
+                                      not accurately     
+                                      inventory/count    
+                                      the 15-item        
+                                      package            
+
+  **R-10**          **MINOR**         Build-order        No after correction
+                                      documentation      
+                                      contains internal  
+                                      dependency/order   
+                                      inconsistencies    
+  --------------------------------------------------------------------------
+
+### R-01 --- PO authority provenance is missing
+
+**Artifact:** `TALKPROOF_PO_DECISION_RECORD_V001_20261004_2211.md`
+
+**Claim:** D-15, D-16 investigation, D-17, D-19, D-20, D-22, D-23, D-24,
+D-25 and D-26 were approved by the PO at **22:02**.
+
+The record cites a `PO decision message 2026-10-04 22:02`, but that
+source message is **not one of the 15 packaged artifacts**. The
+separately supplied 21:51 Decision Gate explicitly says that it made
+**no PO decision** and that recommendations were not approvals.
+
+Therefore I can verify that Claude **recorded** the intended decisions
+correctly---including the corrected D-22 **11 SELECT / 4 CONDITIONAL / 8
+DEFER = 23**---but I cannot independently prove from this package that
+the underlying 22:02 PO authority exists.
+
+**Correction required:** add the verbatim 22:02 PO decision
+record/message as immutable provenance, or have the PO explicitly
+confirm the decision table in the correction iteration.
+
+**Coding impact:** **BLOCKS the gate**, because the purpose of this
+review is specifically not to trust Claude's assertion of PO authority.
+
+### R-02 --- CR-07 crossed the D-22 conditional boundary
+
+`CR_REQUIREMENTS_ANALYSIS` correctly declares that only the **11
+SELECT** candidates are to be expanded and that the four CONDITIONAL
+candidates are merely assessed.
+
+But it then creates a full 19-field:
+
+> `CR-07 — Evidence records as RFC 4998 ERS`
+
+while simultaneously saying it is **pending D-16 = yes**.
+
+That is premature. D-16 authorised **investigation**, not ERS adoption.
+
+**Correction required:** keep CR-07 as a conditional-analysis note only.
+Move its 19-field requirement wording to a clearly quarantined
+**draft-after-D-16** appendix, or remove it until D-16 is decided.
+
+CR-12 is different: its stated condition was R-D, and R-D was actually
+performed, so its expansion is defensible.
+
+### R-03 --- WhatsApp inbound D4 needs correction
+
+The authoritative reconciliation promoted the inbound POST/signature
+sub-capability to **D4**, while keeping the row's primary value D2.
+
+Actual code accepts both a `sha256=` prefixed signature and a bare
+digest. Claude's later artifacts themselves noticed this: Sprint
+reconciliation says **"reject bare digest"**, while Traceability
+silently changes inbound from D4 back to **D3**.
+
+Three states therefore coexist:
+
+-   D-scale/V6: **D4 inbound**
+-   Traceability: **D3 inbound**
+-   Sprint reconciliation: code requires further contract correction
+
+Under the six-condition D4 rule, the independent rating is:
+
+**WhatsApp inbound POST implementation = D3, pending strict
+signature-format conformance + negative test.**
+
+The absent GET `hub.verify_token` handshake is a separate missing part
+of the complete Meta webhook lifecycle.
+
+#### Tally consequence
+
+This **does not alter the primary 46-row distribution** because
+WhatsApp's primary row value remains D2.
+
+The headline therefore remains:
+
+**D1 3 / D2 20 / D3 22 / D4 1 / D5--D7 0**
+
+and the V4-relative disposition remains:
+
+**25 CONFIRMED / 20 LOWERED / 0 RAISED / 1 UNABLE**
+
+Config Resolver remains the supported D4 component.
+
+### R-04 --- WP-10 is not build-ready as specified
+
+Claude defines WP-10 as:
+
+> "limiter wired; configurable"
+
+and proposes D2 → D3.
+
+But FR-080 requires:
+
+-   Redis token bucket;
+-   100 req/min authenticated;
+-   20 req/min unauthenticated;
+-   per-tenant-per-user;
+-   `Retry-After`;
+-   health/metrics exemptions;
+-   Flutter 429 handling/backoff;
+-   admin behaviour.
+
+The repository's current `RateLimitMiddleware` is an **in-process
+fixed-window counter keyed only by client IP**, with a single default
+limit of 100 and no `Retry-After`.
+
+Simply wiring that implementation would turn an unwired non-conformant
+design into a **wired non-conformant implementation**.
+
+**Correction required:** WP-10 acceptance criteria must reproduce
+FR-080, not merely "wire middleware."
+
+**Coding impact:** blocks **WP-10**, not the whole corrected first
+batch.
+
+### R-05 --- S21 security-header defect was missed
+
+FR-080 requires:
+
+`Strict-Transport-Security: max-age=63072000; includeSubDomains`
+
+Current production code has:
+
+`max-age=31536000; includeSubDomains`
+
+The prebuild package does not register this conformance defect.
+
+**Correction required:** add it to the S21 existing-sprint conformance
+work and test the exact required headers.
+
+No new scope is required.
+
+### R-06 --- WhatsApp WP-21 cannot yet be called build-ready
+
+BRD-001 explicitly puts native WhatsApp Business API out of v1.0, while
+later tracker BR-14 introduced and built WhatsApp.
+
+Claude correctly discovered that **BR-14/15/18 are planning-layer BRs,
+not BRD-001 BRs**.
+
+But Build Readiness still marks WP-21 as build-ready under `BR-14`,
+while **PD-A remains undecided**.
+
+That violates its own readiness rule requiring approved authority.
+
+**Correction required:** move WP-21 from build-ready to:
+
+> **BLOCKED ON PD-A / explicit PO authority resolving BRD OOS-02 vs
+> tracker BR-14.**
+
+This does not affect Batch 1 because WP-21 was later anyway.
+
+### R-07 --- WP-23 cannot be Batch 1 yet
+
+WP-23 says its dependency is:
+
+> "PO acceptance of §1 of the tracker reconciliation"
+
+yet it is simultaneously placed at **#2 in the First Build Batch**, and
+the gate concludes that Batch 1 is blocked only by independent review.
+
+Those statements conflict.
+
+**Correction required:** TC-1..TC-12 should be part of the
+**one-iteration documentation correction**, after PO acceptance---not a
+production build package.
+
+Remove WP-23 from the coding batch.
+
+### R-08 --- E-02 proves less than the lifecycle wording sometimes implies
+
+E-02 genuinely **executed** code. It imported the repository's
+production canonicalisation/hash functions and proved that the existing
+`content_hash` can structurally participate as a leaf in a larger hash
+structure.
+
+It did **not** execute:
+
+-   RFC 4998 ASN.1 EvidenceRecord generation;
+-   RFC 6283 XML;
+-   an RFC3161 TSA transaction;
+-   `openssl ts -verify`;
+-   an actual reduced hash tree artefact;
+-   timestamp renewal;
+-   hash-tree renewal;
+-   blockchain anchoring.
+
+**Correction required:** use:
+
+> **"Structural compatibility hypothesis successfully prototyped;
+> standards-conformant ERS encoding and real RFC3161 verification remain
+> unverified."**
+
+There is a second architecture issue: an **offline verifier cannot prove
+that a certificate is currently unrevoked** unless it has a sufficiently
+fresh signed/anchored status artefact. It can prove status **as of the
+latest status evidence it possesses**.
+
+That distinction must appear in the lifecycle and CR-12.
+
+### R-09 --- 15-item package inventory is not clean
+
+Actual outer package:
+
+-   **12 Markdown files**
+-   `e02_prototype.py`
+-   `e02_output.txt`
+-   nested `TALKPROOF_PREBUILD_PACKAGE_V001_20261004.zip`
+
+= **15 items**.
+
+The nested ZIP contains byte-identical copies of the other **14
+non-wrapper files**.
+
+All **13 hashes actually recorded in the Master Index** also match their
+files.
+
+However the Master Index says:
+
+> "Artifacts created: 13 (11 analysis records + 2 retained E-02 evidence
+> files + this index)"
+
+which is arithmetically inconsistent: **11 + 2 + index = 14**, and it
+does not inventory the nested package wrapper.
+
+**Correction required:** Master Index should explicitly state **14
+substantive files + 1 package wrapper = 15 package entries**.
+
+No coding impact.
+
+### R-10 --- Build-order documentation contains internal dependency/order inconsistencies
+
+The package contains inconsistencies between dependency statements,
+readiness classification, and proposed build order.
+
+**Correction required:** reconcile all build-order references to one
+authoritative corrected sequence and make dependencies explicit.
+
+------------------------------------------------------------------------
+
+## C. CROSS-ARTIFACT CONSISTENCY
+
+  -----------------------------------------------------------------------
+  Chain                               Verdict
+  ----------------------------------- -----------------------------------
+  PO → requirements                   **Conditional pass** --- actual
+                                      22:02 authority provenance must be
+                                      attached
+
+  BRD → PRD → FRD/NFRD                **Pass with documented conflicts**
+
+  BR-14/15/18 provenance              **Correctly identified as
+                                      tracker/planning-layer, not
+                                      BRD-001**
+
+  PO → CR analysis                    **One breach: CR-07 expanded before
+                                      D-16**
+
+  Requirements → architecture         **Generally coherent**
+
+  Architecture → code                 **Gaps are mostly accurately
+                                      identified**
+
+  Traceability → D-scale              **Fails on WhatsApp inbound D4/D3**
+
+  Tracker → code                      **Generally strong; one missed
+                                      FR-080 header defect**
+
+  Tracker → Build Readiness           **Fails for WP-21 and WP-23**
+
+  Build Readiness → actual code       **Fails for WP-10 acceptance
+                                      criteria**
+  -----------------------------------------------------------------------
+
+There is **no evidence of wholesale scope shrink**.
+
+There is also no evidence that Claude silently approved D-06, D-18 or
+D-21. They remain recommendations, which is correct.
+
+------------------------------------------------------------------------
+
+## D. D-06 / D-18 / D-21
+
+### D-06 --- Recommend option (c), with one wording correction
+
+I agree with the two-stage proof structure:
+
+**evidence → T0 → human review → approval → T1 + anchor → PDF**
+
+It resolves the FRD/ARCH conflict much better than either historical
+ordering.
+
+But describe T0/T1 as the **proposed evidence architecture**, not as
+RFC4998-conformance already demonstrated.
+
+**Independent recommendation: OPTION (c).**
+
+**Confidence:** high on lifecycle logic; medium-high on standards
+implementation until real ERS/TSA validation.
+
+### D-18 --- Recommend AMEND M22
+
+Keep the existing persisted `AIInteractionLedger`, fix the current
+orchestrator bypass, and extend the ledger rather than replacing it with
+an OpenTelemetry-shaped persistence model.
+
+Use OTel GenAI as a **versioned export/observability mapping**, not
+TalkProof's authoritative evidence schema.
+
+**Independent recommendation: AMEND.**
+
+### D-21 --- Recommend YES, with current-status semantics corrected
+
+A standalone verifier materially strengthens the TalkProof proposition
+and is consistent with the existing offline-verification requirements.
+
+Its outputs must distinguish:
+
+-   **cryptographic integrity verified**
+-   **TSA evidence verified**
+-   **anchor verified / unavailable**
+-   **status valid as of \[signed status timestamp\]**
+-   **current revocation status unknown without fresher status
+    evidence**
+
+Do not let "offline verification" become "guaranteed currently valid
+while permanently disconnected."
+
+**Independent recommendation: YES.**
+
+------------------------------------------------------------------------
+
+## E. FIRST BUILD BATCH
+
+Claude's batch is **not correct as written**.
+
+### Correction/preflight --- before production coding
+
+1.  Attach/confirm the actual 22:02 PO authority.
+2.  Apply approved TC-1..TC-12 tracker corrections --- **not WP-23
+    coding**.
+3.  Correct the WhatsApp D4/D3 records.
+4.  Correct WP-10/FR-080.
+5.  Add the HSTS conformance defect.
+6.  Correct WP-21 authority.
+7.  Fix Master Index/package count.
+8.  Resolve WP-22 wording: **do not lower the 100% engineering gate
+    merely because NFR-057's product floor is 80%.**
+
+### Corrected first coding batch
+
+  --------------------------------------------------------------------------------
+                                       Seq Work
+  ---------------------------------------- ---------------------------------------
+                                         1 **WP-22 corrected** --- make the
+                                           existing 100% engineering gate green by
+                                           covering the remaining lines, unless
+                                           the PO separately changes that
+                                           engineering policy
+
+                                         2 **WP-13 / S02** --- PostgreSQL RLS +
+                                           dual-layer isolation tests
+
+                                         3 **WP-01 / S03** --- RS256
+
+                                         4 **WP-02 / S03/S10** --- 30-minute
+                                           lockout + 120-minute impersonation
+
+                                         5 **WP-03 / S05** --- audit-chain
+                                           concurrency
+
+                                         6 **WP-05 / S06** --- vault read
+                                           path/provider router
+
+                                         7 **WP-08 / S21/S34** --- remove
+                                           development secret defaults
+
+                                         8 **WP-09 / S21** --- consent + DNC
+                                           enforcement
+
+                                         9 **WP-10 corrected / S21** ---
+                                           FR-080-compliant Redis/token-bucket
+                                           rate limiting + exact
+                                           limits/keying/Retry-After/exemptions,
+                                           plus HSTS correction
+  --------------------------------------------------------------------------------
+
+That batch contains **no D-06/D-16/D-18/D-21 work, no CR implementation,
+no new sprint and no new product scope**.
+
+------------------------------------------------------------------------
+
+## F. ONE-ITERATION CORRECTION PLAN
+
+### Exact correction instruction for Claude
+
+> **Do one reconciliation-only correction pass. Do not write production
+> code, create V7, create new sprints, issue FR/NFR IDs, make PO
+> decisions, expand scope or shrink scope.**
+>
+> 1.  Add immutable provenance for the Product Owner's 22:02 decisions
+>     and demonstrate that
+>     D-15/D-16-investigate/D-17/D-19/D-20/D-22/D-23/D-24/D-25/D-26
+>     exactly match that authority. Preserve D-22 as **11 SELECT / 4
+>     CONDITIONAL / 8 DEFER = 23**.
+> 2.  Remove CR-07's 19-field expansion from authorised analysis while
+>     D-16 remains undecided, or quarantine it explicitly as an
+>     unauthorised post-D-16 draft. CR-07 remains CONDITIONAL.
+> 3.  Reconcile WhatsApp everywhere to **D3 for the current inbound POST
+>     implementation**, because `_validate_whatsapp_hmac` accepts a bare
+>     digest and the negative contract case is untested. Preserve row
+>     primary D2 and therefore preserve the overall **25/20/0/1
+>     disposition tally and D1 3 / D2 20 / D3 22 / D4 1 primary
+>     distribution**. Config Resolver remains D4 component.
+> 4.  Correct Traceability, Architecture Reconciliation, Sprint
+>     Reconciliation and Build Readiness to the same WhatsApp state.
+>     Record GET webhook verification as absent.
+> 5.  Rewrite WP-10 against the complete FR-080 contract: Redis token
+>     bucket; 100/min authenticated; 20/min unauthenticated;
+>     per-tenant/per-user; Retry-After; health/metrics exemption;
+>     required client behaviour. Do not merely wire the existing
+>     in-memory IP limiter.
+> 6.  Add the missed S21 security-header conformance defect: HSTS
+>     currently 31536000 but FR-080 requires 63072000.
+> 7.  Move WP-21 out of build-ready status until PD-A or equivalent
+>     explicit PO authority resolves BRD OOS-02 versus tracker BR-14.
+> 8.  Remove WP-23 from the coding batch. Apply TC-1..TC-12 only after
+>     PO acceptance as documentation reconciliation.
+> 9.  Correct WP-22 so D-11 is represented accurately: NFR-057 = 80%
+>     backend requirement floor; 100% remains the existing stricter
+>     engineering policy. Do not silently lower `fail_under` to 80.
+> 10. Reword E-02 as **structural compatibility demonstrated**, not
+>     standards-conformant ERS execution. Explicitly list that real
+>     RFC4998 encoding, real RFC3161 token acquisition/verification,
+>     renewal and live anchor were not executed.
+> 11. Amend the certificate/verifier architecture so offline status
+>     means **status as of the latest signed status evidence
+>     available**, not guaranteed current non-revocation.
+> 12. Correct the Master Index to inventory **14 substantive files + 1
+>     nested package wrapper = 15 entries**; retain the verified hashes
+>     and state that all 14 nested copies are byte-identical.
+> 13. Reissue only the affected prebuild review artifacts as the
+>     corrected prebuild package. Do not alter V6 or repository source
+>     code.
+> 14. Finish with a delta table proving every R-01..R-10 correction
+>     above and show the corrected first coding batch.
+
+------------------------------------------------------------------------
+
+## FINAL GATE POSITION
+
+**Do not start coding from the current package.**
+
+Another recovery exercise is **not** required. The underlying
+recovery/V6 work is sufficiently strong. The defects are concentrated
+in:
+
+1.  authority provenance;
+2.  one conditional CR crossing its gate;
+3.  one D4 boundary;
+4.  build-batch conformance wording and dependency handling.
+
+**One disciplined correction iteration should be enough. After that,
+coding can resume at full speed without creating another baseline.**
+
+------------------------------------------------------------------------
+
+# G. GIT / ITERATION TRACKING RECOMMENDATION
+
+The review should be committed as an immutable gate artifact rather than
+left only in ChatGPT/Claude conversation history.
+
+Recommended repository placement:
+
+``` text
+docs/92_planning/reviews/
+    TALKPROOF_PREBUILD_INDEPENDENT_REVIEW_CHATGPT_V001_20261004_2239.md
+```
+
+Recommended correction lineage:
+
+``` text
+V6 frozen baseline
+    ↓
+Claude prebuild V001
+    ↓
+ChatGPT independent review V001       ← this file
+    ↓
+Claude correction V002
+    ↓
+ChatGPT final gate review V002
+    ↓
+PO decision record
+    ↓
+authorised coding
+```
+
+### Do not overwrite review artifacts
+
+Keep each review/correction immutable:
+
+``` text
+TALKPROOF_PREBUILD_REVIEW_INPUT_V001_20261004_2230.zip
+TALKPROOF_PREBUILD_INDEPENDENT_REVIEW_CHATGPT_V001_20261004_2239.md
+TALKPROOF_PREBUILD_CORRECTION_CLAUDE_V002_<timestamp>.zip
+TALKPROOF_PREBUILD_FINAL_GATE_CHATGPT_V002_<timestamp>.md
+TALKPROOF_PO_BUILD_AUTHORISATION_V001_<timestamp>.md
+```
+
+### Git commit boundaries
+
+Prefer one commit for each evidence event:
+
+``` text
+docs(review): add Claude prebuild V001 evidence package
+docs(review): add ChatGPT independent prebuild gate V001
+docs(reconcile): apply prebuild correction V002
+docs(review): close independent prebuild gate V002
+docs(governance): record PO build authorisation
+```
+
+Only **after** the final gate and PO build authorisation should
+production-code commits resume.
+
+### Why keep the AI messages as files?
+
+The Git record should carry the decision/evidence chain. Chat history
+should be treated as supporting working context, not as the only
+authoritative record.
+
+For every material Claude or ChatGPT review that changes the next
+action, retain either:
+
+1.  the complete AI-produced Markdown artifact; or
+2.  a compact immutable decision/evidence record containing the
+    prompt/input identity, verdict, findings, corrections, and resulting
+    authority.
+
+There is no need to save every conversational message. Save the
+messages/artifacts that **create evidence, challenge evidence, recommend
+a decision, record a PO decision, change a gate, or authorise work**.
+
+This gives TalkProof a reconstructable chain:
+
+**source → review → challenge → correction → decision → build → test →
+evidence → gate**.

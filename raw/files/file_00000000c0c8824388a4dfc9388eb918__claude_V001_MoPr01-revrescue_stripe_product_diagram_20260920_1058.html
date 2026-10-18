@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RevRescue — product diagram and build status (V001)</title>
+<style>
+:root { box-sizing: border-box; --bg:#ffffff; --fg:#1c2433; --muted:#5B6B86; --line:#D6DCE8; --band:#F4F7FB;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#11161f; --fg:#e8ecf4; --muted:#9fb0c9; --line:#2a3445; --band:#1a2130; } }
+:root[data-theme="dark"] { --bg:#11161f; --fg:#e8ecf4; --muted:#9fb0c9; --line:#2a3445; --band:#1a2130; }
+* { box-sizing: inherit; }
+body { margin:0; background:var(--bg); color:var(--fg); font-family: "Segoe UI", Arial, Helvetica, sans-serif; line-height:1.55; }
+.wrap { max-width:1240px; margin:0 auto; padding:24px 18px 60px; }
+h1 { font-size:26px; margin:0 0 6px; } h2 { font-size:20px; margin:36px 0 10px; border-bottom:2px solid var(--line); padding-bottom:6px; }
+h3 { font-size:16px; margin:22px 0 8px; }
+.cover { background:var(--band); border:1px solid var(--line); border-radius:12px; padding:18px 20px; }
+.cover dl { display:grid; grid-template-columns: 210px 1fr; gap:6px 16px; margin:12px 0 0; }
+.cover dt { font-weight:600; color:var(--muted); } .cover dd { margin:0; }
+table { border-collapse:collapse; width:100%; margin:10px 0 18px; font-size:14px; }
+th, td { border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top; }
+th { background:var(--band); }
+.st-b { color:#1E7A46; font-weight:600; white-space:nowrap; }
+.st-p { color:#A8730C; font-weight:600; white-space:nowrap; }
+.st-n { color:#A33A3A; font-weight:600; white-space:nowrap; }
+.figure { overflow-x:auto; border:1px solid var(--line); border-radius:12px; padding:8px; background:var(--bg); }
+svg { display:block; min-width:900px; max-width:100%; height:auto; }
+.bt { font:600 14px "Segoe UI", Arial, sans-serif; }
+.bs { font:13px "Segoe UI", Arial, sans-serif; fill:#33415A; }
+.tag { font:600 11px "Segoe UI", Arial, sans-serif; letter-spacing:.04em; }
+.al { font:12px "Segoe UI", Arial, sans-serif; fill:#5B6B86; }
+.h2 { font:700 19px "Segoe UI", Arial, sans-serif; fill:#1c2433; }
+.sub { font:13px "Segoe UI", Arial, sans-serif; fill:#5B6B86; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .bs, :root:not([data-theme="light"]) .h2 { fill:#e8ecf4; } }
+.legend { display:flex; flex-wrap:wrap; gap:14px; margin:10px 0 0; font-size:14px; }
+.legend span { display:inline-flex; align-items:center; gap:7px; }
+.key { width:16px; height:16px; border-radius:4px; border:2px solid; display:inline-block; }
+.note { background:var(--band); border-left:4px solid var(--muted); padding:10px 14px; border-radius:0 8px 8px 0; margin:14px 0; }
+footer { margin-top:40px; color:var(--muted); font-size:13px; border-top:1px solid var(--line); padding-top:12px; }
+</style></head>
+<body><div class="wrap">
+
+<div class="cover">
+<h1>RevRescue for Stripe — product diagram and build status</h1>
+<div>A one-page picture of what the product does, what is finished, and what is not — with the reason for each gap.</div>
+<dl>
+<dt>Document ID</dt><dd>claude_V001_MoPr01-revrescue_stripe_product_diagram_20260920_1058</dd>
+<dt>Document version</dt><dd>V001</dd>
+<dt>Date issued</dt><dd>2026-09-20 10:58</dd>
+<dt>Project reference</dt><dd>002-MoPr01-revrescue_stripe-DEV</dd>
+<dt>Describes</dt><dd>Code release claude_v017_revrescue_server_code_20260916_1916.zip (tracker v021)</dd>
+<dt>Prepared by</dt><dd>Claude, for Senthil (KP)</dd>
+<dt>Companion documents</dt><dd>claude_V001_MoPr01-revrescue_stripe_versiondetail_manualtest_20260920_1058.xlsx · claude_v021_revrescue_sprint_tracker_traceability_20260916_1916.xlsx</dd>
+<dt>Status</dt><dd>Issued for review</dd>
+</dl>
+</div>
+
+<h2>Version control</h2>
+<table class=""><thead><tr><th>Version</th><th>Date</th><th>Author</th><th>Change description</th><th>Status</th></tr></thead><tbody><tr><td>V001</td><td>2026-09-20 10:58</td><td>Claude</td><td>First issue: product flow diagram with build status, evidence ladder, completed and outstanding tables, and the version story.</td><td>Issued</td></tr></tbody></table>
+
+<h2>Context — what you are looking at</h2>
+<p>RevRescue recovers failed subscription payments for Stripe merchants. When a payment fails it retries at a sensible moment, reminds the customer over four days, offers a deal to anyone cancelling, records which of those actions recovered the money, and bills the merchant a share of what it recovered.</p>
+<p>The diagram below is the whole product on one page. Colour shows how far each part has been built. The important thing to understand before reading it: <strong>nothing in RevRescue has ever talked to Stripe</strong>. That is not an oversight — it is decision D14, which parks the Stripe connectors until you take it. Everything that could be built without Stripe has been built and tested.</p>
+<div class="note"><strong>How to read the status words.</strong> <em>Built</em> means written and proven by tests that run real requests through the real application against a real database. It does not mean live: no real payment, message or alert has ever been sent.</div>
+
+<h2>The product on one page</h2>
+<div class="legend">
+<span><i class="key" style="background:#E4F3E9;border-color:#1E7A46"></i> Built and tested</span>
+<span><i class="key" style="background:#FDF1DC;border-color:#A8730C"></i> Partly built</span>
+<span><i class="key" style="background:#F6E3E3;border-color:#A33A3A"></i> Not built — reason shown</span>
+<span><i class="key" style="background:#EAEEF6;border-color:#4B5D7E"></i> Stripe (outside our control)</span>
+</div>
+<div class="figure"><svg viewBox="0 0 1200 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RevRescue product flow and build status">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#5B6B86"/></marker></defs>
+<text x="20" y="34" class="h2">How RevRescue works — and what is built</text>
+<text x="20" y="56" class="sub">Green = built and tested against a real database. Amber = partly built. Red = not built, and why. Blue = outside our control (Stripe).</text>
+<rect x="20" y="80" width="210" height="110" rx="10" fill="#EAEEF6" stroke="#4B5D7E" stroke-width="2"/>
+<text x="32" y="102" class="bt" fill="#33415A">Stripe</text>
+<text x="32" y="120" class="bs">invoice.payment_failed</text>
+<text x="32" y="135" class="bs">invoice.paid / succeeded</text>
+<text x="32" y="150" class="bs">charge.refunded, disputes</text>
+<text x="32" y="165" class="bs">subscription deleted</text>
+<text x="218" y="98" class="tag" fill="#4B5D7E" text-anchor="end">platform</text>
+<rect x="270" y="80" width="230" height="110" rx="10" fill="#E4F3E9" stroke="#1E7A46" stroke-width="2"/>
+<text x="282" y="102" class="bt" fill="#12512F">Webhook endpoint</text>
+<text x="282" y="120" class="bs">verifies the signature</text>
+<text x="282" y="135" class="bs">rejects unknown accounts</text>
+<text x="282" y="150" class="bs">processes each event once</text>
+<text x="282" y="165" class="bs">releases on failure</text>
+<text x="488" y="98" class="tag" fill="#1E7A46" text-anchor="end">built</text>
+<line x1="230" y1="135" x2="270" y2="135" stroke="#5B6B86" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="560" y="80" width="200" height="90" rx="10" fill="#E4F3E9" stroke="#1E7A46" stroke-width="2"/>
+<text x="572" y="102" class="bt" fill="#12512F">Retry decision</text>
+<text x="572" y="120" class="bs">payday-aware timing</text>
+<text x="572" y="135" class="bs">reason-based rules</text>
+<text x="572" y="150" class="bs">plan limit respected</text>
+<text x="748" y="98" class="tag" fill="#1E7A46" text-anchor="end">built</text>
+<rect x="800" y="80" width="180" height="90" rx="10" fill="#E4F3E9" stroke="#1E7A46" stroke-width="2"/>
+<text x="812" y="102" class="bt" fill="#12512F">Scheduler</text>
+<text x="812" y="120" class="bs">drains the queue</text>
+<text x="812" y="135" class="bs">idempotency key</text>
+<text x="812" y="150" class="bs">state read on crash</text>
+<text x="968" y="98" class="tag" fill="#1E7A46" text-anchor="end">built</text>
+<rect x="1010" y="80" width="170" height="90" rx="10" fill="#F6E3E3" stroke="#A33A3A" stroke-width="2"/>
+<text x="1022" y="102" class="bt" fill="#7A2A2A">Stripe retry</text>
+<text x="1022" y="120" class="bs">sends the charge</text>
+<text x="1168" y="98" class="tag" fill="#A33A3A" text-anchor="end">D14</text>
+<line x1="500" y1="120" x2="560" y2="120" stroke="#5B6B86" stroke-width="2" marker-end="url(#ar)"/>
+<text x="530.0" y="114.0" class="al" text-anchor="middle">failed</text>
+<line x1="760" y1="125" x2="800" y2="125" stroke="#5B6B86" stroke-width="2" marker-end="url(#ar)"/>
+<line x1="980" y1="125" x2="1010" y2="125" stroke="#5B6B86" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="560" y="195" width="200" height="90" rx="10" fill="#E4F3E9" stroke="#1E7A46" stroke-width="2"/>
+<text x="572" y="217" class="bt" fill="#12512F">Dunning sequence</text>
+<text x="572" y="235" class="bs">days 0, 2, 4 and 7</text>
+<text x="572" y="250" class="bs">opt-outs honoured</text>
+<text x="572" y="265" class="bs">stops when paid</text>
+<text x="748" y="213" class="tag" fill="#1E7A46" text-anchor="end">built</text>
+<rect x="800" y="195" width="180" height="90" rx="10" fill="#E4F3E9" stroke="#1E7A46" stroke-width="2"/>
+<text x="812" y="217" class="bt" fill="#12512F">Sandbox sender</text>
+<text x="812" y="235" class="bs">test mode only</text>
+<text x="812" y="250" class="bs">nothing goes out</text>
+<text x="968" y="213" class="tag" fill="#1E7A46" text-anchor="end">built</text>
+<rect x="1010" y="195" width="170" height="90" rx="10" fill="#F6E3E3" stroke="#A33A3A" stroke-width="2"/>
+<text x="1022" y="217" class="bt" fill="#7A2A2A">Email / WhatsApp</text>
+<text x="1022" y="235" class="bs">live senders</text>
+<text x="1168" y="213" class="tag" fill="#A33A3A" text-anchor="end">D14</text>
+<line x1="500" y1="150" x2="560" y2="235" stroke="#5B6B86" stroke-width="2" marker-end="url(#ar)"/>
+<line x1="760" y1="240" x2="800" y2="240" stroke="#5B6B86" stroke-width="2" marker-end="url(#ar)"/>
+<line x1="760" y1="225" x2="1010" y2="225" stroke="#5B6B86" stroke-width="2" marker-end="url(#ar)"/>
+<text x="885.0" y="219.0" class="al" text-anchor="middle">live mode</text>
+<rect x="560" y="310" width="200" height="90" rx="10" fill="#E4F3E9" stroke="#1E7A46" stroke-width="2"/>
+<text x="572" y="332" class="bt" fill="#12512F">Attribution</text>
+<text x="572" y="350" class="bs">retry, reminder or offer</text>
+<text x="572" y="365" class="bs">evidence recorded</text>
+<text x="572" y="380" class="bs">no action = no fee</text>
+<text x="748" y="328" class="tag" fill="#1E7A46" text-anchor="end">built</text>
+<rect x="800" y="310" width="180" height="90" rx="10" fill="#E4F3E9" stroke="#1E7A46" stroke-width="2"/>
+<text x="812" y="332" class="bt" fill="#12512F">Recoveries</text>
+<text x="812" y="350" class="bs">one row per invoice</text>
+<text x="812" y="365" class="bs">real amount only</text>
+<text x="968" y="328" class="tag" fill="#1E7A46" text-anchor="end">built</text>
+<rect x="1010" y="310" width="170" height="90" rx="10" fill="#E4F3E9" stroke="#1E7A46" stroke-width="2"/>
+<text x="1022" y="332" class="bt" fill="#12512F">Monthly statement</text>
+<text x="1022" y="350" class="bs">per month, immutable</text>
+<text x="1022" y="365" class="bs">credits, cap, trial</text>
+<text x="1168" y="328" class="tag" fill="#1E7A46" text-anchor="end">built</text>
+<line x1="500" y1="165" x2="560" y2="355" stroke="#5B6B86" stroke-width="2" marker-end="url(#ar)"/>
+<text x="530.0" y="254.0" class="al" text-anchor="middle">paid</text>
+<line x1="760" y1="355" x2="800" y2="355" stroke="#5B6B86" stroke-width="2" marker-end="url(#ar)"/>
+<line x1="980" y1="355" x2="1010" y2="355" stroke="#5B6B86" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="560" y="425" width="200" height="90" rx="10" fill="#E4F3E9" stroke="#1E7A46" stroke-width="2"/>
+<text x="572" y="447" class="bt" fill="#12512F">Reversals</text>
+<text x="572" y="465" class="bs">refunds and chargebacks</text>
+<text x="572" y="480" class="bs">fee disputes</text>
+<text x="748" y="443" class="tag" fill="#1E7A46" text-anchor="end">built</text>
+<rect x="800" y="425" width="180" height="90" rx="10" fill="#E4F3E9" stroke="#1E7A46" stroke-width="2"/>
+<text x="812" y="447" class="bt" fill="#12512F">Credit on next statement</text>
+<text x="812" y="465" class="bs">converges exactly</text>
+<text x="812" y="480" class="bs">never a rewrite</text>
+<text x="968" y="443" class="tag" fill="#1E7A46" text-anchor="end">built</text>
+<line x1="500" y1="180" x2="560" y2="470" stroke="#5B6B86" stroke-width="2" marker-end="url(#ar)"/>
+<text x="530.0" y="319.0" class="al" text-anchor="middle">refund / dispute</text>
+<line x1="760" y1="470" x2="800" y2="470" stroke="#5B6B86" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="1010" y="425" width="170" height="90" rx="10" fill="#F6E3E3" stroke="#A33A3A" stroke-width="2"/>
+<text x="1022" y="447" class="bt" fill="#7A2A2A">Invoice the merchant</text>
+<text x="1022" y="465" class="bs">charge the fee</text>
+<text x="1168" y="443" class="tag" fill="#A33A3A" text-anchor="end">DEC-02</text>
+<line x1="1095" y1="400" x2="1095" y2="425" stroke="#5B6B86" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="20" y="560" width="230" height="120" rx="10" fill="#E4F3E9" stroke="#1E7A46" stroke-width="2"/>
+<text x="32" y="582" class="bt" fill="#12512F">Merchant API</text>
+<text x="32" y="600" class="bs">statements and evidence</text>
+<text x="32" y="615" class="bs">settings and team</text>
+<text x="32" y="630" class="bs">dispute a fee</text>
+<text x="32" y="645" class="bs">export / delete data</text>
+<text x="238" y="578" class="tag" fill="#1E7A46" text-anchor="end">built</text>
+<rect x="280" y="560" width="220" height="120" rx="10" fill="#F6E3E3" stroke="#A33A3A" stroke-width="2"/>
+<text x="292" y="582" class="bt" fill="#7A2A2A">Dashboard screens</text>
+<text x="292" y="600" class="bs">the merchant-facing UI</text>
+<text x="292" y="615" class="bs">runs inside Stripe</text>
+<text x="488" y="578" class="tag" fill="#A33A3A" text-anchor="end">D14 / S16</text>
+<rect x="530" y="560" width="220" height="120" rx="10" fill="#FDF1DC" stroke="#A8730C" stroke-width="2"/>
+<text x="542" y="582" class="bt" fill="#6B4905">Slack alerts</text>
+<text x="542" y="600" class="bs">per-merchant channel</text>
+<text x="542" y="615" class="bs">routing built, sender not</text>
+<text x="738" y="578" class="tag" fill="#A8730C" text-anchor="end">D14</text>
+<rect x="780" y="560" width="190" height="120" rx="10" fill="#E4F3E9" stroke="#1E7A46" stroke-width="2"/>
+<text x="792" y="582" class="bt" fill="#12512F">Operator API</text>
+<text x="792" y="600" class="bs">replay stuck work</text>
+<text x="792" y="615" class="bs">resolve fee disputes</text>
+<text x="792" y="630" class="bs">every action audited</text>
+<text x="958" y="578" class="tag" fill="#1E7A46" text-anchor="end">built</text>
+<rect x="1000" y="560" width="180" height="120" rx="10" fill="#F6E3E3" stroke="#A33A3A" stroke-width="2"/>
+<text x="1012" y="582" class="bt" fill="#7A2A2A">Operator screens</text>
+<text x="1012" y="600" class="bs">not built; ranked</text>
+<text x="1012" y="615" class="bs">below the Stripe work</text>
+<text x="1168" y="578" class="tag" fill="#A33A3A" text-anchor="end">not started</text>
+<rect x="20" y="710" width="1160" height="80" rx="10" fill="#E4F3E9" stroke="#1E7A46" stroke-width="2"/>
+<text x="32" y="732" class="bt" fill="#12512F">Postgres — one database, tenant-isolated</text>
+<text x="32" y="750" class="bs">Row-level security forced on all 20 account tables · hash-chained audit trail · dead-letter queue · retention policy · migration ledger with checksums and a lock</text>
+<text x="32" y="765" class="bs">Security on every response, rate limits per instance, logs carry the path only, customer identifiers masked in error text</text>
+<text x="1168" y="728" class="tag" fill="#1E7A46" text-anchor="end">built</text>
+<rect x="20" y="810" width="1160" height="70" rx="10" fill="#F6E3E3" stroke="#A33A3A" stroke-width="2"/>
+<text x="32" y="832" class="bt" fill="#7A2A2A">What none of this has done yet</text>
+<text x="32" y="850" class="bs">Nothing has ever talked to Stripe. Every red box above waits on decision D14, which only Senthil can take.</text>
+<text x="32" y="865" class="bs">So no story is Done: the strongest evidence is a real database and real requests, not a real payment.</text>
+<text x="1168" y="828" class="tag" fill="#A33A3A" text-anchor="end">DEC-04</text>
+</svg></div>
+
+<h2>How far the proof goes</h2>
+<div class="figure"><svg viewBox="0 0 1200 430" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Evidence ladder">
+<defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#5B6B86"/></marker></defs>
+<text x="20" y="34" class="h2">How far the proof goes</text>
+<text x="20" y="56" class="sub">Operating rule R9: every story records the strongest kind of proof it has reached. The product sits on the second rung.</text>
+<rect x="20" y="80" width="250" height="45" rx="10" fill="#E4F3E9" stroke="#1E7A46" stroke-width="2"/>
+<text x="32" y="102" class="bt" fill="#12512F">unit</text>
+<text x="290" y="108" class="bs">Pure logic tested on its own</text>
+<rect x="20" y="135" width="250" height="45" rx="10" fill="#E4F3E9" stroke="#1E7A46" stroke-width="2"/>
+<text x="32" y="157" class="bt" fill="#12512F">integration</text>
+<text x="290" y="163" class="bs">Real requests through the real application, against a real database</text>
+<text x="880" y="163" class="bt" fill="#12512F">&#9664; the product is here</text>
+<rect x="20" y="190" width="250" height="45" rx="10" fill="#F6E3E3" stroke="#A33A3A" stroke-width="2"/>
+<text x="32" y="212" class="bt" fill="#7A2A2A">contract</text>
+<text x="290" y="218" class="bs">Proven against Stripe test mode</text>
+<text x="880" y="218" class="bs" fill="#7A2A2A">blocked by DEC-04</text>
+<rect x="20" y="245" width="250" height="45" rx="10" fill="#F6E3E3" stroke="#A33A3A" stroke-width="2"/>
+<text x="32" y="267" class="bt" fill="#7A2A2A">live</text>
+<text x="290" y="273" class="bs">Proven against a live Stripe account</text>
+<rect x="20" y="300" width="250" height="45" rx="10" fill="#F6E3E3" stroke="#A33A3A" stroke-width="2"/>
+<text x="32" y="322" class="bt" fill="#7A2A2A">operational</text>
+<text x="290" y="328" class="bs">Run in production, on real infrastructure, with alerting</text>
+<rect x="20" y="355" width="250" height="45" rx="10" fill="#F6E3E3" stroke="#A33A3A" stroke-width="2"/>
+<text x="32" y="377" class="bt" fill="#7A2A2A">external</text>
+<text x="290" y="383" class="bs">Reviewed or tested by an outside party</text>
+<text x="880" y="383" class="bs" fill="#7A2A2A">one AI review done; pen test and developer review outstanding</text>
+</svg></div>
+
+<h2>What is complete</h2>
+<table class=""><thead><tr><th>Capability</th><th>Status</th><th>What that means in practice</th></tr></thead><tbody><tr><td>Recovering a failed payment: retry timing, reminders, save offers</td><td class="st-b">Built</td><td>Every rule is tested; the scheduler drains its own queue and cannot send a reminder twice.</td></tr><tr><td>Knowing which payment we recovered, and proving it</td><td class="st-b">Built</td><td>Attribution records the evidence; the merchant can read it, and a payment we did not act on is never billed.</td></tr><tr><td>Charging the merchant: monthly statement, cap, trial, credits</td><td class="st-b">Built</td><td>Per month and per currency, immutable once issued, with credits that converge exactly. Checked on 400 random histories and by mutation testing at 99.1%.</td></tr><tr><td>Not charging a customer twice</td><td class="st-b">Built</td><td>Every attempt has a stable key stored before the call; after a crash the invoice state is read first.</td></tr><tr><td>Keeping merchants apart</td><td class="st-b">Built</td><td>The database itself filters by tenant on all 20 account tables; crafted cross-tenant reads and writes are refused.</td></tr><tr><td>Proving nothing was altered</td><td class="st-b">Built</td><td>Each audit row is chained to the previous one; the merchant can verify their own trail, and edits are detected.</td></tr><tr><td>Not losing work</td><td class="st-b">Built</td><td>Repeated failures park the work with a dead letter that an authenticated operator can replay or discard.</td></tr><tr><td>Privacy promises: export, delete, opt-out, retention</td><td class="st-b">Built</td><td>Delete covers every table holding account data, opt-outs survive restarts and stop both channels, retention runs on a schedule.</td></tr><tr><td>Access control: roles, revocation, team changes</td><td class="st-b">Built</td><td>Removing or demoting someone ends their session at once; the last owner cannot be removed.</td></tr><tr><td>Safety net around the build itself</td><td class="st-b">Built</td><td>Seven checks fail the build, including money rules and a check that published promises have code behind them.</td></tr></tbody></table>
+
+<h2>What is not complete, and why</h2>
+<table class=""><thead><tr><th>Capability</th><th>Status</th><th>Why not</th></tr></thead><tbody><tr><td>Sending a single real payment retry, reminder or alert</td><td class="st-n">Not built</td><td>The Stripe, email, WhatsApp and Slack connectors are all parked by decision D14. Building fakes instead would make every test meaningless.</td></tr><tr><td>Proving Stripe honours our idempotency key</td><td class="st-n">Not built</td><td>Only Stripe can prove it. Needs D14 and a test account.</td></tr><tr><td>The merchant screens inside the Stripe Dashboard</td><td class="st-n">Not built</td><td>The UI runs inside Stripe and needs an app registration. Needs D14.</td></tr><tr><td>The app listing and its manifest</td><td class="st-n">Not built</td><td>Needs the app registration, the final price, and a penetration test.</td></tr><tr><td>The fee percentage</td><td class="st-n">Not built</td><td>It is a placeholder everywhere on purpose. The pricing model is your decision, and the independent review called it the weakest part of the plan.</td></tr><tr><td>Proving we only bill recoveries we caused</td><td class="st-p">Partly built</td><td>Today a payment is billed if we acted first. Proving the customer would not have paid anyway needs a holdback experiment, which needs your authorisation.</td></tr><tr><td>Billing the merchant for our own fee</td><td class="st-n">Not built</td><td>How merchants pay us is undecided (DEC-02), so nothing triggers grace mode or read-only either.</td></tr><tr><td>Operator screens</td><td class="st-n">Not built</td><td>The operator API works and is audited; a screen has simply not been built yet. Nothing blocks it.</td></tr><tr><td>Enterprise sign-in (SSO/SCIM)</td><td class="st-n">Not built</td><td>No current merchant asks for it and it is large; ranked below launch.</td></tr><tr><td>Production infrastructure: hosting, log retention, shared rate limits, SRE targets</td><td class="st-n">Not built</td><td>No hosting has been chosen. The current rate limit is per server instance and says so.</td></tr><tr><td>An outside opinion beyond one AI review</td><td class="st-p">Partly built</td><td>One independent AI review has been done and answered. A developer-led review and a penetration test are still outstanding.</td></tr></tbody></table>
+
+<h2>How it got here</h2>
+<table class=""><thead><tr><th>Versions</th><th>What they delivered</th><th>Why</th></tr></thead><tbody><tr><td>v001–v007</td><td>Specification, agreement obligations, engines, launch content</td><td>Built the rules the product sells, before any platform work.</td></tr><tr><td>v008–v012</td><td>First audits: no application, no schema, orphan modules</td><td>Coverage was measuring engines nothing called. Gates were built to stop it recurring.</td></tr><tr><td>v013–v018</td><td>Park audit, real database adapters, the missing scheduler</td><td>Work had been blocked by assumption rather than decision; and the queue nothing drained was found.</td></tr><tr><td>v019</td><td>A real HTTP server</td><td>45 modules could not receive a single request.</td></tr><tr><td>v020</td><td>Independent review answered: 12 findings plus 12 more found while verifying</td><td>Money was being recorded as zero, no payment success was observed, and statements re-billed all history.</td></tr><tr><td>v021</td><td>Mutation testing, dead letters and operator plane, tenant isolation, audit integrity</td><td>The remaining work that does not need Stripe, approved as scope D1–D5.</td></tr><tr><td>v022+</td><td>Stripe adapters, contract tests, manifest, UI, listing</td><td>All waiting on DEC-04 and your pricing decisions.</td></tr></tbody></table>
+
+<h2>The short list that unblocks everything</h2>
+<ol>
+<li><strong>DEC-04</strong> — unpark the Stripe connectors and provide a test account. This alone releases the red boxes.</li>
+<li><strong>Pricing model</strong> — percentage of recovered revenue, a flat tier, or incremental pricing. The fee is a placeholder until you decide, and the independent review called this the weakest part of the plan.</li>
+<li><strong>Confirm the model with Stripe in writing</strong> before the listing is prepared.</li>
+<li><strong>Authorise the holdback experiment</strong> if you want to claim that RevRescue caused a recovery rather than merely acted first.</li>
+<li><strong>Three short approvals</strong>: the corrected help and FAQ wording, the retention periods, and who may act as an operator.</li>
+</ol>
+
+<footer>Prepared by Claude for Senthil (KP), 20 September 2026. Figures quoted in this document: 353 automated tests at 100% coverage, seven review gates, money-path mutation score 99.1%, 24 defects from the independent review and its verification, plus 4 found while building the fixes. No story is marked Done.</footer>
+</div></body></html>

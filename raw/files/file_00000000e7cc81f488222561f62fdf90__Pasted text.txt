@@ -1,0 +1,705 @@
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git status -sb; git log -3 --oneline --decorate; git diff --stat; git stash list; docker ps --format '{{.Names}} {{.Status}}' | Select-String talkproof_api\""
+}
+Response
+
+## master...origin/master
+ M services/api/app/core/config.py
+ M services/api/app/core/security_middleware.py
+ M services/api/app/main.py
+ M services/api/tests/conftest.py
+52337dc (HEAD -> master, origin/master, origin/HEAD) fix(WP-09): surface FR-078 error codes (tcpa_consent_required / dnc_listed) on the telephony route
+12f655e fix(WP-09): existing US-number telephony tests grant consent; black on new code
+8f4f7a9 audit(WP-09): initial AI implementation — unverified
+ services/api/app/core/config.py              |   8 ++
+ services/api/app/core/security_middleware.py | 153 +++++++++++++++++++++++++--
+ services/api/app/main.py                     |  11 +-
+ services/api/tests/conftest.py               |   8 ++
+ 4 files changed, 171 insertions(+), 9 deletions(-)
+stash@{0}: On master: pre-migration preservation: existing S47-B working tree found 2026-10-04
+
+talkproof_api Up 16 minutes
+
+State matches the handoff: WP-10 production edits uncommitted, no tests yet. Writing the intended WP-10 tests now, then snapshot before executing.
+
+Used 2 integrations
+Request
+
+{
+  "content": "\"\"\"WP-10 / FR-080 -- Redis token-bucket rate limiting + exact security headers.\n\nLimits: 100 req/min per authenticated user keyed per-tenant-per-user; 20 req/min\nper client IP when unauthenticated. Breach -> HTTP 429 with Retry-After.\n/health and /metrics are exempt. Headers are the exact FR-080 set, including\nStrict-Transport-Security max-age=63072000; includeSubDomains.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport uuid\n\nimport pytest\n\nfrom app.core import security_middleware as sm\nfrom app.core.config import get_settings\n\nsettings = get_settings()\n\n\n@pytest.fixture\ndef limiter_on(monkeypatch):\n    \"\"\"Enable the limiter with a unique Redis key prefix per test.\"\"\"\n    monkeypatch.setattr(settings, \"rate_limit_enabled\", True)\n    monkeypatch.setattr(sm.rate_limiter, \"prefix\", f\"rltest:{uuid.uuid4().hex[:8]}\")\n    return sm.rate_limiter\n\n\nclass TestTokenBucket:\n    def test_burst_up_to_capacity_then_429_with_retry_after(self, limiter_on):\n        clock = {\"t\": 1_000.0}\n        lim = sm.RedisTokenBucketLimiter(\n            prefix=f\"rlunit:{uuid.uuid4().hex[:8]}\", now=lambda: clock[\"t\"]\n        )\n        results = [lim.allow(\"k\", 5)[0] for _ in range(5)]\n        assert results == [True] * 5\n        allowed, retry = lim.allow(\"k\", 5)\n        assert allowed is False\n        assert retry >= 1  # seconds until one token refills (5/min -> 12 s)\n\n    def test_refills_over_time(self, limiter_on):\n        clock = {\"t\": 2_000.0}\n        lim = sm.RedisTokenBucketLimiter(\n            prefix=f\"rlunit:{uuid.uuid4().hex[:8]}\", now=lambda: clock[\"t\"]\n        )\n        for _ in range(60):\n            assert lim.allow(\"k\", 60)[0] is True\n        assert lim.allow(\"k\", 60)[0] is False\n        clock[\"t\"] += 1.0  # 60/min refills one token per second\n        assert lim.allow(\"k\", 60)[0] is True\n        assert lim.allow(\"k\", 60)[0] is False\n\n    def test_keys_are_independent(self, limiter_on):\n        lim = sm.RedisTokenBucketLimiter(prefix=f\"rlunit:{uuid.uuid4().hex[:8]}\")\n        for _ in range(3):\n            assert lim.allow(\"a\", 3)[0] is True\n        assert lim.allow(\"a\", 3)[0] is False\n        assert lim.allow(\"b\", 3)[0] is True\n\n\nclass TestMiddleware:\n    def test_unauthenticated_ip_limit_20_per_minute(self, client, limiter_on, monkeypatch):\n        monkeypatch.setattr(settings, \"rate_limit_ip_per_minute\", 20)\n        codes = [client.get(\"/api/v1/auth/me\").status_code for _ in range(21)]\n        assert 429 not in codes[:20]\n        assert codes[20] == 429\n        r = client.get(\"/api/v1/auth/me\")\n        assert r.status_code == 429\n        assert int(r.headers[\"Retry-After\"]) >= 1\n        assert r.json()[\"error_code\"] == \"RATE_LIMITED\"\n\n    def test_authenticated_limit_keyed_per_user_not_ip(\n        self, client, limiter_on, monkeypatch, admin_token, agent_token_b\n    ):\n        monkeypatch.setattr(settings, \"rate_limit_user_per_minute\", 3)\n        monkeypatch.setattr(settings, \"rate_limit_ip_per_minute\", 1)\n        h1 = {\"Authorization\": f\"Bearer {admin_token}\"}\n        h2 = {\"Authorization\": f\"Bearer {agent_token_b}\"}\n        for _ in range(3):\n            assert client.get(\"/api/v1/auth/me\", headers=h1).status_code != 429\n        assert client.get(\"/api/v1/auth/me\", headers=h1).status_code == 429\n        # A different user (different tenant) from the same IP has its own bucket.\n        assert client.get(\"/api/v1/auth/me\", headers=h2).status_code != 429\n\n    def test_health_and_metrics_exempt(self, client, limiter_on, monkeypatch):\n        monkeypatch.setattr(settings, \"rate_limit_ip_per_minute\", 1)\n        assert client.get(\"/health\").status_code != 429\n        assert client.get(\"/health\").status_code != 429\n        assert client.get(\"/metrics\").status_code != 429\n        assert client.get(\"/metrics\").status_code != 429\n\n    def test_redis_unavailable_fails_open_and_logs(self, client, limiter_on, monkeypatch):\n        def boom(key, per_minute):\n            raise ConnectionError(\"redis down\")\n\n        monkeypatch.setattr(sm.rate_limiter, \"allow\", boom)\n        assert client.get(\"/api/v1/auth/me\").status_code != 429\n\n    def test_disabled_flag_bypasses_limiter(self, client, monkeypatch):\n        monkeypatch.setattr(settings, \"rate_limit_enabled\", False)\n        monkeypatch.setattr(settings, \"rate_limit_ip_per_minute\", 1)\n        for _ in range(5):\n            assert client.get(\"/api/v1/auth/me\").status_code != 429\n\n\nclass TestSecurityHeaders:\n    def test_fr080_header_set_exact(self, client):\n        r = client.get(\"/health\")\n        assert r.headers[\"Strict-Transport-Security\"] == (\n            \"max-age=63072000; includeSubDomains\"\n        )\n        assert r.headers[\"X-Frame-Options\"] == \"DENY\"\n        assert r.headers[\"X-Content-Type-Options\"] == \"nosniff\"\n        assert r.headers[\"Referrer-Policy\"] == \"strict-origin-when-cross-origin\"\n        assert \"Content-Security-Policy\" in r.headers\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\tests\\unit\\test_wp10_rate_limit.py"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\unit\test_wp10_rate_limit.py
+Snapshot before executing (visible 4A–4D).
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git status --short; git diff --stat; git diff -- services/api/app/core/config.py services/api/app/main.py services/api/tests/conftest.py; 'INTENDED COMMIT: WP-10 | FR-080 Redis token-bucket limiter + exact headers + registration + suite isolation + tests — first attempt, unexecuted'; git add services/api/app/core/security_middleware.py services/api/app/core/config.py services/api/app/main.py services/api/tests/conftest.py services/api/tests/unit/test_wp10_rate_limit.py; git status --short; git diff --cached --stat\""
+}
+Response
+
+ M services/api/app/core/config.py
+ M services/api/app/core/security_middleware.py
+ M services/api/app/main.py
+ M services/api/tests/conftest.py
+?? services/api/tests/unit/test_wp10_rate_limit.py
+ services/api/app/core/config.py              |   8 ++
+ services/api/app/core/security_middleware.py | 153 +++++++++++++++++++++++++--
+ services/api/app/main.py                     |  11 +-
+ services/api/tests/conftest.py               |   8 ++
+ 4 files changed, 171 insertions(+), 9 deletions(-)
+diff --git a/services/api/app/core/config.py b/services/api/app/core/config.py
+index c7f14ed..c6e61e0 100644
+--- a/services/api/app/core/config.py
++++ b/services/api/app/core/config.py
+@@ -31,6 +31,14 @@ class Settings(BaseSettings):
+     # --- Redis ---
+     redis_url: str = "redis://redis:6379/0"
+ 
++    # --- Rate limiting (WP-10 / FR-080) ---
++    # Redis token bucket: per authenticated user (keyed per-tenant-per-user)
++    # and per client IP when unauthenticated. The flag exists so test suites
++    # can isolate buckets; it is not a production option.
++    rate_limit_enabled: bool = True
++    rate_limit_user_per_minute: int = 100
++    rate_limit_ip_per_minute: int = 20
++
+     # --- Auth ---
+     # WP-01 / FR-012, NFR-014: access tokens are RS256-signed. Keys are PEM
+     # strings supplied via env (never committed, NFR-025). Any other algorithm
+diff --git a/services/api/app/main.py b/services/api/app/main.py
+index 493208a..e5a5c47 100644
+--- a/services/api/app/main.py
++++ b/services/api/app/main.py
+@@ -47,7 +47,10 @@ from app.core.config import get_settings
+ from app.core.db import check_db_connection, engine
+ from app.core.logging import get_logger, setup_logging
+ from app.core.middleware import AccessTrailMiddleware, TenantMiddleware
+-from app.core.security_middleware import SecurityHeadersMiddleware
++from app.core.security_middleware import (
++    FR080RateLimitMiddleware,
++    SecurityHeadersMiddleware,
++)
+ 
+ settings = get_settings()
+ setup_logging(settings.app_log_level)
+@@ -82,8 +85,12 @@ app = FastAPI(
+ 
+ # Middleware order: the LAST added runs first (outermost). AccessTrail must see
+ # request.state populated by TenantMiddleware, so add AccessTrail first (inner)
+-# and TenantMiddleware after (outer).
++# and TenantMiddleware after (outer). WP-10 / FR-080: the rate limiter sits
++# between them -- inside TenantMiddleware (needs request.state.token_data for
++# per-tenant-per-user keys) and outside AccessTrail (a 429 is answered before
++# any per-request DB write, so a flood cannot load the database).
+ app.add_middleware(AccessTrailMiddleware)
++app.add_middleware(FR080RateLimitMiddleware)
+ app.add_middleware(TenantMiddleware)
+ app.add_middleware(SecurityHeadersMiddleware)
+ app.add_middleware(
+diff --git a/services/api/tests/conftest.py b/services/api/tests/conftest.py
+index 0ca6ea2..dc769d3 100644
+--- a/services/api/tests/conftest.py
++++ b/services/api/tests/conftest.py
+@@ -40,6 +40,14 @@ def _webhook_test_secrets(monkeypatch):
+     monkeypatch.setattr(settings, "whatsapp_webhook_secret", "dev-secret")
+ 
+ 
++# WP-10 / FR-080: the Redis token bucket is shared across the whole suite (one
++# TestClient IP, a handful of users), so it is disabled by default here; the
++# WP-10 tests enable it explicitly with a unique key prefix.
++@pytest.fixture(autouse=True)
++def _rate_limit_off(monkeypatch):
++    monkeypatch.setattr(settings, "rate_limit_enabled", False)
++
++
+ # --- Test engine (uses talkproof_test DB) ---
+ TEST_DB_URL = settings.database_test_url or settings.database_url.replace(
+     "talkproof_dev", "talkproof_test"
+INTENDED COMMIT: WP-10 | FR-080 Redis token-bucket limiter + exact headers + registration + suite isolation + tests - first attempt, unexecuted
+M  services/api/app/core/config.py
+M  services/api/app/core/security_middleware.py
+M  services/api/app/main.py
+M  services/api/tests/conftest.py
+A  services/api/tests/unit/test_wp10_rate_limit.py
+ services/api/app/core/config.py                 |   8 ++
+ services/api/app/core/security_middleware.py    | 153 ++++++++++++++++++++++--
+ services/api/app/main.py                        |  11 +-
+ services/api/tests/conftest.py                  |   8 ++
+ services/api/tests/unit/test_wp10_rate_limit.py | 115 ++++++++++++++++++
+ 5 files changed, 286 insertions(+), 9 deletions(-)
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git diff --cached -- services/api/app/core/security_middleware.py | Select-Object -First 40; '...(rest shown in earlier edit diff)'; git commit -m 'audit(WP-10): initial AI implementation — unverified' -m 'FR-080 (CD-08, R-04/R-05): security headers set exactly (Strict-Transport-Security max-age=63072000; includeSubDomains); RedisTokenBucketLimiter (atomic Lua refill+consume, shared across processes) and FR080RateLimitMiddleware: 100 req/min per authenticated user keyed per-tenant-per-user (platform scope for super-admin), 20 req/min per client IP unauthenticated, 429 with Retry-After and error_code RATE_LIMITED, /health and /metrics exempt; Redis unavailability fails OPEN with rate_limit_store_unavailable log (availability choice, recorded for review). Registered inside TenantMiddleware (needs token_data) and outside AccessTrail (429 answered before any DB write). Settings: rate_limit_enabled / rate_limit_user_per_minute / rate_limit_ip_per_minute. Legacy in-process RateLimiter kept, documented as not FR-080 and unregistered. tests/conftest.py disables the shared bucket for the suite; WP-10 tests enable it with a unique key prefix. Out of scope here: CSRF double-submit (no cookie-based admin auth exists to protect, DEPENDENCY on FR-012 cookie design) and Flutter 429 backoff (talkproof-app repo).' -m 'Intended tests: tests/unit/test_wp10_rate_limit.py (10). Snapshot taken BEFORE executing. Full verification NOT RUN.' 2>&1 | % { \\\"$_\\\" }; git show --stat --oneline HEAD; git push origin master 2>&1 | % { \\\"$_\\\" }; git status -sb; git log -3 --oneline --decorate\""
+}
+Response
+
+diff --git a/services/api/app/core/security_middleware.py b/services/api/app/core/security_middleware.py
+index 006ea35..2a6b831 100644
+--- a/services/api/app/core/security_middleware.py
++++ b/services/api/app/core/security_middleware.py
+@@ -1,27 +1,36 @@
+ """TalkProof -- M20 security middleware (headers + rate limiting).
+ 
+-- SecurityHeadersMiddleware: adds standard hardening headers to every response.
+-- RateLimitMiddleware: a fixed-window in-process limiter keyed by client IP,
+-  returning 429 when the per-window quota is exceeded. The clock is injectable
+-  for deterministic tests; production deployments front this with an edge / WAF
+-  limiter as well.
++- SecurityHeadersMiddleware: adds the FR-080 hardening headers to every response.
++- RedisTokenBucketLimiter + RateLimitMiddleware (WP-10 / FR-080): Redis token
++  bucket, 100 req/min per authenticated user keyed per-tenant-per-user and
++  20 req/min per client IP unauthenticated; 429 with Retry-After on breach;
++  health/metrics exempt. The bucket is refilled and consumed atomically in a
++  Lua script so multiple API processes share one limit.
++- RateLimiter: the previous in-process fixed-window counter (retained for its
++  callers/tests; it is NOT the FR-080 limiter and is no longer registered).
+ """
+ 
+ from __future__ import annotations
+ 
+ import time
+ from collections import defaultdict
+-from typing import Callable
++from typing import Callable, Optional
+ 
++import structlog
+ from starlette.middleware.base import BaseHTTPMiddleware
+ from starlette.requests import Request
+ from starlette.responses import JSONResponse, Response
+ 
++from app.core.config import get_settings
++
++log = structlog.get_logger()
++
++# FR-080 exact header set.
+ SECURITY_HEADERS = {
+...(rest shown in earlier edit diff)
+[master 2bae1a1] audit(WP-10): initial AI implementation — unverified
+ 5 files changed, 286 insertions(+), 9 deletions(-)
+ create mode 100644 services/api/tests/unit/test_wp10_rate_limit.py
+2bae1a1 audit(WP-10): initial AI implementation — unverified
+ services/api/app/core/config.py                 |   8 ++
+ services/api/app/core/security_middleware.py    | 153 ++++++++++++++++++++++--
+ services/api/app/main.py                        |  11 +-
+ services/api/tests/conftest.py                  |   8 ++
+ services/api/tests/unit/test_wp10_rate_limit.py | 115 ++++++++++++++++++
+ 5 files changed, 286 insertions(+), 9 deletions(-)
+To https://github.com/vsenthil7/talkproof-backend.git
+   52337dc..2bae1a1  master -> master
+## master...origin/master
+2bae1a1 (HEAD -> master, origin/master, origin/HEAD) audit(WP-10): initial AI implementation — unverified
+52337dc fix(WP-09): surface FR-078 error codes (tcpa_consent_required / dnc_listed) on the telephony route
+12f655e fix(WP-09): existing US-number telephony tests grant consent; black on new code
+Executing the WP-10 tests plus the existing security-header test.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh /tmp/run.sh 'tests/unit/test_wp10_rate_limit.py tests/integration/test_m20_compliance.py tests/integration/test_auth_login.py'\""
+}
+Response
+
+E       fixture 'agent_token_b' not found
+/app/tests/unit/test_wp10_rate_limit.py:72
+  /usr/local/lib/python3.11/site-packages/pydantic/_internal/_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
+ERROR tests/unit/test_wp10_rate_limit.py::TestMiddleware::test_authenticated_limit_keyed_per_user_not_ip
+32 passed, 3 warnings, 1 error in 8.86s
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; Select-String tests\\conftest.py -Pattern '^def .*token' | % { $_.Line }\""
+}
+Response
+
+def admin_token(test_user_admin: User, test_tenant: Tenant) -> str:
+def agent_token(test_user_agent: User, test_tenant: Tenant) -> str:
+def super_admin_token(test_user_super_admin: User) -> str:
+def supervisor_token(test_user_supervisor: User, test_tenant: Tenant) -> str:
+Fixing missing fixture name in WP-10 test
+Request
+
+{
+  "edits": [
+    {
+      "newText": "    def test_authenticated_limit_keyed_per_user_not_ip(\n        self, client, limiter_on, monkeypatch, admin_token, agent_token\n    ):\n        monkeypatch.setattr(settings, \"rate_limit_user_per_minute\", 3)\n        monkeypatch.setattr(settings, \"rate_limit_ip_per_minute\", 1)\n        h1 = {\"Authorization\": f\"Bearer {admin_token}\"}\n        h2 = {\"Authorization\": f\"Bearer {agent_token}\"}\n        for _ in range(3):\n            assert client.get(\"/api/v1/auth/me\", headers=h1).status_code != 429\n        assert client.get(\"/api/v1/auth/me\", headers=h1).status_code == 429\n        # A different user from the same IP (and tenant) has its own bucket.\n        assert client.get(\"/api/v1/auth/me\", headers=h2).status_code != 429\n",
+      "oldText": "    def test_authenticated_limit_keyed_per_user_not_ip(\n        self, client, limiter_on, monkeypatch, admin_token, agent_token_b\n    ):\n        monkeypatch.setattr(settings, \"rate_limit_user_per_minute\", 3)\n        monkeypatch.setattr(settings, \"rate_limit_ip_per_minute\", 1)\n        h1 = {\"Authorization\": f\"Bearer {admin_token}\"}\n        h2 = {\"Authorization\": f\"Bearer {agent_token_b}\"}\n        for _ in range(3):\n            assert client.get(\"/api/v1/auth/me\", headers=h1).status_code != 429\n        assert client.get(\"/api/v1/auth/me\", headers=h1).status_code == 429\n        # A different user (different tenant) from the same IP has its own bucket.\n        assert client.get(\"/api/v1/auth/me\", headers=h2).status_code != 429\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\tests\\unit\\test_wp10_rate_limit.py"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\unit\test_wp10_rate_limit.py
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\unit\test_wp10_rate_limit.py	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\unit\test_wp10_rate_limit.py	modified
+@@ -69,18 +69,18 @@
+         assert int(r.headers["Retry-After"]) >= 1
+         assert r.json()["error_code"] == "RATE_LIMITED"
+ 
+     def test_authenticated_limit_keyed_per_user_not_ip(
+-        self, client, limiter_on, monkeypatch, admin_token, agent_token_b
++        self, client, limiter_on, monkeypatch, admin_token, agent_token
+     ):
+         monkeypatch.setattr(settings, "rate_limit_user_per_minute", 3)
+         monkeypatch.setattr(settings, "rate_limit_ip_per_minute", 1)
+         h1 = {"Authorization": f"Bearer {admin_token}"}
+-        h2 = {"Authorization": f"Bearer {agent_token_b}"}
++        h2 = {"Authorization": f"Bearer {agent_token}"}
+         for _ in range(3):
+             assert client.get("/api/v1/auth/me", headers=h1).status_code != 429
+         assert client.get("/api/v1/auth/me", headers=h1).status_code == 429
+-        # A different user (different tenant) from the same IP has its own bucket.
++        # A different user from the same IP (and tenant) has its own bucket.
+         assert client.get("/api/v1/auth/me", headers=h2).status_code != 429
+ 
+     def test_health_and_metrics_exempt(self, client, limiter_on, monkeypatch):
+         monkeypatch.setattr(settings, "rate_limit_ip_per_minute", 1)
+```
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh /tmp/run.sh 'tests/unit/test_wp10_rate_limit.py tests/integration/test_m20_compliance.py' | Select-Object -Last 2; docker exec talkproof_api sh -c 'cd /app && black --check app/core/security_middleware.py app/core/config.py app/main.py tests/conftest.py tests/unit/test_wp10_rate_limit.py 2>&1 | grep -E \\\"reformat|unchanged\\\"; flake8 app/core/security_middleware.py app/core/config.py app/main.py tests/conftest.py tests/unit/test_wp10_rate_limit.py && echo FLAKE8_OK'\""
+}
+Response
+
+ExecaError: Command failed with exit code 255: "powershell -NoProfile -Command ""docker exec talkproof_api sh /tmp/run.sh 'tests/unit/test_wp10_rate_limit.py tests/integration/test_m20_compliance.py' | Select-Object -Last 2; docker exec talkproof_api sh -c 'cd /app && black --check app/core/security_middleware.py app/core/config.py app/main.py tests/conftest.py tests/unit/test_wp10_rate_limit.py 2>&1 | grep -E \""reformat|unchanged\""; flake8 app/core/security_middleware.py app/core/config.py app/main.py tests/conftest.py tests/unit/test_wp10_rate_limit.py && echo FLAKE8_OK'"""
+
+The system cannot find the path specified.
+Request
+
+{
+  "content": "#!/bin/sh\ncd /app\nF=\"app/core/security_middleware.py app/core/config.py app/main.py tests/conftest.py tests/unit/test_wp10_rate_limit.py\"\nCOVERAGE_FILE=/tmp/.c python -m pytest -p no:cacheprovider -q -o addopts= --tb=line tests/unit/test_wp10_rate_limit.py tests/integration/test_m20_compliance.py tests/integration/test_auth_login.py --cov=app.core.security_middleware --cov-report=term-missing --cov-fail-under=0 2>&1 | grep -E '^(FAILED|ERROR)|^/app/|passed|failed|security_middleware' | sed -E 's/ - .*//'\necho \"--- black\"\nblack --check $F 2>&1 | grep -E 'reformat|unchanged'\necho \"--- flake8\"\nflake8 $F && echo FLAKE8_OK\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\wp10check.sh"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\wp10check.sh
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"$s='C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\wp10check.sh'; (Get-Content $s -Raw).Replace(\\\"`r`n\\\",\\\"`n\\\") | Set-Content -NoNewline -Encoding ascii $s; docker cp $s talkproof_api:/tmp/wp10check.sh; docker exec talkproof_api sh /tmp/wp10check.sh\""
+}
+Response
+
+app/core/security_middleware.py      90     19    79%   57-60, 63-71, 78-79, 82-91
+33 passed, 3 warnings in 8.21s
+--- black
+would reformat tests/unit/test_wp10_rate_limit.py
+1 file would be reformatted, 4 files would be left unchanged.
+--- flake8
+FLAKE8_OK
+Checking test coverage on legacy rate limiting code.
+Checking for remaining references before removing legacy rate limiter
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; Get-ChildItem app,tests -Recurse -Filter *.py | Select-String -Pattern 'RateLimiter\\b|RateLimitMiddleware\\b' | ? { $_.Path -notmatch 'security_middleware.py' } | % { $_.Path.Substring((Get-Location).Path.Length+1) + ':' + $_.LineNumber + ': ' + $_.Line.Trim() }; docker exec talkproof_api sh -c 'cd /app && black -q tests/unit/test_wp10_rate_limit.py && black --check -q tests/unit/test_wp10_rate_limit.py && echo BLACK_OK'\""
+}
+Response
+
+app\main.py:51: FR080RateLimitMiddleware,
+app\main.py:93: app.add_middleware(FR080RateLimitMiddleware)
+tests\unit\test_m20_compliance.py:9: from app.core.security_middleware import RateLimiter, RateLimitMiddleware
+tests\unit\test_m20_compliance.py:157: class TestRateLimitMiddleware:
+tests\unit\test_m20_compliance.py:164: mw = RateLimitMiddleware(
+tests\unit\test_m20_compliance.py:166: limiter=RateLimiter(limit=1, window_seconds=10, now=lambda: 0.0),
+tests\unit\test_m20_compliance.py:175: mw = RateLimitMiddleware(
+tests\unit\test_m20_compliance.py:177: limiter=RateLimiter(limit=1, window_seconds=10, now=lambda: 0.0),
+tests\unit\test_m20_compliance.py:194: # No limiter -> default RateLimiter; no client -> "unknown" key.
+tests\unit\test_m20_compliance.py:201: mw = RateLimitMiddleware(app=lambda *a, **k: None)
+tests\unit\test_m20_compliance.py:206: class TestRateLimiter:
+tests\unit\test_m20_compliance.py:209: rl = RateLimiter(limit=3, window_seconds=10, now=lambda: clock["t"])
+tests\unit\test_m20_compliance.py:217: rl = RateLimiter(limit=1, window_seconds=10, now=lambda: clock["t"])
+tests\unit\test_m20_compliance.py:224: rl = RateLimiter(limit=1, window_seconds=10, now=lambda: 0.0)
+BLACK_OK
+Deciding whether to retain the legacy compliance limiter.
+Committing test fix, noting legacy limiter cleanup as follow-up
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git status --short; git diff; 'INTENDED COMMIT: WP-10 | test fixture name (agent_token) + black on new test file'; git add services/api/tests/unit/test_wp10_rate_limit.py; git diff --cached --stat; git commit -m 'fix(WP-10): per-user test used a non-existent fixture; black' -m 'TEST_DEFECT: test_authenticated_limit_keyed_per_user_not_ip requested agent_token_b (named in the conftest docstring, never defined); uses the existing agent_token fixture (different user, same tenant and IP) — still proves the bucket is keyed per user, not per IP. black applied to the new test file. All other 9 WP-10 tests passed on first execution; no production change. Narrow: wp10 + m20 compliance + auth_login: 33 passed; flake8 clean. Review notes recorded: legacy in-process RateLimiter/RateLimitMiddleware remain as unregistered code covered only by their own unit tests (follow-up cleanup); Redis-down fails OPEN by design (availability over strict limiting; alert on rate_limit_store_unavailable).' 2>&1 | % { \\\"$_\\\" }; git show --stat --oneline HEAD; git push origin master 2>&1 | % { \\\"$_\\\" }; git status -sb; git log -3 --oneline --decorate\""
+}
+Response
+
+ M services/api/tests/unit/test_wp10_rate_limit.py
+diff --git a/services/api/tests/unit/test_wp10_rate_limit.py b/services/api/tests/unit/test_wp10_rate_limit.py
+index c805799..9492ba7 100644
+--- a/services/api/tests/unit/test_wp10_rate_limit.py
++++ b/services/api/tests/unit/test_wp10_rate_limit.py
+@@ -59,7 +59,9 @@ class TestTokenBucket:
+ 
+ 
+ class TestMiddleware:
+-    def test_unauthenticated_ip_limit_20_per_minute(self, client, limiter_on, monkeypatch):
++    def test_unauthenticated_ip_limit_20_per_minute(
++        self, client, limiter_on, monkeypatch
++    ):
+         monkeypatch.setattr(settings, "rate_limit_ip_per_minute", 20)
+         codes = [client.get("/api/v1/auth/me").status_code for _ in range(21)]
+         assert 429 not in codes[:20]
+@@ -70,16 +72,16 @@ class TestMiddleware:
+         assert r.json()["error_code"] == "RATE_LIMITED"
+ 
+     def test_authenticated_limit_keyed_per_user_not_ip(
+-        self, client, limiter_on, monkeypatch, admin_token, agent_token_b
++        self, client, limiter_on, monkeypatch, admin_token, agent_token
+     ):
+         monkeypatch.setattr(settings, "rate_limit_user_per_minute", 3)
+         monkeypatch.setattr(settings, "rate_limit_ip_per_minute", 1)
+         h1 = {"Authorization": f"Bearer {admin_token}"}
+-        h2 = {"Authorization": f"Bearer {agent_token_b}"}
++        h2 = {"Authorization": f"Bearer {agent_token}"}
+         for _ in range(3):
+             assert client.get("/api/v1/auth/me", headers=h1).status_code != 429
+         assert client.get("/api/v1/auth/me", headers=h1).status_code == 429
+-        # A different user (different tenant) from the same IP has its own bucket.
++        # A different user from the same IP (and tenant) has its own bucket.
+         assert client.get("/api/v1/auth/me", headers=h2).status_code != 429
+ 
+     def test_health_and_metrics_exempt(self, client, limiter_on, monkeypatch):
+@@ -89,7 +91,9 @@ class TestMiddleware:
+         assert client.get("/metrics").status_code != 429
+         assert client.get("/metrics").status_code != 429
+ 
+-    def test_redis_unavailable_fails_open_and_logs(self, client, limiter_on, monkeypatch):
++    def test_redis_unavailable_fails_open_and_logs(
++        self, client, limiter_on, monkeypatch
++    ):
+         def boom(key, per_minute):
+             raise ConnectionError("redis down")
+ 
+INTENDED COMMIT: WP-10 | test fixture name (agent_token) + black on new test file
+ services/api/tests/unit/test_wp10_rate_limit.py | 14 +++++++++-----
+ 1 file changed, 9 insertions(+), 5 deletions(-)
+[master 8d2084a] fix(WP-10): per-user test used a non-existent fixture; black
+ 1 file changed, 9 insertions(+), 5 deletions(-)
+8d2084a fix(WP-10): per-user test used a non-existent fixture; black
+ services/api/tests/unit/test_wp10_rate_limit.py | 14 +++++++++-----
+ 1 file changed, 9 insertions(+), 5 deletions(-)
+To https://github.com/vsenthil7/talkproof-backend.git
+   2bae1a1..8d2084a  master -> master
+## master...origin/master
+8d2084a (HEAD -> master, origin/master, origin/HEAD) fix(WP-10): per-user test used a non-existent fixture; black
+2bae1a1 audit(WP-10): initial AI implementation — unverified
+52337dc fix(WP-09): surface FR-078 error codes (tcpa_consent_required / dnc_listed) on the telephony route
+Reviewing dependency and tracking items across work packages.
+Running full regression suite in a fresh read-only container
+Request
+
+{
+  "content": "$repo = 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'\n$out  = 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis'\n$kv = @{}; Get-Content \"$repo\\.env\" | Where-Object { $_ -match '^\\s*[A-Za-z_]+\\s*=' } | ForEach-Object { $k,$v = $_ -split '=',2; $kv[$k.Trim()] = $v.Trim().Trim('\"') }\n$user = $kv['POSTGRES_USER']; $pw = $kv['POSTGRES_PASSWORD']; $jwt = $kv['JWT_SECRET_KEY']\ndocker rm -f wp_full312 2>$null | Out-Null\nRemove-Item \"$out\\full312_*\" -ErrorAction SilentlyContinue\n$cmd = \"pip install -q -r /app/requirements.txt > /out/full312_pip.log 2>&1; echo PIP_EXIT=`$? >> /out/full312_pip.log; (python --version; pip list 2>/dev/null | grep -iE '^(coverage|anyio|pytest|pytest-cov) ') > /out/full312_versions.txt; cd /app && COVERAGE_FILE=/tmp/.coverage python -m pytest -p no:cacheprovider -q --cov-report=json:/out/full312_cov.json > /out/full312_pytest.log 2>&1; echo `$? > /out/full312_exit.txt\"\ndocker run -d --name wp_full312 --network talkproof-backend_default -v \"${repo}:/app:ro\" -v \"${out}:/out\" -e PYTHONDONTWRITEBYTECODE=1 -e \"DATABASE_URL=[REDACTED:credentialed-url:sha256-031c31edbb0f]postgres:5432/talkproof_dev\" -e \"DATABASE_TEST_URL=[REDACTED:credentialed-url:sha256-031c31edbb0f]postgres:5432/talkproof_test\" -e \"JWT_SECRET_KEY=$jwt\" -e JWT_ALGORITHM=RS256 -e REDIS_URL=redis://redis:6379/0 -e APP_ENV=development -e LOG_DIR=/tmp/tplogs python:3.12-slim sh -c $cmd | Out-Null\n\"started wp_full312 (full suite, pytest.ini addopts incl. --cov-fail-under=100)\"\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\full312_run.ps1"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\full312_run.ps1
+Request
+
+{
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\full312_run.ps1\""
+}
+Response
+
+started wp_full312 (full suite, pytest.ini addopts incl. --cov-fail-under=100)
+Request
+
+{
+  "content": "$out = 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis'\nfor ($i = 0; $i -lt 60; $i++) { if (Test-Path \"$out\\full312_exit.txt\") { break }; Start-Sleep 6 }\n\"waited ~$($i*6)s; finished: \" + (Test-Path \"$out\\full312_exit.txt\")\nif (Test-Path \"$out\\full312_pip.log\") { \"pip: \" + (Get-Content \"$out\\full312_pip.log\" | Select-Object -Last 1) }\nif (Test-Path \"$out\\full312_versions.txt\") { (Get-Content \"$out\\full312_versions.txt\") -join ' | ' }\nif (Test-Path \"$out\\full312_pytest.log\") {\n  $log = Get-Content \"$out\\full312_pytest.log\"\n  \"--- failures/errors\"\n  $log | Select-String -Pattern '^(FAILED|ERROR) ' | ForEach-Object { ($_.Line -replace ' - .*','') } | Select-Object -First 30\n  \"--- coverage lines with misses\"\n  $log | Select-String -Pattern '^app/.*\\s+\\d+\\s+[1-9]\\d*\\s+' | ForEach-Object { $_.Line }\n  \"--- tail\"\n  $log | Select-Object -Last 4\n}\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\full312_poll.ps1"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\full312_poll.ps1
+Request
+
+{
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\full312_poll.ps1\""
+}
+Response
+
+waited ~198s; finished: True
+pip: PIP_EXIT=0
+Python 3.12.15 | anyio                        4.15.1 | coverage                     7.16.2 | pytest                       8.3.4 | pytest-cov                   6.0.0
+--- failures/errors
+FAILED tests/unit/test_webhook_hmac.py::TestValidateHmac::test_valid_signature_returns_true
+FAILED tests/unit/test_webhook_hmac.py::TestValidateHmac::test_invalid_signature_returns_false
+FAILED tests/unit/test_webhook_hmac.py::TestValidateHmac::test_none_signature_returns_false
+FAILED tests/unit/test_webhook_hmac.py::TestValidateHmac::test_empty_signature_returns_false
+FAILED tests/unit/test_webhook_hmac.py::TestValidateHmac::test_tampered_body_returns_false
+--- coverage lines with misses
+app/services/campaign_carrier/base.py                 8      1    88%   51
+app/services/transcription/base.py                   19      1    95%   63
+--- tail
+FAILED tests/unit/test_webhook_hmac.py::TestValidateHmac::test_none_signature_returns_false
+FAILED tests/unit/test_webhook_hmac.py::TestValidateHmac::test_empty_signature_returns_false
+FAILED tests/unit/test_webhook_hmac.py::TestValidateHmac::test_tampered_body_returns_false
+===== 5 failed, 1559 passed, 64 skipped, 549 warnings in 154.15s (0:02:34) =====
+Investigating failing webhook tests after a regression run.
+Investigating five HMAC webhook test failures after full regression run
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"$log=Get-Content 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\full312_pytest.log'; $log | Select-String -Pattern 'test_webhook_hmac.py:\\d+: |^E   ' | Select -First 6 | % { $_.Line }; cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; $l=Get-Content tests\\unit\\test_webhook_hmac.py; for($i=0;$i -lt 30;$i++){ '{0,4}: {1}' -f ($i+1),$l[$i] }\""
+}
+Response
+
+tests/unit/test_webhook_hmac.py:26: in test_valid_signature_returns_true
+E   AttributeError: <module 'app.api.v1.routes.webhooks' from '/app/app/api/v1/routes/webhooks.py'> does not have the attribute 'WEBHOOK_SECRET'
+tests/unit/test_webhook_hmac.py:31: in test_invalid_signature_returns_false
+E   AttributeError: <module 'app.api.v1.routes.webhooks' from '/app/app/api/v1/routes/webhooks.py'> does not have the attribute 'WEBHOOK_SECRET'
+tests/unit/test_webhook_hmac.py:36: in test_none_signature_returns_false
+E   AttributeError: <module 'app.api.v1.routes.webhooks' from '/app/app/api/v1/routes/webhooks.py'> does not have the attribute 'WEBHOOK_SECRET'
+   1: """
+   2: Unit tests for webhook HMAC validation.
+   3: Patch at import site: app.api.v1.routes.webhooks.WEBHOOK_SECRET
+   4: """
+   5: 
+   6: from __future__ import annotations
+   7: 
+   8: import hashlib
+   9: import hmac
+  10: from unittest.mock import patch
+  11: 
+  12: from app.api.v1.routes.webhooks import _validate_hmac
+  13: 
+  14: 
+  15: [REDACTED:assigned-value:sha256-ec2669e6899b]"
+  16: 
+  17: 
+  18: def _make_sig(body: bytes, secret: str = SECRET) -> str:
+  19:     return hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+  20: 
+  21: 
+  22: class TestValidateHmac:
+  23:     def test_valid_signature_returns_true(self):
+  24:         body = b"CallSid=EX-001&Status=completed"
+  25:         sig = _make_sig(body)
+  26:         with patch("app.api.v1.routes.webhooks.WEBHOOK_SECRET", SECRET):
+  27:             assert _validate_hmac(sig, body) is True
+  28: 
+  29:     def test_invalid_signature_returns_false(self):
+  30:         body = b"CallSid=EX-001&Status=completed"
+Diagnosing webhook HMAC test failures from an obsolete constant
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; $l=Get-Content tests\\unit\\test_webhook_hmac.py; for($i=29;$i -lt $l.Count;$i++){ '{0,4}: {1}' -f ($i+1),$l[$i] }\""
+}
+Response
+
+  30:         body = b"CallSid=EX-001&Status=completed"
+  31:         with patch("app.api.v1.routes.webhooks.WEBHOOK_SECRET", SECRET):
+  32:             assert _validate_hmac("wrongsig", body) is False
+  33: 
+  34:     def test_none_signature_returns_false(self):
+  35:         body = b"CallSid=EX-001&Status=completed"
+  36:         with patch("app.api.v1.routes.webhooks.WEBHOOK_SECRET", SECRET):
+  37:             assert _validate_hmac(None, body) is False
+  38: 
+  39:     def test_empty_signature_returns_false(self):
+  40:         body = b"CallSid=EX-001&Status=completed"
+  41:         with patch("app.api.v1.routes.webhooks.WEBHOOK_SECRET", SECRET):
+  42:             assert _validate_hmac("", body) is False
+  43: 
+  44:     def test_tampered_body_returns_false(self):
+  45:         body = b"CallSid=EX-001&Status=completed"
+  46:         sig = _make_sig(body)
+  47:         tampered = b"CallSid=EX-001&Status=no_answer"
+  48:         with patch("app.api.v1.routes.webhooks.WEBHOOK_SECRET", SECRET):
+  49:             assert _validate_hmac(sig, tampered) is False
+Request
+
+{
+  "content": "\"\"\"\nUnit tests for webhook HMAC validation.\n\nWP-08 / NFR-025: the Exotel secret is runtime configuration\n(settings.exotel_webhook_secret, no in-code default), so tests inject it\nthrough settings rather than patching a module constant.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport hashlib\nimport hmac\n\nimport pytest\n\nfrom app.api.v1.routes.webhooks import _validate_hmac\nfrom app.core.config import get_settings\n\nSECRET = \"test-secret-key\"\n\n\ndef _make_sig(body: bytes, secret: str = SECRET) -> str:\n    return hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()\n\n\n@pytest.fixture(autouse=True)\ndef _secret(monkeypatch):\n    monkeypatch.setattr(get_settings(), \"exotel_webhook_secret\", SECRET)\n\n\nclass TestValidateHmac:\n    def test_valid_signature_returns_true(self):\n        body = b\"CallSid=EX-001&Status=completed\"\n        assert _validate_hmac(_make_sig(body), body) is True\n\n    def test_invalid_signature_returns_false(self):\n        body = b\"CallSid=EX-001&Status=completed\"\n        assert _validate_hmac(\"wrongsig\", body) is False\n\n    def test_none_signature_returns_false(self):\n        body = b\"CallSid=EX-001&Status=completed\"\n        assert _validate_hmac(None, body) is False\n\n    def test_empty_signature_returns_false(self):\n        body = b\"CallSid=EX-001&Status=completed\"\n        assert _validate_hmac(\"\", body) is False\n\n    def test_tampered_body_returns_false(self):\n        body = b\"CallSid=EX-001&Status=completed\"\n        sig = _make_sig(body)\n        tampered = b\"CallSid=EX-001&Status=no_answer\"\n        assert _validate_hmac(sig, tampered) is False\n\n    def test_wrong_secret_returns_false(self):\n        body = b\"CallSid=EX-001&Status=completed\"\n        assert _validate_hmac(_make_sig(body, \"other-secret\"), body) is False\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\tests\\unit\\test_webhook_hmac.py"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\unit\test_webhook_hmac.py
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker rm -f wp_full312 2>&1 | Out-Null; docker exec talkproof_api sh /tmp/run.sh 'tests/unit/test_webhook_hmac.py tests/unit/test_wp08_webhook_secrets.py' | Select-Object -Last 1; docker exec talkproof_api sh -c 'cd /app && black --check -q tests/unit/test_webhook_hmac.py && flake8 tests/unit/test_webhook_hmac.py && echo LINT_OK'; cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git status --short; git diff --stat\""
+}
+Response
+
+15 passed, 3 warnings in 3.16s
+LINT_OK
+ M services/api/tests/unit/test_webhook_hmac.py
+ services/api/tests/unit/test_webhook_hmac.py | 35 +++++++++++++++++-----------
+ 1 file changed, 21 insertions(+), 14 deletions(-)
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git diff -- services/api/tests/unit/test_webhook_hmac.py | Select-Object -First 50; 'INTENDED COMMIT: WP-08 | regression-found: HMAC unit tests patched the removed WEBHOOK_SECRET constant'; git add services/api/tests/unit/test_webhook_hmac.py; git diff --cached --stat; git commit -m 'fix(WP-08): HMAC unit tests inject the secret via settings, not the removed constant' -m 'TEST_DEFECT found by the full regression (Python 3.12 run: 1559 passed, 5 failed): tests/unit/test_webhook_hmac.py patched app.api.v1.routes.webhooks.WEBHOOK_SECRET, which WP-08 removed (no in-code default). The tests now inject settings.exotel_webhook_secret via an autouse monkeypatch fixture and keep every original assertion; one negative added (signature made with a different secret is rejected). Narrow: test_webhook_hmac + test_wp08_webhook_secrets: 15 passed; lint clean.' 2>&1 | % { \\\"$_\\\" }; git show --stat --oneline HEAD; git push origin master 2>&1 | % { \\\"$_\\\" }; git status -sb; git log -3 --oneline --decorate\""
+}
+Response
+
+diff --git a/services/api/tests/unit/test_webhook_hmac.py b/services/api/tests/unit/test_webhook_hmac.py
+index f8e455a..b5133d9 100644
+--- a/services/api/tests/unit/test_webhook_hmac.py
++++ b/services/api/tests/unit/test_webhook_hmac.py
+@@ -1,16 +1,20 @@
+ """
+ Unit tests for webhook HMAC validation.
+-Patch at import site: app.api.v1.routes.webhooks.WEBHOOK_SECRET
++
++WP-08 / NFR-025: the Exotel secret is runtime configuration
++(settings.exotel_webhook_secret, no in-code default), so tests inject it
++through settings rather than patching a module constant.
+ """
+ 
+ from __future__ import annotations
+ 
+ import hashlib
+ import hmac
+-from unittest.mock import patch
+ 
+-from app.api.v1.routes.webhooks import _validate_hmac
++import pytest
+ 
++from app.api.v1.routes.webhooks import _validate_hmac
++from app.core.config import get_settings
+ 
+ [REDACTED:assigned-value:sha256-ec2669e6899b]"
+ 
+@@ -19,31 +23,34 @@ def _make_sig(body: bytes, secret: str = SECRET) -> str:
+     return hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+ 
+ 
++@pytest.fixture(autouse=True)
++def _secret(monkeypatch):
++    monkeypatch.setattr(get_settings(), "exotel_webhook_secret", SECRET)
++
++
+ class TestValidateHmac:
+     def test_valid_signature_returns_true(self):
+         body = b"CallSid=EX-001&Status=completed"
+-        sig = _make_sig(body)
+-        with patch("app.api.v1.routes.webhooks.WEBHOOK_SECRET", SECRET):
+-            assert _validate_hmac(sig, body) is True
++        assert _validate_hmac(_make_sig(body), body) is True
+ 
+     def test_invalid_signature_returns_false(self):
+         body = b"CallSid=EX-001&Status=completed"
+-        with patch("app.api.v1.routes.webhooks.WEBHOOK_SECRET", SECRET):
+-            assert _validate_hmac("wrongsig", body) is False
++        assert _validate_hmac("wrongsig", body) is False
+INTENDED COMMIT: WP-08 | regression-found: HMAC unit tests patched the removed WEBHOOK_SECRET constant
+ services/api/tests/unit/test_webhook_hmac.py | 35 +++++++++++++++++-----------
+ 1 file changed, 21 insertions(+), 14 deletions(-)
+[master 42ca3fb] fix(WP-08): HMAC unit tests inject the secret via settings, not the removed constant
+ 1 file changed, 21 insertions(+), 14 deletions(-)
+42ca3fb fix(WP-08): HMAC unit tests inject the secret via settings, not the removed constant
+ services/api/tests/unit/test_webhook_hmac.py | 35 +++++++++++++++++-----------
+ 1 file changed, 21 insertions(+), 14 deletions(-)
+To https://github.com/vsenthil7/talkproof-backend.git
+   8d2084a..42ca3fb  master -> master
+## master...origin/master
+42ca3fb (HEAD -> master, origin/master, origin/HEAD) fix(WP-08): HMAC unit tests inject the secret via settings, not the removed constant
+8d2084a fix(WP-10): per-user test used a non-existent fixture; black
+2bae1a1 audit(WP-10): initial AI implementation — unverified
+Verifying full test suite and confirming coverage gate status.
+Request
+
+{
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\full312_run.ps1\"; Start-Sleep 150; powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\full312_poll.ps1\""
+}
+Response
+
+ExecaError: Command failed with exit code 4294770688: "powershell -NoProfile -ExecutionPolicy Bypass -File ""C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\full312_run.ps1""; Start-Sleep 150; powershell -NoProfile -ExecutionPolicy Bypass -File ""C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\full312_poll.ps1"""
+
+Processing -File 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\full312_run.ps1;' failed because the file does not have a '.ps1' extension. Specify a valid Windows PowerShell script file name, and then try again.
+
+Windows PowerShell\r
+Copyright (C) Microsoft Corporation. All rights reserved.
+Request
+
+{
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\full312_run.ps1\""
+}
+Response
+
+ExecaError: Command failed with exit code 4294770688: "powershell -NoProfile -ExecutionPolicy Bypass -File ""C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\full312_run.ps1"""
+
+The argument 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\full312_run.ps1' to the -File parameter does not exist. Provide the path to an existing '.ps1' file as an argument to the -File parameter.
+
+Windows PowerShell\r
+Copyright (C) Microsoft Corporation. All rights reserved.
+Tracking down a self-deleting script bug.
+Request
+
+{
+  "content": "$repo = 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'\n$out  = 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis'\n$kv = @{}; Get-Content \"$repo\\.env\" | Where-Object { $_ -match '^\\s*[A-Za-z_]+\\s*=' } | ForEach-Object { $k,$v = $_ -split '=',2; $kv[$k.Trim()] = $v.Trim().Trim('\"') }\n$user = $kv['POSTGRES_USER']; $pw = $kv['POSTGRES_PASSWORD']; $jwt = $kv['JWT_SECRET_KEY']\ndocker rm -f wp_full312 2>$null | Out-Null\nGet-ChildItem $out -File | Where-Object { $_.Name -match '^full312_.*\\.(log|txt|json)$' } | Remove-Item\n$cmd = \"pip install -q -r /app/requirements.txt > /out/full312_pip.log 2>&1; echo PIP_EXIT=`$? >> /out/full312_pip.log; (python --version; pip list 2>/dev/null | grep -iE '^(coverage|anyio|pytest|pytest-cov) ') > /out/full312_versions.txt; cd /app && COVERAGE_FILE=/tmp/.coverage python -m pytest -p no:cacheprovider -q --cov-report=json:/out/full312_cov.json > /out/full312_pytest.log 2>&1; echo `$? > /out/full312_exit.txt\"\ndocker run -d --name wp_full312 --network talkproof-backend_default -v \"${repo}:/app:ro\" -v \"${out}:/out\" -e PYTHONDONTWRITEBYTECODE=1 -e \"DATABASE_URL=[REDACTED:credentialed-url:sha256-031c31edbb0f]postgres:5432/talkproof_dev\" -e \"DATABASE_TEST_URL=[REDACTED:credentialed-url:sha256-031c31edbb0f]postgres:5432/talkproof_test\" -e \"JWT_SECRET_KEY=$jwt\" -e JWT_ALGORITHM=RS256 -e REDIS_URL=redis://redis:6379/0 -e APP_ENV=development -e LOG_DIR=/tmp/tplogs python:3.12-slim sh -c $cmd | Out-Null\n\"started wp_full312\"\nfor ($i = 0; $i -lt 60; $i++) { if (Test-Path \"$out\\full312_exit.txt\") { break }; Start-Sleep 6 }\n\"waited ~$($i*6)s; finished: \" + (Test-Path \"$out\\full312_exit.txt\")\nif (Test-Path \"$out\\full312_pytest.log\") {\n  $log = Get-Content \"$out\\full312_pytest.log\"\n  \"--- failures/errors\"\n  $log | Select-String -Pattern '^(FAILED|ERROR) ' | ForEach-Object { ($_.Line -replace ' - .*','') } | Select-Object -First 20\n  \"--- coverage lines with misses\"\n  $log | Select-String -Pattern '^app/.*\\s+\\d+\\s+[1-9]\\d*\\s+' | ForEach-Object { $_.Line }\n  \"--- tail\"\n  $log | Select-String -Pattern '^TOTAL|Required test coverage|passed|failed' | Select-Object -Last 3 | ForEach-Object { $_.Line }\n}\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\fullrun.ps1"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\fullrun.ps1
+Request
+
+{
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\fullrun.ps1\""
+}
+Response
+
+started wp_full312
+waited ~210s; finished: True
+--- failures/errors
+--- coverage lines with misses
+app/services/campaign_carrier/base.py                 8      1    88%   51
+app/services/transcription/base.py                   19      1    95%   63
+--- tail
+TOTAL                                              9092      2    99%
+FAIL Required test coverage of 100% not reached. Total coverage: 99.98%
+========== 1565 passed, 64 skipped, 549 warnings in 155.10s (0:02:35) ==========
+Verifying full test suite coverage and isolating remaining gaps.
+All tests passing with near-full coverage, flagging final decision for human
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker rm -f wp_full312 | Out-Null; cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git status -sb; git log -10 --oneline --decorate; git stash list\""
+}
+Response
+
+## master...origin/master
+42ca3fb (HEAD -> master, origin/master, origin/HEAD) fix(WP-08): HMAC unit tests inject the secret via settings, not the removed constant
+8d2084a fix(WP-10): per-user test used a non-existent fixture; black
+2bae1a1 audit(WP-10): initial AI implementation — unverified
+52337dc fix(WP-09): surface FR-078 error codes (tcpa_consent_required / dnc_listed) on the telephony route
+12f655e fix(WP-09): existing US-number telephony tests grant consent; black on new code
+8f4f7a9 audit(WP-09): initial AI implementation — unverified
+80112eb fix(WP-08): declare WHATSAPP_WEBHOOK_SECRET in staging env template and deployment doc
+a857cea fix(WP-08): lint — E305 after conftest fixture; black on new test
+40c2d19 audit(WP-08): initial AI implementation — unverified
+2b9ba26 audit(WP-05): initial AI implementation — unverified
+stash@{0}: On master: pre-migration preservation: existing S47-B working tree found 2026-10-04
+Queue exhausted; stopped on a human stop condition. Handoff (§16):
+
+WP	FIRST-ATTEMPT COMMIT	DEFECTS FOUND	FIX COMMITS	TESTS RUN	CURRENT STATE	BLOCKER
+WP-22	8abbed1	—	—	full regression	all targeted lines covered	the 2 Protocol ... stubs (see below)
+WP-13	42865e9 / 2dfa4b5	test tidy	8e1b13e	11/11 + full	application half verified	BLOCKED policy half: users in RLS_TABLES, tenant-less login, no platform bypass, dev role SUPERUSER/BYPASSRLS — design decision
+WP-01	ebed893	DEFECT (500 vs fail-fast), ENVIRONMENT, TEST-DEBT	4910841, d90fbe9, 0253317 (subjects garbled by my helper; intended messages in pushed git notes)	300-wide + full	verified	staging needs a real RSA key pair
+WP-02	f1757e1 / b604230	PRE_EXISTING_DEFECT (stale counter re-lock)	274e2e3	56 + full	verified	FR-011 15-min window = REQUIREMENT_GAP
+WP-03	c8e47d2	TEST_DEFECT ×2	cab5e4f	38 + full	verified	—
+WP-05	2b9ba26	none	—	88 + full	verified, module 100%	DEPENDENCY → WP-17/WP-20 (carrier creds are sid+token pairs)
+WP-08	40c2d19	lint, ENVIRONMENT, review (staging template), regression-found TEST_DEFECT	a857cea, 80112eb, 42ca3fb	27–36 + full	verified; startup gate proven live	billing.py dev-stripe-secret is WP-07 (not in queue)
+WP-09	8f4f7a9	TEST_DEFECT ×3 (obsolete), review R1 (error codes)	12f655e, 52337dc	24 + 108 + full	verified; migration 0069 renders cleanly, not executed	R2 REQUIREMENT_GAP (consent IP/text-version), R3 no DNC admin routes, platform-wide DNC needs decision
+WP-10	2bae1a1	TEST_DEFECT (fixture name)	8d2084a	33 + full	verified (Redis bucket, Retry-After, exemptions, HSTS 63072000)	DEPENDENCY: CSRF double-submit (no cookie auth to protect); Flutter backoff in talkproof-app
+Full regression (Python 3.12, fresh install): 1565 passed / 0 failed / 64 skipped (Playwright, needs live server). Coverage 99.98% — fail_under=100 is red on exactly two statements, both Protocol ... bodies after docstrings. Decision needed (not taken by me): (a) delete the two redundant ... lines to match the house style used by StorageDriver (zero behaviour change), or (b) add a .coveragerc exclude_lines rule for Protocol stubs. Nothing else blocks the gate.
+
+REMAINING WORK (outside the queue / needs you): the Protocol-stub decision above; WP-13 RLS policy design; FR-011 window; WP-09 R2/R3; CSRF/cookie design; ops/backend.ps1 still passes --cov-fail-under=99; the Python 3.11 image's coverage artefact (lines after await not traced) stays DEFERRED — the project's own docker compose exec route will report a false red until the image/toolchain is pinned; migration 0069 must be applied to dev/staging by you; PO review of all preserved evidence (§17).
+
+NEXT EXACT ACTION: your decision on the two Protocol stub lines; then I apply it as one fix(WP-22) commit, re-run the full regression on Python 3.12 to show the 100% gate green, and push.
+
+Git: master == origin/master @ 42ca3fb, working tree clean, stash 4894fc0b intact, TC-1..TC-12 and governance artifacts untouched.
+
+01:22

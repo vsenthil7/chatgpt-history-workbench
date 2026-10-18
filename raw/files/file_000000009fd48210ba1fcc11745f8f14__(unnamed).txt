@@ -1,0 +1,286 @@
+PS C:\platform-tools> date
+
+10 October 2026 17:08:45
+
+
+PS C:\platform-tools>
+PS C:\platform-tools> Write-Host "`n=== POWER KEY / RESET EVIDENCE ==="
+
+=== POWER KEY / RESET EVIDENCE ===
+PS C:\platform-tools>
+PS C:\platform-tools> .\adb.exe shell dumpsys input |
+>>     Select-String -Pattern "KEYCODE_POWER|Power|power" -CaseSensitive:$false
+
+    5: s2mps27-power-keys
+      SysfsDevicePath: /sys/devices/platform/acpm_mfd_bus@12960000/i2c-16/16-001d/s2mps27-power-keys
+  Device 4: s2mps27-power-keys
+    SysfsRootPath:     /sys/devices/platform/acpm_mfd_bus@12960000/i2c-16/16-001d/s2mps27-power-keys
+    mPowerVolUpBehavior = 0
+    KeyGestureEvent { deviceId = 4, keycodes = [26], modifierState = 0, keyGestureType =
+KEY_GESTURE_TYPE_TOGGLE_POWER, action = COMPLETE, displayId = 0, flags = , appLaunchData = null }
+    KeyGestureEvent { deviceId = 4, keycodes = [26], modifierState = 0, keyGestureType =
+KEY_GESTURE_TYPE_TOGGLE_POWER, action = COMPLETE, displayId = 0, flags = , appLaunchData = null }
+    KEYCODE_VOLUME_DOWN + KEYCODE_POWER
+    KEYCODE_VOLUME_UP + KEYCODE_POWER
+
+
+PS C:\platform-tools>
+PS C:\platform-tools> Write-Host "`n=== KERNEL POWER-KEY EVENTS CURRENT BOOT ==="
+
+=== KERNEL POWER-KEY EVENTS CURRENT BOOT ===
+PS C:\platform-tools>
+PS C:\platform-tools> .\adb.exe shell dmesg 2>&1 |
+>>     Select-String -Pattern "power.?key|pwrkey|PWRON|PWROND|keycode.?26|gpio.?key" -CaseSensitive:$false |
+>>     Select-Object -Last 100
+PS C:\platform-tools>
+PS C:\platform-tools> Write-Host "`n=== LOGCAT POWER-KEY EVENTS CURRENT BOOT ==="
+
+=== LOGCAT POWER-KEY EVENTS CURRENT BOOT ===
+PS C:\platform-tools>
+PS C:\platform-tools> .\adb.exe shell logcat -b all -d -v time |
+>>     Select-String -Pattern "KEYCODE_POWER|power.?key|PWRON|PWROND|long.?press|PhoneWindowManager" -CaseSensitive:$false |
+>>     Select-Object -Last 150
+
+10-10 16:50:54.807 D/PhoneWindowManager( 1269): transition/occluded commit occluded=false changed=false
+10-10 16:50:54.807 D/PhoneWindowManager( 1269): setKeyguardOccluded occluded=false
+10-10 16:53:32.413 D/PhoneWindowManager( 1269): interceptKeyTq keycode=26 interactive=false keyguardActive=true
+policyFlags=2000000
+10-10 16:53:32.414 D/PhoneWindowManager( 1269): handleKeyGesture for power key
+10-10 16:53:32.417 D/PhoneWindowManagerExt( 1269): interceptKeyTq code=26 down=true repeatCount=0 displayId=-1
+interactive=false powerCombination=false
+10-10 16:53:32.417 D/PhoneWindowManagerExt( 1269): systemKeyEventRequested REMOVE_PASS
+10-10 16:53:32.417 D/PhoneWindowManager( 1269): interceptKeyTq interceptKeyResult=8
+10-10 16:53:32.424 D/PhoneWindowManager( 1269): interceptPowerKeyDown, powerKeyHandled=false hungUp=false
+handledByPowerManager=false isKeyGestureTriggered=false
+10-10 16:53:32.430 I/PhoneWindowManager( 1269): Started waking up... (groupId=0 why=ON_BECAUSE_OF_USER)
+10-10 16:53:32.568 I/PhoneWindowManager( 1269): Finished waking up... (groupId=0 why=ON_BECAUSE_OF_USER)
+10-10 16:53:32.574 D/PhoneWindowManager( 1269): interceptKeyTq keycode=26 interactive=true keyguardActive=true
+policyFlags=22000000
+10-10 16:53:32.574 D/PhoneWindowManagerExt( 1269): interceptKeyTq code=26 down=false repeatCount=0 displayId=-1
+interactive=true powerCombination=false
+10-10 16:53:32.574 D/PhoneWindowManagerExt( 1269): systemKeyEventRequested REMOVE_PASS
+10-10 16:53:32.574 D/PhoneWindowManager( 1269): interceptKeyTq interceptKeyResult=8
+10-10 16:53:32.574 D/PhoneWindowManager( 1269): finishPowerKeyPress
+10-10 16:53:32.574 I/power_partial_wake_state( 1269):
+[DIS,11889409,151,PhoneWindowManager.mPowerKeyWakeLock:android(enabled),1000,1269,null]
+10-10 16:53:32.574 I/power_partial_wake_state( 1269):
+[REL,11889409,152,PhoneWindowManager.mPowerKeyWakeLock:android,1000,1269,null]
+10-10 16:53:32.748 D/PhoneWindowManager( 1269): powerPress: eventTime=853170 interactive=true count=1
+mShortPressOnPowerBehavior=1 systemKeyRequested=false
+10-10 16:53:32.748 V/PhoneWindowManager( 1269): Ignoring short press of power button because the device is not
+interactive. interactive=true, beganFromNonInteractive=true
+10-10 16:53:35.392 D/QuickPanelLog( 2364): NSSLC | onInterceptTouchEvent | ACTION_DOWN | x:685.81055, y:1780.1367 |
+return: false | KEYGUARD | swipeWantsIt: false, scrollWantsIt: false, expandWantsIt: false, longPressWantsIt: false,
+panelSlideWantsItfalse, hunWantsIt: false
+10-10 16:53:35.392 D/QuickPanelLog( 2364): NSSLC | onTouchEvent | ACTION_DOWN | return: false | KEYGUARD |
+horizontalSwipeWantsIt: false, scrollerWantsIt: false, expandWantsIt: false, longPressWantsIt: false,
+panelSlideWantsIt: false, hunWantsIt: false
+10-10 16:53:35.432 D/KeyguardEditModeAnimatorController( 2364): longPressJob?.cancel
+10-10 16:53:35.512 D/KeyguardEditModeAnimatorController( 2364): long pressed false
+10-10 16:53:35.513 D/KeyguardEditModeAnimatorController( 2364): long pressed false
+10-10 16:53:38.808 D/PhoneWindowManager( 1269): transition/occluded commit occluded=false changed=false
+10-10 16:53:38.808 D/PhoneWindowManager( 1269): setKeyguardOccluded occluded=false
+10-10 16:53:38.841 D/KeyguardEditModeAnimatorController( 2364): long pressed false
+10-10 16:53:41.306 D/PhoneWindowManager( 1269): interceptKeyTq keycode=3 interactive=true keyguardActive=false
+policyFlags=2b000002
+10-10 16:53:41.307 D/PhoneWindowManagerExt( 1269): interceptKeyTq code=3 down=true repeatCount=0 displayId=0
+interactive=true powerCombination=false
+10-10 16:53:41.307 D/PhoneWindowManager( 1269): interceptKeyTq interceptKeyResult=1
+10-10 16:53:41.311 D/PhoneWindowManager( 1269): interceptKeyTi keyCode=3 action=0 repeatCount=0 keyguardOn=false
+canceled=false
+10-10 16:53:41.312 D/PhoneWindowManagerExt( 1269): interceptKeyTi code=3 down=true repeatCount=0 displayId=0
+interactive=true
+10-10 16:53:41.316 D/PhoneWindowManagerExt( 1269): startSearcleByHomeKey, down=true longPress=false displayId=0
+10-10 16:53:41.316 D/StatusBarManagerService( 1269): startSearcleByHomeKey down=true longPress=false
+10-10 16:53:41.318 D/SearcleManager( 2364): startSearcleByHomeKey down = true, longPress = false
+10-10 16:53:41.427 D/PhoneWindowManager( 1269): interceptKeyTq keycode=3 interactive=true keyguardActive=false
+policyFlags=2b000002
+10-10 16:53:41.428 D/PhoneWindowManagerExt( 1269): interceptKeyTq code=3 down=false repeatCount=0 displayId=0
+interactive=true powerCombination=false
+10-10 16:53:41.428 D/PhoneWindowManager( 1269): interceptKeyTq interceptKeyResult=1
+10-10 16:53:41.428 D/PhoneWindowManager( 1269): interceptKeyTi keyCode=3 action=1 repeatCount=0 keyguardOn=false
+canceled=false
+10-10 16:53:41.428 D/PhoneWindowManagerExt( 1269): interceptKeyTi code=3 down=false repeatCount=0 displayId=0
+interactive=true
+10-10 16:53:41.428 D/PhoneWindowManagerExt( 1269): startSearcleByHomeKey, down=false longPress=false displayId=0
+10-10 16:53:41.428 D/StatusBarManagerService( 1269): startSearcleByHomeKey down=false longPress=false
+10-10 16:53:41.430 D/SearcleManager( 2364): startSearcleByHomeKey down = false, longPress = false
+10-10 16:53:41.434 D/PhoneWindowManagerExt( 1269): startDockOrHome,
+Callers=com.android.server.policy.PhoneWindowManager.startDockOrHome:136
+com.android.server.policy.PhoneWindowManager.launchHomeFromHotKey:218
+com.android.server.policy.PhoneWindowManager.handleShortPressOnHome:59
+com.android.server.policy.PhoneWindowManager$DisplayHomeButtonHandler$$ExternalSyntheticLambda0.run:154
+android.os.Handler.handleCallback:1070 android.os.Handler.dispatchMessage:125 android.os.Looper.dispatchMessage:358
+android.os.Looper.loopOnce:288 android.os.Looper.loop:392 android.os.HandlerThread.run:139
+10-10 16:53:41.434 D/PhoneWindowManager( 1269): startDockOrHome: startReason= startDockOrHome
+10-10 16:53:52.339 I/HoneySpace.LongPressTouchController( 2929): ACTION_DOWN, (648.6328, 1352.8125)
+10-10 16:53:52.343 I/HoneySpace.LongPressTouchController( 2929): startLongPressJob, touchDownState =
+com.honeyspace.sdk.HomeScreen$Normal@2f061ab
+10-10 16:53:52.400 I/HoneySpace.LongPressTouchController( 2929): cancelLongPressJob, out of touchSlop
+10-10 16:54:15.160 I/HoneySpace.LongPressTouchController( 2929): ACTION_DOWN, (590.625, 1441.3623)
+10-10 16:54:15.161 I/HoneySpace.LongPressTouchController( 2929): startLongPressJob, touchDownState =
+com.honeyspace.sdk.HomeScreen$Normal@2f061ab
+10-10 16:54:15.213 I/HoneySpace.LongPressTouchController( 2929): cancelLongPressJob, out of touchSlop
+10-10 16:54:28.275 I/HoneySpace.LongPressTouchController( 2929): ACTION_DOWN, (607.5, 1443.6475)
+10-10 16:54:28.276 I/HoneySpace.LongPressTouchController( 2929): startLongPressJob, touchDownState =
+com.honeyspace.sdk.HomeScreen$Normal@2f061ab
+10-10 16:54:28.320 I/HoneySpace.LongPressTouchController( 2929): cancelLongPressJob, out of touchSlop
+10-10 16:54:38.637 I/HoneySpace.LongPressTouchController( 2929): ACTION_DOWN, (682.91016, 1425.9375)
+10-10 16:54:38.638 I/HoneySpace.LongPressTouchController( 2929): startLongPressJob, touchDownState =
+com.honeyspace.sdk.HomeScreen$Normal@2f061ab
+10-10 16:54:38.747 I/HoneySpace.LongPressTouchController( 2929): cancelLongPressJob, out of touchSlop
+10-10 16:54:50.526 D/QuickPanelLog( 2364): NSSLC | onInterceptTouchEvent | ACTION_DOWN | x:930.2344, y:1405.3711 |
+return: false | SHADE | swipeWantsIt: false, scrollWantsIt: false, expandWantsIt: false, longPressWantsIt: false,
+panelSlideWantsItfalse, hunWantsIt: false
+10-10 16:54:50.639 D/QuickPanelLog( 2364): NSSLC | onTouchEvent | ACTION_UP | return: true | SHADE |
+horizontalSwipeWantsIt: true, scrollerWantsIt: true, expandWantsIt: false, longPressWantsIt: false, panelSlideWantsIt:
+false, hunWantsIt: false
+10-10 16:54:50.990 D/QuickPanelLog( 2364): NSSLC | onInterceptTouchEvent | ACTION_DOWN | x:956.86523, y:1193.4229 |
+return: false | SHADE | swipeWantsIt: false, scrollWantsIt: false, expandWantsIt: false, longPressWantsIt: false,
+panelSlideWantsItfalse, hunWantsIt: false
+10-10 16:54:51.080 D/QuickPanelLog( 2364): NSSLC | onTouchEvent | ACTION_UP | return: true | SHADE |
+horizontalSwipeWantsIt: true, scrollerWantsIt: true, expandWantsIt: false, longPressWantsIt: false, panelSlideWantsIt:
+false, hunWantsIt: false
+10-10 16:54:51.586 D/QuickPanelLog( 2364): NSSLC | onInterceptTouchEvent | ACTION_DOWN | x:859.834, y:972.334 |
+return: false | SHADE | swipeWantsIt: false, scrollWantsIt: false, expandWantsIt: false, longPressWantsIt: false,
+panelSlideWantsItfalse, hunWantsIt: false
+10-10 16:54:51.633 D/QuickPanelLog( 2364): NSSLC | onInterceptTouchEvent | ACTION_UP | x:856.1426, y:972.334 | return:
+false | SHADE | swipeWantsIt: false, scrollWantsIt: false, expandWantsIt: false, longPressWantsIt: false,
+panelSlideWantsItfalse, hunWantsIt: false
+10-10 16:54:52.267 D/KeyguardEditModeAnimatorController( 2364): long pressed false
+10-10 16:55:14.513 D/PhoneWindowManager( 1269): interceptKeyTq keycode=187 interactive=true keyguardActive=false
+policyFlags=2b000002
+10-10 16:55:14.513 D/PhoneWindowManagerExt( 1269): interceptKeyTq code=187 down=true repeatCount=0 displayId=0
+interactive=true powerCombination=false
+10-10 16:55:14.513 D/PhoneWindowManager( 1269): interceptKeyTq interceptKeyResult=1
+10-10 16:55:14.517 D/PhoneWindowManager( 1269): handleKeyGestureEvent, type=4 keyguardOn=false displayId=0
+10-10 16:55:14.629 D/PhoneWindowManager( 1269): interceptKeyTq keycode=187 interactive=true keyguardActive=false
+policyFlags=2b000002
+10-10 16:55:14.630 D/PhoneWindowManagerExt( 1269): interceptKeyTq code=187 down=false repeatCount=0 displayId=0
+interactive=true powerCombination=false
+10-10 16:55:14.630 D/PhoneWindowManager( 1269): interceptKeyTq interceptKeyResult=1
+10-10 16:55:14.630 D/PhoneWindowManager( 1269): handleKeyGestureEvent, type=1003 keyguardOn=false displayId=0
+10-10 16:55:14.630 W/PhoneWindowManager( 1269): Received a key gesture KeyGestureEvent { deviceId = -1, keycodes =
+[187, 4], modifierState = 0, keyGestureType = KEY_GESTURE_TYPE_LOCK_TASK_MODE_PINNED_RECENT_BACK, action = COMPLETE,
+displayId = 0, flags = CANCELLED, appLaunchData = null } that was not registered by this handler
+10-10 16:55:14.631 D/PhoneWindowManager( 1269): handleKeyGestureEvent, type=4 keyguardOn=false displayId=0
+10-10 16:55:14.631 D/PhoneWindowManager( 1269): toggleRecentApps
+10-10 16:57:10.160 I/PhoneWindowManager( 1269): Started going to sleep... (groupId=0 why=OFF_BECAUSE_OF_TIMEOUT)
+10-10 16:57:10.541 I/PhoneWindowManager( 1269): Display0 turned off...
+10-10 16:57:10.581 D/PhoneWindowManager( 1269): transition/occluded commit occluded=false changed=false
+10-10 16:57:10.581 D/PhoneWindowManager( 1269): setKeyguardOccluded occluded=false
+10-10 16:57:10.885 I/PhoneWindowManager( 1269): Finished going to sleep... (groupId=0 why=OFF_BECAUSE_OF_TIMEOUT)
+10-10 16:57:11.317 I/PhoneWindowManager( 1269): Display 0 turning on...
+10-10 16:57:11.320 I/PhoneWindowManager( 1269): screenTurningOn(+), before calling onScreenTurningOn to
+KeyguardDelegate
+10-10 16:57:11.320 I/PhoneWindowManager( 1269): screenTurningOn(-), after calling onScreenTurningOn to KeyguardDelegate
+10-10 16:57:11.356 D/PhoneWindowManager( 1269): mKeyguardDelegate.ShowListener.onDrawn.
+10-10 16:57:11.356 W/PhoneWindowManager( 1269): Setting mKeyguardDrawComplete
+10-10 16:57:11.404 W/PhoneWindowManager( 1269): All windows drawn on display -1
+10-10 16:57:11.523 I/PhoneWindowManager( 1269): Display 0 turned on...
+10-10 16:57:15.183 D/ActivityManager( 1269): Received BROADCAST intent 0x5a78cc2 Key{broadcastIntent
+pkg=com.android.systemui intent=act=com.android.internal.policy.impl.PhoneWindowManager.DELAYED_KEYGUARD
+flg=0x10000000 xflg=0x4 pkg=com.android.systemui flags=0x4000000 u=0} requestCode=0 sent=0 from uid 1000
+10-10 16:57:15.245 D/PhoneWindowManager( 1269): transition/occluded commit occluded=false changed=false
+10-10 16:57:15.245 D/PhoneWindowManager( 1269): setKeyguardOccluded occluded=false
+10-10 17:03:50.051 I/adbd    (31922): adbd service requested 'shell,v2,TERM=xterm-256color,raw:grep -inE
+'16:39|PWRHOLD|PWROND|RSVD31|reset|reboot|shutdown|panic|watchdog|fatal' /data/log/prev_dump.log 2>/dev/null | tail -n
+200'
+10-10 17:06:52.432 I/aizy    ( 4401): (REDACTED) #initialConfig Long Press Power Education entrypoints: %s
+10-10 17:06:53.134 I/aizy    ( 4401): (REDACTED) #initialConfig Long Press Power Education entrypoints: %s
+10-10 17:06:56.100 D/PhoneWindowManager( 1269): interceptKeyTq keycode=26 interactive=false keyguardActive=true
+policyFlags=2000000
+10-10 17:06:56.100 D/PhoneWindowManager( 1269): handleKeyGesture for power key
+10-10 17:06:56.102 D/PhoneWindowManagerExt( 1269): interceptKeyTq code=26 down=true repeatCount=0 displayId=-1
+interactive=false powerCombination=false
+10-10 17:06:56.102 D/PhoneWindowManagerExt( 1269): systemKeyEventRequested REMOVE_PASS
+10-10 17:06:56.102 D/PhoneWindowManager( 1269): interceptKeyTq interceptKeyResult=8
+10-10 17:06:56.105 D/PhoneWindowManager( 1269): interceptPowerKeyDown, powerKeyHandled=false hungUp=false
+handledByPowerManager=false isKeyGestureTriggered=false
+10-10 17:06:56.111 I/PhoneWindowManager( 1269): Started waking up... (groupId=0 why=ON_BECAUSE_OF_USER)
+10-10 17:06:56.237 I/PhoneWindowManager( 1269): Finished waking up... (groupId=0 why=ON_BECAUSE_OF_USER)
+10-10 17:06:56.242 D/PhoneWindowManager( 1269): interceptKeyTq keycode=26 interactive=true keyguardActive=true
+policyFlags=22000000
+10-10 17:06:56.243 D/PhoneWindowManagerExt( 1269): interceptKeyTq code=26 down=false repeatCount=0 displayId=-1
+interactive=true powerCombination=false
+10-10 17:06:56.243 D/PhoneWindowManagerExt( 1269): systemKeyEventRequested REMOVE_PASS
+10-10 17:06:56.243 D/PhoneWindowManager( 1269): interceptKeyTq interceptKeyResult=8
+10-10 17:06:56.243 D/PhoneWindowManager( 1269): finishPowerKeyPress
+10-10 17:06:56.243 I/power_partial_wake_state( 1269):
+[DIS,11889409,139,PhoneWindowManager.mPowerKeyWakeLock:android(enabled),1000,1269,null]
+10-10 17:06:56.243 I/power_partial_wake_state( 1269):
+[REL,11889409,139,PhoneWindowManager.mPowerKeyWakeLock:android,1000,1269,null]
+10-10 17:06:56.412 D/PhoneWindowManager( 1269): powerPress: eventTime=1656862 interactive=true count=1
+mShortPressOnPowerBehavior=1 systemKeyRequested=false
+10-10 17:06:56.412 V/PhoneWindowManager( 1269): Ignoring short press of power button because the device is not
+interactive. interactive=true, beganFromNonInteractive=true
+10-10 17:06:57.373 D/QuickPanelLog( 2364): NSSLC | onInterceptTouchEvent | ACTION_DOWN | x:598.7988, y:1820.6982 |
+return: false | KEYGUARD | swipeWantsIt: false, scrollWantsIt: false, expandWantsIt: false, longPressWantsIt: false,
+panelSlideWantsItfalse, hunWantsIt: false
+10-10 17:06:57.373 D/QuickPanelLog( 2364): NSSLC | onTouchEvent | ACTION_DOWN | return: false | KEYGUARD |
+horizontalSwipeWantsIt: false, scrollerWantsIt: false, expandWantsIt: false, longPressWantsIt: false,
+panelSlideWantsIt: false, hunWantsIt: false
+10-10 17:06:57.417 D/KeyguardEditModeAnimatorController( 2364): longPressJob?.cancel
+10-10 17:06:57.489 D/KeyguardEditModeAnimatorController( 2364): long pressed false
+10-10 17:06:57.490 D/KeyguardEditModeAnimatorController( 2364): long pressed false
+10-10 17:07:00.331 D/PhoneWindowManager( 1269): transition/occluded commit occluded=false changed=false
+10-10 17:07:00.331 D/PhoneWindowManager( 1269): setKeyguardOccluded occluded=false
+10-10 17:07:02.260 D/PhoneWindowManager( 1269): interceptKeyTq keycode=3 interactive=true keyguardActive=false
+policyFlags=2b000002
+10-10 17:07:02.260 D/PhoneWindowManagerExt( 1269): interceptKeyTq code=3 down=true repeatCount=0 displayId=0
+interactive=true powerCombination=false
+10-10 17:07:02.260 D/PhoneWindowManager( 1269): interceptKeyTq interceptKeyResult=1
+10-10 17:07:02.263 D/PhoneWindowManager( 1269): interceptKeyTi keyCode=3 action=0 repeatCount=0 keyguardOn=false
+canceled=false
+10-10 17:07:02.263 D/PhoneWindowManagerExt( 1269): interceptKeyTi code=3 down=true repeatCount=0 displayId=0
+interactive=true
+10-10 17:07:02.263 D/PhoneWindowManagerExt( 1269): startSearcleByHomeKey, down=true longPress=false displayId=0
+10-10 17:07:02.263 D/StatusBarManagerService( 1269): startSearcleByHomeKey down=true longPress=false
+10-10 17:07:02.266 D/SearcleManager( 2364): startSearcleByHomeKey down = true, longPress = false
+10-10 17:07:02.387 D/PhoneWindowManager( 1269): interceptKeyTq keycode=3 interactive=true keyguardActive=false
+policyFlags=2b000002
+10-10 17:07:02.387 D/PhoneWindowManagerExt( 1269): interceptKeyTq code=3 down=false repeatCount=0 displayId=0
+interactive=true powerCombination=false
+10-10 17:07:02.387 D/PhoneWindowManager( 1269): interceptKeyTq interceptKeyResult=1
+10-10 17:07:02.388 D/PhoneWindowManager( 1269): interceptKeyTi keyCode=3 action=1 repeatCount=0 keyguardOn=false
+canceled=false
+10-10 17:07:02.388 D/PhoneWindowManagerExt( 1269): interceptKeyTi code=3 down=false repeatCount=0 displayId=0
+interactive=true
+10-10 17:07:02.388 D/PhoneWindowManagerExt( 1269): startSearcleByHomeKey, down=false longPress=false displayId=0
+10-10 17:07:02.388 D/StatusBarManagerService( 1269): startSearcleByHomeKey down=false longPress=false
+10-10 17:07:02.389 D/SearcleManager( 2364): startSearcleByHomeKey down = false, longPress = false
+10-10 17:07:02.393 D/PhoneWindowManagerExt( 1269): startDockOrHome,
+Callers=com.android.server.policy.PhoneWindowManager.startDockOrHome:136
+com.android.server.policy.PhoneWindowManager.launchHomeFromHotKey:218
+com.android.server.policy.PhoneWindowManager.handleShortPressOnHome:59
+com.android.server.policy.PhoneWindowManager$DisplayHomeButtonHandler$$ExternalSyntheticLambda0.run:154
+android.os.Handler.handleCallback:1070 android.os.Handler.dispatchMessage:125 android.os.Looper.dispatchMessage:358
+android.os.Looper.loopOnce:288 android.os.Looper.loop:392 android.os.HandlerThread.run:139
+10-10 17:07:02.393 D/PhoneWindowManager( 1269): startDockOrHome: startReason= startDockOrHome
+10-10 17:07:32.408 I/PhoneWindowManager( 1269): Started going to sleep... (groupId=0 why=OFF_BECAUSE_OF_TIMEOUT)
+10-10 17:07:32.803 I/PhoneWindowManager( 1269): Display0 turned off...
+10-10 17:07:32.868 D/PhoneWindowManager( 1269): transition/occluded commit occluded=false changed=false
+10-10 17:07:32.868 D/PhoneWindowManager( 1269): setKeyguardOccluded occluded=false
+10-10 17:07:33.222 I/PhoneWindowManager( 1269): Finished going to sleep... (groupId=0 why=OFF_BECAUSE_OF_TIMEOUT)
+10-10 17:07:33.654 I/PhoneWindowManager( 1269): Display 0 turning on...
+10-10 17:07:33.657 I/PhoneWindowManager( 1269): screenTurningOn(+), before calling onScreenTurningOn to
+KeyguardDelegate
+10-10 17:07:33.658 I/PhoneWindowManager( 1269): screenTurningOn(-), after calling onScreenTurningOn to KeyguardDelegate
+10-10 17:07:33.703 D/PhoneWindowManager( 1269): mKeyguardDelegate.ShowListener.onDrawn.
+10-10 17:07:33.703 W/PhoneWindowManager( 1269): Setting mKeyguardDrawComplete
+10-10 17:07:33.741 W/PhoneWindowManager( 1269): All windows drawn on display -1
+10-10 17:07:33.871 I/PhoneWindowManager( 1269): Display 0 turned on...
+10-10 17:07:37.428 D/ActivityManager( 1269): Received BROADCAST intent 0x2e44095 Key{broadcastIntent
+pkg=com.android.systemui intent=act=com.android.internal.policy.impl.PhoneWindowManager.DELAYED_KEYGUARD
+flg=0x10000000 xflg=0x4 pkg=com.android.systemui flags=0x4000000 u=0} requestCode=0 sent=0 from uid 1000
+10-10 17:07:37.481 D/PhoneWindowManager( 1269): transition/occluded commit occluded=false changed=false
+10-10 17:07:37.481 D/PhoneWindowManager( 1269): setKeyguardOccluded occluded=false
+
+
+PS C:\platform-tools>
+PS C:\platform-tools> date
+
+10 October 2026 17:08:50
+
+
+PS C:\platform-tools>

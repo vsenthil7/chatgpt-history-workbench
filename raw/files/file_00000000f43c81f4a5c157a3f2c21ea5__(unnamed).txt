@@ -1,0 +1,511 @@
+# TalkProof Technical Ownership Training Plan
+
+**Authoring AI:** ChatGPT\
+**Version:** V001\
+**Created:** 05 October 2026 01:02 BST\
+**Status:** Initial training baseline
+
+## 1. Purpose
+
+TalkProof is now being developed with AI coding agents capable of
+producing substantial implementation changes in short tool windows. The
+engineering process has become more disciplined: requirements are read
+first, authorised work packages are implemented, first AI attempts are
+preserved in Git, tests expose defects, fixes are committed separately,
+and review findings remain visible.
+
+This creates both an opportunity and a risk. Implementation speed is no
+longer the main bottleneck; the risk is that AI systems can understand
+and modify TalkProof faster than the human Product Owner develops
+independent understanding of the architecture, security boundaries, data
+model, runtime behaviour and failure modes.
+
+The target is:
+
+> **Human technical ownership with AI leverage.**
+
+The objective is not to replace Claude manually or memorise code. It is
+to develop enough independent technical understanding to inspect,
+challenge, diagnose, govern and explain TalkProof's critical paths.
+
+## 2. Why this started
+
+Earlier AI-assisted development, particularly around June 2026, felt
+less stable: correcting one issue could expose or create another and
+frequent human intervention was required. By October 2026, Claude
+Desktop was visibly smoother at reading requirements, implementing
+coherent changes, creating tests, preserving Git evidence, diagnosing
+failures, correcting defects and continuing through authorised work.
+
+This led to the guarded autonomous model:
+
+``` text
+requirement → inspect → implement first attempt + intended tests
+→ commit/push first attempt → run tests → classify failures
+→ separate fixes/regression tests → retest → internal review
+→ separate review fixes → next authorised WP
+```
+
+Git became the audit ledger for:
+
+``` text
+AI first attempt → test-discovered defects → fixes
+→ review-discovered defects → fixes → verified state
+```
+
+The remaining concern became human dependency. The undesirable pattern
+is:
+
+``` text
+Claude writes → ChatGPT reviews → human forwards
+```
+
+The desired pattern is:
+
+``` text
+Claude implements → Git/test evidence
+→ ChatGPT independently reviews and explains
+→ human understands the critical path
+→ human increasingly challenges both AI systems
+→ human owns the decision
+```
+
+A Stanford CS230 Autumn 2025 Lecture 9 career discussion involving
+Andrew Ng and Laurence Moroney reinforced the broader direction: as AI
+lowers the cost of producing code, more value moves toward problem
+selection, specification, engineering judgment, verification, production
+operation and useful outcomes. TalkProof can become the practical
+training environment rather than requiring a detached tutorial project.
+
+## 3. What this training is not
+
+This is not a generic Python course, memorising syntax, manually
+rewriting AI code, learning every library, stopping development until
+the Product Owner becomes a programmer, or allowing AI-generated code to
+bypass verification.
+
+The Product Owner instead needs to become progressively better at
+answering:
+
+-   What is this component responsible for?
+-   Why was it designed this way?
+-   What security boundary does it enforce?
+-   What happens when it fails?
+-   What data crosses the boundary?
+-   Which requirement does it satisfy?
+-   What proves it works?
+-   Could another tenant see this data?
+-   What happens under concurrency or restart?
+-   What has actually been verified versus merely implemented?
+
+## 4. Capability levels
+
+### Level 1 --- Explain
+
+Explain what a component does in plain language.
+
+### Level 2 --- Predict
+
+Predict system behaviour when a condition changes.
+
+### Level 3 --- Challenge
+
+Challenge an AI completion claim and ask for the missing proof.
+
+### Level 4 --- Diagnose
+
+Reason through a failure using architecture, runtime evidence, logs,
+tests and code.
+
+The goal is not memorising the whole codebase. It is building a reliable
+mental model and knowing how to locate evidence.
+
+## 5. Training principles
+
+### TalkProof itself is the curriculum
+
+Use real requirements, code, tests, commits, defects and architecture
+decisions.
+
+### Protect Claude execution windows
+
+Claude's tool windows have recently shortened from roughly 30 minutes to
+approximately 10 minutes. Use those primarily for:
+
+``` text
+BUILD → TEST → FIX → GIT → CONTINUE
+```
+
+Training normally happens between meaningful engineering windows.
+
+### Teach only what matters
+
+Classify concepts as **LEARN NOW**, **UNDERSTAND LATER**, or
+**AI/IMPLEMENTATION DETAIL**.
+
+### Concrete first, theory second
+
+Use:
+
+``` text
+real requirement → real code → real test/failure → mental model
+→ underlying concept → human restatement → application to another case
+```
+
+### Do not infer competence
+
+AI output does not prove human understanding. Evidence includes the
+Product Owner explaining, predicting, challenging, tracing or diagnosing
+independently.
+
+## 6. Operating rhythm
+
+``` text
+Claude engineering window
+        ↓
+Git/test evidence
+        ↓
+ChatGPT independent review
+        ↓
+1–2 targeted concepts
+        ↓
+Product Owner explain/predict/challenge/diagnose
+        ↓
+training record update
+        ↓
+next engineering window
+```
+
+This is event-driven. Not every 10-minute coding run requires a lesson.
+
+## 7. Planned curriculum
+
+### TP-T001 --- Follow one operation through TalkProof
+
+Understand route/API → service → repository → database/provider →
+response/error path.
+
+### TP-T002 --- Multi-tenancy and PostgreSQL RLS (WP-13)
+
+Understand tenants, application filtering, RLS, request/transaction
+tenant context, connection pooling, RLS bypass, login-before-tenant,
+super-admin and worker access.
+
+### TP-T003 --- Authentication and RS256 (WP-01)
+
+Understand authentication vs authorization, JWT, signing vs encryption,
+HS256 vs RS256, public/private keys, algorithm pinning, configuration
+and key lifecycle.
+
+### TP-T004 --- Transactions, concurrency and audit integrity (WP-03)
+
+Understand transaction, commit, rollback, race conditions, concurrent
+writers, audit hash chains and advisory locks.
+
+### TP-T005 --- Secrets and provider routing (WP-05)
+
+Understand plaintext vs encrypted-at-rest values, decryption at the
+provider I/O boundary, masking vs encryption, tenant isolation,
+BYO/platform fallback, spend caps and 503 provider-unavailable
+behaviour.
+
+Mental model:
+
+``` text
+provider required
+    ↓
+usable tenant BYO credential?
+    ├─ yes → decrypt → provider call
+    └─ no
+         ↓
+platform credential?
+    ├─ yes → decrypt → provider call/meter
+    └─ no → 503 provider_unavailable
+```
+
+A key ownership question is whether a correct credential resolver is
+actually connected to the real provider adapter. Resolver implementation
+alone does not prove end-to-end provider usage.
+
+### TP-T006 --- Runtime secret safety (WP-08)
+
+Environment variables, development defaults, placeholders, fail-fast
+configuration, committed-secret risks and secret scanning.
+
+### TP-T007 --- Consent and DNC enforcement (WP-09)
+
+Stored policy vs enforced policy, pre-dispatch checks,
+fail-open/fail-closed and audit evidence.
+
+### TP-T008 --- Distributed rate limiting (WP-10)
+
+Authenticated/unauthenticated limits, tenant/user dimensions, Redis,
+distributed instances, Retry-After and why in-process state differs
+under horizontal scaling.
+
+### Later
+
+RAG, retrieval traces, agents, STT/LLM/TTS, telephony, streaming,
+queues, idempotency, observability, CI/CD, deployment, threat modelling,
+security testing, AI evaluation, frontend/admin/mobile and performance
+will be introduced when TalkProof reaches them.
+
+## 8. Standard lesson method
+
+Each lesson records:
+
+1.  **Context** --- what changed?
+2.  **Why** --- what product/security risk matters?
+3.  **Code path** --- only relevant code.
+4.  **Mental model** --- plain-language explanation.
+5.  **Failure mode** --- what breaks if wrong?
+6.  **Human check** --- explain, predict, challenge or diagnose.
+7.  **Evidence** --- what the Product Owner demonstrated.
+8.  **Follow-up** --- genuine gaps only.
+
+## 9. Tracking
+
+  -------------------------------------------------------------------------------------------------
+  ID        Date    WP              Concept      Priority   Before   After   Evidence   Follow-up
+  --------- ------- --------------- ------------ ---------- -------- ------- ---------- -----------
+  TP-T001   TBD     WP-05/current   Provider     LEARN NOW  TBD      TBD     TBD        TBD
+                                    credential                                          
+                                    resolution                                          
+
+  -------------------------------------------------------------------------------------------------
+
+Do not fabricate competence levels. Record them only after interaction.
+
+## 10. Engineering review and training are separate
+
+Every Claude run can produce two independent results.
+
+**Engineering:** PASS / PASS WITH FINDINGS / BLOCKED / DECISION REQUIRED
+/ INSUFFICIENT EVIDENCE.
+
+**Training:** no lesson / LEARN NOW / explained / predicted / challenged
+/ diagnosed / revisit.
+
+A successful lesson does not make defective code acceptable. Green code
+does not prove human understanding.
+
+## 11. Repository strategy
+
+**Decision: keep training inside the TalkProof repository, but in a
+separate non-authoritative folder.**
+
+Recommended:
+
+``` text
+docs/93_training/
+├── README.md
+├── TALKPROOF_TECHNICAL_OWNERSHIP_TRAINING.md
+├── TRAINING_LOG.md
+└── lessons/
+    ├── TP-T001_PROVIDER_ROUTING.md
+    ├── TP-T002_RLS_TENANT_ISOLATION.md
+    └── ...
+```
+
+Reasons:
+
+-   lessons can reference exact WPs and commits;
+-   Git provides chronological history;
+-   training travels with the project;
+-   future code changes can trigger lesson updates;
+-   a second repository would create unnecessary synchronisation work.
+
+`docs/93_training/` is educational/ownership evidence and must not
+become authoritative requirements or governance.
+
+## 12. Versioning strategy
+
+This bootstrap export is:
+
+``` text
+talkproof_technical_ownership_training_chatgpt_V001_20261005_0102.md
+```
+
+Once committed to Git, use stable filenames:
+
+``` text
+docs/93_training/TALKPROOF_TECHNICAL_OWNERSHIP_TRAINING.md
+docs/93_training/TRAINING_LOG.md
+```
+
+Do not create V002/V003 copies for ordinary revisions. Git becomes the
+version history:
+
+``` text
+git log --follow -- docs/93_training/TALKPROOF_TECHNICAL_OWNERSHIP_TRAINING.md
+```
+
+Use descriptive commits such as:
+
+``` text
+docs(training): establish technical ownership plan
+docs(training): add WP-05 provider routing lesson
+docs(training): record RLS ownership checkpoint
+```
+
+## 13. GitHub-connected review
+
+The preferred review architecture is:
+
+``` text
+Claude Desktop
+    ↓ writes/tests/commits/pushes
+GitHub
+    ↓
+ChatGPT GitHub connection
+    ↓ reads permitted code/commits/history
+ChatGPT independent review + training
+    ↓
+Product Owner understanding/decision
+```
+
+This reduces dependence on manually exporting large Claude transcripts.
+
+Direct access to a local Windows working tree is a different capability
+and can be evaluated later through a local coding environment.
+
+For independent review, read-oriented repository access is desirable
+because it reduces accidental mutation risk.
+
+Until connected access is verified, Claude transcripts, Git diffs,
+commit IDs, test output and attached artifacts remain valid evidence
+sources.
+
+## 14. Provenance rules
+
+Every training/review entry should distinguish evidence sources:
+
+``` text
+SOURCE: DIRECT REPOSITORY
+SOURCE: CLAUDE TRANSCRIPT
+SOURCE: ATTACHED DIFF
+SOURCE: TEST OUTPUT
+SOURCE: REQUIREMENT DOCUMENT
+SOURCE: HUMAN EXPLANATION
+```
+
+Never confuse:
+
+1.  what Claude claims;
+2.  what Git proves;
+3.  what tests prove;
+4.  what ChatGPT independently inspected;
+5.  what the Product Owner understands;
+6.  what the PO accepted.
+
+## 15. Immediate training action
+
+Start with **TP-T001 --- WP-05 Provider Credential Resolution and Secret
+Boundaries**.
+
+Objectives:
+
+1.  Explain BYO versus platform credentials.
+2.  Explain encrypted storage versus decrypted runtime use.
+3.  Explain masking versus encryption.
+4.  Predict BYO/platform/503 routing.
+5.  Identify tenant-isolation risk.
+6.  Challenge whether the resolver is wired into provider I/O.
+7.  Read tests and explain what they prove and do not prove.
+
+Do not claim training progress until human understanding is
+demonstrated.
+
+## 16. Overall success condition
+
+The programme succeeds when the Product Owner can increasingly:
+
+``` text
+read requirement
+→ understand architectural intent
+→ inspect AI implementation/evidence
+→ predict important behaviour
+→ identify missing proof/risk
+→ challenge AI
+→ diagnose failures
+→ make informed technical/product decisions
+```
+
+The Product Owner does not need to replace the AI implementation engine.
+The Product Owner must be able to own the system.
+
+## 17. Living-document rule
+
+Update this plan when architecture changes, a new critical subsystem
+appears, repeated AI defects expose a learning gap, human capability is
+demonstrated, direct repository access changes the review workflow, or a
+production incident creates an important learning case.
+
+Do not expand it merely to make the programme look comprehensive.
+
+**Measure useful technical ownership, not document size.**
+
+------------------------------------------------------------------------
+
+## Appendix A --- Lesson template
+
+``` markdown
+# TP-Txxx — <Lesson Name>
+
+## Metadata
+- Date:
+- WP:
+- Requirement:
+- Commit(s):
+- Source:
+- Priority:
+
+## Why this matters
+## What changed
+## Code path
+## Mental model
+## Failure modes
+## What tests prove
+## What tests do NOT prove
+
+## Product Owner check
+### Explain
+### Predict
+### Challenge
+### Diagnose
+
+## Human evidence
+## Gaps
+## Follow-up
+## Related commits / requirements
+```
+
+## Appendix B --- Session checkpoint
+
+``` markdown
+## Training Checkpoint
+
+Date/time:
+Engineering run:
+WP:
+Commit(s):
+Engineering verdict:
+Training priority:
+
+### LEARN NOW
+1.
+2.
+
+### NOT NOW
+1.
+2.
+
+### Human understanding demonstrated
+-
+
+### Remaining gap/risk
+-
+
+### Next lesson
+-
+```

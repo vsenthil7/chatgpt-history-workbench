@@ -1,0 +1,525 @@
+# TALKPROOF --- FINAL INDEPENDENT PREBUILD GATE
+
+**Review lineage:** ChatGPT V002\
+**Final gate timestamp:** 04/10/2026 22:56 BST\
+**Purpose:** Preserve the independent V002 residual review, Claude V003
+micro-correction, and final independent PASS as a Git-trackable audit
+artifact.\
+**Status:** FINAL PREBUILD TECHNICAL/RECONCILIATION GATE --- **PASS**
+
+------------------------------------------------------------------------
+
+## 1. AUDIT LINEAGE
+
+This document records the final part of the TalkProof prebuild review
+chain:
+
+``` text
+Frozen V6
+    ↓
+Claude Prebuild V001
+    ↓
+ChatGPT Independent Review V001
+    Verdict: PASS WITH CORRECTIONS
+    ↓
+Claude Correction V002
+    ↓
+ChatGPT V002 Residual Review
+    Verdict: PASS WITH CORRECTIONS — NOT FINAL PASS
+    ↓
+Claude Micro-Correction V003
+    ↓
+ChatGPT Final Independent Gate
+    Verdict: PASS
+```
+
+This file does **not** replace or rewrite the historical V001 review. It
+records the subsequent residual review and final closure.
+
+------------------------------------------------------------------------
+
+## 2. V002 RESIDUAL REVIEW
+
+Claude supplied the V002 correction package after the V001 independent
+review.
+
+The actual V002 package and its reissued documents were inspected rather
+than accepting Claude's summary alone.
+
+### V002 verdict
+
+**PASS WITH CORRECTIONS --- NOT FINAL PASS YET**
+
+V002 closed the substantive architecture/build-readiness findings from
+the V001 review, but two residual documentation defects and the separate
+PO-provenance confirmation remained.
+
+### V002 finding status
+
+  ------------------------------------------------------------------------
+  Original finding        V002 status             Residual
+  ----------------------- ----------------------- ------------------------
+  R-01 --- PO authority   Pending governance      Reproduced 22:02
+  provenance              confirmation            decision block required
+                                                  PO confirmation
+
+  R-02 --- CR-07          Closed                  CR-07 quarantined as
+  conditional boundary                            post-D-16 draft
+
+  R-03 --- WhatsApp       Closed                  V6 D3 preserved;
+  D-level/evidence                                evidence aligned
+  consistency                                     
+
+  R-04 --- WP-10 / FR-080 Residual documentation  One stale Sprint
+                          issue                   Reconciliation row still
+                                                  described merely wiring
+                                                  existing middleware
+
+  R-05 --- HSTS           Closed                  31536000 current vs
+                                                  63072000 required
+                                                  captured
+
+  R-06 --- WP-21          Closed                  Blocked on PD-A
+  authority                                       
+
+  R-07 --- WP-23          Closed                  Removed from coding
+  dependency                                      batch
+
+  R-08 --- E-02 /         Closed                  Structural compatibility
+  lifecycle semantics                             wording and status-as-of
+                                                  semantics corrected
+
+  R-09 --- package        Residual documentation  V002 Master Index
+  inventory               issue                   inventory wording
+                                                  remained
+                                                  ambiguous/inconsistent
+
+  R-10 --- build-order    Closed                  Corrected
+  consistency                                     sequence/dependencies
+                                                  aligned
+  ------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+## 3. R-03 CLARIFICATION
+
+During the V001 independent review, ChatGPT stated that V6 carried
+WhatsApp inbound at D4.
+
+Claude correctly pushed back:
+
+-   the earlier D-scale reconciliation contained the D4 state;
+-   **V6 change V6-09 had already superseded it and recorded inbound at
+    D3**.
+
+The independent reviewer accepted this correction.
+
+Therefore:
+
+-   **V6 was not to be changed**;
+-   WhatsApp inbound remained **D3**;
+-   the primary row remained D2;
+-   the overall primary distribution/tally remained unchanged;
+-   the underlying evidence still needed to be stated consistently:
+    -   bare digest accepted;
+    -   negative strict-format test missing;
+    -   GET verification handshake absent.
+
+The action from R-03 remained useful, but the premise that V6 itself
+still carried D4 was withdrawn.
+
+------------------------------------------------------------------------
+
+## 4. V002 RESIDUAL R-04
+
+The corrected V002 Build Readiness Gate properly required the complete
+FR-080 implementation.
+
+However, `TALKPROOF_SPRINT_TRACKER_RECONCILIATION_V002` retained a stale
+Category-1 statement equivalent to:
+
+> Rate limiter wiring / wire RateLimitMiddleware / no blocker.
+
+That contradicted the corrected finding that the existing implementation
+was:
+
+-   in-process;
+-   fixed-window;
+-   keyed by IP;
+-   non-conformant with FR-080.
+
+FR-080 requires the complete contract, including:
+
+-   Redis token bucket;
+-   100 requests/minute authenticated;
+-   20 requests/minute unauthenticated;
+-   per-tenant/per-user behaviour;
+-   `Retry-After`;
+-   health/metrics exemptions;
+-   required client behaviour.
+
+The residual correction therefore required the stale wording to be
+removed/replaced rather than merely wiring the existing limiter.
+
+------------------------------------------------------------------------
+
+## 5. V002 RESIDUAL R-09
+
+The V002 Master Index fixed the original V001 arithmetic problem but
+still contained ambiguous package-count wording.
+
+The independent review required the package inventory to distinguish:
+
+1.  files **contained inside** the ZIP; and
+2.  the ZIP container itself.
+
+This was a bookkeeping/audit defect only. It did not affect
+requirements, architecture, D-levels, code or build readiness.
+
+------------------------------------------------------------------------
+
+## 6. CLAUDE V003 MICRO-CORRECTION
+
+Claude performed a documentation-only V003 correction.
+
+Claude reported:
+
+-   no production code changed;
+-   V6 unchanged;
+-   D-levels unchanged;
+-   IDs unchanged;
+-   sprints unchanged;
+-   product scope unchanged;
+-   architecture unchanged.
+
+Only the residual documentation items were reissued.
+
+### V003 changes
+
+#### Sprint Tracker Reconciliation V003
+
+The stale "wire RateLimitMiddleware" row was removed/corrected.
+
+The V003 state explicitly records that the existing in-process
+fixed-window/IP limiter is non-conformant and that WP-10 must implement
+the complete FR-080 Redis token-bucket contract.
+
+#### Master Index V003
+
+Inventory wording was corrected.
+
+The nested V003 correction package was independently counted as:
+
+**18 actual contained files = 17 other files + the Master Index.**
+
+The ZIP container is separate from those contained entries.
+
+#### Delta V003
+
+The V003 delta records only the two residual micro-corrections and
+preserves the already-corrected first build batch.
+
+------------------------------------------------------------------------
+
+## 7. FINAL V003 INDEPENDENT GATE
+
+The actual uploaded V003 package was inspected, including:
+
+-   the reissued Sprint Tracker Reconciliation;
+-   the V003 Master Index;
+-   the V003 correction delta;
+-   the nested correction package.
+
+### Final verdict
+
+# PASS
+
+The two V002 residual documentation defects were closed.
+
+No further requirement-recovery or reconciliation iteration was
+justified.
+
+------------------------------------------------------------------------
+
+## 8. COMPLETED PREBUILD CHAIN
+
+At final V003 gate, the technical/reconciliation chain was:
+
+``` text
+Requirements reconciled                         PASS
+        ↓
+Architecture reconciled                         PASS
+        ↓
+Traceability reconciled                         PASS
+        ↓
+Sprint Tracker reconciled                       PASS
+        ↓
+Build Readiness Gate reconciled                 PASS
+        ↓
+Independent V001 review                         PASS WITH CORRECTIONS
+        ↓
+Claude V002 correction                          COMPLETE
+        ↓
+Independent V002 residual review                2 micro-corrections
+        ↓
+Claude V003 correction                          COMPLETE
+        ↓
+Independent V003 final gate                     PASS
+```
+
+**Reconciliation chain: DONE.**
+
+**Independent technical/prebuild audit: DONE.**
+
+**Final technical/reconciliation gate: PASS.**
+
+------------------------------------------------------------------------
+
+## 9. CORRECTED FIRST CODING BATCH
+
+The final reconciled first coding batch remains:
+
+  -----------------------------------------------------------------------
+                                  Sequence Work package
+  ---------------------------------------- ------------------------------
+                                         1 **WP-22** --- cover the
+                                           remaining 23 lines and make
+                                           the existing 100% engineering
+                                           coverage gate green; do not
+                                           lower `fail_under` without
+                                           separate PO authority
+
+                                         2 **WP-13 / S02** --- PostgreSQL
+                                           RLS + dual-layer isolation
+                                           tests
+
+                                         3 **WP-01 / S03** --- RS256
+
+                                         4 **WP-02 / S03/S10** ---
+                                           30-minute lockout + 120-minute
+                                           impersonation
+
+                                         5 **WP-03 / S05** ---
+                                           audit-chain concurrency
+
+                                         6 **WP-05 / S06** --- vault read
+                                           path/provider router
+
+                                         7 **WP-08 / S21/S34** --- remove
+                                           development secret defaults
+
+                                         8 **WP-09 / S21** --- consent +
+                                           DNC enforcement
+
+                                         9 **WP-10 corrected / S21** ---
+                                           full FR-080-compliant rate
+                                           limiting and recorded HSTS
+                                           correction
+  -----------------------------------------------------------------------
+
+WP-21 and WP-23 are **not** part of this coding batch.
+
+------------------------------------------------------------------------
+
+## 10. D-06 / D-16 / D-18 / D-21
+
+The independent review recommendations at final gate remained:
+
+-   **D-06 → option (c)**
+-   **D-16 → YES**
+-   **D-18 → AMEND**
+-   **D-21 → YES**
+
+These were recommendations at the technical gate, not automatically
+converted into PO decisions merely because the prebuild review passed.
+
+### D-06 recommendation
+
+Two-stage proof structure:
+
+``` text
+evidence
+→ T0
+→ human review
+→ approval
+→ T1 + anchor
+→ PDF
+```
+
+The evidence architecture must not be represented as already-proven
+RFC4998 conformance.
+
+### D-16 recommendation
+
+**YES** to the investigated direction, subject to the PO recording the
+decision explicitly.
+
+### D-18 recommendation
+
+**AMEND** the existing AIInteractionLedger rather than replace the
+authoritative evidence model with an OpenTelemetry-shaped persistence
+model.
+
+OpenTelemetry GenAI should remain a versioned observability/export
+mapping.
+
+### D-21 recommendation
+
+**YES** to the standalone verifier, with output semantics
+distinguishing:
+
+-   cryptographic integrity verified;
+-   TSA evidence verified;
+-   anchor verified/unavailable;
+-   status valid as of latest signed status evidence;
+-   current revocation status unknown without fresher status evidence.
+
+------------------------------------------------------------------------
+
+## 11. GOVERNANCE BOUNDARY AFTER PASS
+
+The final PASS means:
+
+> The requirements/architecture/traceability/tracker/build-readiness
+> reconciliation no longer requires another recovery iteration.
+
+It does **not** mean:
+
+> Every remaining Product Owner decision is automatically approved.
+
+The next boundary is therefore a separate **PO
+decision/build-authorisation gate**.
+
+Before production coding begins, the project must record the remaining
+applicable PO decisions, including the reviewed recommendations above
+and PD-A/PD-B as applicable.
+
+The build-authorisation record must not silently convert recommendations
+into decisions.
+
+------------------------------------------------------------------------
+
+## 12. PO AUTHORITY PROVENANCE
+
+V002 introduced a PO authority provenance artifact reproducing the
+earlier 22:02 decision block.
+
+The reproduced authority stated, in substance:
+
+-   D-15 approved;
+-   D-26 approved;
+-   D-24 approved;
+-   D-19 approved;
+-   D-20 approved;
+-   D-23 approved;
+-   D-25 approved;
+-   D-17 approved;
+-   D-16 approved for investigation only;
+-   D-22 approved for requirements analysis with **11 SELECT / 4
+    CONDITIONAL / 8 DEFER = 23**;
+-   D-06, D-18 and D-21 remained open.
+
+The independent review treated confirmation that this reproduced text
+was genuinely the PO's 22:02 message as a **governance/provenance
+confirmation**, not as another technical reconciliation cycle.
+
+------------------------------------------------------------------------
+
+## 13. WHAT MUST NOT BE REOPENED WITHOUT NEW EVIDENCE
+
+Following the final PASS, a new implementation session should not
+automatically:
+
+-   create V7;
+-   redo requirement recovery;
+-   redo the D-scale reconciliation;
+-   redo architecture reconciliation;
+-   redo traceability reconciliation;
+-   redo Sprint Tracker reconciliation;
+-   redo Build Readiness;
+-   shrink product scope;
+-   create new requirements merely for convenience;
+-   silently alter D-levels.
+
+A completed reconciliation may be reopened only when new
+repository/runtime evidence demonstrates that an accepted premise is
+false or when the PO explicitly changes scope/requirements/architecture.
+
+------------------------------------------------------------------------
+
+## 14. GIT/AUDIT POSITION
+
+This document exists because the final V002/V003 review sequence
+originally existed primarily in AI conversation history.
+
+It should be retained as an immutable review artifact in the
+authoritative TalkProof documentation repository, for example:
+
+``` text
+docs/92_planning/reviews/TALKPROOF_PREBUILD_FINAL_GATE_CHATGPT.md
+```
+
+The original transport filename preserves the review lineage and
+historical timestamp:
+
+``` text
+TALKPROOF_PREBUILD_FINAL_GATE_CHATGPT_V002_20261004_2256.md
+```
+
+Recommended Git commit subject:
+
+``` text
+docs(review): final prebuild gate ChatGPT V002 — 2026-10-04 22:56
+```
+
+Recommended commit body should preserve:
+
+``` text
+Original artifact:
+TALKPROOF_PREBUILD_FINAL_GATE_CHATGPT_V002_20261004_2256.md
+
+Review lineage:
+ChatGPT V002
+
+Covers:
+- Claude V002 residual review
+- R-03 clarification
+- V002 residual R-04/R-09
+- Claude V003 micro-correction
+- independent V003 verification
+
+Final verdict:
+PASS
+
+Effect:
+Technical/reconciliation prebuild gate closed.
+PO build-authorisation remains a separate governance step.
+```
+
+------------------------------------------------------------------------
+
+## 15. FINAL AUDIT STATEMENT
+
+**TalkProof's prebuild technical/reconciliation gate passed at V003.**
+
+The authoritative state at closure is:
+
+**Requirements reconciled**\
+↓\
+**Architecture reconciled**\
+↓\
+**Traceability reconciled**\
+↓\
+**Sprint Tracker reconciled**\
+↓\
+**Build Readiness reconciled**\
+↓\
+**Independent corrections completed**\
+↓\
+**FINAL PASS**
+
+No additional recovery baseline is required before the PO
+build-authorisation gate.
+
+Production coding should begin only after that separate authorisation is
+recorded and committed.

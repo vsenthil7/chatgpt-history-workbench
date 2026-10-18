@@ -1,0 +1,360 @@
+#!/usr/bin/env python3
+"""Expanded independent adversarial probes for UraiFlow Claude V007.
+
+Run from the extracted package root:
+    PYTHONPATH=src python /path/to/this_file.py
+"""
+from __future__ import annotations
+
+import json
+from dataclasses import dataclass
+from datetime import UTC, datetime
+from typing import Any
+
+from uraiflow.adapters.contract import AdapterDescriptor, CommitReceipt
+from uraiflow.adapters.inmemory import InMemoryTargetAdapter
+from uraiflow.core.clock import FixedClock
+from uraiflow.core.errors import NoExternalEffectError
+from uraiflow.core.primitives import freeze_mapping
+from uraiflow.core.tenancy import TenantContext
+from uraiflow.extraction.model import CandidateRecord
+from uraiflow.lineage.model import LineageEvent
+from uraiflow.lineage.store import LineageStore
+from uraiflow.pipeline.orchestrator import ConversationToActionPipeline
+from uraiflow.proposal.model import (
+    ConfirmedItem,
+    ConfirmedSnapshot,
+    ItemDecision,
+    Proposal,
+    ProposalStatus,
+)
+from uraiflow.recovery.service import RecoveryService
+from uraiflow.routing.registry import AdapterRegistry
+from uraiflow.transcription.provider import DeterministicEchoProvider
+from uraiflow.transcription.selector import ProviderSelector
+
+T0 = datetime(2026, 1, 1, tzinfo=UTC)
+CTX = TenantContext("tenant-a", "actor")
+
+
+def emit(probe: str, **result: Any) -> None:
+    print(json.dumps({"probe": probe, **result}, sort_keys=True, default=str))
+
+
+class OneTaskExtractor:
+    def extract(self, text: str) -> tuple[CandidateRecord, ...]:
+        return (
+            CandidateRecord(
+                record_id="rec-one",
+                record_type="task",
+                fields={"title": text},
+                confidence=0.9,
+                source_text=text,
+            ),
+        )
+
+
+class DuplicateIdExtractor:
+    def extract(self, text: str) -> tuple[CandidateRecord, ...]:
+        return (
+            CandidateRecord(
+                record_id="rec-duplicate",
+                record_type="task",
+                fields={"title": "FIRST"},
+                confidence=0.9,
+                source_text=text,
+            ),
+            CandidateRecord(
+                record_id="rec-duplicate",
+                record_type="task",
+                fields={"title": "SECOND"},
+                confidence=0.9,
+                source_text=text,
+            ),
+        )
+
+
+class TwoRecordExtractor:
+    def extract(self, text: str) -> tuple[CandidateRecord, ...]:
+        return (
+            CandidateRecord("rec-task", "task", {"title": "A"}, 0.9, text),
+            CandidateRecord("rec-note", "note", {"title": "B"}, 0.9, text),
+        )
+
+
+class FailNoEffectAdapter(InMemoryTargetAdapter):
+    def commit(self, ctx: TenantContext, record: CandidateRecord, idempotency_key: str) -> CommitReceipt:
+        raise NoExternalEffectError("pre-dispatch refusal")
+
+
+class FailingLineage(LineageStore):
+    def __init__(self, fail_kinds: set[str]) -> None:
+        super().__init__()
+        self.fail_kinds = fail_kinds
+
+    def append(self, ctx: TenantContext, event: LineageEvent) -> LineageEvent:
+        if event.kind in self.fail_kinds:
+            raise OSError(f"audit unavailable for {event.kind}")
+        return super().append(ctx, event)
+
+
+@dataclass
+class Box:
+    value: str
+
+
+def make_pipeline(
+    registry: AdapterRegistry,
+    extractor: Any,
+    lineage: LineageStore | None = None,
+) -> tuple[ConversationToActionPipeline, LineageStore]:
+    store = lineage or LineageStore()
+    selector = ProviderSelector(
+        providers={"echo": DeterministicEchoProvider("echo")},
+        tenant_policy={},
+        default_provider="echo",
+    )
+    return (
+        ConversationToActionPipeline(
+            selector=selector,
+            extractor=extractor,
+            registry=registry,
+            lineage=store,
+            clock=FixedClock(T0),
+        ),
+        store,
+    )
+
+
+def make_confirmed() -> tuple[ConversationToActionPipeline, InMemoryTargetAdapter, Proposal, LineageStore]:
+    registry = AdapterRegistry()
+    adapter = InMemoryTargetAdapter(
+        name="tasks",
+        schema_version="1",
+        required_fields={"task": ("title",)},
+        adapter_id="adp.tasks",
+    )
+    registry.register(adapter)
+    pipe, store = make_pipeline(registry, OneTaskExtractor())
+    proposal = pipe.ingest(CTX, "source", "APPROVED")
+    proposal.confirm_all()
+    return pipe, adapter, proposal, store
+
+
+def main() -> None:
+    # E01: Snapshot hash is compared only with live content; the snapshot's own
+    # items are never re-hashed. Replacing the public snapshot with tampered items
+    # and the old hash commits unapproved content.
+    pipe, adapter, proposal, _ = make_confirmed()
+    old = proposal.confirmed_snapshot
+    forged = ConfirmedItem(
+        record_id=old.items[0].record_id,
+        record_type=old.items[0].record_type,
+        fields=freeze_mapping({"title": "FORGED-SNAPSHOT-CONTENT"}),
+        source_text=old.items[0].source_text,
+    )
+    proposal.confirmed_snapshot = ConfirmedSnapshot(
+        items=(forged,), content_hash=old.content_hash
+    )
+    outcome = pipe.commit(CTX, proposal)
+    stored = adapter.stored_record(CTX, "prop-does-not-exist") if False else adapter.stored_record(
+        CTX, f"{proposal.proposal_id}:{forged.record_id}"
+    )
+    emit(
+        "E01_forged_snapshot_items_with_live_hash",
+        status=proposal.status.value,
+        failure=outcome.failure,
+        live_title=proposal.items[0].fields["title"],
+        stored_title=stored.fields["title"],
+        snapshot_hash_unchanged=proposal.confirmed_snapshot.content_hash == old.content_hash,
+    )
+
+    # E02: status/items are public. A terminal COMMITTED proposal can be reopened,
+    # reconfirmed and committed again, creating a second external effect.
+    pipe, adapter, proposal, _ = make_confirmed()
+    first = pipe.commit(CTX, proposal)
+    proposal.status = ProposalStatus.AWAITING_CONFIRMATION
+    proposal.items[0].record_id = "rec-second"
+    proposal.items[0].fields = {"title": "SECOND-COMMIT"}
+    proposal.items[0].decision = ItemDecision.PENDING
+    proposal.confirmed_snapshot = None
+    proposal.confirm_all()
+    second = pipe.commit(CTX, proposal)
+    emit(
+        "E02_terminal_committed_state_reopened",
+        first_failure=first.failure,
+        second_failure=second.failure,
+        final_status=proposal.status.value,
+        external_records=adapter.committed_count(CTX),
+        second_record_title=adapter.stored_record(
+            CTX, f"{proposal.proposal_id}:rec-second"
+        ).fields["title"],
+    )
+
+    # E03: duplicate item IDs are not rejected. They share one idempotency key;
+    # two receipts are reported while only the first content is stored.
+    registry = AdapterRegistry()
+    adapter = InMemoryTargetAdapter(
+        "tasks", "1", {"task": ("title",)}, adapter_id="adp.tasks"
+    )
+    registry.register(adapter)
+    pipe, store = make_pipeline(registry, DuplicateIdExtractor())
+    proposal = pipe.ingest(CTX, "source", "ignored")
+    proposal.confirm_all()
+    outcome = pipe.commit(CTX, proposal)
+    key = f"{proposal.proposal_id}:rec-duplicate"
+    emit(
+        "E03_duplicate_record_ids_false_two_record_commit",
+        status=proposal.status.value,
+        failure=outcome.failure,
+        proposal_items=len(proposal.items),
+        reported_receipts=len(outcome.receipts),
+        distinct_receipt_ids=len({r.receipt_id for r in outcome.receipts}),
+        external_records=adapter.committed_count(CTX),
+        stored_title=adapter.stored_record(CTX, key).fields["title"],
+        record_committed_events=sum(
+            e.kind == "record.committed"
+            for e in store.for_subject(CTX, proposal.proposal_id)
+        ),
+    )
+
+    # E04: confirmation mutates item decisions before snapshot construction. A
+    # serialization failure leaves a partially mutated aggregate, violating the
+    # documented failed-command atomicity invariant.
+    pipe, _adapter, proposal, _ = make_confirmed()
+    proposal.status = ProposalStatus.AWAITING_CONFIRMATION
+    proposal.items[0].decision = ItemDecision.PENDING
+    proposal.confirmed_snapshot = None
+    proposal.items[0].fields = {"title": object()}
+    error = None
+    try:
+        proposal.confirm_all()
+    except Exception as exc:  # noqa: BLE001
+        error = f"{type(exc).__name__}: {exc}"
+    emit(
+        "E04_confirmation_failure_is_not_atomic",
+        error=error,
+        status=proposal.status.value,
+        decision=proposal.items[0].decision.value,
+        has_snapshot=proposal.confirmed_snapshot is not None,
+    )
+
+    # E05: audit is in the control path before compensation. If the audit append
+    # for proposal.commit_failed fails, a prior remote commit remains live and no
+    # compensation/recovery bookkeeping is established.
+    lineage = FailingLineage({"proposal.commit_failed"})
+    registry = AdapterRegistry()
+    first_adapter = InMemoryTargetAdapter(
+        "first", "1", {"task": ("title",)}, adapter_id="adp.first"
+    )
+    second_adapter = FailNoEffectAdapter(
+        "second", "1", {"note": ("title",)}, adapter_id="adp.second"
+    )
+    registry.register(first_adapter)
+    registry.register(second_adapter)
+    pipe, _ = make_pipeline(registry, TwoRecordExtractor(), lineage)
+    proposal = pipe.ingest(CTX, "source", "ignored")
+    proposal.confirm_all()
+    error = None
+    try:
+        pipe.commit(CTX, proposal)
+    except Exception as exc:  # noqa: BLE001
+        error = f"{type(exc).__name__}: {exc}"
+    emit(
+        "E05_audit_failure_prevents_compensation",
+        error=error,
+        status=proposal.status.value,
+        first_external_records=first_adapter.committed_count(CTX),
+        unrecovered=len(proposal.unrecovered_receipts),
+        uncertain=len(proposal.uncertain_commits),
+        has_compensating_event=any(
+            e.kind == "proposal.compensating"
+            for e in lineage.for_subject(CTX, proposal.proposal_id)
+        ),
+    )
+
+    # E06: a successful operator rollback followed by audit failure leaves the
+    # receipt marked unrecovered. Retrying then fails because the effect is already
+    # gone, leaving recovery stuck.
+    lineage = FailingLineage({"record.rolled_back"})
+    registry = AdapterRegistry()
+    adapter = InMemoryTargetAdapter(
+        "tasks", "1", {"task": ("title",)}, adapter_id="adp.tasks"
+    )
+    registry.register(adapter)
+    candidate = CandidateRecord("rec-recovery", "task", {"title": "x"}, 1.0, "x")
+    receipt = adapter.commit(CTX, candidate, "idem-recovery")
+    proposal = Proposal(
+        proposal_id="prop-recovery",
+        tenant_id=CTX.tenant_id,
+        capture_id="cap-recovery",
+        transcript_id="tr-recovery",
+        items=[],
+        status=ProposalStatus.COMPENSATION_FAILED,
+        unrecovered_receipts=(receipt,),
+    )
+    recovery = RecoveryService(
+        registry=registry,
+        lineage=lineage,
+        clock=FixedClock(T0),
+        authorized_operators=frozenset({CTX.actor_id}),
+    )
+    first_error = None
+    try:
+        recovery.retry_rollback(CTX, proposal)
+    except Exception as exc:  # noqa: BLE001
+        first_error = f"{type(exc).__name__}: {exc}"
+    after_first = {
+        "external_records": adapter.committed_count(CTX),
+        "status": proposal.status.value,
+        "unrecovered": len(proposal.unrecovered_receipts),
+    }
+    lineage.fail_kinds.clear()
+    second_result = recovery.retry_rollback(CTX, proposal)
+    emit(
+        "E06_recovery_audit_failure_leaves_stale_receipt",
+        first_error=first_error,
+        after_first=after_first,
+        after_retry_status=proposal.status.value,
+        after_retry_unrecovered=len(proposal.unrecovered_receipts),
+        retry_failures=second_result.rollback_failures,
+        external_records=adapter.committed_count(CTX),
+    )
+
+    # E07: CandidateRecord is frozen only shallowly; the reference adapter stores
+    # the record object by reference, so committed content changes after commit.
+    adapter = InMemoryTargetAdapter(
+        "tasks", "1", {"task": ("title",)}, adapter_id="adp.tasks"
+    )
+    backing = {"title": "ORIGINAL"}
+    candidate = CandidateRecord("rec-mutable", "task", backing, 1.0, "x")
+    adapter.commit(CTX, candidate, "idem-mutable")
+    backing["title"] = "CHANGED-AFTER-COMMIT"
+    emit(
+        "E07_committed_candidate_fields_mutate_by_reference",
+        stored_title=adapter.stored_record(CTX, "idem-mutable").fields["title"],
+    )
+
+    # E08: FrozenMapping recursively handles built-in containers only. Arbitrary
+    # mutable payload objects remain mutable after a lineage event is appended.
+    box = Box("ORIGINAL")
+    store = LineageStore()
+    event = LineageEvent(
+        event_id="evt-box",
+        tenant_id=CTX.tenant_id,
+        subject_id="subject-box",
+        kind="audit.box",
+        payload={"box": box},
+        occurred_at=T0,
+    )
+    store.append(CTX, event)
+    box.value = "REWRITTEN"
+    emit(
+        "E08_deep_freeze_leaves_custom_mutable_objects",
+        stored_box_value=store.for_subject(CTX, "subject-box")[0].payload["box"].value,
+        same_object=store.for_subject(CTX, "subject-box")[0].payload["box"] is box,
+    )
+
+
+if __name__ == "__main__":
+    main()
