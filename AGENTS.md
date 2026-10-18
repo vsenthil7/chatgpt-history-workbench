@@ -22,9 +22,10 @@ Close every turn with: `python3 -I scripts/turn_close/turn_close.py --turn T### 
 | Folder | Holds |
 |---|---|
 | `source/` | export checksums, redaction log — proof of where everything came from |
-| `raw/exports/<YYYYMMDD>/` | each ChatGPT export kept as received — VERBATIM |
+| `index/exports/<YYYYMMDD>/` | inventory of each export zip (entries, chats, summary). The zip itself stays on Drive (checksum in `source/`) |
 | `raw/conversations/YYYY/MM/` | one chat per file — VERBATIM except logged redactions |
-| `raw/memories/`, `raw/files/` | memory and file categories of the export |
+| `raw/data/` | the export's other data files (byte copies; user.json not copied) |
+| `raw/files/` | attachments `<file id>__<real name>` (byte copies; text files may carry logged redactions) |
 | `readable/conversations/YYYY/MM/` | DERIVED readable version of each chat |
 | `index/` | conversations.csv, manifest, timeline, export-to-export diff |
 | `scripts/` | importer, verifier, redactor, usage, turn close — rerunnable |
@@ -38,9 +39,18 @@ File names for derived/working files: `chatgpt-history_<ai>_<type>_<topic>_YYYYM
 ## Provenance values
 `VERBATIM`, `RECONSTRUCTED` (labelled), `UNRECOVERABLE`. Never present a reconstruction as an original.
 
+## Drive-only items (never in Git)
+- Files over 95 MB and `chat.html` → `index/large_files.csv`.
+- Containers with credentials inside → `index/held_back_files.csv` (hit list without values: `source/CONTAINER_SECRET_HITS_<date>.csv`).
+Both stay inside the export zip on Drive; `verify_raw.py` checks their SHA-256 against the zip.
+
+## Import order for an export (rerunnable, on the PC clone)
+`inventory_export.py` → `import_export.py` (chats, data) → `import_files.py` (attachments) → `redact_secrets.py` (append-only log) → `secret_scan.py` + `scan_containers.py` → `hold_back.py` if containers hit → `verify_raw.py` (exit 0) → commit in batches ≤ ~200 MB.
+
 ## Rules carried from Senthil's standards
 - Every turn starts with pull-and-merge; never overwrite other AIs' work.
 - No deletes of files or branches without Senthil's explicit say-so.
+- Research rule: think every prompt through fully, search the web when it helps, name sources, give as much useful information as possible.
 - Live-looking credentials are redacted before push and logged in `source/REDACTIONS.md`.
 
 ## Fresh-page bootstrap

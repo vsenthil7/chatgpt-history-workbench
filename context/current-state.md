@@ -1,6 +1,7 @@
-# Current state — 2026-10-18 22:05
+# Current state — 2026-10-18 22:35
 
-- T002 bootstrap · T003 export hashed + inventoried · T004 S1–S3 done.
-- In Git: 811 chats (raw/conversations), 9 data files (raw/data), import index, redaction log (98 values / 17 files), verify_raw exit 0.
-- Not yet: S4 attachments (1,679 file_*.dat → raw/files/, >95 MB as Drive pointers in index/large_files.csv), S7 readable chats, S8 indexes, S9 export-compare.
-- PC clone: C:\Users\v_sen\develop\chatgpt-history-workbench (bulk work runs there). Memory export still missing (not in the data export).
+- T002 bootstrap · T003 inventory · T004 chats + data · T005 attachments.
+- In Git: 811 chats, 9 data files, 1,634 attachments (518 MB). Drive-only: 3 large files, chat.html, 42 containers with keys inside.
+- Redactions: 125 values in 25 files (2 runs). All scans 0 blocking; verify_raw 0 problems.
+- Not yet: S7 readable chats, S8 indexes (conversations.csv, manifest, timeline of chats), S9 export-compare baseline.
+- PC clone: C:\Users\v_sen\develop\chatgpt-history-workbench. Memory export still missing (not in the data export).

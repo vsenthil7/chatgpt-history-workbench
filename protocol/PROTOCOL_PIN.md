@@ -12,3 +12,5 @@ Template repo: vsenthil7/claude-history-workbench @ 0c1ee3e (layout, scripts, re
 - 2026-10-18 21:47 (T004): plan v0.1 approved ("go 21:47"); files > 95 MB Drive-only with pointer rows (S4).
 - 2026-10-18 21:59 (T004, D3 here): redaction = every match of secret_scan.py's BLOCK list (ALLOW honoured), logged append-only in source/REDACTIONS.md; verify_raw.py proves raw/ = export apart from those.
 - 2026-10-18 22:00 (T004): bulk imports run on Senthil's PC clone (C:\Users\v_sen\develop\chatgpt-history-workbench); the zip is read in place from G:\My Drive. Batch commits listed in the turn record.
+- 2026-10-18 22:22 (T005): attachments that contain credentials INSIDE (found by scripts/scan_containers.py) are held back Drive-only via scripts/hold_back.py (moved, never deleted; not rewritten). scan_containers.py runs before every attachment push.
+- 2026-10-18 22:30 (T005): PC bridge practice — no `-ExecutionPolicy Bypass` (EPERM); start python/git directly; waits ≤ 45 s; commit messages as files.
