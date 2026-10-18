@@ -1,0 +1,1119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VoiceBridge CTI — Product Map &amp; Completion Status v001</title>
+<meta name="author" content="Claude for Senthil / KP">
+<meta name="description" content="Pictorial explanation of VoiceBridge CTI (MoPr11): what the product is, what is completed, what is not, and why. Code v0.28.0, 20 September 2026.">
+<style>
+  :root{
+    --ink:#1f2328; --muted:#57606a; --hair:#d0d7de; --surface:#ffffff; --tint:#f6f8fa;
+    --green:#1a7f37; --greenbg:#dafbe1; --amber:#9a6700; --amberbg:#fff8c5;
+    --red:#cf222e; --redbg:#ffebe9; --blue:#0969da; --bluebg:#f2f7fd; --grey:#57606a; --greybg:#eaeef2;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:#eef1f4;color:var(--ink);
+       font:15px/1.6 Arial,Helvetica,sans-serif}
+  .page{max-width:1500px;margin:0 auto 26px;background:var(--surface);
+        padding:44px 52px 52px;box-shadow:0 1px 3px rgba(31,35,40,.12)}
+  h1{font-size:30px;line-height:1.2;margin:0 0 6px}
+  h2{font-size:21px;margin:42px 0 10px;padding-bottom:8px;border-bottom:2px solid var(--ink)}
+  h3{font-size:16px;margin:26px 0 8px}
+  p{margin:0 0 12px;max-width:105ch}
+  .lede{font-size:16px;color:var(--muted);max-width:105ch}
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:1.4px;color:var(--muted);text-transform:uppercase;margin:0 0 10px}
+  table{border-collapse:collapse;width:100%;margin:14px 0 20px;font-size:13.5px}
+  th,td{border:1px solid var(--hair);padding:9px 11px;text-align:left;vertical-align:top}
+  th{background:var(--greybg);font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+  td.k{width:210px;font-weight:700;background:var(--tint)}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:var(--tint);
+       padding:1px 5px;border-radius:4px;border:1px solid var(--hair)}
+  figure{margin:26px 0 34px;padding:18px;border:1px solid var(--hair);border-radius:10px;background:var(--surface)}
+  figure svg{display:block;width:100%;height:auto}
+  figcaption{margin-top:14px;padding-top:12px;border-top:1px solid var(--hair);
+             font-size:13.5px;color:var(--muted);max-width:none}
+  figcaption b{color:var(--ink)}
+  .chip{display:inline-block;padding:2px 9px;border-radius:11px;font-size:11.5px;font-weight:700;
+        border:1.4px solid;white-space:nowrap}
+  .c-green{color:var(--green);background:var(--greenbg);border-color:var(--green)}
+  .c-amber{color:var(--amber);background:var(--amberbg);border-color:var(--amber)}
+  .c-red{color:var(--red);background:var(--redbg);border-color:var(--red)}
+  .c-grey{color:var(--grey);background:var(--greybg);border-color:var(--grey)}
+  .callout{border:1.6px solid var(--blue);background:var(--bluebg);border-left-width:5px;
+           border-radius:8px;padding:16px 20px;margin:20px 0}
+  .callout.warn{border-color:var(--red);background:#fff5f5}
+  .callout.hold{border-color:var(--amber);background:#fffbe6}
+  .callout h3{margin:0 0 8px;font-size:15px}
+  .callout p:last-child{margin-bottom:0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin:18px 0}
+  .stat{border:1.6px solid var(--hair);border-radius:8px;padding:14px 16px;background:var(--tint)}
+  .stat .n{font-size:27px;font-weight:700;line-height:1.1}
+  .stat .l{font-size:12.5px;color:var(--muted);margin-top:4px}
+  .howto{font-size:13.5px;background:var(--tint);border:1px dashed var(--hair);border-radius:7px;
+         padding:11px 15px;margin:0 0 16px;color:var(--muted)}
+  .howto b{color:var(--ink)}
+  ol,ul{max-width:105ch;margin:0 0 14px;padding-left:22px}
+  li{margin-bottom:7px}
+  .foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--hair);margin-top:36px;padding-top:14px}
+  @media print{
+    body{background:#fff}
+    .page{box-shadow:none;max-width:none;margin:0;padding:0 0 12px}
+    figure{break-inside:avoid;page-break-inside:avoid}
+    h2{break-after:avoid}
+    table{font-size:11px}
+  }
+</style>
+</head>
+<body>
+<main class="page">
+
+  <p class="eyebrow">Product documentation · MoPr11 · VoiceBridge CTI for Salesforce</p>
+  <h1>What VoiceBridge actually is, what is finished, and what is not</h1>
+  <p class="lede">A pictorial walk-through of the product as it stands at code version 0.28.0. Five diagrams,
+  each stating the status of every part in words as well as colour, followed by the completed and
+  not-completed registers and the reason behind every gap.</p>
+
+  <table>
+    <tr><td class="k">Document</td><td>claude_v001_MoPr11-voicebridge_salesforce_productmap_20260920_1232</td></tr>
+    <tr><td class="k">Document version</td><td>v001 · first issue</td></tr>
+    <tr><td class="k">Issued</td><td>20 September 2026, 12:32 BST</td></tr>
+    <tr><td class="k">Author / prepared by</td><td>Claude for Senthil (KP)</td></tr>
+    <tr><td class="k">Owner / approver</td><td>Senthil (KP) — product owner and sole decision-maker on every open item</td></tr>
+    <tr><td class="k">Describes</td><td>voicebridge-cti <b>v0.28.0</b>, package hash <code>f0f4eb4ab67d</code>, released 20 Sep 2026 10:45</td></tr>
+    <tr><td class="k">Classification</td><td>Internal — contains an honest completion assessment not intended for a prospect or a listing</td></tr>
+    <tr><td class="k">Companion documents</td><td>
+      Sprint tracker <code>claude_v024_…_sprint_tracker_traceability_20260920_1045.xlsx</code> ·
+      Version &amp; manual-test workbook <code>claude_V001_…_versiondetail_manualtest_20260920_1232.xlsx</code> ·
+      Code <code>voicebridge-cti-codebase-20260920_1045.zip</code></td></tr>
+    <tr><td class="k">Review inputs</td><td>External review V001 (ChatGPT, 13 Sep, REJECT) · Perplexity review V001 (16 Sep, HOLD) · five internal cold-review passes</td></tr>
+  </table>
+
+  <h2>1 · Document control</h2>
+  <p class="howto"><b>How to use this section.</b> One row per issue of this document. Amend the row, never the
+  history: a new fact about the product means a new version of this file, released alongside a code zip and a
+  tracker version so the three always describe the same build.</p>
+  <table>
+    <tr><th style="width:80px">Version</th><th style="width:130px">Date</th><th style="width:150px">Author</th><th>What changed, and why</th><th style="width:100px">Status</th></tr>
+    <tr><td>v001</td><td>20 Sep 2026 12:32</td><td>Claude for Senthil/KP</td>
+        <td>First issue. Created because the written trackers describe the build accurately but do not let a
+        cold reader <i>see</i> where the product stops. Describes v0.28.0 exactly as shipped and verified from
+        its own zip; every status claim traces to a test, a gate, an operator step or a named decision.</td>
+        <td>Released</td></tr>
+    <tr><td>v002</td><td>—</td><td>—</td>
+        <td><i>Planned.</i> Opens when the S13 decision gate closes (D-V8 strategy ruling, D-V9 listing
+        confirmation), or when the first operator step produces live evidence — either changes the picture in
+        figures 1, 3 and 4 materially.</td>
+        <td>Planned</td></tr>
+  </table>
+  <p><b>Naming convention.</b> <code>claude_v&lt;NNN&gt;_&lt;product ref&gt;_&lt;document name&gt;_YYYYMMDD_HHMI.&lt;ext&gt;</code>,
+  with the timestamp supplied by Senthil at release. The same figures are also delivered as standalone SVG and PNG
+  files for reuse in decks and in the workbooks.</p>
+
+  <h2>2 · Context — what this product is, and how it got here</h2>
+  <p class="howto"><b>How to use this section.</b> Read it once before the diagrams. It carries the six facts that
+  make the pictures legible; everything after it assumes them.</p>
+  <p><b>The product.</b> VoiceBridge CTI is a Salesforce AppExchange application for mid-market B2B sales teams:
+  a softphone that lives in the Salesforce utility bar, click-to-dial from any record, automatic logging of every
+  call (and, in the pitch, every WhatsApp thread) back onto the Contact or Lead, plus lightweight cadences,
+  coaching scorecards and Flow actions. It is product P02 of a twelve-product marketplace portfolio, built solo.</p>
+  <p><b>How it was built.</b> Fifteen numbered code releases between 13 and 20 September 2026, each one packaged,
+  re-extracted and re-verified from its own zip. Every release is gated on 100% statement, branch, function and
+  line coverage with no coverage pragmas — a standing portfolio rule (D13) — and on a release-evidence pack bound
+  to the package hash.</p>
+  <p><b>What three reviews found.</b> Five internal cold-review passes found roughly forty defects inside code
+  that already had 100% coverage. An external review (ChatGPT, 13 September) returned <b>REJECT</b> with fourteen
+  findings, five of them blockers. A second independent review (Perplexity, 16 September) returned
+  <b>HOLD — re-platform or pivot</b>, with six further findings and one strategic fact nobody had recorded: the
+  Salesforce API the whole in-org surface depends on is being retired.</p>
+  <p><b>Where that leaves the build.</b> Version 0.28.0 closed five of the six Perplexity findings and four worse
+  defects that the fixes themselves exposed. The code is now, by any reasonable reading, an engineering-complete
+  service — and it has still never placed a telephone call, never written a record into a real Salesforce org, and
+  never run against a real database. Those two sentences are both true at once, and holding them together is the
+  point of this document.</p>
+
+  <h3>The vocabulary used on every diagram</h3>
+  <table>
+    <tr><th style="width:230px">Status</th><th>What it means here — the test applied to every single box</th></tr>
+    <tr><td><span class="chip c-green">Built and proven</span></td>
+        <td>The code exists and the evidence exists <i>today</i>, in a form you can re-run yourself: an automated
+        test, a build gate, a database check, or the release evidence pack. Nothing in this state depends on a
+        system we do not have.</td></tr>
+    <tr><td><span class="chip c-amber">Built, unproven live</span></td>
+        <td>The code exists and is fully tested, but every counterparty in the test is a double we wrote. It has
+        never met a real Salesforce org, a real PostgreSQL server, a real carrier or a real browser inside a real
+        utility bar. This is not a quality judgement on the code; it is a statement about what has been observed.</td></tr>
+    <tr><td><span class="chip c-red">Not built</span></td>
+        <td>The component does not exist. In every case the reason is a decision that has not been made or a
+        commercial relationship that does not exist — never an unsolved technical problem.</td></tr>
+    <tr><td><span class="chip c-grey">Not ours</span></td>
+        <td>Salesforce's, a vendor's, or the operator's. Shown because the mechanism is unreadable without it.</td></tr>
+  </table>
+  <p>Each state is written on the box as well as coloured, so the diagrams survive greyscale printing and do not
+  depend on colour vision.</p>
+
+  <h2>3 · The product map</h2>
+  <p class="howto"><b>Use this figure when</b> someone asks "what <i>is</i> this thing?", or when you need to show
+  that a change in the left-hand column (the Salesforce surface) does not threaten the middle and right ones.
+  Read it left to right: the customer's org, our service, the outside world.</p>
+  <figure>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1940 1224" role="img" aria-label="Product map: the Salesforce org on the left, the VoiceBridge service in the middle, and the external carrier, WhatsApp, KMS, metrics backend, hosting and listing on the right. The path from the org into the service is built and proven; the path out to a telephony carrier does not exist because no provider has been chosen; the write-back to Salesforce is built but has never run against a live org." style="max-width:100%;height:auto">
+<rect x="0" y="0" width="1940" height="1224" fill="#ffffff"/>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#1f2328"/></marker>
+<marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#cf222e"/></marker>
+<marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#1a7f37"/></marker>
+<marker id="arrowMuted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#57606a"/></marker>
+</defs>
+<text x="32" y="46" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1f2328">VoiceBridge CTI — what the product actually is, and where it stops</text>
+<text x="32" y="74" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#57606a">Every box states its own status in words. Dashed red = the component does not exist; the reason is on the box. Code v0.28.0, 20 Sep 2026.</text>
+<rect x="32" y="93" width="15" height="15" rx="3" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.6"/>
+<text x="54" y="105" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#57606a">Built and proven now (tests, gates, evidence pack)</text>
+<rect x="400.0" y="93" width="15" height="15" rx="3" fill="#fff8c5" stroke="#9a6700" stroke-width="1.6"/>
+<text x="422.0" y="105" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#57606a">Built and tested, never run against a live org/database/carrier</text>
+<rect x="849.12" y="93" width="15" height="15" rx="3" fill="#ffebe9" stroke="#cf222e" stroke-width="1.6" stroke-dasharray="5 3"/>
+<text x="871.12" y="105" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#57606a">Not built — blocker named on the box</text>
+<rect x="1129.76" y="93" width="15" height="15" rx="3" fill="#eaeef2" stroke="#57606a" stroke-width="1.6"/>
+<text x="1151.76" y="105" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#57606a">Not ours (Salesforce, a vendor, or the operator)</text>
+<rect x="32" y="140" width="488" height="900" rx="10" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1.4"/>
+<rect x="32" y="140" width="6" height="900" rx="3" fill="#0969da"/>
+<text x="52" y="168" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#57606a" letter-spacing="1.1">1 · SALESFORCE ORG — THE CUSTOMER'S</text>
+<rect x="700" y="140" width="680" height="900" rx="10" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1.4"/>
+<rect x="700" y="140" width="6" height="900" rx="3" fill="#8250df"/>
+<text x="720" y="168" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#57606a" letter-spacing="1.1">2 · VOICEBRIDGE SERVICE — OURS (NODE / EXPRESS 5)</text>
+<rect x="1460" y="140" width="448" height="900" rx="10" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1.4"/>
+<rect x="1460" y="140" width="6" height="900" rx="3" fill="#57606a"/>
+<text x="1480" y="168" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#57606a" letter-spacing="1.1">3 · OUTSIDE — CARRIERS, PLATFORMS, VENDORS</text>
+<text x="724" y="186" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" fill="#57606a" letter-spacing="0.9">INBOUND — A REQUEST ARRIVES</text>
+<text x="1060" y="186" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" fill="#57606a" letter-spacing="0.9">OUTBOUND — WE CALL SOMEONE</text>
+<rect x="56" y="196" width="440" height="80" rx="7" fill="#eaeef2" stroke="#57606a" stroke-width="1.7"/>
+<rect x="56" y="196" width="4" height="80" rx="2" fill="#57606a"/>
+<text x="72" y="217" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">Lightning utility bar</text>
+<text x="72" y="234" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">Where the rep works all day. Hosts our panel in a frame.</text>
+<line x1="72" y1="251" x2="484" y2="251" stroke="#57606a" stroke-width="0.8" opacity="0.35"/>
+<text x="72" y="266" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#424a53" letter-spacing="0.3">SALESFORCE'S — we only supply the URL it loads</text>
+<rect x="56" y="290" width="440" height="108" rx="7" fill="#fff8c5" stroke="#9a6700" stroke-width="1.7"/>
+<rect x="56" y="290" width="4" height="108" rx="2" fill="#9a6700"/>
+<text x="72" y="311" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">Softphone panel — widget/softphone.html</text>
+<text x="72" y="328" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">Dial pad, live call state, outcome + notes.</text>
+<text x="72" y="343" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">Trades the install cookie for a bearer, then calls us.</text>
+<line x1="72" y1="373" x2="484" y2="373" stroke="#9a6700" stroke-width="0.8" opacity="0.35"/>
+<text x="72" y="388" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#7d4e00" letter-spacing="0.3">FIXED v0.28.0 (F-P01): the page had never been served at all</text>
+<rect x="56" y="412" width="440" height="80" rx="7" fill="#fff8c5" stroke="#9a6700" stroke-width="1.7"/>
+<rect x="56" y="412" width="4" height="80" rx="2" fill="#9a6700"/>
+<text x="72" y="433" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">Record page — click-to-dial</text>
+<text x="72" y="450" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">Any phone field becomes a dial link via onClickToDial.</text>
+<line x1="72" y1="467" x2="484" y2="467" stroke="#9a6700" stroke-width="0.8" opacity="0.35"/>
+<text x="72" y="482" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#7d4e00" letter-spacing="0.3">BUILT · needs a live org to see it work (O7b)</text>
+<rect x="56" y="506" width="440" height="108" rx="7" fill="#fff8c5" stroke="#9a6700" stroke-width="1.7"/>
+<rect x="56" y="506" width="4" height="108" rx="2" fill="#9a6700"/>
+<text x="72" y="527" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">CallCenter definition (Open CTI)</text>
+<text x="72" y="544" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">The metadata that points the utility bar at our panel.</text>
+<text x="72" y="559" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">Ships in the 2GP package with the permission sets.</text>
+<line x1="72" y1="589" x2="484" y2="589" stroke="#9a6700" stroke-width="0.8" opacity="0.35"/>
+<text x="72" y="604" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#7d4e00" letter-spacing="0.3">BUILT · the API underneath it retires 28 Feb 2028 — see below</text>
+<rect x="56" y="628" width="440" height="92" rx="7" fill="#fff8c5" stroke="#9a6700" stroke-width="1.7"/>
+<rect x="56" y="628" width="4" height="92" rx="2" fill="#9a6700"/>
+<text x="72" y="649" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">Permission sets × 3 (owner / admin / member)</text>
+<text x="72" y="666" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">Generated from the same role matrix the server enforces.</text>
+<line x1="72" y1="695" x2="484" y2="695" stroke="#9a6700" stroke-width="0.8" opacity="0.35"/>
+<text x="72" y="710" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#7d4e00" letter-spacing="0.3">BUILT · install shape untested in a real org (LC-5)</text>
+<rect x="56" y="734" width="440" height="100" rx="7" fill="#fff8c5" stroke="#9a6700" stroke-width="1.7"/>
+<rect x="56" y="734" width="4" height="100" rx="2" fill="#9a6700"/>
+<text x="72" y="755" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">Task + VoiceBridge_External_Id__c</text>
+<text x="72" y="772" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">One activity per call. Our external id is the upsert key,</text>
+<text x="72" y="787" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">so a retry updates rather than duplicating.</text>
+<line x1="72" y1="809" x2="484" y2="809" stroke="#9a6700" stroke-width="0.8" opacity="0.35"/>
+<text x="72" y="824" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#7d4e00" letter-spacing="0.3">BUILT · no Task has ever been written to a real org (O7)</text>
+<rect x="56" y="848" width="440" height="96" rx="7" fill="#eaeef2" stroke="#57606a" stroke-width="1.7"/>
+<rect x="56" y="848" width="4" height="96" rx="2" fill="#57606a"/>
+<text x="72" y="869" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">Contact / Lead</text>
+<text x="72" y="886" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">Matched from the phone number so the call attaches</text>
+<text x="72" y="901" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">to the right person — or to nobody, honestly.</text>
+<line x1="72" y1="919" x2="484" y2="919" stroke="#57606a" stroke-width="0.8" opacity="0.35"/>
+<text x="72" y="934" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#424a53" letter-spacing="0.3">THE CUSTOMER'S DATA — we only read and attach</text>
+<rect x="56" y="958" width="440" height="62" rx="7" fill="#fff8c5" stroke="#9a6700" stroke-width="1.7"/>
+<rect x="56" y="958" width="4" height="62" rx="2" fill="#9a6700"/>
+<text x="72" y="979" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">External Client App (OAuth)</text>
+<text x="72" y="996" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">Install + token refresh. Connected Apps are gone.</text>
+<line x1="72" y1="995" x2="484" y2="995" stroke="#9a6700" stroke-width="0.8" opacity="0.35"/>
+<text x="72" y="1010" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#7d4e00" letter-spacing="0.3">BUILT · never completed against a live org</text>
+<rect x="724" y="196" width="316" height="92" rx="7" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.7"/>
+<rect x="724" y="196" width="4" height="92" rx="2" fill="#1a7f37"/>
+<text x="740" y="217" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">Edge — every request</text>
+<text x="740" y="234" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">CSP + frame-ancestors, HSTS, 100 kB cap,</text>
+<text x="740" y="249" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">per-org and per-ip rate limits, request ids.</text>
+<line x1="740" y1="263" x2="1028" y2="263" stroke="#1a7f37" stroke-width="0.8" opacity="0.35"/>
+<text x="740" y="278" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#0d5926" letter-spacing="0.3">NEW in v0.28.0 (F-P04)</text>
+<rect x="724" y="302" width="316" height="92" rx="7" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.7"/>
+<rect x="724" y="302" width="4" height="92" rx="2" fill="#1a7f37"/>
+<text x="740" y="323" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">Identity boundary</text>
+<text x="740" y="340" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">Signed session with a jti and an epoch;</text>
+<text x="740" y="355" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">logout, revoke-all, role change kills sessions.</text>
+<line x1="740" y1="369" x2="1028" y2="369" stroke="#1a7f37" stroke-width="0.8" opacity="0.35"/>
+<text x="740" y="384" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#0d5926" letter-spacing="0.3">PROVEN BY TEST — 613 tests, 100% coverage</text>
+<rect x="724" y="408" width="316" height="104" rx="7" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.7"/>
+<rect x="724" y="408" width="4" height="104" rx="2" fill="#1a7f37"/>
+<text x="740" y="429" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">HTTP routes</text>
+<text x="740" y="446" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">/widget /dial /log /events /crm /ui /auth</text>
+<text x="740" y="461" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">/roles /blocklist /audit /metrics /status</text>
+<line x1="740" y1="487" x2="1028" y2="487" stroke="#1a7f37" stroke-width="0.8" opacity="0.35"/>
+<text x="740" y="502" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#0d5926" letter-spacing="0.3">PROVEN BY TEST — contract tests drive the real app</text>
+<rect x="724" y="526" width="316" height="104" rx="7" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.7"/>
+<rect x="724" y="526" width="4" height="104" rx="2" fill="#1a7f37"/>
+<text x="740" y="547" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">Feature modules</text>
+<text x="740" y="564" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">dialer · call logger · cadence · coaching</text>
+<text x="740" y="579" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">flow actions · billing · analytics · support</text>
+<line x1="740" y1="605" x2="1028" y2="605" stroke="#1a7f37" stroke-width="0.8" opacity="0.35"/>
+<text x="740" y="620" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#0d5926" letter-spacing="0.3">PROVEN BY TEST — business rules, not integrations</text>
+<rect x="724" y="644" width="316" height="92" rx="7" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.7"/>
+<rect x="724" y="644" width="4" height="92" rx="2" fill="#1a7f37"/>
+<text x="740" y="665" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">Number guard — before any dial</text>
+<text x="740" y="682" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">E.164 + 15 country rules, org blocklist,</text>
+<text x="740" y="697" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">do-not-call check. A refused number never dials.</text>
+<line x1="740" y1="711" x2="1028" y2="711" stroke="#1a7f37" stroke-width="0.8" opacity="0.35"/>
+<text x="740" y="726" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#0d5926" letter-spacing="0.3">NEW in v0.28.0 (VB-E-025)</text>
+<rect x="724" y="750" width="316" height="92" rx="7" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.7"/>
+<rect x="724" y="750" width="4" height="92" rx="2" fill="#1a7f37"/>
+<text x="740" y="771" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">Audit trail</text>
+<text x="740" y="788" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">sha256 hash chain, append-only in the database,</text>
+<text x="740" y="803" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">verifiable by the customer at /audit/verify.</text>
+<line x1="740" y1="817" x2="1028" y2="817" stroke="#1a7f37" stroke-width="0.8" opacity="0.35"/>
+<text x="740" y="832" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#0d5926" letter-spacing="0.3">NEW in v0.28.0 (VB-E-081)</text>
+<rect x="1060" y="196" width="300" height="104" rx="7" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.7"/>
+<rect x="1060" y="196" width="4" height="104" rx="2" fill="#1a7f37"/>
+<text x="1076" y="217" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">Telephony seam</text>
+<text x="1076" y="234" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">The contract an adapter must satisfy, plus a</text>
+<text x="1076" y="249" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">simulator that labels every call simulated.</text>
+<line x1="1076" y1="275" x2="1348" y2="275" stroke="#1a7f37" stroke-width="0.8" opacity="0.35"/>
+<text x="1076" y="290" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#0d5926" letter-spacing="0.3">SEAM BUILT — the adapter behind it does not exist</text>
+<rect x="1060" y="314" width="300" height="112" rx="7" fill="#fff8c5" stroke="#9a6700" stroke-width="1.7"/>
+<rect x="1060" y="314" width="4" height="112" rx="2" fill="#9a6700"/>
+<text x="1076" y="335" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">CRM write-back — sfRest</text>
+<text x="1076" y="352" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">SOSL phone match: one, none, or ambiguous.</text>
+<text x="1076" y="367" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">Ambiguous → written unattached, never guessed.</text>
+<line x1="1076" y1="401" x2="1348" y2="401" stroke="#9a6700" stroke-width="0.8" opacity="0.35"/>
+<text x="1076" y="416" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#7d4e00" letter-spacing="0.3">BUILT · answered by a double, not Salesforce (O7)</text>
+<rect x="1060" y="440" width="300" height="104" rx="7" fill="#fff8c5" stroke="#9a6700" stroke-width="1.7"/>
+<rect x="1060" y="440" width="4" height="104" rx="2" fill="#9a6700"/>
+<text x="1076" y="461" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">Outbox + drain worker</text>
+<text x="1076" y="478" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">A failed write queues and is retried by a</text>
+<text x="1076" y="493" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">leader-elected worker; dead-letter after 8.</text>
+<line x1="1076" y1="519" x2="1348" y2="519" stroke="#9a6700" stroke-width="0.8" opacity="0.35"/>
+<text x="1076" y="534" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#7d4e00" letter-spacing="0.3">NEW in v0.28.0 (F-P03) · live proof at O10</text>
+<rect x="1060" y="558" width="300" height="96" rx="7" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.7"/>
+<rect x="1060" y="558" width="4" height="96" rx="2" fill="#1a7f37"/>
+<text x="1076" y="579" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">Observability</text>
+<text x="1076" y="596" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">Structured logs, RED metrics per route,</text>
+<text x="1076" y="611" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">/metrics for a scraper, error reporting.</text>
+<line x1="1076" y1="629" x2="1348" y2="629" stroke="#1a7f37" stroke-width="0.8" opacity="0.35"/>
+<text x="1076" y="644" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#0d5926" letter-spacing="0.3">NEW in v0.28.0 · nothing scrapes it yet</text>
+<rect x="1060" y="668" width="300" height="88" rx="7" fill="#fff8c5" stroke="#9a6700" stroke-width="1.7"/>
+<rect x="1060" y="668" width="4" height="88" rx="2" fill="#9a6700"/>
+<text x="1076" y="689" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">SLO + burn alerts</text>
+<text x="1076" y="706" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">The published 99.5% as code, with rules</text>
+<text x="1076" y="721" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">an alerting backend can import.</text>
+<line x1="1076" y1="731" x2="1348" y2="731" stroke="#9a6700" stroke-width="0.8" opacity="0.35"/>
+<text x="1076" y="746" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#7d4e00" letter-spacing="0.3">BUILT · never fired in anger (game day O10)</text>
+<rect x="1060" y="770" width="300" height="88" rx="7" fill="#fff8c5" stroke="#9a6700" stroke-width="1.7"/>
+<rect x="1060" y="770" width="4" height="88" rx="2" fill="#9a6700"/>
+<text x="1076" y="791" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">Deploy + DR tooling</text>
+<text x="1076" y="808" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">Blue/green with migration and health gates,</text>
+<text x="1076" y="823" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">automatic rollback; pg_dump restore drill.</text>
+<line x1="1076" y1="833" x2="1348" y2="833" stroke="#9a6700" stroke-width="0.8" opacity="0.35"/>
+<text x="1076" y="848" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#7d4e00" letter-spacing="0.3">BUILT · no platform to run it on yet</text>
+<rect x="724" y="900" width="636" height="108" rx="7" fill="#fff8c5" stroke="#9a6700" stroke-width="1.7"/>
+<rect x="724" y="900" width="4" height="108" rx="2" fill="#9a6700"/>
+<text x="740" y="921" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">PostgreSQL — 10 ordered migrations</text>
+<text x="740" y="938" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">Row-level security per tenant · tokens encrypted at rest (AES-256-GCM) · hash-chained audit</text>
+<text x="740" y="953" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">outbox + dead letter · worker leases · rate-limit windows · sequences · PKCE state</text>
+<text x="740" y="968" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">Every org-scoped statement runs inside a transaction that sets the tenant context.</text>
+<line x1="740" y1="983" x2="1348" y2="983" stroke="#9a6700" stroke-width="0.8" opacity="0.35"/>
+<text x="740" y="998" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#7d4e00" letter-spacing="0.3">BUILT · HAS NEVER RUN AGAINST A LIVE POSTGRES (operator step O6)</text>
+<rect x="1484" y="196" width="400" height="112" rx="7" fill="#ffebe9" stroke="#cf222e" stroke-width="1.7" stroke-dasharray="6 4"/>
+<rect x="1484" y="196" width="4" height="112" rx="2" fill="#cf222e"/>
+<text x="1500" y="217" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">Telephony carrier</text>
+<text x="1500" y="234" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">The thing that actually rings a phone.</text>
+<text x="1500" y="249" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">Twilio / Plivo / Exotel / Service Cloud Voice.</text>
+<line x1="1500" y1="283" x2="1872" y2="283" stroke="#cf222e" stroke-width="0.8" opacity="0.35"/>
+<text x="1500" y="298" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#a40e26" letter-spacing="0.3">BLOCKED: D-V5 — no provider chosen, so no calls are placed</text>
+<rect x="1484" y="322" width="400" height="112" rx="7" fill="#ffebe9" stroke="#cf222e" stroke-width="1.7" stroke-dasharray="6 4"/>
+<rect x="1484" y="322" width="4" height="112" rx="2" fill="#cf222e"/>
+<text x="1500" y="343" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">WhatsApp Cloud API</text>
+<text x="1500" y="360" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">Send and receive business messages.</text>
+<text x="1500" y="375" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">The 'omnichannel' half of the pitch.</text>
+<line x1="1500" y1="409" x2="1872" y2="409" stroke="#cf222e" stroke-width="0.8" opacity="0.35"/>
+<text x="1500" y="424" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#a40e26" letter-spacing="0.3">BLOCKED: D-V6 — the claim is withdrawn until it is built</text>
+<rect x="1484" y="448" width="400" height="100" rx="7" fill="#ffebe9" stroke="#cf222e" stroke-width="1.7" stroke-dasharray="6 4"/>
+<rect x="1484" y="448" width="4" height="100" rx="2" fill="#cf222e"/>
+<text x="1500" y="469" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">KMS / secret store</text>
+<text x="1500" y="486" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">Unwraps the token encryption key at boot.</text>
+<line x1="1500" y1="523" x2="1872" y2="523" stroke="#cf222e" stroke-width="0.8" opacity="0.35"/>
+<text x="1500" y="538" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#a40e26" letter-spacing="0.3">DEPLOY-TIME WIRING — the key ring in code is ready</text>
+<rect x="1484" y="562" width="400" height="100" rx="7" fill="#ffebe9" stroke="#cf222e" stroke-width="1.7" stroke-dasharray="6 4"/>
+<rect x="1484" y="562" width="4" height="100" rx="2" fill="#cf222e"/>
+<text x="1500" y="583" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">Metrics + alerting backend</text>
+<text x="1500" y="600" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">Scrapes /metrics and runs the burn-rate rules.</text>
+<line x1="1500" y1="637" x2="1872" y2="637" stroke="#cf222e" stroke-width="0.8" opacity="0.35"/>
+<text x="1500" y="652" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#a40e26" letter-spacing="0.3">NO PLATFORM YET — rules are exported and waiting</text>
+<rect x="1484" y="676" width="400" height="100" rx="7" fill="#ffebe9" stroke="#cf222e" stroke-width="1.7" stroke-dasharray="6 4"/>
+<rect x="1484" y="676" width="4" height="100" rx="2" fill="#cf222e"/>
+<text x="1500" y="697" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">Hosting platform + managed Postgres</text>
+<text x="1500" y="714" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">Where the middle column would actually run.</text>
+<line x1="1500" y1="751" x2="1872" y2="751" stroke="#cf222e" stroke-width="0.8" opacity="0.35"/>
+<text x="1500" y="766" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#a40e26" letter-spacing="0.3">NOT DEPLOYED ANYWHERE — this is why so much says 'unproven'</text>
+<rect x="1484" y="790" width="400" height="112" rx="7" fill="#ffebe9" stroke="#cf222e" stroke-width="1.7" stroke-dasharray="6 4"/>
+<rect x="1484" y="790" width="4" height="112" rx="2" fill="#cf222e"/>
+<text x="1500" y="811" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328">AppExchange listing</text>
+<text x="1500" y="828" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">Security review, licensing, the public listing.</text>
+<text x="1500" y="843" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#57606a">$999 per submission, 5–9 months lead time.</text>
+<line x1="1500" y1="877" x2="1872" y2="877" stroke="#cf222e" stroke-width="0.8" opacity="0.35"/>
+<text x="1500" y="892" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#a40e26" letter-spacing="0.3">BLOCKED: D-V8 strategy, D-V3 billing route, ISV agreement</text>
+<polyline points="496,346 724,346" fill="none" stroke="#1a7f37" stroke-width="1.9" marker-end="url(#arrowGreen)"/>
+<rect x="531" y="327" width="159" height="15" rx="3" fill="#ffffff" opacity="0.92"/>
+<text x="610" y="338" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="600" fill="#1a7f37" text-anchor="middle">1  install cookie → bearer</text>
+<polyline points="496,456 724,456" fill="none" stroke="#1a7f37" stroke-width="1.9" marker-end="url(#arrowGreen)"/>
+<rect x="522" y="437" width="176" height="15" rx="3" fill="#ffffff" opacity="0.92"/>
+<text x="610" y="448" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="600" fill="#1a7f37" text-anchor="middle">2  click-to-dial → POST /dial</text>
+<polyline points="1360,250 1484,250" fill="none" stroke="#cf222e" stroke-width="1.9" stroke-dasharray="7 5" marker-end="url(#arrowRed)"/>
+<rect x="1368" y="229" width="107" height="15" rx="3" fill="#ffffff" opacity="0.92"/>
+<text x="1422" y="240" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="600" fill="#cf222e" text-anchor="middle">3  place the call</text>
+<polyline points="1484,378 1360,378" fill="none" stroke="#cf222e" stroke-width="1.9" stroke-dasharray="7 5" marker-end="url(#arrowRed)"/>
+<rect x="1371" y="357" width="102" height="15" rx="3" fill="#ffffff" opacity="0.92"/>
+<text x="1422" y="368" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="600" fill="#cf222e" text-anchor="middle">→ /events/ingest</text>
+<polyline points="1360,414 1370,414 1370,1052 16,1052 16,784 56,784" fill="none" stroke="#9a6700" stroke-width="1.9" marker-end="url(#arrowMuted)"/>
+<rect x="338" y="1032" width="656" height="15" rx="3" fill="#ffffff" opacity="0.92"/>
+<text x="666" y="1043" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="600" fill="#9a6700" text-anchor="middle">4  REST upsert — one Task per call, keyed on our external id; answered by a test double, never by a real org (O7)</text>
+<rect x="32" y="1098" width="1876" height="102" rx="8" fill="#fff5f5" stroke="#cf222e" stroke-width="1.8"/>
+<rect x="32" y="1098" width="5" height="102" rx="2.5" fill="#cf222e"/>
+<text x="52" y="1124" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#cf222e">The one fact that governs the whole left-hand column — R-V21</text>
+<text x="52" y="1146" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">Open CTI — the API the utility bar, the CallCenter definition and our softphone adapter all depend on — is in maintenance mode.</text>
+<text x="52" y="1164" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">Salesforce ends its life on 28 February 2028 and has closed it to newly created Agentforce Service orgs (verified 20 Sep 2026, help article 005306437).</text>
+<text x="52" y="1182" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">Columns 2 and 3 survive a move to Salesforce Voice with Partner Telephony untouched. Choosing that move is decision D-V8; confirming the listing rule is D-V9.</text>
+</svg>
+<figcaption><b>Figure 1 — The product map.</b> The customer's Salesforce org on the left, our service in the middle, the outside world on the right. Three boundary crossings carry the whole story: the org reaches us and that works (arrows 1 and 2); we reach a carrier and there is nothing there (arrow 3, dashed); we write back to Salesforce and that is built but has only ever been answered by a test double (arrow 4). The red strip beneath is the fact that governs the entire left column.</figcaption>
+</figure>
+
+  <h2>4 · One call, end to end</h2>
+  <p class="howto"><b>Use this figure when</b> the question is "does it work?" — because the honest answer is
+  "seven of the eight steps do". It is also the fastest way to explain why the product is not simply "nearly
+  finished".</p>
+  <figure>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1840 580" role="img" aria-label="The eight steps of one call. Steps 1, 2, 3, 6 work today; step 4 — a carrier placing the call — does not exist because no telephony provider has been chosen, so every call is recorded as simulated; steps 5, 7 and 8 are built and tested but have never been driven by a real network or a real Salesforce org." style="max-width:100%;height:auto">
+<rect x="0" y="0" width="1840" height="580" fill="#ffffff"/>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#1f2328"/></marker>
+<marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#cf222e"/></marker>
+<marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#1a7f37"/></marker>
+<marker id="arrowMuted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#57606a"/></marker>
+</defs>
+<text x="32" y="46" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1f2328">One call, start to finish — and the single link that is missing</text>
+<text x="32" y="74" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#57606a">The chain is intact everywhere except step 4. Nothing downstream of it has ever been driven by a real telephone network.</text>
+<circle cx="60" cy="152" r="15" fill="#9a6700"/>
+<text x="60" y="157" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
+<rect x="40" y="170" width="186" height="152" rx="7" fill="#fff8c5" stroke="#9a6700" stroke-width="1.7"/>
+<rect x="40" y="170" width="4" height="152" rx="2" fill="#9a6700"/>
+<text x="56" y="191" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328"></text>
+<line x1="56" y1="297" x2="214" y2="297" stroke="#9a6700" stroke-width="0.8" opacity="0.35"/>
+<text x="56" y="312" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#7d4e00" letter-spacing="0.3">WORKS — live check O7b</text>
+<text x="56" y="192" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">Rep opens the softphone</text>
+<text x="56" y="212" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">The utility bar loads the</text>
+<text x="56" y="226" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">panel we now actually serve.</text>
+<circle cx="276" cy="152" r="15" fill="#1a7f37"/>
+<text x="276" y="157" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">2</text>
+<rect x="256" y="170" width="186" height="152" rx="7" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.7"/>
+<rect x="256" y="170" width="4" height="152" rx="2" fill="#1a7f37"/>
+<text x="272" y="191" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328"></text>
+<line x1="272" y1="297" x2="430" y2="297" stroke="#1a7f37" stroke-width="0.8" opacity="0.35"/>
+<text x="272" y="312" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#0d5926" letter-spacing="0.3">WORKS — contract test</text>
+<text x="272" y="192" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">The panel signs itself</text>
+<text x="272" y="208" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">in</text>
+<text x="272" y="228" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">It swaps the install cookie</text>
+<text x="272" y="242" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">for a bearer token.</text>
+<circle cx="492" cy="152" r="15" fill="#1a7f37"/>
+<text x="492" y="157" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">3</text>
+<rect x="472" y="170" width="186" height="152" rx="7" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.7"/>
+<rect x="472" y="170" width="4" height="152" rx="2" fill="#1a7f37"/>
+<text x="488" y="191" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328"></text>
+<line x1="488" y1="297" x2="646" y2="297" stroke="#1a7f37" stroke-width="0.8" opacity="0.35"/>
+<text x="488" y="312" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#0d5926" letter-spacing="0.3">WORKS — 25 number tests</text>
+<text x="488" y="192" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">Rep clicks a number</text>
+<text x="488" y="212" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">POST /dial. E.164 first,</text>
+<text x="488" y="226" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">then blocklist and DNC.</text>
+<circle cx="772" cy="152" r="15" fill="#cf222e"/>
+<text x="772" y="157" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
+<rect x="752" y="170" width="186" height="152" rx="7" fill="#ffebe9" stroke="#cf222e" stroke-width="1.7" stroke-dasharray="6 4"/>
+<rect x="752" y="170" width="4" height="152" rx="2" fill="#cf222e"/>
+<text x="768" y="191" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328"></text>
+<line x1="768" y1="297" x2="926" y2="297" stroke="#cf222e" stroke-width="0.8" opacity="0.35"/>
+<text x="768" y="312" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#a40e26" letter-spacing="0.3">DOES NOT HAPPEN — D-V5</text>
+<text x="768" y="192" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">A carrier places the</text>
+<text x="768" y="208" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">call</text>
+<text x="768" y="228" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Nothing does. The record</text>
+<text x="768" y="242" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">is marked simulated:true</text>
+<text x="768" y="256" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">and the panel says so.</text>
+<circle cx="988" cy="152" r="15" fill="#9a6700"/>
+<text x="988" y="157" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">5</text>
+<rect x="968" y="170" width="186" height="152" rx="7" fill="#fff8c5" stroke="#9a6700" stroke-width="1.7"/>
+<rect x="968" y="170" width="4" height="152" rx="2" fill="#9a6700"/>
+<text x="984" y="191" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328"></text>
+<line x1="984" y1="297" x2="1142" y2="297" stroke="#9a6700" stroke-width="0.8" opacity="0.35"/>
+<text x="984" y="312" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#7d4e00" letter-spacing="0.3">WORKS — nothing drives it</text>
+<text x="984" y="192" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">Call state moves on</text>
+<text x="984" y="212" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">ringing → connected →</text>
+<text x="984" y="226" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">ended, driven by us —</text>
+<text x="984" y="240" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">not by carrier events.</text>
+<circle cx="1204" cy="152" r="15" fill="#1a7f37"/>
+<text x="1204" y="157" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">6</text>
+<rect x="1184" y="170" width="186" height="152" rx="7" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.7"/>
+<rect x="1184" y="170" width="4" height="152" rx="2" fill="#1a7f37"/>
+<text x="1200" y="191" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328"></text>
+<line x1="1200" y1="297" x2="1358" y2="297" stroke="#1a7f37" stroke-width="0.8" opacity="0.35"/>
+<text x="1200" y="312" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#0d5926" letter-spacing="0.3">WORKS — 613 tests</text>
+<text x="1200" y="192" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">Rep hangs up with a note</text>
+<text x="1200" y="212" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">POST /log ends the call</text>
+<text x="1200" y="226" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">and stores the activity.</text>
+<circle cx="1420" cy="152" r="15" fill="#9a6700"/>
+<text x="1420" y="157" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">7</text>
+<rect x="1400" y="170" width="186" height="152" rx="7" fill="#fff8c5" stroke="#9a6700" stroke-width="1.7"/>
+<rect x="1400" y="170" width="4" height="152" rx="2" fill="#9a6700"/>
+<text x="1416" y="191" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328"></text>
+<line x1="1416" y1="297" x2="1574" y2="297" stroke="#9a6700" stroke-width="0.8" opacity="0.35"/>
+<text x="1416" y="312" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#7d4e00" letter-spacing="0.3">BUILT — no real org (O7)</text>
+<text x="1416" y="192" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">Salesforce Task upserted</text>
+<text x="1416" y="212" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">SOSL match, then upsert</text>
+<text x="1416" y="226" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">on our external id: one</text>
+<text x="1416" y="240" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Task per call, ever.</text>
+<circle cx="1636" cy="152" r="15" fill="#9a6700"/>
+<text x="1636" y="157" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">8</text>
+<rect x="1616" y="170" width="186" height="152" rx="7" fill="#fff8c5" stroke="#9a6700" stroke-width="1.7"/>
+<rect x="1616" y="170" width="4" height="152" rx="2" fill="#9a6700"/>
+<text x="1632" y="191" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#1f2328"></text>
+<line x1="1632" y1="297" x2="1790" y2="297" stroke="#9a6700" stroke-width="0.8" opacity="0.35"/>
+<text x="1632" y="312" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#7d4e00" letter-spacing="0.3">BUILT — proven in test</text>
+<text x="1632" y="192" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">If Salesforce is down</text>
+<text x="1632" y="212" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">The write queues and a</text>
+<text x="1632" y="226" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">worker drains it later,</text>
+<text x="1632" y="240" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">with nobody watching.</text>
+<polyline points="230,246 252,246" fill="none" stroke="#57606a" stroke-width="1.9" marker-end="url(#arrowMuted)"/>
+<polyline points="446,246 468,246" fill="none" stroke="#57606a" stroke-width="1.9" marker-end="url(#arrowMuted)"/>
+<polyline points="664,246 746,246" fill="none" stroke="#cf222e" stroke-width="1.9" stroke-dasharray="7 5" marker-end="url(#arrowRed)"/>
+<text x="705" y="218" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#cf222e" text-anchor="middle">the chain</text>
+<text x="705" y="234" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#cf222e" text-anchor="middle">breaks here</text>
+<polyline points="942,246 964,246" fill="none" stroke="#57606a" stroke-width="1.9" marker-end="url(#arrowMuted)"/>
+<polyline points="1158,246 1180,246" fill="none" stroke="#57606a" stroke-width="1.9" marker-end="url(#arrowMuted)"/>
+<polyline points="1374,246 1396,246" fill="none" stroke="#57606a" stroke-width="1.9" marker-end="url(#arrowMuted)"/>
+<polyline points="1590,246 1612,246" fill="none" stroke="#57606a" stroke-width="1.9" marker-end="url(#arrowMuted)"/>
+<rect x="40" y="372" width="880" height="120" rx="8" fill="#fffbe6" stroke="#9a6700" stroke-width="1.8"/>
+<rect x="40" y="372" width="5" height="120" rx="2.5" fill="#9a6700"/>
+<text x="60" y="398" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#9a6700">What a customer would actually get today, if everything else were deployed</text>
+<text x="60" y="420" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">A softphone panel that opens, authenticates, validates and refuses the right numbers, records the call,</text>
+<text x="60" y="438" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">writes one Task per call to Salesforce and survives a Salesforce outage — with every call marked</text>
+<text x="60" y="456" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">"simulated: no telephony provider is connected, so +91… was not dialled" on the panel itself.</text>
+<rect x="960" y="372" width="840" height="120" rx="8" fill="#fff5f5" stroke="#cf222e" stroke-width="1.8"/>
+<rect x="960" y="372" width="5" height="120" rx="2.5" fill="#cf222e"/>
+<text x="980" y="398" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#cf222e">Why step 4 is empty, and what it costs</text>
+<text x="980" y="420" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">Choosing a carrier (D-V5) sets per-minute cost, and therefore the pricing floor in billing.ts — so it is a</text>
+<text x="980" y="438" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">commercial decision, not a technical one. Building the adapter afterwards is one file against an existing</text>
+<text x="980" y="456" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">contract, plus one inbound webhook route whose signature scheme is provider-specific.</text>
+</svg>
+<figcaption><b>Figure 2 — One call, end to end.</b> Eight steps. Seven of them run today. Step 4 — a carrier actually placing the call — is empty, and because it is empty every call downstream is recorded honestly as simulated. The two notes below say what a customer would really get today, and why the empty step is a commercial decision rather than an engineering one.</figcaption>
+</figure>
+
+  <h2>5 · Completion, capability by capability</h2>
+  <p class="howto"><b>Use this figure</b> in a status review or with an investor. The two chip columns are the
+  whole argument: the code column is mostly green, the evidence column is entirely red, and one operator week
+  would change that more than another month of building.</p>
+  <figure>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1520 1130" role="img" aria-label="A twelve-row matrix of capabilities. Six are complete in code and proven, four partial, two not built at all. Every row's live-evidence column reads None, because the service has never been deployed and no Salesforce developer org exists." style="max-width:100%;height:auto">
+<rect x="0" y="0" width="1520" height="1130" fill="#ffffff"/>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#1f2328"/></marker>
+<marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#cf222e"/></marker>
+<marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#1a7f37"/></marker>
+<marker id="arrowMuted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#57606a"/></marker>
+</defs>
+<text x="32" y="46" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1f2328">Completion by capability — what is done, what is only written down, and why</text>
+<text x="32" y="74" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#57606a">Two different questions: is the code there, and has anyone ever seen it work outside a test? For this product they have very different answers.</text>
+<rect x="40" y="106" width="348" height="86" rx="8" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.6"/>
+<text x="62" y="160" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1a7f37">7</text>
+<text x="130" y="134" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#1f2328">capability areas complete in code, with</text>
+<text x="130" y="148" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#1f2328">tests and gates behind them</text>
+<rect x="404" y="106" width="348" height="86" rx="8" fill="#fff8c5" stroke="#9a6700" stroke-width="1.6"/>
+<text x="426" y="160" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#9a6700">2</text>
+<text x="494" y="134" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#1f2328">partial — the code is there, the commercial</text>
+<text x="494" y="148" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#1f2328">inputs are not</text>
+<rect x="768" y="106" width="348" height="86" rx="8" fill="#ffebe9" stroke="#cf222e" stroke-width="1.6"/>
+<text x="790" y="160" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#cf222e">3</text>
+<text x="858" y="134" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#1f2328">not built at all — each blocked on one</text>
+<text x="858" y="148" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#1f2328">named decision</text>
+<rect x="1132" y="106" width="348" height="86" rx="8" fill="#eaeef2" stroke="#57606a" stroke-width="1.6"/>
+<text x="1154" y="160" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#57606a">0</text>
+<text x="1222" y="134" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#1f2328">areas with any live evidence — nothing is</text>
+<text x="1222" y="148" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#1f2328">deployed and no dev org exists</text>
+<rect x="40" y="228" width="1440" height="34" rx="5" fill="#eaeef2"/>
+<text x="52" y="251" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#57606a" letter-spacing="0.6">CAPABILITY — WHAT A BUYER WOULD ASK FOR</text>
+<text x="498" y="251" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#57606a" letter-spacing="0.6">CODE</text>
+<text x="664" y="251" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#57606a" letter-spacing="0.6">LIVE EVIDENCE</text>
+<text x="834" y="251" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#57606a" letter-spacing="0.6">WHAT IS MISSING, AND WHY</text>
+<rect x="40" y="272" width="1440" height="58" rx="5" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<text x="52" y="307" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">Install, identity and permissions</text>
+<rect x="490" y="288" width="140" height="26" rx="13" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.5"/>
+<text x="560" y="306" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1a7f37" text-anchor="middle">Complete</text>
+<rect x="656" y="288" width="140" height="26" rx="13" fill="#ffebe9" stroke="#cf222e" stroke-width="1.5"/>
+<text x="726" y="306" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#cf222e" text-anchor="middle">None</text>
+<text x="834" y="298" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">OAuth on an External Client App, PKCE, signed sessions with logout and revoke-all. No install has ever completed</text>
+<text x="834" y="312" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">against a live org (no dev org exists yet).</text>
+<rect x="40" y="334" width="1440" height="58" rx="5" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<text x="52" y="369" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">In-org softphone surface</text>
+<rect x="490" y="350" width="140" height="26" rx="13" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.5"/>
+<text x="560" y="368" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1a7f37" text-anchor="middle">Complete</text>
+<rect x="656" y="350" width="140" height="26" rx="13" fill="#ffebe9" stroke="#cf222e" stroke-width="1.5"/>
+<text x="726" y="368" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#cf222e" text-anchor="middle">None</text>
+<text x="834" y="360" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">The page is finally served (F-P01 — it never was). Whether the panel renders inside a real utility bar is operator</text>
+<text x="834" y="374" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">step O7b.</text>
+<rect x="40" y="396" width="1440" height="58" rx="5" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<text x="52" y="431" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">Placing a real call</text>
+<rect x="490" y="412" width="140" height="26" rx="13" fill="#ffebe9" stroke="#cf222e" stroke-width="1.5"/>
+<text x="560" y="430" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#cf222e" text-anchor="middle">None</text>
+<rect x="656" y="412" width="140" height="26" rx="13" fill="#ffebe9" stroke="#cf222e" stroke-width="1.5"/>
+<text x="726" y="430" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#cf222e" text-anchor="middle">None</text>
+<text x="834" y="422" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">No telephony adapter. Blocked on D-V5: the provider choice sets per-minute cost and the pricing floor, so it is</text>
+<text x="834" y="436" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Senthil's commercial call.</text>
+<rect x="40" y="458" width="1440" height="58" rx="5" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<text x="52" y="493" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">Inbound calls and screen pop</text>
+<rect x="490" y="474" width="140" height="26" rx="13" fill="#ffebe9" stroke="#cf222e" stroke-width="1.5"/>
+<text x="560" y="492" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#cf222e" text-anchor="middle">None</text>
+<rect x="656" y="474" width="140" height="26" rx="13" fill="#ffebe9" stroke="#cf222e" stroke-width="1.5"/>
+<text x="726" y="492" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#cf222e" text-anchor="middle">None</text>
+<text x="834" y="484" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Needs the same adapter plus a provider-specific webhook (signature scheme and event vocabulary differ per carrier).</text>
+<text x="834" y="498" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Blocked on D-V5.</text>
+<rect x="40" y="520" width="1440" height="58" rx="5" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<text x="52" y="555" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">Auto-logging to Salesforce</text>
+<rect x="490" y="536" width="140" height="26" rx="13" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.5"/>
+<text x="560" y="554" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1a7f37" text-anchor="middle">Complete</text>
+<rect x="656" y="536" width="140" height="26" rx="13" fill="#ffebe9" stroke="#cf222e" stroke-width="1.5"/>
+<text x="726" y="554" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#cf222e" text-anchor="middle">None</text>
+<text x="834" y="546" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">SOSL match and Task upsert on an external id, with a durable outbox behind it. Answered by a recorded double; live</text>
+<text x="834" y="560" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">proof is O7.</text>
+<rect x="40" y="582" width="1440" height="58" rx="5" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<text x="52" y="617" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">WhatsApp / omnichannel</text>
+<rect x="490" y="598" width="140" height="26" rx="13" fill="#ffebe9" stroke="#cf222e" stroke-width="1.5"/>
+<text x="560" y="616" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#cf222e" text-anchor="middle">None</text>
+<rect x="656" y="598" width="140" height="26" rx="13" fill="#ffebe9" stroke="#cf222e" stroke-width="1.5"/>
+<text x="726" y="616" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#cf222e" text-anchor="middle">None</text>
+<text x="834" y="616" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Never built. The claim was withdrawn from the help centre in v0.28.0 rather than left published. Blocked on D-V6.</text>
+<rect x="40" y="644" width="1440" height="58" rx="5" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<text x="52" y="679" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">Sales features (cadence, coaching, flows)</text>
+<rect x="490" y="660" width="140" height="26" rx="13" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.5"/>
+<text x="560" y="678" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1a7f37" text-anchor="middle">Complete</text>
+<rect x="656" y="660" width="140" height="26" rx="13" fill="#ffebe9" stroke="#cf222e" stroke-width="1.5"/>
+<text x="726" y="678" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#cf222e" text-anchor="middle">None</text>
+<text x="834" y="670" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Business rules are complete and tested. Coaching counts events rather than reading transcripts — that needs the AI</text>
+<text x="834" y="684" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">layer, which needs recordings.</text>
+<rect x="40" y="706" width="1440" height="58" rx="5" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<text x="52" y="741" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">Billing, plans and pricing</text>
+<rect x="490" y="722" width="140" height="26" rx="13" fill="#fff8c5" stroke="#9a6700" stroke-width="1.5"/>
+<text x="560" y="740" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#9a6700" text-anchor="middle">Partial</text>
+<rect x="656" y="722" width="140" height="26" rx="13" fill="#ffebe9" stroke="#cf222e" stroke-width="1.5"/>
+<text x="726" y="740" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#cf222e" text-anchor="middle">None</text>
+<text x="834" y="732" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Trial, proration, dunning, limits, invoices all built. The prices themselves derive from D-V5, and the route to</text>
+<text x="834" y="746" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">charge (Checkout vs ISVforce) is D-V3.</text>
+<rect x="40" y="768" width="1440" height="58" rx="5" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<text x="52" y="803" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">Durable storage and tenant isolation</text>
+<rect x="490" y="784" width="140" height="26" rx="13" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.5"/>
+<text x="560" y="802" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1a7f37" text-anchor="middle">Complete</text>
+<rect x="656" y="784" width="140" height="26" rx="13" fill="#ffebe9" stroke="#cf222e" stroke-width="1.5"/>
+<text x="726" y="802" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#cf222e" text-anchor="middle">None</text>
+<text x="834" y="794" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Ten migrations, row-level security enforced by Postgres, encrypted tokens. Never run against a live Postgres —</text>
+<text x="834" y="808" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">operator step O6.</text>
+<rect x="40" y="830" width="1440" height="58" rx="5" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<text x="52" y="865" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">Security hardening and audit integrity</text>
+<rect x="490" y="846" width="140" height="26" rx="13" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.5"/>
+<text x="560" y="864" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1a7f37" text-anchor="middle">Complete</text>
+<rect x="656" y="846" width="140" height="26" rx="13" fill="#ffebe9" stroke="#cf222e" stroke-width="1.5"/>
+<text x="726" y="864" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#cf222e" text-anchor="middle">None</text>
+<text x="834" y="856" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Headers, rate limits, encryption at rest, hash-chained append-only audit. The external half is a penetration test,</text>
+<text x="834" y="870" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">which needs a deployment.</text>
+<rect x="40" y="892" width="1440" height="58" rx="5" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<text x="52" y="927" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">Operations — observability, SLO, deploy, DR</text>
+<rect x="490" y="908" width="140" height="26" rx="13" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.5"/>
+<text x="560" y="926" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1a7f37" text-anchor="middle">Complete</text>
+<rect x="656" y="908" width="140" height="26" rx="13" fill="#ffebe9" stroke="#cf222e" stroke-width="1.5"/>
+<text x="726" y="926" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#cf222e" text-anchor="middle">None</text>
+<text x="834" y="918" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Logs, metrics, burn-rate rules, blue/green with rollback, a restore drill. Nothing is deployed, so nothing has ever</text>
+<text x="834" y="932" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">been operated.</text>
+<rect x="40" y="954" width="1440" height="58" rx="5" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<text x="52" y="989" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">Go to market — package, listing, pilots</text>
+<rect x="490" y="970" width="140" height="26" rx="13" fill="#fff8c5" stroke="#9a6700" stroke-width="1.5"/>
+<text x="560" y="988" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#9a6700" text-anchor="middle">Partial</text>
+<rect x="656" y="970" width="140" height="26" rx="13" fill="#ffebe9" stroke="#cf222e" stroke-width="1.5"/>
+<text x="726" y="988" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#cf222e" text-anchor="middle">None</text>
+<text x="834" y="980" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Package source, listing copy and assets are drafted. Blocked on D-V8 (which platform), D-V3 (billing route), the ISV</text>
+<text x="834" y="994" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">agreement and 5-9 months of lead time.</text>
+<rect x="40" y="1026" width="1440" height="76" rx="8" fill="#f2f7fd" stroke="#0969da" stroke-width="1.8"/>
+<rect x="40" y="1026" width="5" height="76" rx="2.5" fill="#0969da"/>
+<text x="60" y="1052" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#0969da">Read the two columns together</text>
+<text x="60" y="1074" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">Nine of the twelve rows are complete in code and empty of live evidence. That is not an accident of sequencing: there is no dev org, no deployed</text>
+<text x="60" y="1092" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">service and no database, so no amount of further building moves those cells. Operator steps O6, O7, O7b, O9 and O10 are what change them.</text>
+</svg>
+<figcaption><b>Figure 3 — Completion by capability.</b> Twelve capability areas, each with two separate answers: is the code there, and has anyone seen it work outside a test. Seven areas are complete in code, two partial, three not built — and not one has any live evidence, because nothing is deployed and there is no developer org. The right-hand column names the specific blocker for each row.</figcaption>
+</figure>
+
+  <h2>6 · Release history and what comes next</h2>
+  <p class="howto"><b>Use this figure</b> to show velocity honestly. Above the line is what was shipped and
+  verified; below it is what cannot start, with the specific blocker on each card.</p>
+  <figure>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1880 760" role="img" aria-label="A timeline: six groups of shipped releases from v0.14 to v0.28, then nine planned releases from v0.29 to v1.0, each marked with the decision or external dependency that blocks it." style="max-width:100%;height:auto">
+<rect x="0" y="0" width="1880" height="760" fill="#ffffff"/>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#1f2328"/></marker>
+<marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#cf222e"/></marker>
+<marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#1a7f37"/></marker>
+<marker id="arrowMuted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#57606a"/></marker>
+</defs>
+<text x="32" y="46" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1f2328">Where the code has been, and where it can go next</text>
+<text x="32" y="74" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#57606a">Fifteen numbered releases between 13 and 20 September alone, then a hard stop. Everything below the line waits on a decision, or on something that has to exist in the world first.</text>
+<text x="40" y="128" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#1a7f37" letter-spacing="0.8">SHIPPED — EACH ONE VERIFIED FROM ITS OWN ZIP</text>
+<rect x="40" y="146" width="290" height="152" rx="7" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.7"/>
+<rect x="40" y="146" width="4" height="152" rx="2" fill="#1a7f37"/>
+<text x="56" y="172" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#0d5926">v0.14 – v0.16</text>
+<text x="56" y="192" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">Surface and identity</text>
+<text x="56" y="214" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">The 7 missing screens, the OAuth controls</text>
+<text x="56" y="228" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Salesforce made mandatory, and the identity</text>
+<text x="56" y="242" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">boundary that stopped self-named callers.</text>
+<rect x="348" y="146" width="290" height="152" rx="7" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.7"/>
+<rect x="348" y="146" width="4" height="152" rx="2" fill="#1a7f37"/>
+<text x="364" y="172" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#0d5926">v0.17 – v0.22</text>
+<text x="364" y="192" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">Persistence, in stages</text>
+<text x="364" y="214" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Twenty modules moved onto an async repository</text>
+<text x="364" y="228" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">one green build at a time, then the legacy</text>
+<text x="364" y="242" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">in-process store was deleted outright.</text>
+<rect x="656" y="146" width="290" height="152" rx="7" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.7"/>
+<rect x="656" y="146" width="4" height="152" rx="2" fill="#1a7f37"/>
+<text x="672" y="172" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#0d5926">v0.23 – v0.24</text>
+<text x="672" y="192" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">Concurrency</text>
+<text x="672" y="214" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Serial guards for check-then-write, then the</text>
+<text x="672" y="228" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">dedupe pushed down into a Postgres unique</text>
+<text x="672" y="242" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">index so two instances cannot both win.</text>
+<rect x="964" y="146" width="290" height="152" rx="7" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.7"/>
+<rect x="964" y="146" width="4" height="152" rx="2" fill="#1a7f37"/>
+<text x="980" y="172" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#0d5926">v0.25</text>
+<text x="980" y="192" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">First external review</text>
+<text x="980" y="214" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">ChatGPT's review: REJECT. Nine of fourteen</text>
+<text x="980" y="228" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">findings closed, including three of five</text>
+<text x="980" y="242" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">blockers, in one release.</text>
+<rect x="1272" y="146" width="290" height="152" rx="7" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.7"/>
+<rect x="1272" y="146" width="4" height="152" rx="2" fill="#1a7f37"/>
+<text x="1288" y="172" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#0d5926">v0.26 – v0.27</text>
+<text x="1288" y="192" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">CRM write-back, honest dial</text>
+<text x="1288" y="214" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">The Task upsert that had never been written,</text>
+<text x="1288" y="228" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">and the end of the pretence: every simulated</text>
+<text x="1288" y="242" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">call is now labelled on every surface.</text>
+<rect x="1580" y="146" width="290" height="152" rx="7" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.7"/>
+<rect x="1580" y="146" width="4" height="152" rx="2" fill="#1a7f37"/>
+<text x="1596" y="172" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#0d5926">v0.28  ← you are here</text>
+<text x="1596" y="192" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#1f2328">Second external review</text>
+<text x="1596" y="214" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Perplexity's six findings closed, plus four</text>
+<text x="1596" y="228" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">worse ones the fix exposed. Hardening,</text>
+<text x="1596" y="242" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">encryption, RLS, audit chain, outbox worker.</text>
+<line x1="40" y1="330" x2="1840" y2="330" stroke="#d0d7de" stroke-width="2"/>
+<circle cx="1725" cy="330" r="7" fill="#1a7f37"/>
+<text x="1725" y="354" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1a7f37" text-anchor="middle">20 Sep 2026</text>
+<text x="40" y="384" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#9a6700" letter-spacing="0.8">NOT SHIPPED — THE BLOCKER IS NAMED ON EVERY CARD</text>
+<rect x="40" y="400" width="186" height="186" rx="7" fill="#fbfcfd" stroke="#57606a" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="54" y="424" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#57606a">v0.29</text>
+<text x="54" y="442" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#1f2328">Decision gate</text>
+<text x="54" y="464" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">No feature code. The six</text>
+<text x="54" y="478" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">S13 decisions, the model</text>
+<text x="54" y="492" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">rebuild, reclassification.</text>
+<rect x="52" y="546" width="162" height="26" rx="5" fill="#ffebe9" stroke="#cf222e" stroke-width="1.2"/>
+<text x="133" y="564" font-family="Arial, Helvetica, sans-serif" font-size="10.5" font-weight="700" fill="#a40e26" text-anchor="middle">blocked: D-V4 … D-V9</text>
+<rect x="242" y="400" width="186" height="186" rx="7" fill="#fbfcfd" stroke="#57606a" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="256" y="424" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#57606a">v0.30</text>
+<text x="256" y="442" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#1f2328">Dial path 1</text>
+<text x="256" y="464" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">The provider adapter and</text>
+<text x="256" y="478" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">the inbound webhook.</text>
+<rect x="254" y="546" width="162" height="26" rx="5" fill="#ffebe9" stroke="#cf222e" stroke-width="1.2"/>
+<text x="335" y="564" font-family="Arial, Helvetica, sans-serif" font-size="10.5" font-weight="700" fill="#a40e26" text-anchor="middle">blocked: D-V5</text>
+<rect x="444" y="400" width="186" height="186" rx="7" fill="#fbfcfd" stroke="#57606a" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="458" y="424" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#57606a">v0.31</text>
+<text x="458" y="442" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#1f2328">Dial path 2</text>
+<text x="458" y="464" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Inbound routing, screen</text>
+<text x="458" y="478" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">pop, call-quality telemetry.</text>
+<rect x="456" y="546" width="162" height="26" rx="5" fill="#ffebe9" stroke="#cf222e" stroke-width="1.2"/>
+<text x="537" y="564" font-family="Arial, Helvetica, sans-serif" font-size="10.5" font-weight="700" fill="#a40e26" text-anchor="middle">blocked: D-V5</text>
+<rect x="646" y="400" width="186" height="186" rx="7" fill="#fbfcfd" stroke="#57606a" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="660" y="424" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#57606a">v0.32-33</text>
+<text x="660" y="442" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#1f2328">Partner Telephony</text>
+<text x="660" y="464" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Connector, Contact Center,</text>
+<text x="660" y="478" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Voice Call records, 2GP.</text>
+<rect x="658" y="546" width="162" height="26" rx="5" fill="#ffebe9" stroke="#cf222e" stroke-width="1.2"/>
+<text x="739" y="564" font-family="Arial, Helvetica, sans-serif" font-size="10.5" font-weight="700" fill="#a40e26" text-anchor="middle">blocked: D-V8 + dev org</text>
+<rect x="848" y="400" width="186" height="186" rx="7" fill="#fbfcfd" stroke="#57606a" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="862" y="424" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#57606a">v0.34</text>
+<text x="862" y="442" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#1f2328">Live durability</text>
+<text x="862" y="464" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Conformance against a real</text>
+<text x="862" y="478" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Postgres; cross-hop traces.</text>
+<rect x="860" y="546" width="162" height="26" rx="5" fill="#ffebe9" stroke="#cf222e" stroke-width="1.2"/>
+<text x="941" y="564" font-family="Arial, Helvetica, sans-serif" font-size="10.5" font-weight="700" fill="#a40e26" text-anchor="middle">blocked: O6 + a platform</text>
+<rect x="1050" y="400" width="186" height="186" rx="7" fill="#fbfcfd" stroke="#57606a" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="1064" y="424" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#57606a">v0.35</text>
+<text x="1064" y="442" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#1f2328">WhatsApp</text>
+<text x="1064" y="464" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Cloud API, opt-in ledger,</text>
+<text x="1064" y="478" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">24h window, templates.</text>
+<rect x="1062" y="546" width="162" height="26" rx="5" fill="#ffebe9" stroke="#cf222e" stroke-width="1.2"/>
+<text x="1143" y="564" font-family="Arial, Helvetica, sans-serif" font-size="10.5" font-weight="700" fill="#a40e26" text-anchor="middle">blocked: D-V6 + Meta</text>
+<rect x="1252" y="400" width="186" height="186" rx="7" fill="#fbfcfd" stroke="#57606a" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="1266" y="424" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#57606a">v0.36</text>
+<text x="1266" y="442" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#1f2328">AI layer</text>
+<text x="1266" y="464" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Transcription, summaries,</text>
+<text x="1266" y="478" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">real coaching scorecards.</text>
+<rect x="1264" y="546" width="162" height="26" rx="5" fill="#ffebe9" stroke="#cf222e" stroke-width="1.2"/>
+<text x="1345" y="564" font-family="Arial, Helvetica, sans-serif" font-size="10.5" font-weight="700" fill="#a40e26" text-anchor="middle">blocked: recordings first</text>
+<rect x="1454" y="400" width="186" height="186" rx="7" fill="#fbfcfd" stroke="#57606a" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="1468" y="424" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#57606a">v0.37</text>
+<text x="1468" y="442" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#1f2328">Enterprise close-out</text>
+<text x="1468" y="464" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">SSO decision, pen test,</text>
+<text x="1468" y="478" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">SOC 2 readiness.</text>
+<rect x="1466" y="546" width="162" height="26" rx="5" fill="#ffebe9" stroke="#cf222e" stroke-width="1.2"/>
+<text x="1547" y="564" font-family="Arial, Helvetica, sans-serif" font-size="10.5" font-weight="700" fill="#a40e26" text-anchor="middle">blocked: vendors + D-V10</text>
+<rect x="1656" y="400" width="186" height="186" rx="7" fill="#fbfcfd" stroke="#57606a" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="1670" y="424" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="700" fill="#57606a">v0.38 → v1.0</text>
+<text x="1670" y="442" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#1f2328">Listing and pilots</text>
+<text x="1670" y="464" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Security review, listing,</text>
+<text x="1670" y="478" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">three paid pilots, GA.</text>
+<rect x="1668" y="546" width="162" height="26" rx="5" fill="#ffebe9" stroke="#cf222e" stroke-width="1.2"/>
+<text x="1749" y="564" font-family="Arial, Helvetica, sans-serif" font-size="10.5" font-weight="700" fill="#a40e26" text-anchor="middle">blocked: D-V3 + all above</text>
+<rect x="40" y="610" width="1800" height="114" rx="8" fill="#f2f7fd" stroke="#0969da" stroke-width="1.8"/>
+<rect x="40" y="610" width="5" height="114" rx="2.5" fill="#0969da"/>
+<text x="60" y="636" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#0969da">Why the stop is deliberate rather than a stall</text>
+<text x="60" y="658" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">Every one of these nine needs something that cannot be written: a ruling, a carrier contract, a Meta business account, a deployed service, or a developer org.</text>
+<text x="60" y="676" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">or a ruling on whether to stay on an API that retires in 2028. v0.28.0 deliberately spent itself on the work that is valid whichever way those rulings go —</text>
+<text x="60" y="694" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">hardening, encryption, isolation, audit integrity, operations — so that none of it has to be redone after the strategy is chosen.</text>
+</svg>
+<figcaption><b>Figure 4 — Release history and what comes next.</b> Above the line: fifteen numbered releases between 13 and 20 September, grouped by what each phase achieved, every one verified from its own zip. Below it: nine planned releases, each carrying the decision or external dependency that blocks it. The stop is deliberate — v0.28.0 spent itself on work that stays valid whichever strategy is chosen.</figcaption>
+</figure>
+
+  <h2>7 · The decisions that unblock everything else</h2>
+  <p class="howto"><b>Use this figure</b> as the agenda for the S13 decision gate. It is the shortest path from
+  "we are blocked" to "here is the list, and here is what each item releases".</p>
+  <figure>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 1090" role="img" aria-label="Eight open decisions on the left, each with an arrow to what it unlocks on the right: the listing question, the strategy ruling, the carrier, WhatsApp, the financial model, story reclassification, the billing route, and unparking customer discovery." style="max-width:100%;height:auto">
+<rect x="0" y="0" width="1560" height="1090" fill="#ffffff"/>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#1f2328"/></marker>
+<marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#cf222e"/></marker>
+<marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#1a7f37"/></marker>
+<marker id="arrowMuted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#57606a"/></marker>
+</defs>
+<text x="32" y="46" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1f2328">The eight decisions that block the next release — and exactly what each unlocks</text>
+<text x="32" y="74" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#57606a">Nothing in the right-hand column can start until the matching decision on the left is made. All eight sit with Senthil; the packet for each is already written.</text>
+<rect x="40" y="148" width="470" height="92" rx="7" fill="#f2f7fd" stroke="#0969da" stroke-width="1.7"/>
+<rect x="40" y="148" width="4" height="92" rx="2" fill="#0969da"/>
+<text x="58" y="172" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#0969da">D-V9</text>
+<text x="112" y="172" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1f2328">Will AppExchange accept a net-new Open CTI listing at all?</text>
+<text x="58" y="224" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Raise a partner support case.</text>
+<text x="494" y="224" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#0969da" text-anchor="end">SENTHIL</text>
+<polyline points="510,194 620,194" fill="none" stroke="#0969da" stroke-width="1.9" marker-end="url(#arrow)"/>
+<rect x="620" y="148" width="900" height="92" rx="7" fill="#ffffff" stroke="#d0d7de" stroke-width="1.4"/>
+<text x="644" y="188" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">Decides whether option (C) — finishing on Open CTI for a cash window — exists as a choice. Blocks D-V8.</text>
+<rect x="40" y="252" width="470" height="92" rx="7" fill="#f2f7fd" stroke="#0969da" stroke-width="1.7"/>
+<rect x="40" y="252" width="4" height="92" rx="2" fill="#0969da"/>
+<text x="58" y="276" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#0969da">D-V8</text>
+<text x="112" y="276" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1f2328">Strategy: (A) re-platform to Partner Telephony, (B) pivot to an</text>
+<text x="112" y="292" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1f2328">AI layer, (C) finish on Open CTI</text>
+<text x="58" y="328" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Pick one. Packet written.</text>
+<text x="494" y="328" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#0969da" text-anchor="end">SENTHIL</text>
+<polyline points="510,298 620,298" fill="none" stroke="#0969da" stroke-width="1.9" marker-end="url(#arrow)"/>
+<rect x="620" y="252" width="900" height="92" rx="7" fill="#ffffff" stroke="#d0d7de" stroke-width="1.4"/>
+<text x="644" y="292" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">Selects the whole shape of S15-S29. Under (B) the carrier, the package and half the roadmap disappear.</text>
+<rect x="40" y="356" width="470" height="92" rx="7" fill="#f2f7fd" stroke="#0969da" stroke-width="1.7"/>
+<rect x="40" y="356" width="4" height="92" rx="2" fill="#0969da"/>
+<text x="58" y="380" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#0969da">D-V5</text>
+<text x="112" y="380" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1f2328">Which telephony carrier?</text>
+<text x="58" y="432" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Decide on landed cost per minute.</text>
+<text x="494" y="432" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#0969da" text-anchor="end">SENTHIL</text>
+<polyline points="510,402 620,402" fill="none" stroke="#0969da" stroke-width="1.9" marker-end="url(#arrow)"/>
+<rect x="620" y="356" width="900" height="92" rx="7" fill="#ffffff" stroke="#d0d7de" stroke-width="1.4"/>
+<text x="644" y="396" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">Unblocks the adapter, the inbound webhook, recording, call quality — and sets the pricing floor in billing.ts.</text>
+<rect x="40" y="460" width="470" height="92" rx="7" fill="#f2f7fd" stroke="#0969da" stroke-width="1.7"/>
+<rect x="40" y="460" width="4" height="92" rx="2" fill="#0969da"/>
+<text x="58" y="484" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#0969da">D-V6</text>
+<text x="112" y="484" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1f2328">WhatsApp: build it, or drop the ambition?</text>
+<text x="58" y="536" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">The claim is already withdrawn.</text>
+<text x="494" y="536" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#0969da" text-anchor="end">SENTHIL</text>
+<polyline points="510,506 620,506" fill="none" stroke="#0969da" stroke-width="1.9" marker-end="url(#arrow)"/>
+<rect x="620" y="460" width="900" height="92" rx="7" fill="#ffffff" stroke="#d0d7de" stroke-width="1.4"/>
+<text x="644" y="500" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">Unblocks the one capability the review found genuinely differentiated and unbuilt (S21-S22, 72 points).</text>
+<rect x="40" y="564" width="470" height="92" rx="7" fill="#f2f7fd" stroke="#0969da" stroke-width="1.7"/>
+<rect x="40" y="564" width="4" height="92" rx="2" fill="#0969da"/>
+<text x="58" y="588" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#0969da">D-V7</text>
+<text x="112" y="588" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1f2328">What are the real cost and funding assumptions?</text>
+<text x="58" y="640" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">ARPU contradicts the ICP by 2.5-5x.</text>
+<text x="494" y="640" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#0969da" text-anchor="end">SENTHIL</text>
+<polyline points="510,610 620,610" fill="none" stroke="#0969da" stroke-width="1.9" marker-end="url(#arrow)"/>
+<rect x="620" y="564" width="900" height="92" rx="7" fill="#ffffff" stroke="#d0d7de" stroke-width="1.4"/>
+<text x="644" y="604" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">Unblocks Financial_Model_v2, and with it the portfolio sequencing decision D15.</text>
+<rect x="40" y="668" width="470" height="92" rx="7" fill="#f2f7fd" stroke="#0969da" stroke-width="1.7"/>
+<rect x="40" y="668" width="4" height="92" rx="2" fill="#0969da"/>
+<text x="58" y="692" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#0969da">D-V4</text>
+<text x="112" y="692" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1f2328">Do the 20 dial/log stories stay counted as Done?</text>
+<text x="58" y="744" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Both reviewers say reclassify.</text>
+<text x="494" y="744" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#0969da" text-anchor="end">SENTHIL</text>
+<polyline points="510,714 620,714" fill="none" stroke="#0969da" stroke-width="1.9" marker-end="url(#arrow)"/>
+<rect x="620" y="668" width="900" height="92" rx="7" fill="#ffffff" stroke="#d0d7de" stroke-width="1.4"/>
+<text x="644" y="708" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">Moves the reported position from 96/100 to 76/100. Costs nothing but a number; buys an honest board.</text>
+<rect x="40" y="772" width="470" height="92" rx="7" fill="#f2f7fd" stroke="#0969da" stroke-width="1.7"/>
+<rect x="40" y="772" width="4" height="92" rx="2" fill="#0969da"/>
+<text x="58" y="796" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#0969da">D-V3</text>
+<text x="112" y="796" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1f2328">Billing route: AppExchange Checkout, or ISVforce licence + COA?</text>
+<text x="58" y="848" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">15% either way; 25% for OEM.</text>
+<text x="494" y="848" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#0969da" text-anchor="end">SENTHIL</text>
+<polyline points="510,818 620,818" fill="none" stroke="#0969da" stroke-width="1.9" marker-end="url(#arrow)"/>
+<rect x="620" y="772" width="900" height="92" rx="7" fill="#ffffff" stroke="#d0d7de" stroke-width="1.4"/>
+<text x="644" y="812" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">Unblocks the ISV agreement, the LMA setup and the pricing page copy (LC-1, LC-9).</text>
+<rect x="40" y="876" width="470" height="92" rx="7" fill="#f2f7fd" stroke="#0969da" stroke-width="1.7"/>
+<rect x="40" y="876" width="4" height="92" rx="2" fill="#0969da"/>
+<text x="58" y="900" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#0969da">D13</text>
+<text x="112" y="900" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1f2328">Unpark discovery: 15 conversations with Salesforce-using sales</text>
+<text x="112" y="916" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1f2328">leaders</text>
+<text x="58" y="952" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#57606a">Parked portfolio-wide since 10 Sep.</text>
+<text x="494" y="952" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#0969da" text-anchor="end">SENTHIL</text>
+<polyline points="510,922 620,922" fill="none" stroke="#0969da" stroke-width="1.9" marker-end="url(#arrow)"/>
+<rect x="620" y="876" width="900" height="92" rx="7" fill="#ffffff" stroke="#d0d7de" stroke-width="1.4"/>
+<text x="644" y="916" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">The review calls this the root cause. It gates the S16 kill point: three paid pilots at the ratified price, or stop.</text>
+<rect x="40" y="988" width="1480" height="78" rx="8" fill="#fffbe6" stroke="#9a6700" stroke-width="1.8"/>
+<rect x="40" y="988" width="5" height="78" rx="2.5" fill="#9a6700"/>
+<text x="60" y="1014" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#9a6700">The cheapest item on this page is the one that has been parked longest</text>
+<text x="60" y="1036" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">Fifteen thirty-minute conversations cost nothing but calendar time, and they decide whether any of the other seven are worth making. Every other row</text>
+<text x="60" y="1054" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">commits money, a contract, or months of lead time; this one commits an afternoon. Three further decisions are open but block nothing right now: D-V1</text>
+<text x="60" y="1072" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2328">(chat vendor — the built-in engine works), D-V10 (SSO — recommendation is 'not needed, document the smaller surface') and D15 (portfolio sequencing, which follows D-V7).</text>
+</svg>
+<figcaption><b>Figure 5 — The decisions that unblock everything else.</b> Eight decisions, each with an arrow to exactly what it releases. All eight sit with Senthil. The packet for each is already written — the strategy options, the carrier trade-offs, the model rebuild scope — so each row is a ruling rather than a research task.</figcaption>
+</figure>
+
+  <h2>8 · What is completed</h2>
+  <p class="howto"><b>How to use this register.</b> Every row names evidence you can reproduce without any
+  system we do not have. If a row cannot be reproduced from the zip alone, it does not belong in this table —
+  it belongs in section 9.</p>
+  <div class="grid">
+    <div class="stat"><div class="n">58 / 613</div><div class="l">test suites / tests, all passing</div></div>
+    <div class="stat"><div class="n">100%</div><div class="l">statements, branches, functions, lines — zero pragmas</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">production dependency advisories, any severity</div></div>
+    <div class="stat"><div class="n">55 / 10</div><div class="l">source modules / ordered database migrations</div></div>
+  </div>
+  <table>
+    <tr><th style="width:260px">Completed</th><th>What it does</th><th style="width:330px">Evidence you can run today</th></tr>
+    <tr><td><b>The in-org softphone surface</b></td>
+        <td>The panel, its adapter bundle and its configuration are served by the application itself. Until
+        v0.28.0 the page the CallCenter definition pointed at was never served at all — a live utility bar would
+        have loaded a 404 with no error anywhere.</td>
+        <td><code>test/widget.test.ts</code> boots the real app, fetches the real URL, asserts both script tags
+        and the injected config, and parses the CallCenter metadata to prove the path resolves to a registered route.</td></tr>
+    <tr><td><b>Identity and session lifecycle</b></td>
+        <td>OAuth on an External Client App with PKCE, a signed session carrying a token id and a per-user epoch,
+        logout, revoke-all, and role assignment that kills the target's existing sessions.</td>
+        <td><code>test/sessionLifecycle.test.ts</code>, <code>test/authBoundary.test.ts</code> — including that a
+        pre-v0.28.0 token shape is refused rather than grandfathered.</td></tr>
+    <tr><td><b>Web hardening</b></td>
+        <td>Content-Security-Policy with a Salesforce-only <code>frame-ancestors</code> allowlist, HSTS, nosniff,
+        referrer and permissions policies, a 100 kB body cap, an inbound timeout, request ids, and rate limits
+        that hold across instances because the counter lives in the database.</td>
+        <td><code>test/hardening.test.ts</code> pins every header on JSON, HTML, 404 and 401 responses, and proves
+        the org budget holds across two separate app instances sharing one repository.</td></tr>
+    <tr><td><b>Encryption at rest</b></td>
+        <td>AES-256-GCM envelopes over both Salesforce tokens, with a versioned key ring, per-org additional
+        authenticated data, and a rotation sweep. The trust page has claimed this since S10; it became true on
+        20 September.</td>
+        <td><code>test/tokenCipher.test.ts</code> plus a conformance test on both repository implementations
+        asserting the persisted bytes never contain the plaintext.</td></tr>
+    <tr><td><b>Tenant isolation at the database</b></td>
+        <td>Row-level security, forced on every org-scoped table, compared against a tenant context set inside
+        each transaction. A deliberately misconfigured application reads nothing.</td>
+        <td><code>db/checks/rls-smoke.sql</code> runs in CI as a non-superuser role and proves the cross-tenant
+        read and write are both blocked with the application absent.</td></tr>
+    <tr><td><b>Tamper-evident audit trail</b></td>
+        <td>A sha256 hash chain per org, append-only at the database, verifiable by the customer through an
+        endpoint, and exempt from the record cap because an audit log with a ten-thousand-row memory is not one.</td>
+        <td><code>test/auditChain.test.ts</code> (tampered, deleted and re-ordered rows each detected at a named
+        position) and <code>db/checks/audit-append-only.sql</code>.</td></tr>
+    <tr><td><b>Auto-logging to Salesforce (our half)</b></td>
+        <td>Phone matching through the platform's own phone index, then one Task per call upserted on our
+        external id, so a retry updates rather than duplicating. More than one matching record is reported as
+        ambiguous and written unattached — never guessed.</td>
+        <td><code>test/crmWriteBack.test.ts</code> drives the real route through the real writer over a local
+        HTTP server answering the shapes Salesforce really returns.</td></tr>
+    <tr><td><b>A durable, self-draining outbox</b></td>
+        <td>A failed CRM write queues and is retried by a leader-elected background worker with exponential
+        backoff and a dead-letter threshold. Before v0.28.0 the queue only drained if a human pressed a button.</td>
+        <td><code>test/outboxWorker.test.ts</code> black-holes Salesforce for ten simulated minutes and proves the
+        queue drains unattended on recovery, with leadership handing over on lease expiry.</td></tr>
+    <tr><td><b>Pre-dial refusal</b></td>
+        <td>E.164 normalisation against fifteen country rule sets, an org blocklist and a do-not-call registry
+        seam — all consulted before a provider would ever be asked, so a refused number never costs a carrier attempt.</td>
+        <td><code>test/numbers.test.ts</code> — 25 cases including the negative ones, plus the admin-only routes.</td></tr>
+    <tr><td><b>Operations tooling</b></td>
+        <td>Structured JSON logs with secret redaction, RED metrics per route pattern, a Prometheus endpoint, an
+        error sink, the published 99.5% expressed as an error budget with importable burn-rate rules, a real
+        blue/green deployment script with automatic rollback, and a disaster-recovery drill script.</td>
+        <td><code>test/observability.test.ts</code>, <code>test/reviewSprint.test.ts</code> (the workflow and
+        script shapes are asserted, not assumed).</td></tr>
+    <tr><td><b>The claim-to-test gate</b></td>
+        <td>Every sentence the product publishes about its own behaviour maps to a claim id, and every claim id
+        must be carried by a tagged test. An unbacked sentence fails the build.</td>
+        <td><code>test/claims.test.ts</code> walks both directions over 34 claims;
+        <code>docs/claims-registry.md</code> is generated from the same list.</td></tr>
+    <tr><td><b>Release integrity</b></td>
+        <td>The evidence pack is bound to the package hash, and the comparison is symmetric: a source file the
+        evidence never saw, or a test suite on disk the run never executed, both fail the release.</td>
+        <td><code>npm run evidence:check</code> in CI and before every deploy; the gate was executed from the
+        packaged zip and its own false positive fixed before release.</td></tr>
+  </table>
+
+  <h2>9 · What is not completed, and exactly why</h2>
+  <p class="howto"><b>How to use this register.</b> Sorted by what blocks it, not by size. Nothing in this table
+  is blocked on engineering difficulty; every row is waiting on a ruling, a commercial relationship, or a system
+  that has to be provisioned before anyone can watch it work.</p>
+
+  <h3>9.1 · Blocked on a decision only Senthil can make</h3>
+  <table>
+    <tr><th style="width:230px">Not completed</th><th>Why it is not built</th><th style="width:150px">Unblocked by</th></tr>
+    <tr><td><b>Placing a real telephone call</b></td>
+        <td>No telephony adapter exists. The seam an adapter must satisfy is built and tested, and the simulator
+        behind it labels every call <code>simulated: true</code> on every surface — but nothing dials. This was
+        left deliberately: the provider choice sets per-minute cost and therefore the pricing floor in
+        <code>billing.ts</code>, so it is a commercial decision, and building an adapter for an unchosen provider
+        would mean inventing one and then testing the invention.</td>
+        <td><b>D-V5</b> — name the carrier on landed cost per minute</td></tr>
+    <tr><td><b>Inbound calls, screen pop, call-quality telemetry</b></td>
+        <td>All three need the same adapter plus an inbound webhook whose signature scheme and event vocabulary
+        are provider-specific. The routing and screen-pop logic on our side already exists.</td>
+        <td><b>D-V5</b></td></tr>
+    <tr><td><b>Call recording and consent</b></td>
+        <td>Needs the carrier, a storage location and a per-jurisdiction announcement policy. The audit chain and
+        retention sweep it would hang on are built.</td>
+        <td><b>D-V5</b> + a storage decision</td></tr>
+    <tr><td><b>WhatsApp — the whole omnichannel half</b></td>
+        <td>Never built. The product accepts a message event if something else posts one, and logs it as a Task,
+        but there is no provider client, no number onboarding, no opt-in ledger, no 24-hour window enforcement
+        and no templates. In v0.28.0 the <i>claim</i> was withdrawn from the help centre rather than left
+        published, so the product no longer says it does something it does not do.</td>
+        <td><b>D-V6</b> — build it, or drop the ambition</td></tr>
+    <tr><td><b>Which platform the in-org surface targets</b></td>
+        <td>Everything in the Salesforce column is built on Open CTI, which is in maintenance mode, ends life on
+        28 February 2028, and is closed to newly created Agentforce Service orgs. Against a five-to-nine month
+        listing lead time, a submission started today would list onto a surface with under a year of supported
+        life. No further work was done on that surface beyond making it correct.</td>
+        <td><b>D-V9</b> then <b>D-V8</b></td></tr>
+    <tr><td><b>A usable financial model</b></td>
+        <td>The current model never reaches breakeven inside eighteen months, its $600 ARPU contradicts its own
+        50–500 seat ICP by a factor of 2.5–5, it has no per-minute cost line for a telephony product, and its top
+        plan limit equals the top of the ICP with no tier to grow into.</td>
+        <td><b>D-V7</b> — cost and funding assumptions</td></tr>
+    <tr><td><b>An honest story count</b></td>
+        <td>Twenty stories promising click-to-dial and automatic logging are still counted as Done. Both external
+        reviewers, and this release, recommend reclassifying them to "Code-complete (unproven)", which moves the
+        reported position from 96/100 to 76/100. The definition-of-done clause is already recorded; only the
+        reclassification itself is outstanding.</td>
+        <td><b>D-V4</b></td></tr>
+    <tr><td><b>Any evidence that a customer wants this</b></td>
+        <td>Discovery interviews were parked portfolio-wide on 10 September (D13) and have never been run. Every
+        demand claim in the workbook is a desk assumption. The second reviewer calls this the root cause of the
+        entire review, and it is the cheapest item on the whole list.</td>
+        <td><b>D13</b> — fifteen conversations</td></tr>
+  </table>
+
+  <h3>9.2 · Blocked on something that has to exist in the world</h3>
+  <table>
+    <tr><th style="width:230px">Not completed</th><th>Why it is not done</th><th style="width:150px">Unblocked by</th></tr>
+    <tr><td><b>Any live evidence at all</b></td>
+        <td>There is no Salesforce developer org, no deployed service and no PostgreSQL server. This single fact
+        is why nine of twelve capability rows read "code complete, evidence none". It is not a sequencing
+        accident and no amount of further building changes it.</td>
+        <td>O6, O7, O7b, O9, O10</td></tr>
+    <tr><td><b>Penetration test, SOC 2, DPA execution</b></td>
+        <td>The internal half is done — threat model, evidence pack, control-to-code map, and a DPA template that
+        maps every GDPR Article 28(3) and 32 clause to the code that satisfies it. The external half needs a
+        vendor, a consultant, a legal entity and a deployed target.</td>
+        <td>Vendors, legal entity</td></tr>
+    <tr><td><b>KMS wiring, metrics backend, alerting</b></td>
+        <td>The key ring, the metrics endpoint and the alert rules are all built and exported. Nothing unwraps a
+        key, scrapes the endpoint or evaluates the rules, because there is no platform.</td>
+        <td>A hosting decision</td></tr>
+    <tr><td><b>AppExchange listing and paid pilots</b></td>
+        <td>Package source, listing copy, asset plan and submission dry-run all exist. The listing needs the ISV
+        agreement, the billing route, the security review ($999 per submission) and five to nine months.</td>
+        <td>D-V8, D-V3, ISV agreement</td></tr>
+    <tr><td><b>The AI layer</b></td>
+        <td>Transcription, AI summaries and transcript-derived coaching all need call recordings, which need a
+        carrier. Deliberately not started: building AI governance copy before a model is ever called would create
+        exactly the class of unbacked claim the release just spent effort eliminating.</td>
+        <td>Recordings (D-V5)</td></tr>
+  </table>
+
+  <div class="callout warn">
+    <h3>The one thing to take away if you read nothing else</h3>
+    <p>The gap between this product and a shippable one is not a code gap. It is five operator days against a
+    developer org and a database, plus six decisions that cost nothing to make but cannot be made by an engineer.
+    Six months of further engineering with the current inputs would not move a single cell in the evidence column.</p>
+  </div>
+
+  <h2>10 · The five operator steps that change the picture</h2>
+  <p class="howto"><b>How to use this section.</b> These are the shortest paths from amber to green in figures 1
+  and 3. Each is written as an executable step in <code>docs/salesforce-dev-org-guide.md</code>, and each one has
+  a corresponding manual test case in the companion test workbook.</p>
+  <table>
+    <tr><th style="width:90px">Step</th><th style="width:250px">What it needs</th><th>What it would prove, and what turns green</th></tr>
+    <tr><td><b>O6</b></td><td>A PostgreSQL 16 instance</td>
+        <td>That the repository conformance suite behaves identically against a real database — caps, cascades,
+        unique indexes and the atomic counter under concurrency. Closes R-V11 and R-V13, and turns the storage and
+        isolation rows green.</td></tr>
+    <tr><td><b>O7</b></td><td>A Salesforce developer org + the package deployed</td>
+        <td>That a Task really is created once and updated on retry, that the phone match finds the right Contact,
+        and that a Salesforce outage leaves the note safe and drains afterwards. This is the single highest-value
+        hour available.</td></tr>
+    <tr><td><b>O7b</b></td><td>The same org, utility bar open</td>
+        <td>That the softphone panel actually renders inside Salesforce and the adapter loads. This is the step
+        that would have caught the defect that survived three reviews and eight releases.</td></tr>
+    <tr><td><b>O9</b></td><td>Live PostgreSQL, application role</td>
+        <td>That row-level security blocks a cross-tenant read with the application deliberately misconfigured,
+        that audit rows refuse to be updated or deleted, and that a dump restores with matching checksums.</td></tr>
+    <tr><td><b>O10</b></td><td>A deployed service + any metrics backend</td>
+        <td>That the burn-rate alert fires and clears during a deliberate ten-minute Salesforce outage, and that
+        the outbox drains without anyone watching. Turns the operations row green.</td></tr>
+  </table>
+
+  <h2>11 · Glossary</h2>
+  <table>
+    <tr><th style="width:230px">Term</th><th>Meaning as used in these diagrams</th></tr>
+    <tr><td><b>Open CTI</b></td><td>The Salesforce API for embedding a third-party softphone in the Lightning UI. In maintenance mode; end of life 28 February 2028.</td></tr>
+    <tr><td><b>Partner Telephony</b></td><td>The Service Cloud Voice model Salesforce directs third-party carriers to; the supported replacement for Open CTI.</td></tr>
+    <tr><td><b>CallCenter definition</b></td><td>The metadata record that tells a Salesforce org which URL to load as its softphone.</td></tr>
+    <tr><td><b>External Client App (ECA)</b></td><td>The OAuth client type that replaced Connected Apps, which can no longer be created as of Spring '26.</td></tr>
+    <tr><td><b>SOSL</b></td><td>Salesforce Object Search Language. <code>FIND {digits} IN PHONE FIELDS</code> uses the platform's own phone index, replacing an unindexed trailing-wildcard scan.</td></tr>
+    <tr><td><b>Upsert on an external id</b></td><td>Writing a record keyed on our own identifier, so the platform decides insert-or-update and a retry cannot create a duplicate.</td></tr>
+    <tr><td><b>Outbox</b></td><td>A durable queue of CRM writes that failed, drained in order by a background worker with backoff and a dead-letter threshold.</td></tr>
+    <tr><td><b>Row-level security (RLS)</b></td><td>PostgreSQL policies that filter every row by the tenant context set inside the transaction, so isolation is the database's job rather than the application's.</td></tr>
+    <tr><td><b>Dead letter</b></td><td>A queued write parked after too many failures: visible in health output, never retried automatically.</td></tr>
+    <tr><td><b>Burn rate</b></td><td>How fast an error budget is being consumed. A fast burn pages a human; a slow burn opens a ticket.</td></tr>
+    <tr><td><b>E.164 / DNC</b></td><td>The international phone number format; a do-not-call registry that must be consulted before dialling.</td></tr>
+    <tr><td><b>O-step</b></td><td>An operator step: work that cannot be done in code because it needs a live system.</td></tr>
+    <tr><td><b>D-Vn</b></td><td>An open decision recorded in the sprint tracker, with its owner and what it blocks.</td></tr>
+    <tr><td><b>F-Pn / VB-CR-n / F-Vn</b></td><td>Findings from the Perplexity review, the ChatGPT review, and the internal cold reviews respectively.</td></tr>
+  </table>
+
+  <div class="foot">
+    <p><b>Sources for every status claim in this document:</b> the code and its test suite as shipped in
+    <code>voicebridge-cti-codebase-20260920_1045.zip</code> (58 suites / 613 tests, 100% coverage, verified from a
+    clean extraction); the release evidence pack bound to package hash <code>f0f4eb4ab67d</code>; the sprint tracker
+    <code>claude_v024_…_20260920_1045.xlsx</code>; and the Salesforce help article on Open CTI retirement
+    (005306437), read on 20 September 2026.</p>
+    <p>Prepared by Claude for Senthil (KP) · MoPr11 VoiceBridge CTI for Salesforce · document v001 ·
+    20 September 2026 12:32 BST · end of document.</p>
+  </div>
+
+</main>
+</body>
+</html>

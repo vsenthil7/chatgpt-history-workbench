@@ -1,0 +1,447 @@
+# AT-LOS-004 — V035 Independent Deep Review
+
+**Review started:** 11/08/2026 01:46 BST  
+**Reviewed package:** `AT-LifeOperatingSystem_DurableIdentitySchemeAndEvidenceAuthorityClosure_Claude_V035_20260810_0315.zip`  
+**Outer ZIP SHA-256:** `d06ff9ca5ff113b5f08cda9641a9634bdd6db4ad2659cada2585d04f18fe6fbd`  
+**Nested repository ZIP SHA-256:** `90db15395d18465d282a06e599aef1c18e5bafa463f7c699a6e762550540d89a`  
+**Decision:** **REJECTED — V035 is not independently accepted and is not shippable.**
+
+## Executive decision
+
+The uploaded archive is healthy: ZIP CRC checks pass, the manifest accounts for every declared payload, all declared byte counts and SHA-256 hashes match, the nested repository parses and compiles, and the DOCX/XLSX artefacts open. The problem is not the upload.
+
+The release itself has four blockers and several high-severity defects. Most importantly:
+
+1. The delivered deterministic test suite is red: `1 failed, 630 passed, 1 skipped, 2 deselected` because the clean-environment CLI test omits the new `at-durable` package.
+2. A database carrying a current event-store marker and an incompatible old identity-store marker is still accepted by the event store.
+3. The real CLI can write events and provenance before the identity registry rejects that same incompatible database, leaving a partial import committed.
+4. A matching sibling marker can authorise adoption and modification of a malformed target-store schema.
+5. The included mutation runner can report every mutant killed even when the unmutated baseline already fails.
+6. The accepted input domain of the canonical encoder is not injective for Python subclasses; two unequal `SourceRef` values can produce one Event ID.
+7. Release facts, current metadata and the included release-builder do not establish a reproducible final seal.
+
+No six-status evidence work, timeline work, commitments work, questions work or other feature tranche should start. V036 must be a corrective release only.
+
+## Package and file coverage
+
+### Outer package
+
+The outer ZIP contains 12 entries: 11 manifest-tracked payloads plus the manifest. All were opened and reviewed individually.
+
+| Artefact | Review result |
+|---|---|
+| Current README V035 | Parsed; generated fact block is internally aligned with the shipped flat facts, but the test, mutation and durable-boundary claims are disproved by the delivered code. |
+| Decision Memo V004 DOCX | Opened and rendered; two pages, no clipping or corruption. Correctly historical. |
+| Metadata V035 JSON | Valid JSON; contains current-state contradictions and unsupported gate/verdict claims. |
+| Project Memory Standard V035 Markdown | Parsed and inspected; no file corruption. Current authority inherits unsupported release facts. |
+| Project Memory V035 XLSX | 16 sheets opened; formula scan clean; current registers repeat the unsupported 631/67 claims. |
+| Development Design Document V006 DOCX | Opened and rendered; three pages, no clipping or corruption. Correctly historical. |
+| Test Strategy and Plan V035 XLSX | 29 sheets opened; formula scan clean; mutation and gate claims are invalid; the V035 disposition sheet is visually unreadable because key columns are too narrow. |
+| Evidence Register V004 XLSX | Six sheets opened; formula scan clean; correctly historical. |
+| Change Log V035 Markdown | Parsed; durable-boundary and gate claims are disproved by the delivered code. |
+| Manifest V035 CSV | All 11 payload entries exist and match declared size and SHA-256. |
+| Call Effectiveness Analysis V009 XLSX | Six sheets opened; no actual formula error found. A historical note contains the literal text `#NAME?`, not a failing formula. |
+| Nested repository V035 ZIP | CRC clean; 143 files and 60 directory entries; no path traversal, duplicate payload or shipped cache/editor state found. |
+
+### Nested repository
+
+The 143 files comprise 71 Markdown, 48 Python, 14 TOML, three YAML, three JSON, two text and two SQLite fixture files. Every file was included in archive inventory, extension/parser checks and integrity scans. All Python files compile; all JSON and TOML files parse. The V035 authority surface—durable policy, three SQLite stores, CLI, canonical identity, evidence read guards, release facts/build/audit scripts, mutation runner, tests, current docs and workbooks—was then read and adversarially exercised.
+
+The generated architecture and testing documentation regenerate byte-identically from the delivered structured sources.
+
+## Gate ledger
+
+| Gate | Independent result |
+|---|---|
+| Outer ZIP CRC | PASS |
+| Manifest membership, bytes and SHA-256 | PASS |
+| Nested ZIP CRC and hygiene | PASS |
+| Python compilation | PASS |
+| JSON/TOML parsing | PASS |
+| Structured-doc regeneration | PASS — byte-identical |
+| Deterministic pytest suite | **FAIL — 1 failed, 630 passed, 1 skipped, 2 deselected** |
+| Coverage after all tests execute | 100% line and branch, but a red suite is still a failed release |
+| Diagnostic one-line fixture repair | 631 passed, 1 skipped, 2 deselected; confirms the immediate harness omission only |
+| Mutation claim | **INVALID — baseline is already red and runner has no baseline-green precondition** |
+| Package audit using shipped facts | Reports zero, but adversarial metadata corruption also reports zero |
+| Ruff exact CI command | Not independently rerun; ruff was unavailable and the review environment had no package-index access |
+| Mypy strict exact CI command | Not independently rerun; mypy was unavailable and the review environment had no package-index access |
+| Environment-dependent integration | One local pass and one environment skip; not treated as a V035 product defect |
+
+## Findings
+
+### F01 — BLOCKER — Delivered test/CI/release-fact baseline is red
+
+**Reproduction**
+
+```text
+python -m pytest -q -m "not integration"
+1 failed, 630 passed, 1 skipped, 2 deselected
+```
+
+Failing test:
+
+```text
+packages/at-cli/tests/test_cli.py::
+test_cli_is_runnable_as_a_module_from_a_clean_environment
+```
+
+Failure:
+
+```text
+ModuleNotFoundError: No module named 'at_durable'
+```
+
+The clean-environment test constructs its own `PYTHONPATH` from:
+
+```text
+at-ingest-core, at-ingest-whatsapp, at-ingest-llm-export,
+at-store, at-identity, at-cli
+```
+
+It omits the newly introduced `at-durable`. The package metadata itself includes the dependency; the release test fixture is stale.
+
+A diagnostic one-line change adding `at-durable` to that tuple produced:
+
+```text
+631 passed, 1 skipped, 2 deselected
+2111 statements, 620 branches, 100% line and branch coverage
+```
+
+That diagnostic result does not accept V035: it only proves the immediate suite-count discrepancy is a one-line test-harness omission. The architectural blockers below remain.
+
+**Required closure**
+
+- Repair the clean-environment fixture through a single machine-derived package/dependency source rather than another hand-maintained tuple.
+- Make the documented deterministic command explicit and identical in CI, release facts and review workbooks.
+- Run the exact delivered repository after clean extraction; do not publish facts from a different working tree.
+
+### F02 — BLOCKER — Mixed identity schemes are accepted in a shared database
+
+V035 claims every durable store refuses a database written under another identity scheme before any read or write. The delivered policy does not enforce agreement across all marker tables.
+
+`inspect_database()` records only one `sibling_scheme`. `decide_open()` checks the sibling only when the target store has no own schema marker. Once the target store's own schema/version/scheme are valid, an incompatible sibling marker is ignored.
+
+**Reproduced both directions**
+
+1. Valid V035 event marker `schema_meta: schema 3, atid/3` plus identity marker `identity_meta: schema 1, atid/1` → `SqliteEventStore` opens.
+2. Valid V035 identity marker `identity_meta: schema 2, atid/3` plus event marker `schema_meta: schema 3, atid/1` → `SqliteIdentityRegistry` opens.
+
+Therefore a file can advertise two incompatible identity schemes and still be accepted.
+
+**Real CLI impact**
+
+A database was prepared with a current event marker and an older identity marker, then passed to the real import path. Before rejection it contained zero events, zero source registrations and zero import occurrences. After the identity registry finally rejected the old schema, it contained:
+
+```text
+2 events
+1 source_registration
+1 import_occurrence
+```
+
+Failure path:
+
+```text
+CLI import
+  ├─ opens EventStore
+  │    └─ sees own atid/3 marker and ignores sibling atid/1 marker
+  ├─ writes source registration, occurrence and events
+  └─ opens IdentityRegistry
+       └─ rejects old identity schema
+
+Result: command fails, but partial durable state remains committed.
+```
+
+This is direct database-integrity damage and disproves the release verdict's “before reading or writing a byte” claim.
+
+**Required closure**
+
+- Inspect every platform marker table and retain every observed scheme, not one overwritten sibling value.
+- Reject any disagreement among platform markers before opening any store.
+- Add a CLI-level shared-database preflight that validates all stores before the first write.
+- Either coordinate the import under one atomic transaction or ensure no component can write until all store preflights pass.
+- Assert the complete database directory state byte-for-byte before and after every refusal, including WAL/SHM/journal sidecars.
+
+### F03 — BLOCKER — Sibling markers and partial schemas authorise unsafe adoption
+
+A matching sibling marker proves only that another platform store owns the container. It does not prove that existing target-store tables are valid or safe to adopt.
+
+**Reproduction A: matching sibling plus malformed target table**
+
+Database before open:
+
+```text
+identity_meta = schema 2, atid/3
+source_registration(x TEXT)   # malformed target-owned table
+no event-store schema_meta
+```
+
+`SqliteEventStore` opened successfully, created/stamped the event store, added the other event-store tables, left the malformed `source_registration(x)` untouched and changed the database bytes.
+
+**Reproduction B: valid own marker plus partial/malformed store**
+
+Database before open:
+
+```text
+schema_meta = schema 3, atid/3
+source_registration(x TEXT)   # only one malformed known table
+```
+
+Because `known_tables` uses intersection rather than full structural validation, one table name is enough. The store opened, created missing tables and modified the database while retaining the malformed table.
+
+**Reproduction C: malformed marker shape**
+
+A table `schema_meta(x TEXT)` leaks raw:
+
+```text
+OperationalError: no such column: key
+```
+
+instead of a domain-level refusal.
+
+**Required closure**
+
+- With no own marker, allow target-store creation only when no target-owned table, index or trigger already exists.
+- With an own marker, validate the complete expected schema: table set, required columns, primary/foreign keys, indexes and marker shape.
+- Never silently repair or adopt a partial/corrupt marked store during ordinary open.
+- Convert malformed/corrupt marker failures into the declared domain exception without writing.
+- Perform schema creation and marker stamping atomically.
+
+### F04 — HIGH — The accepted canonical input domain is still non-injective
+
+The encoder claims injectivity across accepted values, but uses `isinstance()` for strings, integers, datetimes, lists and tuples. Python subclasses can override the operations the encoder trusts.
+
+A `str` subclass was accepted by `SourceRef`. Two unequal underlying values—`different-source-A` and `different-source-B`—overrode formatting and UTF-8 encoding so both canonicalised as `same-source`.
+
+Observed result:
+
+```text
+refs_equal = False
+source_ids_equal = False
+canonical_keys_equal = True
+Event IDs:
+ea7b181c0d885fc1a23ef4b6576da8ca
+ea7b181c0d885fc1a23ef4b6576da8ca
+```
+
+This is deterministic identity collapse inside the function's accepted Python domain, not a hash collision.
+
+**Required closure**
+
+- Use exact built-in type boundaries: `type(value) is str`, `type(value) is int`, exact `bool`, exact supported sequence types, and an explicit datetime policy.
+- Enforce or normalise exact primitives in public record constructors, not only inside the encoder.
+- Add adversarial subclass tests for `str`, `int`, `datetime`, `list` and `tuple`.
+- Add a mutation regression that reintroduces `isinstance` and must be killed.
+
+### F05 — BLOCKER — Final release provenance and seal are not reproducible
+
+Three independent facts conflict:
+
+1. The included `tools/build_release.py` writes `release_facts.json` in this shape:
+
+```json
+{
+  "derived": { ... },
+  "integrity_failures": [ ... ]
+}
+```
+
+The shipped `release_facts.json` is a flat dictionary with neither key.
+
+2. The exact delivered repository cannot successfully derive the claimed facts because the deterministic suite is red. Therefore the included release builder cannot reproduce the submitted release from the submitted repository.
+
+3. The release declares `2026-08-10T03:15:50+01:00` and says it was written from the build clock, but recorded ZIP modification times include:
+
+```text
+repo README       2026-08-10 23:49
+nested repo ZIP   2026-08-10 23:51
+outer manifest    2026-08-10 23:52
+```
+
+These are about 20 hours after the declared build/seal identity. Whatever the cause, the submitted bytes are not proven to be the final package sealed at 03:15.
+
+**Required closure**
+
+- Define one canonical `release_facts.json` schema and make every reader/writer use it.
+- Run one final atomic release builder from a clean checkout/extraction.
+- Derive the filename timestamp and metadata timestamp at final seal, after tests, generators and audits pass—not at the start and not from a planned time.
+- Forbid any post-seal replacement of README, nested ZIP, workbook or manifest.
+- Re-extract the final outer ZIP and rerun every gate against the extracted bytes.
+- Persist machine-readable command evidence: command, start/end, exit code, counts, environment and artefact hashes.
+
+### F06 — HIGH — The claimed 67/67 mutation result is invalid
+
+The mutation runner performs no baseline-green test. For each mutant it runs pytest and treats any non-zero return code as “killed”:
+
+```python
+if proc.returncode != 0:
+    killed += 1
+```
+
+The exact unmutated command used by the runner already returns non-zero:
+
+```text
+1 failed, 12 passed
+```
+
+It stops at the clean-environment CLI failure. Therefore unrelated baseline failure can mark every mutant as killed. The workbook, README, changelog and release facts claim 67 mutation regressions without evidence that failures are mutation-specific.
+
+**Required closure**
+
+- Run the exact unmutated baseline in the throwaway snapshot and require exit zero before mutating anything.
+- For each mutant, record the failing test identity and prove the restored baseline returns zero afterward.
+- Do not count timeout, environment failure, collection failure or unrelated test failure as a kill.
+- Emit a machine-readable mutation report tied to the final source hash.
+
+### F07 — HIGH — Current metadata contradicts itself, and the package audit misses the class
+
+Current V035 metadata says F05 corrected “6 packages coded” into seven Implemented and eight code-bearing packages. Yet the same current metadata still contains:
+
+```json
+"coding_status": {
+  "packages_coded": 6
+}
+```
+
+It also says the six-status model is next after independent **V033** acceptance while the current verdict says after independent **V035** acceptance.
+
+The shipped package audit reports zero findings because it only reconciles a numeric metadata leaf when the leaf's exact key exists in facts. `packages_coded` is a stale semantic alias, so it is ignored.
+
+Adversarial proof:
+
+- Change current `packages_coded` from `6` to `999`.
+- Change “after independent V033 acceptance” to “after independent V000 acceptance”.
+- Run `audit_package()` with the shipped facts.
+- Result: **zero findings**.
+
+**Required closure**
+
+- Remove retired numeric aliases such as `packages_coded`; use only canonical derived keys.
+- Fail on unknown/retired derived-looking numeric fields in current machine authority.
+- Reconcile release references semantically in current JSON, not only Markdown lines containing the word “current”.
+- Add exact negative tests for `packages_coded=999` and `V000 acceptance`.
+
+### F08 — MEDIUM — The atid/3 instant grammar is not fully language-independent
+
+The declared accepted domain includes aware Python datetimes, but `canonical_instant()` delegates year formatting to platform `strftime("%Y...")`.
+
+On the delivered Linux/Python runtime:
+
+```text
+year 1   -> 1-01-02T03:04:05.000006Z
+year 9   -> 9-01-02T03:04:05.000006Z
+year 99  -> 99-01-02T03:04:05.000006Z
+year 999 -> 999-01-02T03:04:05.000006Z
+```
+
+The specification describes `%Y` but does not publish normative golden bytes for these accepted values. A cross-language implementation may reasonably emit `0001`, `0009`, `0099`, `0999`, producing different IDs.
+
+**Required closure**
+
+- Format every instant component manually, including `year:04d`.
+- Publish normative canonical key and ID vectors for all primitive types, Unicode, nested sequences, timezone-equivalent instants and year 1.
+- If the representation changes for any previously accepted value, bump the identity scheme and durable markers again; alternatively explicitly reject the unsupported datetime range before identity derivation.
+
+### F09 — MEDIUM — The current review-disposition worksheet is not readable
+
+`AT-LifeOperatingSystem_00050_TestStrategyAndPlan_Claude_V035_20260810_0315.xlsx`, sheet `28_V035ReviewDisposition`, has narrow columns and clipped text. Headers run together (`ReproduceRoot causeFix`) and the F01–F06 detail is not readable without manual resizing.
+
+This is the current sheet intended to prove closure of the independent review, so readability is part of governance evidence, not cosmetic polish.
+
+**Required closure**
+
+- Set usable widths for all columns.
+- Wrap text and auto-fit row heights.
+- Freeze header rows and apply filters.
+- Render the sheet during release assembly and gate obvious clipping.
+
+## Verified positive work
+
+The rejection does not mean nothing improved. The following were independently observed:
+
+- The outer package and manifest are healthy and complete.
+- The new `at-durable` package is a sensible architectural direction: inspection is centralised and occurs before each individual store's schema script.
+- For ordinary exact built-in values, the canonical encoder now counts UTF-8 bytes and rejects a top-level bare string as the fields sequence.
+- Durable evidence read paths visibly re-run admissibility verification rather than trusting admission-time verification alone.
+- Actor IDs and person linkage are represented as separate concepts; `ActorKind.TOOL` exists.
+- Generated architecture/testing documents reproduce byte-for-byte.
+- Both historical DOCX files render cleanly.
+- All four workbooks open and their actual formulas show no calculation errors.
+
+These positives should be preserved in V036 while the blockers are closed.
+
+## Required next release
+
+**Version:** `V036`  
+**Release stem:** `AT-LifeOperatingSystem_DurableIdentityBoundaryAndReleaseIntegrityClosure_Claude_V036`  
+**Final filename:** `AT-LifeOperatingSystem_DurableIdentityBoundaryAndReleaseIntegrityClosure_Claude_V036_<actual-final-seal-YYYYMMDD_HHMM>.zip`
+
+The timestamp must be generated at the actual final seal. Do not preselect it and do not reuse `20260810_0315`.
+
+## Copy-paste instruction for Claude
+
+```text
+Build V036 as a corrective release only. Do not start the six-status evidence model, timeline, commitments, questions, consent work, AT-056, UI/API work or any other feature tranche.
+
+Target release stem:
+AT-LifeOperatingSystem_DurableIdentityBoundaryAndReleaseIntegrityClosure_Claude_V036
+
+The final timestamp must be generated from the actual final seal time after all tests and audits pass. The final file must be:
+AT-LifeOperatingSystem_DurableIdentityBoundaryAndReleaseIntegrityClosure_Claude_V036_<actual-final-seal-YYYYMMDD_HHMM>.zip
+
+Independently reproduce and close every V035 finding below. Do not reject, relabel or defer any finding without executable contradictory evidence.
+
+F01 BLOCKER — the delivered deterministic suite is red:
+`python -m pytest -q -m "not integration"` gives 1 failed, 630 passed, 1 skipped, 2 deselected because the clean-environment CLI test omits at-durable. Remove the hand-maintained dependency tuple or derive it from the package graph. The exact clean-extracted V036 repository must pass its documented deterministic command.
+
+F02 BLOCKER — shared databases can carry current schema_meta/atid-3 beside old identity_meta/atid-1, and the event store opens. The reverse direction also opens. Inspect all platform markers and reject any disagreement before any store reads or writes. Add CLI-wide preflight of every store sharing the file before the first write, and make the import atomic or otherwise impossible to partially commit. Add exact end-to-end regression: incompatible identity marker, import fails, event/source/occurrence counts remain zero, main DB and all sidecars remain byte-for-byte unchanged.
+
+F03 BLOCKER — a matching sibling marker currently authorises adoption of pre-existing malformed target tables; a valid own marker plus one malformed known table also passes because known_tables uses intersection. Validate the complete target schema. A sibling marker may authorise adding a genuinely absent store to a shared container only when no target-owned table/index/trigger already exists. Malformed marker shape must raise the domain error, never raw sqlite OperationalError. Every refusal must be non-mutating. Creation and stamping must be atomic.
+
+F04 HIGH — canonical encoding uses isinstance and accepts subclass-controlled collisions. Enforce exact built-in primitives in record constructors and canonical encoding. Add adversarial str/int/datetime/list/tuple subclass tests and a mutation that restores isinstance. Two unequal accepted values must never produce one canonical key.
+
+F05 BLOCKER — release provenance is not reproducible. The included build_release.py writes `{derived, integrity_failures}` but the shipped release_facts.json is flat; the exact repo is red; and submitted ZIP timestamps show README/repo ZIP/manifest approximately 20 hours after the declared 03:15 build identity. Define one facts schema, use one atomic final builder, derive timestamp at final seal, prohibit post-seal substitutions, and rerun all gates from a clean extraction of the final outer ZIP. Store machine-readable command evidence and hashes.
+
+F06 HIGH — mutation_regression.py treats any non-zero pytest return as a kill and never proves the baseline is green. Require an exact zero baseline in the throwaway snapshot before mutations. Record the test that kills each mutant, reject environment/collection/timeout/unrelated failures as kills, restore and rerun baseline, and publish a machine-readable report tied to the final source hash.
+
+F07 HIGH — current metadata still says packages_coded=6 while claiming that wording was corrected to seven Implemented/eight code-bearing; it also says six-status work follows V033 acceptance. The package audit misses packages_coded=999 and V000 acceptance. Remove retired aliases, reconcile all current machine authority, and add exact negative audit tests.
+
+F08 MEDIUM — atid/3 uses platform strftime for year formatting. On the delivered runtime years 1/9/99/999 are not four-digit. Manually format canonical instants and publish normative golden byte/key/ID vectors. If any previously accepted identity changes, bump the scheme and durable schemas again; otherwise explicitly reject the unsupported range.
+
+F09 MEDIUM — resize/wrap/freeze/filter the V036 review-disposition worksheet and render it as a release check so the closure evidence is readable.
+
+Required adversarial regressions:
+1. Event own-current + identity sibling-old: every store and CLI reject before write.
+2. Identity own-current + event sibling-old: reject before write.
+3. Matching sibling marker + target-owned malformed table: reject unchanged.
+4. Valid own marker + partial/malformed target schema: reject unchanged.
+5. Malformed marker columns/rows and corrupt SQLite input: domain error, unchanged.
+6. Complete shared-file preflight occurs before source/event/identity writes.
+7. Exact primitive/subclass canonical tests and year-1 golden vector.
+8. Mutation baseline-red negative test: runner must abort, not count kills.
+9. Package-audit negatives for packages_coded=999 and V000 acceptance.
+10. Clean-environment CLI dependency test derived from the actual package graph.
+11. Final-seal facts-shape, timestamp and post-seal-tamper tests.
+
+Run and record at minimum:
+- python -m pytest -q -m "not integration"
+- python -m pytest tests/internal/integration -q -o addopts="" -m integration
+- ruff check packages tests tools verification
+- mypy --strict packages/*/src
+- python tools/mutation_regression.py
+- python tools/standalone_install_check.py
+- python tools/gen_architecture.py followed by a zero diff
+- python tools/gen_testing_docs.py followed by a zero diff
+- python tools/gen_facts_block.py followed by a zero diff
+- the one canonical final release builder
+- clean extraction of the final outer ZIP, then the complete test/audit sequence again against extracted bytes
+- ZIP CRC, manifest membership, byte count and SHA-256 verification
+
+Do not state “accepted”, “shippable”, “all blockers closed”, “67/67”, “631 passed” or any equivalent until the exact final extracted package proves it. Call V036 a candidate for independent review.
+```
+
+## Final disposition
+
+**V035: REJECTED.**  
+**Do not freeze it. Do not use it as an accepted baseline. Do not begin the next feature tranche.**  
+Submit one corrective V036 package using the stem and closure requirements above.

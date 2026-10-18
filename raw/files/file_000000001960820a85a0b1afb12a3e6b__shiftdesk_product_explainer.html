@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ShiftDesk — Product Explainer</title>
+<meta name="description" content="What ShiftDesk for Microsoft Teams is, what is finished, what is not, and why — with two diagrams.">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1f2933; --muted: #5b6875; --rule: #e2e6ea;
+    --panel: #f7f9fa; --verified: #1e7a46; --pending: #9a6a00; --owed: #b8443a;
+    --maxw: 1180px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12171c; --fg: #e6ebef; --muted: #9aa7b2; --rule: #2a333c;
+      --panel: #1a2128; --verified: #5fd08b; --pending: #e0a93f; --owed: #f08076;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12171c; --fg: #e6ebef; --muted: #9aa7b2; --rule: #2a333c;
+    --panel: #1a2128; --verified: #5fd08b; --pending: #e0a93f; --owed: #f08076;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; overflow-x: clip; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px; line-height: 1.62; overflow-x: hidden;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 16px 80px; }
+  header { border-bottom: 1px solid var(--rule); padding: 44px 0 26px; margin-bottom: 34px; }
+  h1 { font-size: clamp(1.5rem, 4vw, 2.1rem); line-height: 1.22; margin: 0 0 10px; letter-spacing: -0.01em; }
+  .standfirst { font-size: 1.06rem; color: var(--muted); margin: 0 0 20px; max-width: 74ch; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px 26px; font-size: 0.82rem; color: var(--muted); }
+  .meta b { color: var(--fg); font-weight: 600; }
+  .meta span { overflow-wrap: anywhere; }
+  code { overflow-wrap: anywhere; }
+  h2 { font-size: clamp(1.15rem, 2.6vw, 1.42rem); margin: 48px 0 12px; letter-spacing: -0.01em; }
+  h3 { font-size: 1.02rem; margin: 30px 0 6px; }
+  p { margin: 0 0 15px; max-width: 78ch; }
+  figure { margin: 26px 0 30px; }
+  figure svg { width: 100%; max-width: 100%; height: auto; display: block;
+                background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 10px; }
+  figcaption { font-size: 0.86rem; color: var(--muted); margin-top: 10px; max-width: 80ch; }
+  .scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .scroll > svg { min-width: 760px; }
+  .hint { display: none; font-size: 0.78rem; color: var(--muted); margin-top: 6px; }
+  @media (max-width: 800px) {
+    .hint { display: block; }
+    td:first-child { white-space: normal; padding-right: 12px; }
+    table { font-size: 0.84rem; }
+  }
+  table { border-collapse: collapse; width: 100%; font-size: 0.88rem; margin: 14px 0 22px; }
+  th, td { text-align: left; vertical-align: top; padding: 9px 12px 9px 0; border-bottom: 1px solid var(--rule); }
+  th { font-weight: 600; font-size: 0.8rem; letter-spacing: 0.03em; text-transform: uppercase; color: var(--muted); }
+  td:first-child { white-space: nowrap; padding-right: 20px; }
+  .tag { display: inline-block; font-size: 0.74rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; border: 1px solid; }
+  .v { color: var(--verified); border-color: var(--verified); }
+  .p { color: var(--pending); border-color: var(--pending); }
+  .o { color: var(--owed); border-color: var(--owed); }
+  .panel { background: var(--panel); border: 1px solid var(--rule); border-left: 3px solid var(--fg);
+            border-radius: 8px; padding: 16px 18px; margin: 22px 0; }
+  .panel p:last-child { margin-bottom: 0; }
+  footer { border-top: 1px solid var(--rule); margin-top: 54px; padding-top: 22px; font-size: 0.84rem; color: var(--muted); }
+  @media print { body { font-size: 11pt; } figure svg { border: none; } .scroll > svg { min-width: 0; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>ShiftDesk for Microsoft Teams — what it is, what is finished, and what is not</h1>
+  <p class="standfirst">A frontline shift-handover product that produces evidence an auditor can read. The code is finished and verified three ways. It has never run in a real Microsoft tenant, and nobody has bought it. Both of those sentences are true at the same time, and this page is about keeping them that way.</p>
+  <div class="meta">
+    <span><b>Document</b> claude_V001_MoPr09-shiftdesk_teams_explainer</span>
+    <span><b>Version</b> V001</span>
+    <span><b>Issued</b> 20 September 2026, 17:15</span>
+    <span><b>Codebase</b> v0.14.0 · release v040</span>
+    <span><b>Prepared by</b> Claude, for Senthil / KP</span>
+  </div>
+</header>
+
+<h2>What the product does</h2>
+<p>A supervisor ending a shift writes a handover in Teams: what happened, what is outstanding, what the next shift must watch. The incoming supervisor acknowledges it, and that acknowledgement is the record. Around that core sit approval workflows with thresholds and blocked categories, digital checklists, kudos, and a manager dashboard over all of it. It installs as a Teams app with tabs and a bot, signs people in with their existing Microsoft identity, and keeps tenant data in PostgreSQL.</p>
+<p>The reason to build it at all is narrower than the feature list suggests. Microsoft already gives every customer Approvals and Planner task publishing at no extra cost, so two of the three original pillars compete with free. What those tools do not produce is a retained, queryable handover record with an audit trail — the thing somebody has to find when an inspector asks about the night of the fourteenth. That is the wedge, and the positioning was rewritten onto it after an independent reviewer pointed out that the old framing competed with zero.</p>
+
+<h2>How a request actually moves through it</h2>
+<figure>
+  <div class="scroll">
+  <svg viewBox="0 0 1300 880" role="img" aria-label="How a request moves through ShiftDesk: client, token verifier, request guard, tenancy and permissions, domain modules, per-record store — each marked verified, pending live, or owed to a person" xmlns="http://www.w3.org/2000/svg"><defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M 0 1 L 9 5 L 0 9 z" fill="currentColor" opacity="0.85"/>
+</marker>
+<marker id="arrowOpen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M 0 1 L 9 5 L 0 9" fill="none" stroke="currentColor" stroke-width="1.4"/>
+</marker>
+</defs>
+<line x1="248" y1="60" x2="248" y2="700" stroke="currentColor" stroke-width="1" stroke-dasharray="3 5" opacity="0.45"/>
+<text x="258" y="50" text-anchor="start" font-size="11" font-weight="600" fill="currentColor" opacity="0.65">TRUST BOUNDARY — nothing to the right of this line happens until a token verifies</text>
+<text x="40" y="50" text-anchor="start" font-size="11" font-weight="600" fill="currentColor" opacity="0.5">Microsoft's side</text>
+<rect x="40" y="150" width="180" height="92" rx="6" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+<text x="130.0" y="170" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Teams client</text>
+<text x="130.0" y="186" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">Tab (desktop, web,</text>
+<text x="130.0" y="200" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">mobile) — React</text>
+<rect x="40" y="300" width="180" height="92" rx="6" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+<text x="130.0" y="320" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Teams bot</text>
+<text x="130.0" y="336" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">Typed commands and</text>
+<text x="130.0" y="350" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">Adaptive Card taps</text>
+<rect x="276" y="140" width="190" height="112" rx="6" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+<text x="371.0" y="160" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Entra SSO verifier</text>
+<text x="371.0" y="176" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">JWKS by kid, RS256 only,</text>
+<text x="371.0" y="190" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">rotation, one refresh per</text>
+<text x="371.0" y="204" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">unknown kid  · SD201</text>
+<rect x="276" y="290" width="190" height="112" rx="6" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+<text x="371.0" y="310" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Connector JWT verifier</text>
+<text x="371.0" y="326" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">issuer + audience +</text>
+<text x="371.0" y="340" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">serviceUrl binding + skew</text>
+<text x="371.0" y="354" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">SD202</text>
+<line x1="220" y1="196" x2="274" y2="196" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85"/>
+<text x="247.0" y="190.0" text-anchor="middle" font-size="10.5" font-weight="400" fill="currentColor" opacity="0.7">SSO token</text>
+<line x1="220" y1="346" x2="274" y2="346" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85"/>
+<text x="247.0" y="340.0" text-anchor="middle" font-size="10.5" font-weight="400" fill="currentColor" opacity="0.7">activity</text>
+<rect x="506" y="200" width="176" height="132" rx="6" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+<text x="594.0" y="220" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Request guard</text>
+<text x="594.0" y="236" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">256 KB body cap → 413</text>
+<text x="594.0" y="250" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">per-IP + per-tenant</text>
+<text x="594.0" y="264" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">buckets → 429</text>
+<text x="594.0" y="278" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">security headers · SD205/6</text>
+<polyline points="468,196 486,196 486,246 502,246" fill="none" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85"/>
+<polyline points="468,346 486,346 486,290 502,290" fill="none" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85"/>
+<rect x="722" y="178" width="184" height="176" rx="6" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+<text x="814.0" y="198" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Tenant + policy</text>
+<text x="814.0" y="214" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">tenant from the token only</text>
+<text x="814.0" y="228" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">role from Teams ownership</text>
+<text x="814.0" y="242" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">nine permissions enforced</text>
+<text x="814.0" y="256" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">at named sites</text>
+<text x="814.0" y="270" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">entitlement gate on writes</text>
+<line x1="682" y1="266" x2="720" y2="266" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85"/>
+<text x="701.0" y="260.0" text-anchor="middle" font-size="10.5" font-weight="400" fill="currentColor" opacity="0.7">identified</text>
+<rect x="946" y="150" width="182" height="232" rx="8" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/>
+<text x="1037" y="142" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" opacity="0.8">Domain modules</text>
+<rect x="960" y="164" width="154" height="34" rx="4" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+<text x="1037.0" y="184" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Shift handovers</text>
+<rect x="960" y="208" width="154" height="34" rx="4" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+<text x="1037.0" y="228" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Approvals</text>
+<rect x="960" y="252" width="154" height="34" rx="4" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+<text x="1037.0" y="272" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Digital checklists</text>
+<rect x="960" y="296" width="154" height="34" rx="4" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+<text x="1037.0" y="316" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Kudos</text>
+<rect x="960" y="340" width="154" height="34" rx="4" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+<text x="1037.0" y="360" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Manager dashboard</text>
+<line x1="906" y1="266" x2="944" y2="266" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85"/>
+<text x="925.0" y="260.0" text-anchor="middle" font-size="10.5" font-weight="400" fill="currentColor" opacity="0.7">allowed</text>
+<rect x="1168" y="178" width="116" height="104" rx="6" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+<text x="1226.0" y="198" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Per-record</text>
+<text x="1226.0" y="214" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">persistence,</text>
+<text x="1226.0" y="228" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">version guard,</text>
+<text x="1226.0" y="242" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">windowed</text>
+<text x="1226.0" y="256" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">hydration</text>
+<line x1="1128" y1="230" x2="1166" y2="230" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85"/>
+<rect x="1168" y="320" width="116" height="96" rx="6" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+<text x="1226.0" y="340" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">PostgreSQL 16</text>
+<text x="1226.0" y="356" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">enc:v2 envelope,</text>
+<text x="1226.0" y="370" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">region asserted</text>
+<text x="1226.0" y="384" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">at boot</text>
+<line x1="1226" y1="282" x2="1226" y2="318" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85"/>
+<text x="40" y="470" text-anchor="start" font-size="11" font-weight="600" fill="currentColor" opacity="0.6">ALWAYS-ON MACHINERY — runs without a user in front of it</text>
+<rect x="40" y="490" width="200" height="100" rx="6" fill="none" stroke="#C98A00" stroke-width="2"/>
+<text x="140.0" y="510" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Proactive messenger</text>
+<text x="140.0" y="526" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">pushes the handover card</text>
+<text x="140.0" y="540" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">when nobody has</text>
+<text x="140.0" y="554" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">acknowledged · SD223</text>
+<rect x="276" y="490" width="200" height="100" rx="6" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+<text x="376.0" y="510" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Retention + lifecycle</text>
+<text x="376.0" y="526" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">hourly sweep enforces the</text>
+<text x="376.0" y="540" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">published retention days;</text>
+<text x="376.0" y="554" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">30-day uninstall purge</text>
+<rect x="512" y="490" width="200" height="100" rx="6" fill="none" stroke="#C98A00" stroke-width="2"/>
+<text x="612.0" y="510" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Marketplace fulfillment</text>
+<text x="612.0" y="526" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">resolve, activate, five</text>
+<text x="612.0" y="540" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">idempotent webhooks,</text>
+<text x="612.0" y="554" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">seat reconciliation · SD239</text>
+<rect x="748" y="490" width="200" height="100" rx="6" fill="none" stroke="#C98A00" stroke-width="2"/>
+<text x="848.0" y="510" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Telemetry + SLO</text>
+<text x="848.0" y="526" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">funnel, p95, 11 alert rules,</text>
+<text x="848.0" y="540" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">216 min monthly error</text>
+<text x="848.0" y="554" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">budget · sinks unconfigured</text>
+<rect x="984" y="490" width="300" height="100" rx="6" fill="none" stroke="#C98A00" stroke-width="2"/>
+<text x="1134.0" y="510" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Azure Key Vault (managed identity)</text>
+<text x="1134.0" y="526" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">supplies the key ring; production refuses</text>
+<text x="1134.0" y="540" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">a plain environment key. Never spoken to</text>
+<text x="1134.0" y="554" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">a real vault · SD232</text>
+<polyline points="130,488 130,396" fill="none" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85"/>
+<text x="140" y="430" text-anchor="start" font-size="10.5" font-weight="400" fill="currentColor" opacity="0.7">card to the channel</text>
+<polyline points="376,488 376,452 1190,452 1190,420" fill="none" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.7"/>
+<text x="790" y="446" text-anchor="middle" font-size="10.5" font-weight="400" fill="currentColor" opacity="0.7">deletes by kind and age</text>
+<polyline points="612,488 612,430 814,430 814,358" fill="none" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.7"/>
+<text x="714" y="424" text-anchor="middle" font-size="10.5" font-weight="400" fill="currentColor" opacity="0.7">entitlement changes</text>
+<polyline points="1260,488 1260,420" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arrow)" opacity="0.7"/>
+<text x="1272" y="466" text-anchor="end" font-size="10.5" font-weight="400" fill="currentColor" opacity="0.7">key ring</text>
+<polyline points="866,356 866,486" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="4 4" marker-end="url(#arrow)" opacity="0.5"/>
+<text x="876" y="412" text-anchor="start" font-size="10.5" font-weight="400" fill="currentColor" opacity="0.6">every request emits</text>
+<text x="40" y="650" text-anchor="start" font-size="11" font-weight="600" fill="currentColor" opacity="0.6">WHAT NO CODE CAN CLOSE — eleven items, owned by a person</text>
+<rect x="40" y="670" width="226" height="74" rx="6" fill="none" stroke="#D1584F" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="153.0" y="690" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Dev tenant</text>
+<text x="153.0" y="706" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">sideload, consent,</text>
+<text x="153.0" y="720" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">mobile pass</text>
+<rect x="290" y="670" width="226" height="74" rx="6" fill="none" stroke="#D1584F" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="403.0" y="690" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Staging</text>
+<text x="403.0" y="706" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">k6 5x sweep,</text>
+<text x="403.0" y="720" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">p95 evidence</text>
+<rect x="540" y="670" width="226" height="74" rx="6" fill="none" stroke="#D1584F" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="653.0" y="690" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Partner Center</text>
+<text x="653.0" y="706" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">attestation,</text>
+<text x="653.0" y="720" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">transactable offer</text>
+<rect x="790" y="670" width="226" height="74" rx="6" fill="none" stroke="#D1584F" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="903.0" y="690" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Vendors + budget</text>
+<text x="903.0" y="706" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">pen test,</text>
+<text x="903.0" y="720" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">SOC 2 audit</text>
+<rect x="1040" y="670" width="226" height="74" rx="6" fill="none" stroke="#D1584F" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="1153.0" y="690" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Customers</text>
+<text x="1153.0" y="706" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">15 interviews,</text>
+<text x="1153.0" y="720" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">5 signed pilots</text>
+<text x="40" y="794" text-anchor="start" font-size="11" font-weight="600" fill="currentColor" opacity="0.7">LEGEND</text>
+<rect x="40" y="803" width="22" height="12" rx="3" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+<text x="72" y="812" text-anchor="start" font-size="11" font-weight="400" fill="currentColor" opacity="0.8">Verified — behaviour pinned by a named test; 68 suites / 555 cases at 100%, plus a real-Postgres tier</text>
+<rect x="40" y="821" width="22" height="12" rx="3" fill="none" stroke="#C98A00" stroke-width="2"/>
+<text x="72" y="830" text-anchor="start" font-size="11" font-weight="400" fill="currentColor" opacity="0.8">Code-complete pending live — built and tested, but the proof needs a real tenant, vault or offer</text>
+<rect x="40" y="839" width="22" height="12" rx="3" fill="none" stroke="#D1584F" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="72" y="848" text-anchor="start" font-size="11" font-weight="400" fill="currentColor" opacity="0.8">Owed to a person — a purchase, an access grant or a customer. Never counted as done (decision D-SD8)</text></svg>
+  </div>
+  <figcaption><strong>Figure 1 — the mechanism, colour-coded by what is proven.</strong> Left to right is a single request: the Teams client or bot presents a token, a verifier decides whether anything happens at all, the request guard caps and throttles it, tenancy and permissions are resolved from the verified token rather than from anything the caller sent, and only then does a domain module run and write a versioned record. Below the main flow is the machinery that runs with nobody in front of it. The band at the bottom is the work no amount of code closes.</figcaption>
+  <p class="hint">The diagram is wide — scroll it sideways, or open the SVG file for the full-size version.</p>
+</figure>
+
+<p>Two things in that picture are worth pausing on, because they are where this product has historically gone wrong. The first is the dashed vertical line. Until three days ago the production configuration had no working verifier on either side of it: tab sign-on accepted a hardcoded development string, and the bot's production authentication function returned <em>false</em> for everything, which meant the primary surface was inert in any real deployment. Both are now real verifiers with real signature checks, and the process refuses to start if a development shortcut is wired in outside development.</p>
+<p>The second is the box on the far right. The same review found that <code>DATABASE_URL</code> was honoured nowhere — no database client was ever constructed, so the shipped server always ran from memory, and every claim about durability, encryption at rest, audit retention and data deletion rested on a store that evaporated on restart. That is now wired, with migrations on boot, and proven against a real PostgreSQL 16 rather than a test double. Within an hour of a real database being in the loop it exposed a defect that five releases of a fake store had never shown: the driver parses JSONB into objects while the code had been parsing it as text.</p>
+
+<h2>What is complete — and what the claim rests on</h2>
+<p>Complete here means one specific thing: the behaviour is pinned by a named test that fails if the behaviour changes. The gate has three tiers, which is itself a consequence of the review. A single hundred-per-cent coverage gate had coexisted with three critical defects, because coverage measures the execution of the code that exists and says nothing about whether the code that matters exists at all.</p>
+<table>
+  <thead><tr><th>Area</th><th>Status</th><th>What backs it</th></tr></thead>
+  <tbody>
+    <tr><td>Identity at both trust boundaries</td><td><span class="tag v">Verified</span></td><td>Entra signature verification by key id with rotation, and Connector token verification bound to the service URL. Wrong key, expired, <code>alg=none</code>, tampered and mismatched-service-URL tokens are all rejected, each with a counted reason.</td></tr>
+    <tr><td>Durability</td><td><span class="tag v">Verified</span></td><td>Nine integration tests against real PostgreSQL 16: restart, two-instance convergence, snapshot migration, 100k-record hydration inside the latency budget, cursor paging, encryption rotation, lifecycle purge. Plus a backup and restore drill that ran for real and passed with the recovery numbers measured, not asserted.</td></tr>
+    <tr><td>Tenancy, permissions, billing enforcement</td><td><span class="tag v">Verified</span></td><td>Tenant comes from the verified token only; every published permission is bound to an enforcement site by a two-way test; read-only, plan limits and trial expiry gate writes at the request boundary. Each of these was once a claim the code did not honour, and each has a defect number to prove it.</td></tr>
+    <tr><td>Request hardening and headers</td><td><span class="tag v">Verified</span></td><td>A 256&nbsp;KB body cap that stops the stream rather than buffering to it, token buckets per IP and per tenant, and security headers on every surface including the last-resort error path.</td></tr>
+    <tr><td>Retention, deletion, residency, legal documents</td><td><span class="tag v">Verified</span></td><td>The published retention numbers are the numbers an hourly sweep enforces. The DPA, subprocessor register, retention schedule and residency table are generated from the same constants the product enforces, so a test fails if page and product disagree.</td></tr>
+    <tr><td>Cards, proactive push, channel tab</td><td><span class="tag p">Pending live</span></td><td>Built and schema-validated, and the logic is tested. How a card renders and whether a push arrives are facts about a live Teams client, and no test in a sandbox can settle them.</td></tr>
+    <tr><td>Marketplace fulfillment, key custody, analytics sinks</td><td><span class="tag p">Pending live</span></td><td>Implemented against the documented contracts, with idempotency and both webhook authentication modes. None of it has spoken to a real offer, a real vault or a real analytics endpoint.</td></tr>
+  </tbody>
+</table>
+<div class="panel">
+  <p><strong>The number, stated plainly.</strong> 68 unit suites and 555 tests at 100% of statements, branches, functions and lines with no exemptions; 9 of 9 integration tests against a real database; a production-seam assertion that fails the build if any seam has no real implementation, and that runs again at boot so a mis-wired deployment refuses to serve rather than serving insecurely.</p>
+  <p>And the honest caveat that belongs next to it: this project has twice shipped a release where the gate was green and the gate itself was broken. The last one was found this week — the build never produced the tab page, so a clean checkout would have served a blank tab, and the test job never built before testing, so five suites were checking a tree no deployment would ever have. Both are fixed and both are now pinned. A green gate is necessary here and has never once been sufficient.</p>
+</div>
+
+<h2>What is not complete, and why</h2>
+<p>Eleven items are open, and it is worth being precise about the reason, because none of them is open for lack of effort. Every one needs something that cannot be written: an access grant, a purchase, a person's time, or a customer's signature.</p>
+<table>
+  <thead><tr><th>Blocked on</th><th>What it would close</th><th>Why code cannot substitute</th></tr></thead>
+  <tbody>
+    <tr><td>A Microsoft 365 dev tenant</td><td>Mobile pass on iOS and Android, admin consent in two tenants, the store-required mobile screenshot, and every pending-live item above</td><td>A sandbox cannot render a Teams client or display a consent screen. This has been the binding constraint since the first week of the build.</td></tr>
+    <tr><td>A staging environment</td><td>The 5× load sweep with its latency and conflict numbers, data rights over a hosted store, key custody against a real vault</td><td>The harness, the pass bar and the instrumentation are all built. A performance figure that has not been measured is not a figure.</td></tr>
+    <tr><td>A Partner Center account</td><td>Publisher Attestation, the transactable offer, and therefore any paid install at all</td><td>Every answer the attestation asks for is drafted. Submitting requires an enrolled, verified publisher.</td></tr>
+    <tr><td>Vendors and budget</td><td>Third-party penetration test with the high findings closed, SOC 2 engagement</td><td>The scope pack and control maps are prepared so the engagements start without a discovery phase. The fees are real: roughly £4k–£15k for the test, $15k–$50k for the audit, plus about six months of observation for Type II.</td></tr>
+    <tr><td>Customers</td><td>Fifteen discovery interviews and five paid pilots</td><td>This is the one that matters most. A decision early in the programme parked discovery interviews so building could proceed; that decision is now the binding constraint. Nobody has yet said this solves a problem they would pay for.</td></tr>
+  </tbody>
+</table>
+
+<h2>What stands between here and the finish line</h2>
+<figure>
+  <div class="scroll">
+  <svg viewBox="0 0 1300 470" role="img" aria-label="Two tracks between the current build and the completion gates: access and money on one, customers on the other" xmlns="http://www.w3.org/2000/svg"><defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M 0 1 L 9 5 L 0 9 z" fill="currentColor" opacity="0.85"/>
+</marker>
+<marker id="arrowOpen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M 0 1 L 9 5 L 0 9" fill="none" stroke="currentColor" stroke-width="1.4"/>
+</marker>
+</defs>
+<rect x="40" y="170" width="200" height="110" rx="6" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+<text x="140.0" y="190" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Where it is today</text>
+<text x="140.0" y="206" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">code-complete,</text>
+<text x="140.0" y="220" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">three-tier verified,</text>
+<text x="140.0" y="234" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">never run in a real</text>
+<text x="140.0" y="248" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">Microsoft tenant</text>
+<text x="300" y="60" text-anchor="start" font-size="11.5" font-weight="600" fill="currentColor" opacity="0.65">TRACK A — CAN IT SHIP?  every box is access or money</text>
+<rect x="300" y="84" width="212" height="90" rx="6" fill="none" stroke="#D1584F" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="406.0" y="104" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Dev tenant</text>
+<text x="406.0" y="120" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">SD226 / SD228</text>
+<text x="406.0" y="134" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">sideload, consent in 2 tenants,</text>
+<text x="406.0" y="148" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">mobile screenshot</text>
+<rect x="532" y="84" width="212" height="90" rx="6" fill="none" stroke="#D1584F" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="638.0" y="104" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Staging</text>
+<text x="638.0" y="120" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">SD219 / SD220 / SD231</text>
+<text x="638.0" y="134" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">k6 5x sweep passes,</text>
+<text x="638.0" y="148" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">p95 and 409 evidence</text>
+<line x1="510" y1="129" x2="530" y2="129" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85"/>
+<rect x="764" y="84" width="212" height="90" rx="6" fill="none" stroke="#D1584F" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="870.0" y="104" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Assurance</text>
+<text x="870.0" y="120" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">SD234 / SD235 / SD238</text>
+<text x="870.0" y="134" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">pen-test Highs closed,</text>
+<text x="870.0" y="148" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">attestation, a11y signed</text>
+<line x1="742" y1="129" x2="762" y2="129" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85"/>
+<rect x="996" y="84" width="212" height="90" rx="6" fill="none" stroke="#D1584F" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="1102.0" y="104" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Offer live</text>
+<text x="1102.0" y="120" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">SD240 / LC-6 / LC-11</text>
+<text x="1102.0" y="134" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">a test customer transacts,</text>
+<text x="1102.0" y="148" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">entitlement enforced</text>
+<line x1="974" y1="129" x2="994" y2="129" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85"/>
+<polyline points="242,206 272,206 272,129 298,129" fill="none" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85"/>
+<rect x="1226" y="84" width="58" height="90" rx="6" fill="none" stroke="#D1584F" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="1255.0" y="104" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">G-01</text>
+<text x="1255.0" y="120" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">listed</text>
+<line x1="1204" y1="129" x2="1224" y2="129" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85"/>
+<text x="300" y="322" text-anchor="start" font-size="11.5" font-weight="600" fill="currentColor" opacity="0.65">TRACK B — SHOULD IT SHIP?  neither end can be bought</text>
+<rect x="300" y="344" width="212" height="90" rx="6" fill="none" stroke="#D1584F" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="406.0" y="364" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">15 discovery interviews</text>
+<text x="406.0" y="380" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">SD244 — unparks D13</text>
+<text x="406.0" y="394" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">how handover evidence is made</text>
+<text x="406.0" y="408" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">today, what audit failure costs</text>
+<rect x="532" y="344" width="212" height="90" rx="6" fill="none" stroke="#C98A00" stroke-width="2"/>
+<text x="638.0" y="364" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Reposition to the wedge</text>
+<text x="638.0" y="380" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">SD245 — drafted</text>
+<text x="638.0" y="394" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">copy written against free</text>
+<text x="638.0" y="408" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">Approvals and Planner</text>
+<line x1="510" y1="389" x2="530" y2="389" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85"/>
+<rect x="764" y="344" width="212" height="90" rx="6" fill="none" stroke="#C98A00" stroke-width="2"/>
+<text x="870.0" y="364" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Pricing that closes</text>
+<text x="870.0" y="380" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">SD246 — modelled</text>
+<text x="870.0" y="394" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">per-site pricing; funding</text>
+<text x="870.0" y="408" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">requirement stated</text>
+<line x1="742" y1="389" x2="762" y2="389" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85"/>
+<rect x="996" y="344" width="212" height="90" rx="6" fill="none" stroke="#D1584F" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="1102.0" y="364" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">5 paid pilots</text>
+<text x="1102.0" y="380" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">SD247</text>
+<text x="1102.0" y="394" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">five paying tenants, retention</text>
+<text x="1102.0" y="408" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">measured through the funnel</text>
+<line x1="974" y1="389" x2="994" y2="389" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85"/>
+<polyline points="242,250 272,250 272,389 298,389" fill="none" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85"/>
+<rect x="1226" y="344" width="58" height="90" rx="6" fill="none" stroke="#D1584F" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="1255.0" y="364" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">G-02</text>
+<text x="1255.0" y="380" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.75">10 paid</text>
+<line x1="1204" y1="389" x2="1224" y2="389" stroke="currentColor" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85"/>
+<text x="790" y="268" text-anchor="middle" font-size="11.5" font-weight="600" fill="currentColor" opacity="0.85">Both tracks must land. Track A without Track B ships something nobody asked for;</text>
+<text x="790" y="286" text-anchor="middle" font-size="11.5" font-weight="600" fill="currentColor" opacity="0.85">Track B without Track A has nothing to sell.</text></svg>
+  </div>
+  <figcaption><strong>Figure 2 — two tracks, both required.</strong> The upper track is everything that makes the product shippable, and every box on it is an access grant or a purchase. The lower track is everything that makes it worth shipping, and neither end of it can be bought. The completion gate for this product was never "code complete" — it is a live listing and ten paying installs from strangers, and both remain open.</figcaption>
+  <p class="hint">The diagram is wide — scroll it sideways, or open the SVG file for the full-size version.</p>
+</figure>
+<p>The commercial picture deserves the same candour as the technical one. On the original per-seat assumptions the model never reaches break-even inside eighteen months, and the funding requirement is now stated outright in the financial model rather than left for a reader to infer. Per-site pricing changes that arithmetic, but not the evidence underneath it: both scenarios rest on a conversion rate and a price that no customer has yet paid. The number worth acting on is the funding requirement, and the thing that would replace these inputs with facts is the fifteen conversations.</p>
+
+<h2>How to read the colours</h2>
+<p>The three-way encoding is deliberate and it is the same in both figures and in every workbook in this set. Green means the behaviour is pinned by a named test. Amber means the code is finished and the proof needs something real — a tenant, a vault, an offer. Red dashes mean a person owns it, and no amount of code closes it. A decision in the tracker keeps those eleven red items on the board with their full estimates rather than quietly restating them as something greener, so the remaining work always reads honestly.</p>
+
+<footer>
+  <p><strong>Companion documents.</strong> Sprint tracker v040 — the execution record: 147 stories, per-sprint boards, RAID, gates. Product workbook v046 — backlog, financial model, risk register, launch checklist. Version detail and manual test specification V001 — every release with the reason it happened, plus 199 manual test cases. Source zip v046 — the code, with the findings register inside it.</p>
+  <p><strong>Document control.</strong> V001, issued 20 September 2026 17:15 by Claude for Senthil / KP. Status: released for review. Supersedes nothing. Next issue when release v041 closes — the cold review of this release's code, or the first sweep from a real tenant, whichever lands first. Classification: internal build record, contains no customer data.</p>
+</footer>
+
+</div>
+</body>
+</html>

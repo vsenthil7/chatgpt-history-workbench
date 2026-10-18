@@ -1,0 +1,464 @@
+#!/usr/bin/env python3
+"""Independent adversarial probes for UraiFlow Claude V007.
+
+Run from the extracted package root:
+    PYTHONPATH=src python /path/to/this_file.py
+
+The probes intentionally exercise public/runtime surfaces that the shipped
+338-test suite does not cover. Each result is printed as one JSON object.
+"""
+from __future__ import annotations
+
+import json
+from datetime import UTC, datetime
+from typing import Any
+
+from uraiflow.adapters.contract import (
+    AdapterDescriptor,
+    CommitReceipt,
+    standard_validate,
+)
+from uraiflow.adapters.inmemory import InMemoryTargetAdapter
+from uraiflow.confirmation.service import ConfirmationService
+from uraiflow.core.clock import FixedClock
+from uraiflow.core.errors import NoExternalEffectError
+from uraiflow.core.tenancy import TenantContext
+from uraiflow.extraction.model import CandidateRecord
+from uraiflow.extraction.rules import (
+    ConfigurableRuleExtractor,
+    ExtractionRule,
+    FieldSpec,
+)
+from uraiflow.lineage.model import LineageEvent
+from uraiflow.lineage.store import LineageStore
+from uraiflow.pipeline.orchestrator import ConversationToActionPipeline
+from uraiflow.proposal.model import ConfirmedSnapshot, ItemDecision, ProposalStatus
+from uraiflow.recovery.service import RecoveryService
+from uraiflow.routing.registry import AdapterRegistry
+from uraiflow.transcription.provider import DeterministicEchoProvider
+from uraiflow.transcription.selector import ProviderSelector
+
+T0 = datetime(2026, 1, 1, tzinfo=UTC)
+CTX = TenantContext("tenant-a", "actor")
+
+
+def emit(probe: str, result: dict[str, Any]) -> None:
+    print(json.dumps({"probe": probe, **result}, sort_keys=True, default=str))
+
+
+def extractor(*record_types: str) -> ConfigurableRuleExtractor:
+    return ConfigurableRuleExtractor(
+        rules=tuple(
+            ExtractionRule(
+                record_type=record_type,
+                pattern=rf"{record_type}:\s*(?P<title>\S+)",
+                confidence=0.9,
+                fields=(FieldSpec(name="title", source="group:title"),),
+            )
+            for record_type in record_types
+        )
+    )
+
+
+def pipeline(
+    registry: AdapterRegistry,
+    *record_types: str,
+    lineage: LineageStore | None = None,
+) -> tuple[ConversationToActionPipeline, LineageStore]:
+    store = lineage or LineageStore()
+    selector = ProviderSelector(
+        providers={"echo": DeterministicEchoProvider("echo")},
+        tenant_policy={},
+        default_provider="echo",
+    )
+    return (
+        ConversationToActionPipeline(
+            selector=selector,
+            extractor=extractor(*record_types),
+            registry=registry,
+            lineage=store,
+            clock=FixedClock(T0),
+        ),
+        store,
+    )
+
+
+def confirmed_single(
+    adapter: InMemoryTargetAdapter | None = None,
+    lineage: LineageStore | None = None,
+) -> tuple[
+    ConversationToActionPipeline,
+    LineageStore,
+    InMemoryTargetAdapter,
+    Any,
+]:
+    registry = AdapterRegistry()
+    target = adapter or InMemoryTargetAdapter(
+        name="tasks",
+        schema_version="1",
+        required_fields={"task": ("title",)},
+        adapter_id="adp.tasks",
+    )
+    registry.register(target)
+    pipe, store = pipeline(registry, "task", lineage=lineage)
+    proposal = pipe.ingest(CTX, "source", "task: approved")
+    proposal.confirm_all()
+    return pipe, store, target, proposal
+
+
+class BadReceiptAdapter(InMemoryTargetAdapter):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.effects: list[str] = []
+
+    def commit(self, ctx: TenantContext, record: CandidateRecord, idempotency_key: str) -> CommitReceipt:
+        self.effects.append(record.record_id)
+        return CommitReceipt(
+            receipt_id="bad-receipt",
+            adapter_id=self.descriptor().adapter_id,
+            adapter_name=self.descriptor().name,
+            tenant_id="wrong-tenant",
+            record_id=record.record_id,
+            idempotency_key=idempotency_key,
+            target_ref="remote/1",
+        )
+
+
+class FailingLineage(LineageStore):
+    def __init__(self, fail_kinds: set[str]) -> None:
+        super().__init__()
+        self.fail_kinds = fail_kinds
+
+    def append(self, ctx: TenantContext, event: LineageEvent) -> LineageEvent:
+        if event.kind in self.fail_kinds:
+            raise OSError(f"audit unavailable for {event.kind}")
+        return super().append(ctx, event)
+
+
+class ForgedNameAdapter(InMemoryTargetAdapter):
+    def commit(self, ctx: TenantContext, record: CandidateRecord, idempotency_key: str) -> CommitReceipt:
+        receipt = super().commit(ctx, record, idempotency_key)
+        return CommitReceipt(
+            receipt_id=receipt.receipt_id,
+            adapter_id=receipt.adapter_id,
+            adapter_name="forged-audit-name",
+            tenant_id=receipt.tenant_id,
+            record_id=receipt.record_id,
+            idempotency_key=receipt.idempotency_key,
+            target_ref=receipt.target_ref,
+        )
+
+
+class WriteThenLieNoEffect(InMemoryTargetAdapter):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.effects: list[str] = []
+
+    def commit(self, ctx: TenantContext, record: CandidateRecord, idempotency_key: str) -> CommitReceipt:
+        self.effects.append(record.record_id)
+        raise NoExternalEffectError("claimed pre-dispatch rejection after write")
+
+
+class EvilStr(str):
+    def __new__(cls, real: str, masquerade: str) -> "EvilStr":
+        obj = super().__new__(cls, real)
+        obj.masquerade = masquerade
+        return obj
+
+    def __hash__(self) -> int:
+        return hash(self.masquerade)
+
+    def __eq__(self, other: object) -> bool:
+        return other == self.masquerade
+
+
+def uncertain_setup(actor: str = "actor") -> tuple[Any, AdapterRegistry, LineageStore, BadReceiptAdapter, TenantContext]:
+    ctx = TenantContext("tenant-a", actor)
+    registry = AdapterRegistry()
+    adapter = BadReceiptAdapter(
+        name="bad",
+        schema_version="1",
+        required_fields={"task": ("title",)},
+        adapter_id="adp.bad",
+    )
+    registry.register(adapter)
+    pipe, store = pipeline(registry, "task")
+    proposal = pipe.ingest(ctx, "source", "task: approved")
+    proposal.confirm_all()
+    pipe.commit(ctx, proposal)
+    return proposal, registry, store, adapter, ctx
+
+
+def main() -> None:
+    # 1. Snapshot backing mapping is mutable; hash is not recomputed.
+    pipe, _store, target, proposal = confirmed_single()
+    old_hash = proposal.confirmed_snapshot.content_hash
+    proposal.confirmed_snapshot.items[0].fields._data["title"] = "TAMPERED_IN_SNAPSHOT"
+    outcome = pipe.commit(CTX, proposal)
+    stored = target.stored_record(CTX, f"{proposal.proposal_id}:{proposal.items[0].record_id}")
+    emit("P01_snapshot_backing_dict_mutation", {
+        "status": proposal.status.value,
+        "failure": outcome.failure,
+        "stored_title": stored.fields["title"],
+        "hash_unchanged": proposal.confirmed_snapshot.content_hash == old_hash,
+        "live_title": proposal.items[0].fields["title"],
+    })
+
+    # 2. Public state can fabricate a confirmation without ConfirmationService.
+    registry = AdapterRegistry()
+    target = InMemoryTargetAdapter("tasks", "1", {"task": ("title",)}, adapter_id="adp.tasks")
+    registry.register(target)
+    pipe, store = pipeline(registry, "task")
+    proposal = pipe.ingest(CTX, "source", "task: approved")
+    proposal.items[0].decision = ItemDecision.CONFIRMED
+    proposal.confirmed_snapshot = ConfirmedSnapshot.build(proposal.items)
+    proposal.advance(ProposalStatus.CONFIRMED)
+    outcome = pipe.commit(CTX, proposal)
+    kinds = [e.kind for e in store.for_subject(CTX, proposal.proposal_id)]
+    emit("P02_public_transition_fabricates_confirmation", {
+        "status": proposal.status.value,
+        "failure": outcome.failure,
+        "external_records": target.committed_count(CTX),
+        "has_confirmation_event": any(k.startswith("proposal.confirm") for k in kinds),
+        "events": kinds,
+    })
+
+    # 3. Public recovery state assignment can erase uncertainty then roll back.
+    proposal, _registry, _store, adapter, _ctx = uncertain_setup()
+    before = [proposal.status.value, len(proposal.uncertain_commits), len(adapter.effects)]
+    proposal.uncertain_commits = ()
+    proposal.mark_rolled_back()
+    emit("P03_clear_uncertain_field_then_false_rollback", {
+        "before": before,
+        "after_status": proposal.status.value,
+        "external_effects": len(adapter.effects),
+    })
+
+    # 4. Audit failure after a successful remote write leaves no recovery record.
+    lineage = FailingLineage({"record.committed"})
+    pipe, _store, target, proposal = confirmed_single(lineage=lineage)
+    error = None
+    try:
+        pipe.commit(CTX, proposal)
+    except Exception as exc:  # noqa: BLE001 - probe records escaped failure
+        error = f"{type(exc).__name__}: {exc}"
+    emit("P04_lineage_failure_after_remote_write", {
+        "error": error,
+        "status": proposal.status.value,
+        "external_records": target.committed_count(CTX),
+        "uncertain": len(proposal.uncertain_commits),
+        "unrecovered": len(proposal.unrecovered_receipts),
+    })
+
+    # 5. Receipt display name is not bound to the pinned descriptor.
+    forged = ForgedNameAdapter("real-name", "1", {"task": ("title",)}, adapter_id="adp.real")
+    pipe, store, _target, proposal = confirmed_single(adapter=forged)
+    outcome = pipe.commit(CTX, proposal)
+    commit_event = next(e for e in store.for_subject(CTX, proposal.proposal_id) if e.kind == "record.committed")
+    emit("P05_forged_receipt_display_name", {
+        "status": proposal.status.value,
+        "receipt_name": outcome.receipts[0].adapter_name,
+        "lineage_adapter": commit_event.payload["adapter"],
+    })
+
+    # 6. Pinned descriptor's FrozenMapping can be rewritten via _data.
+    registry = AdapterRegistry()
+    target = InMemoryTargetAdapter("tasks", "1", {"task": ("title",)}, adapter_id="adp.tasks")
+    registry.register(target)
+    pinned = registry.resolve_by_id("adp.tasks").descriptor
+    missing = CandidateRecord("rec-1", "task", {}, 0.5, "x")
+    before_result = standard_validate(pinned, missing)
+    pinned.required_fields._data["task"] = ()
+    after_result = standard_validate(pinned, missing)
+    emit("P06_descriptor_backing_dict_mutation", {
+        "before_ok": before_result.ok,
+        "before_errors": before_result.errors,
+        "after_ok": after_result.ok,
+        "after_errors": after_result.errors,
+        "same_object_as_adapter_descriptor": pinned is target.descriptor(),
+    })
+
+    # 7. Stored lineage evidence can be rewritten through the same backing dict.
+    store = LineageStore()
+    event = LineageEvent(
+        event_id="evt-1",
+        tenant_id=CTX.tenant_id,
+        subject_id="subject-1",
+        kind="recovery.manually_resolved",
+        payload={"operator_id": "real", "nested": {"evidence": "original"}},
+        occurred_at=T0,
+    )
+    store.append(CTX, event)
+    event.payload._data["operator_id"] = "forged"
+    event.payload["nested"]._data["evidence"] = "rewritten"
+    got = store.for_subject(CTX, "subject-1")[0]
+    emit("P07_lineage_payload_backing_dict_mutation", {
+        "operator_id": got.payload["operator_id"],
+        "nested_evidence": got.payload["nested"]["evidence"],
+        "same_event_object": got is event,
+    })
+
+    # 8. Confirmation mutates aggregate before audit; audit failure still permits commit.
+    lineage = FailingLineage({"proposal.confirmed"})
+    registry = AdapterRegistry()
+    target = InMemoryTargetAdapter("tasks", "1", {"task": ("title",)}, adapter_id="adp.tasks")
+    registry.register(target)
+    pipe, _ = pipeline(registry, "task", lineage=lineage)
+    proposal = pipe.ingest(CTX, "source", "task: approved")
+    service = ConfirmationService(lineage, FixedClock(T0))
+    confirmation_error = None
+    try:
+        service.confirm_all(CTX, proposal)
+    except Exception as exc:  # noqa: BLE001
+        confirmation_error = f"{type(exc).__name__}: {exc}"
+    outcome = pipe.commit(CTX, proposal)
+    kinds = [e.kind for e in lineage.for_subject(CTX, proposal.proposal_id)]
+    emit("P08_confirmation_audit_failure", {
+        "confirmation_error": confirmation_error,
+        "state_after_failure": proposal.status.value,
+        "has_snapshot": proposal.confirmed_snapshot is not None,
+        "commit_failure": outcome.failure,
+        "external_records": target.committed_count(CTX),
+        "has_confirmation_event": "proposal.confirmed" in kinds,
+        "events": kinds,
+    })
+
+    # 9. Manual resolution mutates terminal state before mandatory audit append.
+    proposal, registry, _old_store, adapter, ctx = uncertain_setup()
+    lineage = FailingLineage({"recovery.manually_resolved"})
+    # Recovery needs the same proposal/registry but can use a failing store.
+    service = RecoveryService(registry, lineage, FixedClock(T0), frozenset({ctx.actor_id}))
+    manual_error = None
+    try:
+        service.resolve_manually(ctx, proposal, "operator checked remote system")
+    except Exception as exc:  # noqa: BLE001
+        manual_error = f"{type(exc).__name__}: {exc}"
+    emit("P09_manual_recovery_audit_failure", {
+        "manual_error": manual_error,
+        "status": proposal.status.value,
+        "external_effects": len(adapter.effects),
+        "has_manual_resolution_event": any(e.kind == "recovery.manually_resolved" for e in lineage.all_for_tenant(ctx)),
+        "uncertain_commits_retained": len(proposal.uncertain_commits),
+    })
+
+    # 10. Adapter can write then lie using NoExternalEffectError.
+    registry = AdapterRegistry()
+    liar = WriteThenLieNoEffect("liar", "1", {"task": ("title",)}, adapter_id="adp.liar")
+    registry.register(liar)
+    pipe, store = pipeline(registry, "task")
+    proposal = pipe.ingest(CTX, "source", "task: approved")
+    proposal.confirm_all()
+    outcome = pipe.commit(CTX, proposal)
+    emit("P10_lying_no_external_effect_exception", {
+        "status": proposal.status.value,
+        "failure": outcome.failure,
+        "external_effects": len(liar.effects),
+        "uncertain_commits": len(proposal.uncertain_commits),
+        "reported_recovery_uncertain": len(outcome.recovery.uncertain_commits) if outcome.recovery else None,
+        "events": [e.kind for e in store.for_subject(CTX, proposal.proposal_id)],
+    })
+
+    # 11. Hostile tenant-policy key impersonates a victim tenant.
+    poisoned_tenant = EvilStr("attacker-tenant", "tenant-victim")
+    selector = ProviderSelector(
+        providers={"safe": DeterministicEchoProvider("safe"), "evil": DeterministicEchoProvider("evil")},
+        tenant_policy={poisoned_tenant: "evil"},
+        default_provider="safe",
+    )
+    selected = selector.select(TenantContext("tenant-victim", "actor"))
+    emit("P11_tenant_policy_key_spoofs_victim", {
+        "selected_provider": selected.name,
+        "expected_provider": "safe",
+        "stored_policy_key_value": str(next(iter(selector._tenant_policy))),
+        "stored_policy_key_type": type(next(iter(selector._tenant_policy))).__name__,
+    })
+
+    # 12. Hostile provider-map key impersonates the configured default name.
+    poisoned_provider_name = EvilStr("attacker-provider", "safe")
+    selector = ProviderSelector(
+        providers={poisoned_provider_name: DeterministicEchoProvider("evil")},
+        tenant_policy={},
+        default_provider="safe",
+    )
+    selected = selector.select(TenantContext("tenant-victim", "actor"))
+    emit("P12_provider_name_key_spoofs_default", {
+        "selected_provider": selected.name,
+        "expected_lookup_name": "safe",
+        "stored_provider_key_value": str(next(iter(selector._providers))),
+        "stored_provider_key_type": type(next(iter(selector._providers))).__name__,
+    })
+
+    # 13. Candidate field key can impersonate a required field.
+    poisoned_field = EvilStr("not-title", "title")
+    descriptor = AdapterDescriptor(
+        adapter_id="adp.safe",
+        name="safe",
+        schema_version="1",
+        accepted_record_types=("task",),
+        required_fields={"task": ("title",)},
+        supports_rollback=True,
+    )
+    record = CandidateRecord(
+        record_id="rec-1",
+        record_type="task",
+        fields={poisoned_field: "malicious"},
+        confidence=0.5,
+        source_text="x",
+    )
+    result = standard_validate(descriptor, record)
+    emit("P13_candidate_field_key_spoofs_required_field", {
+        "validation_ok": result.ok,
+        "errors": result.errors,
+        "actual_field_key_value": str(next(iter(record.fields))),
+        "actual_field_key_type": type(next(iter(record.fields))).__name__,
+    })
+
+    # 14. Even without direct field assignment, public bookkeeping methods erase uncertainty.
+    proposal, _registry, _store, adapter, _ctx = uncertain_setup()
+    before = [proposal.status.value, len(proposal.uncertain_commits), len(adapter.effects)]
+    proposal.record_uncertain(())
+    proposal.record_unrecovered(())
+    proposal.mark_rolled_back()
+    emit("P14_public_bookkeeping_commands_erase_uncertainty", {
+        "before": before,
+        "after_status": proposal.status.value,
+        "external_effects": len(adapter.effects),
+        "uncertain": len(proposal.uncertain_commits),
+    })
+
+    # 15. Same confirmation bypass using only public transition API (no direct status write).
+    registry = AdapterRegistry()
+    target = InMemoryTargetAdapter("tasks", "1", {"task": ("title",)}, adapter_id="adp.tasks")
+    registry.register(target)
+    pipe, store = pipeline(registry, "task")
+    proposal = pipe.ingest(CTX, "source", "task: approved")
+    proposal.items[0].decision = ItemDecision.CONFIRMED
+    proposal.confirmed_snapshot = ConfirmedSnapshot.build(proposal.items)
+    proposal.advance(ProposalStatus.CONFIRMED)
+    outcome = pipe.commit(CTX, proposal)
+    kinds = [e.kind for e in store.for_subject(CTX, proposal.proposal_id)]
+    emit("P15_public_transition_api_bypasses_confirmation_service", {
+        "status": proposal.status.value,
+        "failure": outcome.failure,
+        "external_records": target.committed_count(CTX),
+        "has_confirmation_event": any(k.startswith("proposal.confirm") for k in kinds),
+        "events": kinds,
+    })
+
+    # 16. Ordinary actor bypasses RecoveryService authorization and evidence entirely.
+    proposal, _registry, store, adapter, ordinary_ctx = uncertain_setup(actor="ordinary-user")
+    before = proposal.status.value
+    proposal.advance(ProposalStatus.MANUALLY_RESOLVED)
+    kinds = [e.kind for e in store.for_subject(ordinary_ctx, proposal.proposal_id)]
+    emit("P16_unauthorised_direct_manual_resolution", {
+        "before": before,
+        "after": proposal.status.value,
+        "actor": ordinary_ctx.actor_id,
+        "external_effects": len(adapter.effects),
+        "has_manual_resolution_event": "recovery.manually_resolved" in kinds,
+        "uncertain": len(proposal.uncertain_commits),
+    })
+
+
+if __name__ == "__main__":
+    main()

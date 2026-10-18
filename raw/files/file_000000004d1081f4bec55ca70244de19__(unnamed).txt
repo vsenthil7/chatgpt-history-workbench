@@ -1,0 +1,269 @@
+from __future__ import annotations
+
+from datetime import UTC, datetime
+
+from uraiflow.adapters.contract import AdapterDescriptor, CommitReceipt, ValidationResult, standard_validate
+from uraiflow.adapters.inmemory import InMemoryTargetAdapter
+from uraiflow.core.clock import FixedClock
+from uraiflow.core.errors import AdapterContractError
+from uraiflow.core.tenancy import TenantContext
+from uraiflow.extraction.model import CandidateRecord
+from uraiflow.extraction.rules import ConfigurableRuleExtractor, ExtractionRule, FieldSpec
+from uraiflow.lineage.model import LineageEvent
+from uraiflow.lineage.store import LineageStore
+from uraiflow.pipeline.orchestrator import ConversationToActionPipeline
+from uraiflow.proposal.model import ItemDecision, ProposalStatus
+from uraiflow.recovery.service import RecoveryService
+from uraiflow.routing.registry import AdapterRegistry
+from uraiflow.transcription.provider import DeterministicEchoProvider
+from uraiflow.transcription.selector import ProviderSelector
+
+
+def make_pipeline(registry: AdapterRegistry, rules: tuple[ExtractionRule, ...], lineage: LineageStore | None = None):
+    lin = lineage or LineageStore()
+    clock = FixedClock(datetime(2026, 1, 1, tzinfo=UTC))
+    pipeline = ConversationToActionPipeline(
+        selector=ProviderSelector(
+            providers={"echo": DeterministicEchoProvider("echo")},
+            tenant_policy={},
+            default_provider="echo",
+        ),
+        extractor=ConfigurableRuleExtractor(rules=rules),
+        registry=registry,
+        lineage=lin,
+        clock=clock,
+    )
+    return pipeline, lin, clock
+
+
+def task_rule(record_type: str = "task", pattern: str = r"task:\s*(?P<title>\S+)") -> ExtractionRule:
+    return ExtractionRule(
+        record_type=record_type,
+        pattern=pattern,
+        confidence=0.9,
+        fields=(FieldSpec(name="title", source="group:title"),),
+    )
+
+
+class InvalidReceiptAfterEffect(InMemoryTargetAdapter):
+    def __init__(self):
+        super().__init__(
+            adapter_id="adp.invalid",
+            name="invalid",
+            schema_version="1.0",
+            required_fields={"task": ("title",)},
+        )
+        self.effects: list[str] = []
+
+    def commit(self, ctx, record, idempotency_key):
+        self.effects.append(record.record_id)
+        return CommitReceipt(
+            receipt_id="rcpt-invalid",
+            adapter_id="adp.invalid",
+            adapter_name="invalid",
+            tenant_id="WRONG-TENANT",
+            record_id=record.record_id,
+            idempotency_key=idempotency_key,
+            target_ref="external/1",
+        )
+
+
+class RaisesAfterEffect(InMemoryTargetAdapter):
+    def __init__(self):
+        super().__init__(
+            adapter_id="adp.raises",
+            name="raises",
+            schema_version="1.0",
+            required_fields={"task": ("title",)},
+        )
+        self.effects: list[str] = []
+
+    def commit(self, ctx, record, idempotency_key):
+        self.effects.append(record.record_id)
+        raise TimeoutError("response lost after remote commit")
+
+
+class BoomAdapter(InMemoryTargetAdapter):
+    def commit(self, ctx, record, idempotency_key):
+        raise RuntimeError("second adapter down")
+
+
+def probe_uncertain_retry_false_rolled_back():
+    registry = AdapterRegistry()
+    adapter = InvalidReceiptAfterEffect()
+    registry.register(adapter)
+    pipeline, lineage, clock = make_pipeline(registry, (task_rule(),))
+    ctx = TenantContext("tenant-a", "operator")
+    proposal = pipeline.ingest(ctx, source_ref="s", content="task: alpha")
+    proposal.confirm_all()
+    outcome = pipeline.commit(ctx, proposal)
+    before = {
+        "status": proposal.status.value,
+        "effects": list(adapter.effects),
+        "unrecovered": len(proposal.unrecovered_receipts),
+        "uncertain": len(proposal.uncertain_commits),
+    }
+    recovery = RecoveryService(
+        registry=registry,
+        lineage=lineage,
+        clock=clock,
+        authorized_operators=frozenset({"operator"}),
+    )
+    result = recovery.retry_rollback(ctx, proposal)
+    after = {
+        "status": proposal.status.value,
+        "effects": list(adapter.effects),
+        "unrecovered": len(proposal.unrecovered_receipts),
+        "uncertain": len(proposal.uncertain_commits),
+        "retry_compensated": len(result.compensated_receipts),
+    }
+    return before, after, outcome.failure
+
+
+def probe_exception_after_effect_false_rolled_back():
+    registry = AdapterRegistry()
+    adapter = RaisesAfterEffect()
+    registry.register(adapter)
+    pipeline, _, _ = make_pipeline(registry, (task_rule(),))
+    ctx = TenantContext("tenant-a", "actor")
+    proposal = pipeline.ingest(ctx, source_ref="s", content="task: alpha")
+    proposal.confirm_all()
+    outcome = pipeline.commit(ctx, proposal)
+    return {
+        "status": proposal.status.value,
+        "effects": list(adapter.effects),
+        "uncertain": len(proposal.uncertain_commits),
+        "report_uncertain": len(outcome.recovery.uncertain_commits if outcome.recovery else ()),
+        "failure": outcome.failure,
+    }
+
+
+def probe_duplicate_display_name_preflight_bypass():
+    registry = AdapterRegistry()
+    nonrollback = InMemoryTargetAdapter(
+        adapter_id="adp.nonrollback",
+        name="same-display",
+        schema_version="1.0",
+        required_fields={"task": ("title",)},
+        supports_rollback=False,
+    )
+    second = BoomAdapter(
+        adapter_id="adp.second",
+        name="same-display",
+        schema_version="1.0",
+        required_fields={"note": ("title",)},
+        supports_rollback=True,
+    )
+    registry.register(nonrollback)
+    registry.register(second)
+    rules = (
+        task_rule("task", r"task:\s*(?P<title>\S+)"),
+        ExtractionRule(
+            record_type="note",
+            pattern=r"note:\s*(?P<title>\S+)",
+            confidence=0.9,
+            fields=(FieldSpec(name="title", source="group:title"),),
+        ),
+    )
+    pipeline, _, _ = make_pipeline(registry, rules)
+    ctx = TenantContext("tenant-a", "actor")
+    proposal = pipeline.ingest(ctx, source_ref="s", content="task: alpha\nnote: beta")
+    proposal.confirm_all()
+    preflight_blocked = False
+    try:
+        outcome = pipeline.commit(ctx, proposal)
+    except AdapterContractError:
+        preflight_blocked = True
+        outcome = None
+    return {
+        "preflight_blocked": preflight_blocked,
+        "status": proposal.status.value,
+        "nonrollback_external_commits": nonrollback.committed_count(ctx),
+        "failure": outcome.failure if outcome else None,
+    }
+
+
+def probe_pinned_descriptor_is_mutable():
+    registry = AdapterRegistry()
+    adapter = InMemoryTargetAdapter(
+        adapter_id="adp.mutable",
+        name="mutable",
+        schema_version="1.0",
+        required_fields={"task": ("title",)},
+    )
+    registry.register(adapter)
+    record = CandidateRecord(
+        record_id="rec-1", record_type="task", fields={}, confidence=0.9, source_text="x"
+    )
+    pinned = registry.resolve("task").descriptor
+    before = standard_validate(pinned, record)
+    # Normal mapping mutation; no object.__setattr__ or private registry access.
+    pinned.required_fields["task"] = ()
+    after = standard_validate(registry.resolve("task").descriptor, record)
+    return {
+        "before_ok": before.ok,
+        "after_ok": after.ok,
+        "pinned_same_object": pinned is registry.resolve("task").descriptor,
+        "required_fields_now": dict(pinned.required_fields),
+    }
+
+
+def probe_lineage_payload_mutable():
+    store = LineageStore()
+    ctx = TenantContext("tenant-a", "actor")
+    payload = {"operator_id": "good", "evidence": "resolved"}
+    event = LineageEvent(
+        event_id="evt-1",
+        tenant_id="tenant-a",
+        subject_id="prop-1",
+        kind="recovery.manually_resolved",
+        payload=payload,
+        occurred_at=datetime(2026, 1, 1, tzinfo=UTC),
+    )
+    store.append(ctx, event)
+    payload["operator_id"] = "forged"
+    payload["evidence"] = "rewritten"
+    stored = store.for_subject(ctx, "prop-1")[0]
+    return dict(stored.payload)
+
+
+def probe_human_confirmation_bypass():
+    registry = AdapterRegistry()
+    adapter = InMemoryTargetAdapter(
+        adapter_id="adp.task",
+        name="task",
+        schema_version="1.0",
+        required_fields={"task": ("title",)},
+    )
+    registry.register(adapter)
+    pipeline, _, _ = make_pipeline(registry, (task_rule(),))
+    ctx = TenantContext("tenant-a", "actor")
+    proposal = pipeline.ingest(ctx, source_ref="s", content="task: alpha")
+    original = proposal.status.value
+    # No confirm_all/ConfirmationService call: public state is rewritten directly.
+    proposal.items[0].decision = ItemDecision.CONFIRMED
+    proposal.status = ProposalStatus.CONFIRMED
+    outcome = pipeline.commit(ctx, proposal)
+    return {
+        "original_status": original,
+        "final_status": proposal.status.value,
+        "external_commits": adapter.committed_count(ctx),
+        "outcome_failure": outcome.failure,
+    }
+
+
+if __name__ == "__main__":
+    probes = [
+        ("F1_uncertain_retry_false_rolled_back", probe_uncertain_retry_false_rolled_back),
+        ("F2_exception_after_effect_false_rolled_back", probe_exception_after_effect_false_rolled_back),
+        ("F3_duplicate_display_name_preflight_bypass", probe_duplicate_display_name_preflight_bypass),
+        ("F4_pinned_descriptor_is_mutable", probe_pinned_descriptor_is_mutable),
+        ("F5_lineage_payload_is_mutable", probe_lineage_payload_mutable),
+        ("F6_human_confirmation_bypass", probe_human_confirmation_bypass),
+    ]
+    for name, fn in probes:
+        print(f"=== {name} ===")
+        try:
+            print(fn())
+        except Exception as exc:
+            print(f"PROBE ERROR: {type(exc).__name__}: {exc}")

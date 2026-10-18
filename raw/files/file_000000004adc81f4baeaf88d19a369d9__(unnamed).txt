@@ -1,0 +1,192 @@
+# AUMNITY Work Platform SaaS — V014 Correction Brief
+
+**Source package reviewed:** `AUMNITY-Work-Platform-SaaS_Claude_V013_20260809_2003.zip`  
+**V013 SHA-256:** `5d341c47565da3480f992ba9951526bc3754d40999d782848cf3d745f4d6ec2b`  
+**Required next artifact:** `AUMNITY-Work-Platform-SaaS_Claude_V014_<timestamp>.zip` plus matching `.release-validation.json`
+
+## Direction to Claude
+
+Build **V014 as a hardening-only release**. Do not add a feature tranche. First reproduce every finding against the untouched V013 package, then fix the underlying architecture, add permanent regressions, update governance/evidence, and run the complete release ladder from the extracted final ZIP twice. Do not describe a finding as fixed merely because the existing suite remains green.
+
+## Mandatory findings
+
+### F01 — BLOCKER: `restore()` bypasses transaction mode and scope
+
+`InMemoryOrganisationRepository.restore`, `InMemoryPrincipalRepository.restore`, `InMemoryWorkObjectRepository.restore`, `InMemoryEvidenceRepository.restore`, and `InMemoryAuditSink.restore` replace persisted state without `_require_mutation_context()` or an internal rollback capability.
+
+Reproduce both cases before changing code:
+
+```text
+P1_JOINED_READ_RESTORE_MUTATION_PERSISTED True
+P1_TOP_LEVEL_READ_RESTORE_MUTATION_PERSISTED True
+```
+
+Required correction:
+
+1. Make full-state restore transaction-internal, or enforce current WRITE mode plus current-scope coverage on every restore path.
+2. Preserve rollback/savepoint operation without exposing a public unguarded mutation channel. A private rollback protocol/capability is preferred; a guard is acceptable only if all rollback paths remain protected and tested.
+3. Prove every store rejects restore:
+   - outside a transaction;
+   - in a top-level READ;
+   - in a READ joined into a WRITE;
+   - from a nested WRITE scope that did not declare that store;
+   - after a caught nested failure.
+4. Prove legitimate top-level and nested rollback still restores all declared stores.
+
+### F02 — BLOCKER: public mutating operations are split across transactions
+
+`WorkObjectRegistry.assign`, `resume`, `block`, `unblock`, and `restart_after_rework` perform validation/read work before entering `_transition()`'s write transaction. `block()` can persist stale `blocked_from` after a valid interleaving commit.
+
+Reproduce before changing code:
+
+```text
+P2_STATE_AT_WRITE_WAS_ASSIGNABLE True
+P2_STALE_BLOCKED_FROM READY
+P2_EXPECTED_BLOCKED_FROM ASSIGNABLE
+```
+
+Required correction:
+
+1. Each public mutating operation must execute its complete bind/read/precondition/mutation/audit sequence inside exactly one `UnitOfWork.run` callback.
+2. `block()` must derive `blocked_from` from the aggregate loaded inside that transaction, not from a prior read.
+3. `unblock`, `resume`, and `restart_after_rework` must evaluate their operation-specific preconditions inside the same write transaction.
+4. `assign()` must perform assignee membership validation inside the same write transaction as aggregate transition and audit.
+5. Add deterministic interleaving regressions for all five operations, not only `block()`.
+6. Add a test inventory that enumerates every public kernel mutation and proves its one-transaction boundary.
+
+### F03 — BLOCKER: raw enum values bypass critical evidence policy
+
+`WorkObject.__post_init__` does not enforce runtime enum types. `create(..., risk_level="CRITICAL")` stores a string. `CriticalWorkEvidencePolicy` uses identity against `RiskLevel.CRITICAL`, so the raw string is treated as non-critical and completes without evidence.
+
+Reproduce before changing code:
+
+```text
+P3_RAW_CRITICAL_TYPE str 'CRITICAL'
+P3_CRITICAL_COMPLETED_WITHOUT_EVIDENCE True
+```
+
+Required correction:
+
+1. Enforce canonical runtime types at public/domain boundaries for at least `RiskLevel`, `Priority`, `WorkObjectState`, `PrincipalKind`, and `EvidenceKind`.
+2. Use fail-closed policy logic. Invalid domain types returned by a defective adapter must be rejected before disclosure or action.
+3. Add exact negative tests for raw strings, foreign enum classes, enum subclasses where relevant, and malformed adapter-returned aggregates.
+4. Preserve the project's exact-type trust model where already adopted; do not rely only on static typing.
+
+### F04 — HIGH: rollback misses `BaseException`
+
+`InMemoryUnitOfWork.run` and `InMemoryTenantProvisioner.provision` rollback only in `except Exception`. Cancellation/abort classes derived directly from `BaseException` leave writes committed.
+
+Reproduce before changing code:
+
+```text
+P4_BASEEXCEPTION_WRITE_PERSISTED True
+```
+
+Required correction:
+
+1. Roll back on `BaseException`, then re-raise the original object unchanged.
+2. Test top-level and joined UoW paths, provisioning paths, and caught nested aborts.
+3. Include a custom `BaseException` regression and document cancellation/`KeyboardInterrupt` semantics.
+
+### F05 — HIGH: RTM says ENFORCED while the mapped behaviour is false
+
+`RD-001`, `RD-003`, `TXN-004`, and `TXN-007` overclaim enforcement. G09 proves only that cited tests are collectable or files exist; it does not prove that every public operation/mutation path is covered.
+
+Required correction:
+
+1. Set affected rows to the truthful status while corrections are in progress.
+2. Add a machine-readable public-operation/transaction-path inventory.
+3. Make G09 verify that every published operation and every adapter mutation primitive is represented by explicit positive and negative tests.
+4. Add the restore bypass, split-operation interleaving, raw-enum policy bypass, and `BaseException` regressions to the RTM.
+
+### F06 — MEDIUM: current review handoff is still V002
+
+`08-ai/CHATGPT-REVIEW-HANDOFF.md` contains V002 implementation claims and limitations that are false for V013. Versioned handoffs stop at V011.
+
+Required correction:
+
+1. Preserve the old V002 document only as historical `CHATGPT-REVIEW-HANDOFF-V002.md`.
+2. Replace the unversioned current handoff with a V014 handoff generated from current source and release sidecar facts.
+3. Add versioned V012, V013, and V014 disposition records or an explicit gap record explaining why those handoffs are absent.
+4. Extend G10 so the current handoff must identify the current `ARTIFACT-VERSION` and may not carry stale current-state claims.
+
+### F07 — MEDIUM: tenant-neutrality gate is a five-token, case-sensitive scan
+
+G06 scans only `("IPBS", "KuralFlow", "KURALFLOW", "Evil-to-Evil", "tenant-hardcoded")` with exact case-sensitive substring matching.
+
+Required correction:
+
+1. Casefold scanned source and governed identifiers.
+2. Move prohibited customer/product identifiers into a governed data file with tests.
+3. Cover string literals/configuration and obvious concatenation/dynamic-import bypasses where feasible.
+4. Keep AST dependency-direction checks.
+5. Add adversarial tests showing lowercase and split-token variants are rejected.
+
+### F08 — MEDIUM: V013 evidence embeds V012 staging paths
+
+`platform/evidence/g04_coverage.txt` and `platform/evidence/gate_ladder.json` contain absolute paths ending in `AUMNITY-Work-Platform-SaaS_Claude_V012_20260809_1538`.
+
+Required correction:
+
+1. Emit relative or normalised paths in release evidence.
+2. Add a gate rejecting stale artifact-version tokens and build-host absolute roots in current evidence.
+3. Ensure final-ZIP evidence identifies V014 consistently.
+
+### F09 — MEDIUM: G11's idempotence digest does not cover the complete ZIP
+
+`_tree_digest()` hashes only the 172 manifest-controlled files. The 176-file ZIP also contains `PACKAGE-MANIFEST.json` and three declared self-referential evidence files.
+
+Required correction:
+
+1. Compare paths and bytes for every final-ZIP file before and after both validation runs, with an explicit design for self-referential evidence.
+2. Alternatively, rename the claim everywhere to “manifest-controlled corpus unchanged” and add a separate whole-archive file-set/byte comparison.
+3. Do not claim “entire extracted tree unchanged” unless all 176 files are covered.
+
+### F10 — MEDIUM: `content_sha256` accepts non-SHA values
+
+`EvidenceRecord.__post_init__` only checks that `content_sha256` is a non-empty identifier. Values such as `abc` are accepted despite the field and documentation asserting SHA-256 content fixation.
+
+Required correction:
+
+1. Validate exactly 64 hexadecimal characters and normalise case, or rename the field/contract if it is intended to be an opaque checksum.
+2. Add empty, short, non-hex, overlong, mixed-case-normalisation, and valid-hash tests.
+3. Clarify separately whether this slice verifies only hash syntax or also resolves the URI and re-hashes content.
+
+### F11 — LOW: bare critical section accepts a READ coordinator join
+
+TXN-007 and the `TransactionMutex.__enter__` documentation say a bare section accepts no joins, but an empty READ frame is a subset of the empty parent and `UnitOfWork.read()` joins successfully.
+
+Required correction: either reject all joins under a bare frame with an explicit frame kind, or correct ADR/RTM/docs/tests to say “no WRITE joins; READ joins remain permitted and read-only.” Add the exact READ-join test.
+
+### F12 — LOW: time-provider contract is not enforced
+
+`Clock.now()` promises aware UTC datetimes, but `TickingClock` accepts a naive start and zero/negative step. Add constructor validation or weaken the protocol/documentation deliberately. Also restore numerical ordering in the ADR index (`ADR-020` currently follows `ADR-026`).
+
+## Release acceptance conditions
+
+V014 is not acceptable until all of the following are true:
+
+| Acceptance condition | Required result |
+|---|---|
+| Original V013 probes | Reproduced before fixes |
+| Corrected probes | All former `True`/stale outcomes become rejection or correct state |
+| Full tests | All pass from the extracted final ZIP |
+| Coverage | 100% line and branch over executable product packages |
+| Mutation | No survivors in the declared mutation scope; expand scope for new validation/rollback branches |
+| Manifest | Root and preserved baseline manifests verify |
+| Packaging | Deterministic double build |
+| Final validation | Full ladder twice, read-only and idempotent, with proof scope stated accurately |
+| Documentation | ADR, RTM, handoff, defect ledger, changelog, and evidence agree |
+| Scope | Hardening only; no unrelated feature expansion |
+
+## Required V014 response format
+
+Report, in this order:
+
+1. Exact V014 ZIP name and SHA-256.
+2. For each F01–F12: V013 reproduction, root cause, implementation change, permanent test node IDs, and disposition.
+3. Machine-derived test/coverage/mutation/file counts from the V014 sidecar only.
+4. Root/baseline manifest verification.
+5. Deterministic-build and extracted-final-ZIP double-ladder results.
+6. Explicit statement that no feature tranche was added.
+7. Any finding not fully closed must remain OPEN; do not ship a “final” label around an open blocker.

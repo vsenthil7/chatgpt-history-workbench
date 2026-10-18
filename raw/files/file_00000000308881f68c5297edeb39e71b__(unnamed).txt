@@ -1,0 +1,77 @@
+#!/usr/bin/env python3
+"""Supplemental independent adversarial probes for UraiFlow Claude V007.
+
+Run from the extracted package root:
+    PYTHONPATH=src python /path/to/this_file.py
+"""
+from __future__ import annotations
+
+import json
+
+from uraiflow.adapters.inmemory import InMemoryTargetAdapter
+from uraiflow.core.tenancy import TenantContext
+from uraiflow.extraction.model import CandidateRecord
+
+
+class EvilStr(str):
+    """A str subclass whose visible value differs from its hash/equality target."""
+
+    def __new__(cls, actual: str, spoof: str) -> "EvilStr":
+        obj = super().__new__(cls, actual)
+        obj._spoof = spoof
+        return obj
+
+    def __hash__(self) -> int:
+        return hash(self._spoof)
+
+    def __eq__(self, other: object) -> bool:
+        return other == self._spoof
+
+    def __ne__(self, other: object) -> bool:
+        return not self.__eq__(other)
+
+
+class FakeContext:
+    def __init__(self) -> None:
+        self.tenant_id = EvilStr("attacker-tenant", "victim-tenant")
+        self.actor_id = "attacker"
+
+
+def main() -> None:
+    victim = TenantContext("victim-tenant", "victim-actor")
+    fake = FakeContext()
+    adapter = InMemoryTargetAdapter(
+        name="tasks",
+        schema_version="1",
+        required_fields={"task": ("title",)},
+        adapter_id="adp.tasks",
+    )
+    record = CandidateRecord(
+        record_id="rec-secret",
+        record_type="task",
+        fields={"title": "VICTIM-SECRET"},
+        confidence=0.99,
+        source_text="private",
+    )
+    receipt = adapter.commit(victim, record, "victim-idem")
+
+    leaked = adapter.stored_record(fake, "victim-idem")  # type: ignore[arg-type]
+    spoofed_count = adapter.committed_count(fake)  # type: ignore[arg-type]
+    adapter.rollback(fake, receipt)  # type: ignore[arg-type]
+
+    print(
+        json.dumps(
+            {
+                "probe": "E09_inmemory_fake_context_cross_tenant_read_delete",
+                "fake_tenant_actual_value": str(fake.tenant_id),
+                "leaked_title": leaked.fields["title"],
+                "spoofed_committed_count": spoofed_count,
+                "victim_count_after_attacker_rollback": adapter.committed_count(victim),
+            },
+            sort_keys=True,
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()

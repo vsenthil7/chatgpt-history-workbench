@@ -1,0 +1,1759 @@
+Used shell integration
+Verifying work packages against their test criteria.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git status -sb; git log -10 --oneline --decorate; git stash list\""
+}
+Response
+
+## master...origin/master
+0253317 (HEAD -> master, origin/master, origin/HEAD) $(Get-Content 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\_msgC.txt' -Raw)
+d90fbe9 $(Get-Content 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\_msgB.txt' -Raw)
+4910841 $(Get-Content 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\_msgA.txt' -Raw)
+8abbed1 audit(WP-22): AI coverage test implementation — verification pending
+f1757e1 audit(WP-02): initial AI implementation — unverified
+ebed893 audit(WP-01): initial AI implementation — unverified
+42865e9 audit(WP-13): initial AI implementation — unverified
+637683b docs(planning): artifact migration manifest
+af51b99 docs(review): final prebuild gate ChatGPT V002 — 2026-10-04 22:56
+eed7ebd docs(prebuild): close residual corrections V003 — 2026-10-04 22:51
+stash@{0}: On master: pre-migration preservation: existing S47-B working tree found 2026-10-04
+Diagnosing garbled commit messages from a scripting mistake.
+Fixing garbage commit subjects with git notes instead of rewriting history
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git show --stat --oneline 4910841 | Select -First 1; git show --stat --oneline d90fbe9 | Select -First 1; git show --stat --oneline 0253317 | Select -First 1; $a='C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis'; git notes add -F \\\"$a\\_msgA.txt\\\" 4910841; git notes add -F \\\"$a\\_msgB.txt\\\" d90fbe9; git notes add -F \\\"$a\\_msgC.txt\\\" 0253317; git log -3 --format='%h %s%n   note: %N' | Select -First 12\""
+}
+Response
+
+ExecaError: Command failed with exit code 1: "powershell -NoProfile -Command ""cd 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend'; git show --stat --oneline 4910841 | Select -First 1; git show --stat --oneline d90fbe9 | Select -First 1; git show --stat --oneline 0253317 | Select -First 1; $a='C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis'; git notes add -F \""$a\_msgA.txt\"" 4910841; git notes add -F \""$a\_msgB.txt\"" d90fbe9; git notes add -F \""$a\_msgC.txt\"" 0253317; git log -3 --format='%h %s%n   note: %N' | Select -First 12"""
+
+4910841 $(Get-Content 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\_msgA.txt' -Raw)\r
+d90fbe9 $(Get-Content 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\_msgB.txt' -Raw)\r
+0253317 $(Get-Content 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\_msgC.txt' -Raw)\r
+0253317 $(Get-Content 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\_msgC.txt' -Raw)\r
+   note: fix(WP-01): tests — replace obsolete HS256 assumptions with RS256\r
+\r
+TEST-DEBT (obsolete assumptions after WP-01):\r
+- tests/unit/test_config.py: test_jwt_algorithm_is_hs256 asserted the old\r
+  default; now test_jwt_algorithm_is_rs256\r
+- tests/unit/test_auth.py (expired token) and tests/unit/test_coverage_gaps.py\r
+  (missing sub / role / email claims) minted tokens with\r
+  jwt.encode(jwt_secret_key, HS256). Under RS256 these were rejected before the\r
+  claim checks ran, so the tests passed vacuously. They now sign with the\r
+  service's RS256 private key (_jwt_keys()[0]) so the intended branches are\r
+  exercised again.
+Notes attached (exit 1 came only from Select -First truncating). Pushing the notes ref visibly.
+
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git notes list; git push origin refs/notes/commits 2>&1; git log -3 --format='%h %s | note-first-line: %(trailers:key=none)%N' | % { ($_ -split \\\"`n\\\")[0] }\""
+}
+
+Response
+
+ece201bffa4fc9669b75b65510fe7477f40d59c0 0253317f6d1e082017dd6e707a6d88c2f761139e
+317b7096c1d924278010b6b5fd10e840cc6ce5b3 4910841a9156e22644a36fb539d590b760410616
+9e788cd7b5baac9a9abfdb318584a0ced7a747ac d90fbe94d78d7b7d6a4db6e01ec24721428647a1
+0253317 $(Get-Content 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\_msgC.txt' -Raw) | note-first-line: fix(WP-01): tests — replace obsolete HS256 assumptions with RS256
+
+TEST-DEBT (obsolete assumptions after WP-01):
+- tests/unit/test_config.py: test_jwt_algorithm_is_hs256 asserted the old
+  default; now test_jwt_algorithm_is_rs256
+- tests/unit/test_auth.py (expired token) and tests/unit/test_coverage_gaps.py
+  (missing sub / role / email claims) minted tokens with
+  jwt.encode(jwt_secret_key, HS256). Under RS256 these were rejected before the
+  claim checks ran, so the tests passed vacuously. They now sign with the
+  service's RS256 private key (_jwt_keys()[0]) so the intended branches are
+  exercised again.
+
+No production code changed. Narrow: 34 passed; flake8/black clean.
+
+d90fbe9 $(Get-Content 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\_msgB.txt' -Raw) | note-first-line: fix(WP-01): environment — RS256 in env templates, CI and deployment doc
+
+ENVIRONMENT: every tracked environment definition still set JWT_ALGORITHM=HS256,
+which the WP-01 service now refuses (all auth tests failed with
+JWTConfigurationError: got 'HS256').
+
+- services/api/.env.example: JWT_ALGORITHM=RS256; key generation commands;
+  JWT_PRIVATE_KEY_PATH / JWT_PUBLIC_KEY_PATH documented (dev/test may rely on
+  the ephemeral pair)
+- deploy/staging.env: RS256 + key-path variables (APP_ENV=staging requires a
+  real key pair; the service refuses to start without one)
+- .github/workflows/ci.yml: JWT_ALGORITHM=RS256 (APP_ENV=development ->
+  ephemeral pair; no key in CI)
+- docs/15_deployment/DEPLOYMENT.md: env examples and required-variables table
+  updated; JWT_SECRET_KEY now only derives the dev/test BYO vault key
+
+Local untracked services/api/.env changed to RS256 by hand; api container
+recreated. Narrow, no env override: test_wp01_rs256 + test_auth_login +
+test_impersonate + test_m02_auth: 55 passed.
+
+4910841 $(Get-Content 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\_msgA.txt' -Raw) | note-first-line: fix(WP-01): refuse to start on bad JWT config; key files via *_PATH
+
+DEFECT: with WP-01 a non-RS256 jwt_algorithm (or missing keys) surfaced as
+HTTP 500 on every request from TenantMiddleware (X-Request-ID missing) instead
+of refusing to start.
+
+- app/main.py lifespan calls verify_jwt_configuration(): RS256 check, key pair
+  present (inline or JWT_PRIVATE_KEY_PATH / JWT_PUBLIC_KEY_PATH files), and a
+  sign/verify round trip; JWTConfigurationError aborts startup
+- half-configured pair (only one of private/public) is refused
+- *_PATH options added because docker compose env_file cannot carry multi-line PEM
+
+Regression tests: tests/unit/test_wp01_rs256.py (8): RS256 header + public-key
+verification; HS256 token signed with the shared secret rejected; ephemeral
+dev pair generated once; non-RS256 / production-without-keys / half pair /
+mismatched pair refused; keys loaded from path files.
+
+Narrow: test_wp01_rs256.py + test_auth_login.py 23 passed (JWT_ALGORITHM=RS256
+process override; local .env still HS256 -> separate environment fix).
+
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git push origin refs/notes/commits 2>&1 | % { \\\"$_\\\" }; git ls-remote origin refs/notes/commits; git rev-parse refs/notes/commits\""
+}
+
+Response
+
+Everything up-to-date
+8f8050f0f1d5c6efc12a48824a6355d145b36710	refs/notes/commits
+8f8050f0f1d5c6efc12a48824a6355d145b36710
+Drafting boundary tests for the verification work package.
+
+Notes are on the remote. Active WP from Git: WP-02 (snapshot f1757e1, verification pending). Reading the existing lockout/impersonation test conventions, then writing the boundary tests.
+
+Used 2 integrations
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; Select-String tests\\unit\\test_auth_service.py -Pattern 'lock|def test|fixture|def _|^from|^import|LOCKOUT|MAX_FAILED' | % { $_.LineNumber.ToString() + ': ' + $_.Line.Trim() } | Select -First 40\""
+}
+Response
+
+6: role propagation, SSO-only rejection. Lockout/MFA/refresh covered in
+10: from __future__ import annotations
+12: import uuid
+14: from sqlalchemy import func, select
+16: from app.core.auth import decode_access_token, hash_password
+17: from app.models.auth import AuthEvent, Session
+18: from app.models.tenant import Tenant
+19: from app.models.user import User
+20: from app.schemas.auth import LoginRequest
+21: from app.services.auth_service import AuthError, AuthService
+22: from app.services.auth_service import LoginResult  # noqa: F401  (type reference)
+24: import pytest
+27: def _tenant(db) -> Tenant:
+45: def _user(
+72: def test_valid_credentials_return_token_pair(self, db_session):
+87: def test_login_creates_session_and_auth_event(self, db_session):
+105: def test_unknown_email_raises_401(self, db_session):
+113: def test_wrong_password_raises_401(self, db_session):
+123: def test_inactive_user_raises_401(self, db_session):
+133: def test_no_user_enumeration_same_message(self, db_session):
+144: def test_super_admin_login_null_tenant(self, db_session):
+154: def test_token_carries_role(self, db_session):
+163: def test_sso_only_account_rejected_403(self, db_session):
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; $l=Get-Content tests\\unit\\test_auth_service.py; for($i=0;$i -lt 10;$i++){ $l[$i] }; '...'; for($i=26;$i -lt 122;$i++){ $l[$i] }; '=== lockout tests elsewhere'; Select-String -Path tests\\integration\\test_m02_auth.py -Pattern 'lock|423|failed_login' | % { $_.LineNumber.ToString() + ': ' + $_.Line.Trim() } | Select -First 12; '=== login signature'; Select-String app\\services\\auth_service.py -Pattern 'def login' -Context 0,8 | % { $_.Line; $_.Context.PostContext }\""
+}
+Response
+
+"""
+Unit tests for AuthService.login (M02 flow) against a real DB session.
+
+Covers: success (token pair + session + auth_event), unknown email, wrong
+password, inactive user, no-enumeration parity, super-admin null tenant,
+role propagation, SSO-only rejection. Lockout/MFA/refresh covered in
+test_m02_auth.py and the integration suite.
+"""
+
+from __future__ import annotations
+...
+def _tenant(db) -> Tenant:
+    t = Tenant(
+        id=uuid.uuid4(),
+        name="Auth T",
+        slug=f"auth-{uuid.uuid4().hex[:8]}",
+        status="active",
+        plan_tier="standard",
+        isolation_tier="A",
+        is_generic_client=False,
+        branding={},
+        quotas={},
+        config_overrides={},
+    )
+    db.add(t)
+    db.flush()
+    return t
+
+
+def _user(
+    db,
+    *,
+    role="ops_agent",
+    status="active",
+    tenant_id=None,
+    [REDACTED:assigned-value:sha256-f0377fbde3a3]",
+    auth_provider="local",
+) -> User:
+    u = User(
+        id=uuid.uuid4(),
+        tenant_id=tenant_id,
+        email=f"u-{uuid.uuid4().hex[:8]}@test.com",
+        name="Auth User",
+        role=role,
+        status=status,
+        hashed_password=hash_password(password),
+        auth_provider=auth_provider,
+        failed_login_count=0,
+        mfa_enabled=False,
+    )
+    db.add(u)
+    db.flush()
+    return u
+
+
+class TestAuthServiceLogin:
+    def test_valid_credentials_return_token_pair(self, db_session):
+        t = _tenant(db_session)
+        u = _user(db_session, tenant_id=t.id)
+        svc = AuthService(db_session)
+        result = svc.login(
+            LoginRequest(email=u.email, [REDACTED:assigned-value:sha256-f0377fbde3a3]"),
+            ip_address="1.2.3.4",
+            user_agent="pytest",
+        )
+        assert result.tokens is not None
+        assert result.tokens.token_type == "bearer"
+        assert result.tokens.expires_in > 0
+        assert len(result.tokens.access_token) > 20
+        assert len(result.tokens.refresh_token) > 20
+
+    def test_login_creates_session_and_auth_event(self, db_session):
+        t = _tenant(db_session)
+        u = _user(db_session, tenant_id=t.id)
+        AuthService(db_session).login(
+            LoginRequest(email=u.email, [REDACTED:assigned-value:sha256-f0377fbde3a3]"),
+            ip_address="9.9.9.9",
+        )
+        n_sessions = db_session.execute(
+            select(func.count()).select_from(Session).where(Session.user_id == u.id)
+        ).scalar_one()
+        assert n_sessions == 1
+        ev = db_session.execute(
+            select(AuthEvent).where(
+                AuthEvent.user_id == u.id, AuthEvent.event == "login"
+            )
+        ).scalar_one_or_none()
+        assert ev is not None and ev.success is True
+
+    def test_unknown_email_raises_401(self, db_session):
+        with pytest.raises(AuthError) as exc:
+            AuthService(db_session).login(
+                LoginRequest(email="nobody@test.com", password="whatever")
+            )
+        assert exc.value.status_code == 401
+        assert "invalid credentials" in exc.value.message
+
+    def test_wrong_password_raises_401(self, db_session):
+        t = _tenant(db_session)
+        u = _user(db_session, tenant_id=t.id)
+        with pytest.raises(AuthError) as exc:
+            AuthService(db_session).login(
+                LoginRequest(email=u.email, [REDACTED:assigned-value:sha256-74e5d32aa7f8]")
+            )
+        assert exc.value.status_code == 401
+        assert "invalid credentials" in exc.value.message
+
+=== lockout tests elsewhere
+51: failed_login_count=0,
+78: def test_lockout_after_five_failures(self, client, db_session, password_user):
+84: # 6th attempt - even with the correct password - is locked (423).
+89: assert r.status_code == 423
+=== login signature
+    def login(
+        self,
+        request: LoginRequest,
+        *,
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None,
+    ) -> LoginResult:
+        """Validate credentials (+ MFA) and issue tokens, or raise AuthError."""
+        user = self._repo.find_active_by_email(request.email)
+Writing unit tests for login lockout and reset behavior.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; $l=Get-Content tests\\integration\\test_impersonate.py; for($i=36;$i -lt 75;$i++){ $l[$i] }; '=== impersonate service signature'; Select-String app\\services\\superadmin_service.py -Pattern 'def impersonate' -Context 0,12 | % { $_.Line; $_.Context.PostContext }\""
+}
+Response
+
+# ==========================================================================
+# POST /impersonate/{user_id}
+# ==========================================================================
+
+
+class TestImpersonate:
+    def test_tc00410_returns_valid_jwt_for_target(
+        self,
+        client: TestClient,
+        test_user_agent,
+        super_admin_token: str,
+    ) -> None:
+        """TC00410 POST /impersonate/{user_id} returns a valid JWT."""
+        resp = client.post(
+            f"/api/v1/impersonate/{test_user_agent.id}",
+            headers=_auth(super_admin_token),
+        )
+        assert resp.status_code == 200, resp.text
+        body = resp.json()
+        assert "access_token" in body
+        assert body["token_type"] == "bearer"
+        # Token decodes and has a sub claim
+        decoded = _decode(body["access_token"])
+        assert decoded["sub"] == str(test_user_agent.id)
+
+    def test_tc00411_jwt_carries_target_tenant_and_role(
+        self,
+        client: TestClient,
+        test_user_agent,
+        test_tenant,
+        super_admin_token: str,
+    ) -> None:
+        """TC00411 minted JWT has TARGET's tenant_id + role (not caller's)."""
+        resp = client.post(
+            f"/api/v1/impersonate/{test_user_agent.id}",
+            headers=_auth(super_admin_token),
+        )
+        assert resp.status_code == 200
+        body = resp.json()
+=== impersonate service signature
+    def impersonate(
+        self,
+        *,
+        target_user_id: UUID,
+        reason: str,
+        expire_minutes: int = IMPERSONATION_DEFAULT_MINUTES,
+        actor_user_id: UUID,
+    ) -> dict:
+        if not reason or not reason.strip():
+            raise SuperAdminError("reason_required", status_code=400)
+        if not (
+            IMPERSONATION_MIN_MINUTES <= expire_minutes <= IMPERSONATION_MAX_MINUTES
+        ):
+Mapping impersonation routes to their service implementations.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; Select-String app\\api\\v1\\routes\\*.py -Pattern 'ImpersonateRequest|\\.impersonate\\(' | % { $_.Filename + ':' + $_.LineNumber + ': ' + $_.Line.Trim() }; Select-String app\\api\\v1\\routes\\superadmin.py -Pattern 'router = APIRouter|@router.post' | % { $_.LineNumber.ToString() + ': ' + $_.Line.Trim() } | Select -First 6; Select-String app\\main.py -Pattern 'superadmin_router' | % { $_.Line.Trim() }; Select-String tests\\integration\\*.py -Pattern 'superadmin/impersonate' | % { $_.Filename + ':' + $_.LineNumber } | Select -First 3\""
+}
+Response
+
+superadmin.py:19: ImpersonateRequest,
+superadmin.py:77: body: ImpersonateRequest,
+superadmin.py:82: result = SuperAdminService(db).impersonate(
+30: router = APIRouter(prefix="/api/v1/superadmin", tags=["superadmin"])
+75: @router.post("/impersonate", response_model=ImpersonateResult)
+107: @router.post("/feature-override", response_model=GlobalFeatureOverrideResponse)
+123: @router.post("/kill-switch", response_model=KillSwitchResponse)
+from app.api.v1.routes.superadmin import router as superadmin_router
+app.include_router(superadmin_router)
+test_m09_superadmin.py:81
+test_m09_superadmin.py:96
+test_m09_superadmin.py:107
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; $l=Get-Content tests\\integration\\test_m09_superadmin.py; for($i=0;$i -lt 30;$i++){ $l[$i] }; for($i=76;$i -lt 125;$i++){ $l[$i] }\""
+}
+Response
+
+"""M09 SaaS Super-Admin -- integration tests (HTTP routes)."""
+
+from __future__ import annotations
+
+import uuid
+from decimal import Decimal
+
+from app.models.billing import Plan, Subscription
+
+
+def _auth(token: str) -> dict:
+    return {"Authorization": f"Bearer {token}"}
+
+
+def _plan(db, code="premium", price="50"):
+    p = Plan(
+        code=code,
+        tier="premium",
+        name=code.title(),
+        monthly_price=Decimal(price),
+        currency="USD",
+        seat_limit=10,
+        usage_caps={},
+        features={},
+    )
+    db.add(p)
+    db.flush()
+    return p
+
+
+
+class TestImpersonation:
+    def test_impersonate(self, client, db_session, super_admin_token, test_user_agent):
+        r = client.post(
+            "/api/v1/superadmin/impersonate",
+            headers=_auth(super_admin_token),
+            json={
+                "target_user_id": str(test_user_agent.id),
+                "reason": "investigating a bug",
+                "expire_minutes": 10,
+            },
+        )
+        assert r.status_code == 200, r.text
+        body = r.json()
+        assert body["impersonated_user_id"] == str(test_user_agent.id)
+        assert body["expires_in"] == 600
+
+    def test_impersonate_unknown_user_404(self, client, super_admin_token):
+        r = client.post(
+            "/api/v1/superadmin/impersonate",
+            headers=_auth(super_admin_token),
+            json={
+                "target_user_id": str(uuid.uuid4()),
+                "reason": "x",
+            },
+        )
+        assert r.status_code == 404
+
+    def test_impersonate_bad_expiry_422(self, client, super_admin_token):
+        r = client.post(
+            "/api/v1/superadmin/impersonate",
+            headers=_auth(super_admin_token),
+            json={
+                "target_user_id": str(uuid.uuid4()),
+                "reason": "x",
+                "expire_minutes": 9999,
+            },
+        )
+        # schema validation rejects (ge=1, le=60)
+        assert r.status_code == 422
+
+
+class TestMetrics:
+    def test_metrics(self, client, db_session, super_admin_token, test_tenant):
+        p = _plan(db_session, price="100")
+        _sub(db_session, test_tenant.id, p.id, status="active", seats=4)
+        r = client.get("/api/v1/superadmin/metrics", headers=_auth(super_admin_token))
+        assert r.status_code == 200, r.text
+        body = r.json()
+Writing the WP-02 verification tests (new file), then snapshot before running them.
+Request
+
+{
+  "content": "\"\"\"WP-02 / FR-011, FR-045 (D-08) -- lockout and impersonation time-box bounds.\n\nFR-011: lockout after 5 failed logins, 30-minute lockout.\nFR-045 + D-08: impersonation time-box maximum 120 minutes.\n\nNote: FR-011's \"5 failures in 15 minutes\" window is a recorded requirement\ngap (needs persisted failure timing); it is intentionally NOT asserted here.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport uuid\nfrom datetime import datetime, timedelta, timezone\n\nimport pytest\n\nfrom app.core.auth import hash_password\nfrom app.models.tenant import Tenant\nfrom app.models.user import User\nfrom app.schemas.auth import LoginRequest\nfrom app.services.auth_service import (\n    LOCKOUT_MINUTES,\n    MAX_FAILED_LOGINS,\n    AuthError,\n    AuthService,\n)\nfrom app.services.superadmin_service import (\n    IMPERSONATION_MAX_MINUTES,\n    SuperAdminError,\n    SuperAdminService,\n)\n\n\ndef _tenant(db) -> Tenant:\n    t = Tenant(\n        id=uuid.uuid4(),\n        name=\"WP02 T\",\n        slug=f\"wp02-{uuid.uuid4().hex[:8]}\",\n        status=\"active\",\n        plan_tier=\"standard\",\n        isolation_tier=\"A\",\n        is_generic_client=False,\n        branding={},\n        quotas={},\n        config_overrides={},\n    )\n    db.add(t)\n    db.flush()\n    return t\n\n\ndef _user(db, *, tenant_id, role=\"ops_agent\", password=\"correctpassword\") -> User:\n    u = User(\n        id=uuid.uuid4(),\n        tenant_id=tenant_id,\n        email=f\"wp02-{uuid.uuid4().hex[:8]}@test.com\",\n        name=\"WP02 User\",\n        role=role,\n        status=\"active\",\n        hashed_password=hash_password(password),\n        auth_provider=\"local\",\n        failed_login_count=0,\n        mfa_enabled=False,\n    )\n    db.add(u)\n    db.flush()\n    return u\n\n\ndef _fail(svc, user, n):\n    for _ in range(n):\n        with pytest.raises(AuthError) as exc:\n            svc.login(LoginRequest(email=user.email, password=\"wrongpassword\"))\n        assert exc.value.status_code == 401\n\n\nclass TestLockoutThreshold:\n    def test_constants_match_fr011(self):\n        assert MAX_FAILED_LOGINS == 5\n        assert LOCKOUT_MINUTES == 30\n\n    def test_four_failures_do_not_lock(self, db_session):\n        t = _tenant(db_session)\n        u = _user(db_session, tenant_id=t.id)\n        svc = AuthService(db_session)\n        _fail(svc, u, MAX_FAILED_LOGINS - 1)\n        db_session.refresh(u)\n        assert u.failed_login_count == MAX_FAILED_LOGINS - 1\n        assert u.locked_until is None\n        # Correct password still works and resets the counter.\n        result = svc.login(LoginRequest(email=u.email, password=\"correctpassword\"))\n        assert result.tokens is not None\n        db_session.refresh(u)\n        assert u.failed_login_count == 0\n\n    def test_exactly_five_failures_lock_for_thirty_minutes(self, db_session):\n        t = _tenant(db_session)\n        u = _user(db_session, tenant_id=t.id)\n        svc = AuthService(db_session)\n        before = datetime.now(timezone.utc)\n        _fail(svc, u, MAX_FAILED_LOGINS)\n        db_session.refresh(u)\n        assert u.failed_login_count == MAX_FAILED_LOGINS\n        assert u.locked_until is not None\n        lock_len = u.locked_until - before\n        assert timedelta(minutes=LOCKOUT_MINUTES) <= lock_len < timedelta(\n            minutes=LOCKOUT_MINUTES, seconds=30\n        )\n        # Correct password during the lockout -> 423, counter untouched.\n        with pytest.raises(AuthError) as exc:\n            svc.login(LoginRequest(email=u.email, password=\"correctpassword\"))\n        assert exc.value.status_code == 423\n\n\nclass TestLockoutExpiryBoundary:\n    def test_still_locked_just_before_expiry(self, db_session):\n        t = _tenant(db_session)\n        u = _user(db_session, tenant_id=t.id)\n        u.failed_login_count = MAX_FAILED_LOGINS\n        u.locked_until = datetime.now(timezone.utc) + timedelta(seconds=20)\n        db_session.flush()\n        with pytest.raises(AuthError) as exc:\n            AuthService(db_session).login(\n                LoginRequest(email=u.email, password=\"correctpassword\")\n            )\n        assert exc.value.status_code == 423\n\n    def test_unlocked_after_expiry_and_counter_reset(self, db_session):\n        t = _tenant(db_session)\n        u = _user(db_session, tenant_id=t.id)\n        u.failed_login_count = MAX_FAILED_LOGINS\n        u.locked_until = datetime.now(timezone.utc) - timedelta(seconds=1)\n        db_session.flush()\n        result = AuthService(db_session).login(\n            LoginRequest(email=u.email, password=\"correctpassword\")\n        )\n        assert result.tokens is not None\n        db_session.refresh(u)\n        assert u.failed_login_count == 0\n        assert u.locked_until is None\n\n    def test_wrong_password_after_expiry_counts_again_from_zero(self, db_session):\n        # An expired lockout must not keep an already-maxed counter: the next\n        # wrong password after expiry is failure 1 of 5, not an instant re-lock.\n        t = _tenant(db_session)\n        u = _user(db_session, tenant_id=t.id)\n        u.failed_login_count = MAX_FAILED_LOGINS\n        u.locked_until = datetime.now(timezone.utc) - timedelta(seconds=1)\n        db_session.flush()\n        svc = AuthService(db_session)\n        _fail(svc, u, 1)\n        db_session.refresh(u)\n        assert u.failed_login_count == 1\n        assert u.locked_until is None\n\n\nclass TestImpersonationBound:\n    def _super_admin(self, db):\n        return _user(db, tenant_id=None, role=\"we_super_admin\")\n\n    def test_constant_matches_d08(self):\n        assert IMPERSONATION_MAX_MINUTES == 120\n\n    def test_120_minutes_accepted(self, db_session):\n        t = _tenant(db_session)\n        target = _user(db_session, tenant_id=t.id)\n        actor = self._super_admin(db_session)\n        result = SuperAdminService(db_session).impersonate(\n            target_user_id=target.id,\n            reason=\"support ticket 1\",\n            expire_minutes=120,\n            actor_user_id=actor.id,\n        )\n        assert result[\"expires_in\"] == 120 * 60\n\n    def test_121_minutes_rejected(self, db_session):\n        t = _tenant(db_session)\n        target = _user(db_session, tenant_id=t.id)\n        actor = self._super_admin(db_session)\n        with pytest.raises(SuperAdminError) as exc:\n            SuperAdminService(db_session).impersonate(\n                target_user_id=target.id,\n                reason=\"support ticket 2\",\n                expire_minutes=121,\n                actor_user_id=actor.id,\n            )\n        assert exc.value.status_code == 400\n\n    def test_request_schema_bound_is_120(self):\n        from pydantic import ValidationError\n\n        from app.schemas.superadmin import ImpersonateRequest\n\n        ok = ImpersonateRequest(target_user_id=uuid.uuid4(), reason=\"r\", expire_minutes=120)\n        assert ok.expire_minutes == 120\n        with pytest.raises(ValidationError):\n            ImpersonateRequest(target_user_id=uuid.uuid4(), reason=\"r\", expire_minutes=121)\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\tests\\unit\\test_wp02_lockout_impersonation.py"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\unit\test_wp02_lockout_impersonation.py
+Snapshot before executing these tests (4A–4D, visible).
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git status --short; git diff --stat; git diff; 'INTENDED COMMIT: WP-02 | verification tests (lockout threshold, 30-min boundary, impersonation 120/121) — first attempt, unexecuted'; git add services/api/tests/unit/test_wp02_lockout_impersonation.py; git status --short; git diff --cached --stat\""
+}
+Response
+
+?? services/api/tests/unit/test_wp02_lockout_impersonation.py
+INTENDED COMMIT: WP-02 | verification tests (lockout threshold, 30-min boundary, impersonation 120/121) - first attempt, unexecuted
+A  services/api/tests/unit/test_wp02_lockout_impersonation.py
+ .../tests/unit/test_wp02_lockout_impersonation.py  | 197 +++++++++++++++++++++
+ 1 file changed, 197 insertions(+)
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git diff --cached | Select-Object -First 25; '...'; git commit -m \\\"test(WP-02): add lockout/impersonation boundary tests — unverified first attempt\\\" -m \\\"Covers FR-011 (5 failures -> 30-minute lockout; 4 failures do not lock; still locked just before expiry; unlocked and counter reset after expiry; post-expiry failure counts from zero) and FR-045/D-08 (impersonation 120 accepted, 121 rejected at service and schema).\\\" -m \\\"The FR-011 15-minute failure window remains a recorded requirement gap and is not asserted. Snapshot taken BEFORE executing these tests.\\\"; git show --stat --oneline HEAD; git status --short\""
+}
+Response
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git log -2 --oneline; git status --short; git diff --cached --stat\""
+}
+Response
+
+b604230 test(WP-02): add lockout/impersonation boundary tests — unverified first attempt
+0253317 $(Get-Content 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\_msgC.txt' -Raw)
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git show --stat --oneline HEAD; git push origin master 2>&1 | % { \\\"$_\\\" }; git status -sb; git log -5 --oneline --decorate\""
+}
+Response
+
+b604230 test(WP-02): add lockout/impersonation boundary tests — unverified first attempt
+ .../tests/unit/test_wp02_lockout_impersonation.py  | 197 +++++++++++++++++++++
+ 1 file changed, 197 insertions(+)
+To https://github.com/vsenthil7/talkproof-backend.git
+   0253317..b604230  master -> master
+## master...origin/master
+b604230 (HEAD -> master, origin/master, origin/HEAD) test(WP-02): add lockout/impersonation boundary tests — unverified first attempt
+0253317 $(Get-Content 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\_msgC.txt' -Raw)
+d90fbe9 $(Get-Content 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\_msgB.txt' -Raw)
+4910841 $(Get-Content 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\_msgA.txt' -Raw)
+8abbed1 audit(WP-22): AI coverage test implementation — verification pending
+Snapshot pushed. Now executing the WP-02 tests.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh /tmp/run.sh 'tests/unit/test_wp02_lockout_impersonation.py tests/unit/test_auth_service.py tests/integration/test_m09_superadmin.py tests/integration/test_m02_auth.py'\""
+}
+Response
+
+/app/tests/unit/test_wp02_lockout_impersonation.py:153: assert 6 == 1
+  /usr/local/lib/python3.11/site-packages/pydantic/_internal/_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
+FAILED tests/unit/test_wp02_lockout_impersonation.py::TestLockoutExpiryBoundary::test_wrong_password_after_expiry_counts_again_from_zero
+1 failed, 51 passed, 3 warnings in 11.89s
+Investigating whether a lockout re-trigger counts as a defect.
+Resetting stale failure counter after lockout expiry
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; $l=Get-Content app\\services\\auth_service.py; for($i=278;$i -lt 302;$i++){ '{0,4}: {1}' -f ($i+1),$l[$i] }\""
+}
+Response
+
+ 279:     def _register_failure(
+ 280:         self, user: User, ip_address: Optional[str], user_agent: Optional[str]
+ 281:     ) -> None:
+ 282:         user.failed_login_count = (user.failed_login_count or 0) + 1
+ 283:         locked = user.failed_login_count >= MAX_FAILED_LOGINS
+ 284:         if locked:
+ 285:             user.locked_until = datetime.now(timezone.utc) + timedelta(
+ 286:                 minutes=LOCKOUT_MINUTES
+ 287:             )
+ 288:         self._db.flush()
+ 289:         self._events.record(
+ 290:             event="login_failed",
+ 291:             success=False,
+ 292:             user_id=user.id,
+ 293:             tenant_id=user.tenant_id,
+ 294:             ip_address=ip_address,
+ 295:             user_agent=user_agent,
+ 296:             detail={"count": user.failed_login_count, "locked": locked},
+ 297:         )
+ 298: 
+ 299:     def _reset_failures(self, user: User) -> None:
+ 300:         user.failed_login_count = 0
+ 301:         user.locked_until = None
+ 302:         user.last_login_at = datetime.now(timezone.utc)
+Request
+
+{
+  "edits": [
+    {
+      "newText": "    def _register_failure(\n        self, user: User, ip_address: Optional[str], user_agent: Optional[str]\n    ) -> None:\n        now = datetime.now(timezone.utc)\n        if user.locked_until is not None and user.locked_until <= now:\n            # WP-02 / FR-011: a served (expired) lockout is a bounded penalty.\n            # Start a fresh 5-failure count instead of re-locking on the next\n            # wrong password from a stale, already-maxed counter.\n            user.failed_login_count = 0\n            user.locked_until = None\n        user.failed_login_count = (user.failed_login_count or 0) + 1\n        locked = user.failed_login_count >= MAX_FAILED_LOGINS\n        if locked:\n            user.locked_until = now + timedelta(minutes=LOCKOUT_MINUTES)\n",
+      "oldText": "    def _register_failure(\n        self, user: User, ip_address: Optional[str], user_agent: Optional[str]\n    ) -> None:\n        user.failed_login_count = (user.failed_login_count or 0) + 1\n        locked = user.failed_login_count >= MAX_FAILED_LOGINS\n        if locked:\n            user.locked_until = datetime.now(timezone.utc) + timedelta(\n                minutes=LOCKOUT_MINUTES\n            )\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\app\\services\\auth_service.py"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\services\auth_service.py
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\services\auth_service.py	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\services\auth_service.py	modified
+@@ -278,14 +278,19 @@
+ 
+     def _register_failure(
+         self, user: User, ip_address: Optional[str], user_agent: Optional[str]
+     ) -> None:
++        now = datetime.now(timezone.utc)
++        if user.locked_until is not None and user.locked_until <= now:
++            # WP-02 / FR-011: a served (expired) lockout is a bounded penalty.
++            # Start a fresh 5-failure count instead of re-locking on the next
++            # wrong password from a stale, already-maxed counter.
++            user.failed_login_count = 0
++            user.locked_until = None
+         user.failed_login_count = (user.failed_login_count or 0) + 1
+         locked = user.failed_login_count >= MAX_FAILED_LOGINS
+         if locked:
+-            user.locked_until = datetime.now(timezone.utc) + timedelta(
+-                minutes=LOCKOUT_MINUTES
+-            )
++            user.locked_until = now + timedelta(minutes=LOCKOUT_MINUTES)
+         self._db.flush()
+         self._events.record(
+             event="login_failed",
+             success=False,
+```
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh /tmp/run.sh 'tests/unit/test_wp02_lockout_impersonation.py tests/unit/test_auth_service.py tests/integration/test_m02_auth.py tests/integration/test_auth_login.py'; docker exec talkproof_api sh -c 'cd /app && black --check -q app/services/auth_service.py tests/unit/test_wp02_lockout_impersonation.py && echo BLACK_OK; flake8 app/services/auth_service.py tests/unit/test_wp02_lockout_impersonation.py && echo FLAKE8_OK'\""
+}
+Response
+
+  /usr/local/lib/python3.11/site-packages/pydantic/_internal/_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
+56 passed, 3 warnings in 12.38s
+FLAKE8_OK
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh -c 'cd /app && black --check app/services/auth_service.py tests/unit/test_wp02_lockout_impersonation.py 2>&1 | head -3; black --diff -q tests/unit/test_wp02_lockout_impersonation.py app/services/auth_service.py 2>/dev/null | grep -E \\\"^[-+][^-+]\\\" | head -12'\""
+}
+Response
+
+would reformat tests/unit/test_wp02_lockout_impersonation.py
+
+Oh no! 💥 💔 💥
+--- tests/unit/test_wp02_lockout_impersonation.py	2026-10-04 23:28:33.353009+00:00
++++ tests/unit/test_wp02_lockout_impersonation.py	2026-10-04 23:30:07.088629+00:00
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh -c 'cd /app && black -q tests/unit/test_wp02_lockout_impersonation.py && black --check -q tests/unit/test_wp02_lockout_impersonation.py app/services/auth_service.py && echo BLACK_OK'; cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git status --short; git diff --stat; git diff -- services/api/app/services/auth_service.py\""
+}
+Response
+
+BLACK_OK
+ M services/api/app/services/auth_service.py
+ M services/api/tests/unit/test_wp02_lockout_impersonation.py
+ services/api/app/services/auth_service.py                  | 11 ++++++++---
+ services/api/tests/unit/test_wp02_lockout_impersonation.py | 14 ++++++++++----
+ 2 files changed, 18 insertions(+), 7 deletions(-)
+diff --git a/services/api/app/services/auth_service.py b/services/api/app/services/auth_service.py
+index f0489d8..523f6a3 100644
+--- a/services/api/app/services/auth_service.py
++++ b/services/api/app/services/auth_service.py
+@@ -279,12 +279,17 @@ class AuthService:
+     def _register_failure(
+         self, user: User, ip_address: Optional[str], user_agent: Optional[str]
+     ) -> None:
++        now = datetime.now(timezone.utc)
++        if user.locked_until is not None and user.locked_until <= now:
++            # WP-02 / FR-011: a served (expired) lockout is a bounded penalty.
++            # Start a fresh 5-failure count instead of re-locking on the next
++            # wrong password from a stale, already-maxed counter.
++            user.failed_login_count = 0
++            user.locked_until = None
+         user.failed_login_count = (user.failed_login_count or 0) + 1
+         locked = user.failed_login_count >= MAX_FAILED_LOGINS
+         if locked:
+-            user.locked_until = datetime.now(timezone.utc) + timedelta(
+-                minutes=LOCKOUT_MINUTES
+-            )
++            user.locked_until = now + timedelta(minutes=LOCKOUT_MINUTES)
+         self._db.flush()
+         self._events.record(
+             event="login_failed",
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git diff -- services/api/tests/unit/test_wp02_lockout_impersonation.py; 'INTENDED COMMIT: WP-02 | fix stale counter re-lock after expired lockout (+ black on the new test file)'; git add services/api/app/services/auth_service.py services/api/tests/unit/test_wp02_lockout_impersonation.py; git status --short; git diff --cached --stat\""
+}
+Response
+
+diff --git a/services/api/tests/unit/test_wp02_lockout_impersonation.py b/services/api/tests/unit/test_wp02_lockout_impersonation.py
+index 9a34c70..e376cc7 100644
+--- a/services/api/tests/unit/test_wp02_lockout_impersonation.py
++++ b/services/api/tests/unit/test_wp02_lockout_impersonation.py
+@@ -103,8 +103,10 @@ class TestLockoutThreshold:
+         assert u.failed_login_count == MAX_FAILED_LOGINS
+         assert u.locked_until is not None
+         lock_len = u.locked_until - before
+-        assert timedelta(minutes=LOCKOUT_MINUTES) <= lock_len < timedelta(
+-            minutes=LOCKOUT_MINUTES, seconds=30
++        assert (
++            timedelta(minutes=LOCKOUT_MINUTES)
++            <= lock_len
++            < timedelta(minutes=LOCKOUT_MINUTES, seconds=30)
+         )
+         # Correct password during the lockout -> 423, counter untouched.
+         with pytest.raises(AuthError) as exc:
+@@ -191,7 +193,11 @@ class TestImpersonationBound:
+ 
+         from app.schemas.superadmin import ImpersonateRequest
+ 
+-        ok = ImpersonateRequest(target_user_id=uuid.uuid4(), reason="r", expire_minutes=120)
++        ok = ImpersonateRequest(
++            target_user_id=uuid.uuid4(), reason="r", expire_minutes=120
++        )
+         assert ok.expire_minutes == 120
+         with pytest.raises(ValidationError):
+-            ImpersonateRequest(target_user_id=uuid.uuid4(), reason="r", expire_minutes=121)
++            ImpersonateRequest(
++                target_user_id=uuid.uuid4(), reason="r", expire_minutes=121
++            )
+INTENDED COMMIT: WP-02 | fix stale counter re-lock after expired lockout (+ black on the new test file)
+M  services/api/app/services/auth_service.py
+M  services/api/tests/unit/test_wp02_lockout_impersonation.py
+ services/api/app/services/auth_service.py                  | 11 ++++++++---
+ services/api/tests/unit/test_wp02_lockout_impersonation.py | 14 ++++++++++----
+ 2 files changed, 18 insertions(+), 7 deletions(-)
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git commit -m 'fix(WP-02): start a fresh failure count after an expired lockout' -m 'PRE_EXISTING_DEFECT found by test_wrong_password_after_expiry_counts_again_from_zero: after a served 30-minute lockout the stale counter (5) was incremented to 6 and the user re-locked immediately, so the lockout escalated indefinitely until a successful login. _register_failure now clears an already-expired lockout and counter before counting the new failure (FR-011: bounded 30-minute lockout). The FR-011 15-minute window stays a separate requirement gap. Also black-formats the new WP-02 test file. Narrow: wp02 + auth_service + m02_auth + auth_login: 56 passed.' 2>&1 | % { \\\"$_\\\" }; git show --stat --oneline HEAD; git status --short\""
+}
+Response
+
+[master 274e2e3] fix(WP-02): start a fresh failure count after an expired lockout
+ 2 files changed, 18 insertions(+), 7 deletions(-)
+274e2e3 fix(WP-02): start a fresh failure count after an expired lockout
+ services/api/app/services/auth_service.py                  | 11 ++++++++---
+ services/api/tests/unit/test_wp02_lockout_impersonation.py | 14 ++++++++++----
+ 2 files changed, 18 insertions(+), 7 deletions(-)
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git push origin master 2>&1 | % { \\\"$_\\\" }; git status -sb; git log -5 --oneline --decorate\""
+}
+Response
+
+To https://github.com/vsenthil7/talkproof-backend.git
+   b604230..274e2e3  master -> master
+## master...origin/master
+274e2e3 (HEAD -> master, origin/master, origin/HEAD) fix(WP-02): start a fresh failure count after an expired lockout
+b604230 test(WP-02): add lockout/impersonation boundary tests — unverified first attempt
+0253317 $(Get-Content 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\_msgC.txt' -Raw)
+d90fbe9 $(Get-Content 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\_msgB.txt' -Raw)
+4910841 $(Get-Content 'C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\_msgA.txt' -Raw)
+Reviewing impersonation safeguards against existing security tests.
+
+Designing verification tests for tenant isolation mechanisms.
+
+Testing how session transactions interact with request-scoped context.
+
+Starting WP-13 verification of ContextVar and transaction wiring tests
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; Select-String tests\\conftest.py -Pattern 'def client|def admin_token|def super_admin_token|def test_tenant\\b|dependency_overrides|def db_session|begin_nested|join' | % { $_.LineNumber.ToString() + ': ' + $_.Line.Trim() }; Test-Path tests\\__init__.py; $l=Get-Content tests\\conftest.py; for($i=50;$i -lt 75;$i++){ '{0,4}: {1}' -f ($i+1),$l[$i] }\""
+}
+Response
+
+51: def db_session() -> Generator[Session, None, None]:
+68: def test_tenant(db_session: Session) -> Tenant:
+206: def admin_token(test_user_admin: User, test_tenant: Tenant) -> str:
+228: def super_admin_token(test_user_super_admin: User) -> str:
+250: def client(db_session: Session) -> Generator[TestClient, None, None]:
+256: app.dependency_overrides[get_db] = override_get_db
+259: app.dependency_overrides.clear()
+True
+  51: def db_session() -> Generator[Session, None, None]:
+  52:     """Transactional DB session -- rolled back after every test.
+  53: 
+  54:     Guarantees test isolation: no test leaves data in the DB.
+  55:     """
+  56:     connection = test_engine.connect()
+  57:     transaction = connection.begin()
+  58:     session = TestSessionLocal(bind=connection)
+  59: 
+  60:     yield session
+  61: 
+  62:     session.close()
+  63:     transaction.rollback()
+  64:     connection.close()
+  65: 
+  66: 
+  67: @pytest.fixture
+  68: def test_tenant(db_session: Session) -> Tenant:
+  69:     """A real Tenant row for use in tests."""
+  70:     tenant = Tenant(
+  71:         id=uuid.uuid4(),
+  72:         name="Test Election Co",
+  73:         slug=f"test-election-{uuid.uuid4().hex[:8]}",
+  74:         status="active",
+  75:         plan_tier="standard",
+Request
+
+{
+  "content": "\"\"\"WP-13 / FR-006 -- request tenant -> per-transaction `app.current_tenant_id`.\n\nVerifies the application half of Tier A RLS: TenantMiddleware binds the JWT\ntenant to a ContextVar for the request, and a Session.after_begin event runs\nset_config('app.current_tenant_id', <tenant>, is_local => true) on every\ntransaction opened while that binding is active.\n\nChecked here: value visible inside the transaction; transaction-local (gone\nafter commit/rollback, including on the same pooled connection); not set for\nunauthenticated, super-admin (tenant_id=None) or worker/no-request sessions;\nbinding reset after the request, also when the handler raises; propagation\nthrough the real middleware into a route handler.\n\nNOT covered (BLOCKED, architecture decision pending): enabling/forcing the\nPostgreSQL policies themselves (login-by-email, super-admin and worker paths,\nand the SUPERUSER/BYPASSRLS dev role must be resolved first).\n\"\"\"\n\nfrom __future__ import annotations\n\nimport uuid\n\nimport pytest\nfrom sqlalchemy import text\nfrom sqlalchemy.orm import Session\n\nfrom app.core import tenancy\nfrom app.core.db import get_db_context\nfrom app.core.middleware import TenantMiddleware\nfrom tests.conftest import test_engine\n\n_SETTING = text(\"SELECT current_setting('app.current_tenant_id', true)\")\n\n\ndef _setting(session: Session):\n    value = session.execute(_SETTING).scalar()\n    return value or None  # unset -> NULL, cleared -> '' : both mean \"no tenant\"\n\n\nclass TestTransactionScopedSetting:\n    def test_bound_tenant_is_set_inside_transaction(self):\n        tid = uuid.uuid4()\n        token = tenancy.bind_request_tenant(tid)\n        try:\n            with Session(test_engine) as s:\n                assert _setting(s) == str(tid)\n                s.rollback()\n        finally:\n            tenancy.reset_request_tenant(token)\n\n    def test_setting_does_not_survive_the_transaction(self):\n        tid = uuid.uuid4()\n        token = tenancy.bind_request_tenant(tid)\n        try:\n            with Session(test_engine) as s:\n                assert _setting(s) == str(tid)\n                s.commit()  # transaction ends; is_local => true drops the value\n        finally:\n            tenancy.reset_request_tenant(token)\n        with Session(test_engine) as s:\n            assert _setting(s) is None\n            s.rollback()\n\n    def test_pooled_connection_reuse_does_not_leak_between_tenants(self):\n        # Force both transactions onto the same DBAPI connection.\n        with test_engine.connect() as conn:\n            tid_a = uuid.uuid4()\n            token = tenancy.bind_request_tenant(tid_a)\n            try:\n                with Session(bind=conn) as s:\n                    assert _setting(s) == str(tid_a)\n                    s.rollback()\n            finally:\n                tenancy.reset_request_tenant(token)\n            # Next transaction on the very same connection, no binding.\n            with Session(bind=conn) as s:\n                assert _setting(s) is None\n                s.rollback()\n            # ...and a different tenant sees only its own id.\n            tid_b = uuid.uuid4()\n            token = tenancy.bind_request_tenant(tid_b)\n            try:\n                with Session(bind=conn) as s:\n                    assert _setting(s) == str(tid_b)\n                    s.rollback()\n            finally:\n                tenancy.reset_request_tenant(token)\n\n    def test_no_binding_means_no_setting(self):\n        assert tenancy.request_tenant_id.get() is None\n        with Session(test_engine) as s:\n            assert _setting(s) is None\n            s.rollback()\n\n    def test_super_admin_none_tenant_sets_nothing(self):\n        token = tenancy.bind_request_tenant(None)\n        try:\n            assert tenancy.request_tenant_id.get() is None\n            with Session(test_engine) as s:\n                assert _setting(s) is None\n                s.rollback()\n        finally:\n            tenancy.reset_request_tenant(token)\n\n    def test_worker_context_outside_request_sets_nothing(self, monkeypatch):\n        # get_db_context is the orchestrator/worker entry point: no request,\n        # no binding, so Tier A policies would see no tenant.\n        from app.core import db as core_db\n\n        monkeypatch.setattr(core_db, \"SessionLocal\", lambda: Session(test_engine))\n        with get_db_context() as s:\n            assert _setting(s) is None\n            s.rollback()\n\n\nclass TestMiddlewareBinding:\n    @pytest.mark.asyncio\n    async def test_binding_reset_after_request_even_when_handler_raises(self):\n        seen = {}\n        tid = uuid.uuid4()\n\n        class _State:\n            pass\n\n        class _Req:\n            headers = {\"X-Request-ID\": \"req-1\"}\n\n            def __init__(self):\n                self.state = _State()\n                self.url = type(\"U\", (), {\"path\": \"/x\"})()\n                self.method = \"GET\"\n\n        req = _Req()\n        # Pre-set what TenantMiddleware would decode from a JWT.\n        req.headers = {\"X-Request-ID\": \"req-1\"}\n\n        async def call_next(_request):\n            seen[\"during\"] = tenancy.request_tenant_id.get()\n            raise RuntimeError(\"handler failed\")\n\n        mw = TenantMiddleware(app=None)\n        # Drive dispatch with a token already decoded: patch decode via state.\n        from app.core import middleware as mw_mod\n\n        class _Tok:\n            tenant_id = tid\n            user_id = uuid.uuid4()\n            role = \"ops_agent\"\n\n        orig = mw_mod.decode_access_token\n        mw_mod.decode_access_token = lambda token: _Tok()\n        try:\n            req.headers = {\"Authorization\": \"Bearer x\", \"X-Request-ID\": \"req-1\"}\n            with pytest.raises(RuntimeError, match=\"handler failed\"):\n                await mw.dispatch(req, call_next)\n        finally:\n            mw_mod.decode_access_token = orig\n        assert seen[\"during\"] == str(tid)\n        assert tenancy.request_tenant_id.get() is None\n\n\nclass TestEndToEndPropagation:\n    def _probe_route(self, app, captured):\n        async def probe():\n            captured[\"ctx\"] = tenancy.request_tenant_id.get()\n            with Session(test_engine) as s:\n                captured[\"db\"] = _setting(s)\n                s.rollback()\n            return {\"ok\": True}\n\n        app.add_api_route(\"/_wp13/probe\", probe, methods=[\"GET\"])\n        return app.router.routes[-1]\n\n    def _remove(self, app, route):\n        app.router.routes.remove(route)\n\n    def test_authenticated_request_sets_tenant_for_new_transactions(\n        self, client, admin_token, test_tenant\n    ):\n        captured = {}\n        route = self._probe_route(client.app, captured)\n        try:\n            r = client.get(\n                \"/_wp13/probe\", headers={\"Authorization\": f\"Bearer {admin_token}\"}\n            )\n        finally:\n            self._remove(client.app, route)\n        assert r.status_code == 200, r.text\n        assert captured[\"ctx\"] == str(test_tenant.id)\n        assert captured[\"db\"] == str(test_tenant.id)\n\n    def test_unauthenticated_request_sets_no_tenant(self, client):\n        captured = {}\n        route = self._probe_route(client.app, captured)\n        try:\n            r = client.get(\"/_wp13/probe\")\n        finally:\n            self._remove(client.app, route)\n        assert r.status_code == 200, r.text\n        assert captured[\"ctx\"] is None\n        assert captured[\"db\"] is None\n\n    def test_super_admin_request_sets_no_tenant(self, client, super_admin_token):\n        captured = {}\n        route = self._probe_route(client.app, captured)\n        try:\n            r = client.get(\n                \"/_wp13/probe\",\n                headers={\"Authorization\": f\"Bearer {super_admin_token}\"},\n            )\n        finally:\n            self._remove(client.app, route)\n        assert r.status_code == 200, r.text\n        assert captured[\"ctx\"] is None\n        assert captured[\"db\"] is None\n\n    def test_sequential_requests_do_not_leak_tenant(\n        self, client, admin_token, test_tenant\n    ):\n        captured = {}\n        route = self._probe_route(client.app, captured)\n        try:\n            client.get(\"/_wp13/probe\", headers={\"Authorization\": f\"Bearer {admin_token}\"})\n            assert captured[\"db\"] == str(test_tenant.id)\n            captured.clear()\n            client.get(\"/_wp13/probe\")\n        finally:\n            self._remove(client.app, route)\n        assert captured[\"ctx\"] is None\n        assert captured[\"db\"] is None\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\tests\\integration\\test_wp13_rls_tenant_context.py"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\integration\test_wp13_rls_tenant_context.py
+Snapshot before executing (visible sequence).
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git status --short; git diff --stat; git diff; 'INTENDED COMMIT: WP-13 | verification tests for ContextVar + after_begin tenant propagation — first attempt, unexecuted'; git add services/api/tests/integration/test_wp13_rls_tenant_context.py; git status --short; git diff --cached --stat\""
+}
+Response
+
+?? services/api/tests/integration/test_wp13_rls_tenant_context.py
+INTENDED COMMIT: WP-13 | verification tests for ContextVar + after_begin tenant propagation - first attempt, unexecuted
+A  services/api/tests/integration/test_wp13_rls_tenant_context.py
+ .../integration/test_wp13_rls_tenant_context.py    | 230 +++++++++++++++++++++
+ 1 file changed, 230 insertions(+)
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git commit -m 'test(WP-13): add tenant-context propagation tests — unverified first attempt' -m 'FR-006 application half: value set inside the transaction; transaction-local (gone after commit, and on the same pooled connection); not set for unauthenticated, super-admin (tenant_id=None) and worker/no-request sessions; binding reset after the request including when the handler raises; end-to-end propagation through TenantMiddleware into a route handler. RLS policy activation remains BLOCKED (architecture decision). Snapshot taken BEFORE executing these tests.' 2>&1 | % { \\\"$_\\\" }; git show --stat --oneline HEAD; git status --short; git push origin master 2>&1 | % { \\\"$_\\\" }; git status -sb; git log -3 --oneline --decorate\""
+}
+Response
+
+[master 2dfa4b5] test(WP-13): add tenant-context propagation tests — unverified first attempt
+ 1 file changed, 230 insertions(+)
+ create mode 100644 services/api/tests/integration/test_wp13_rls_tenant_context.py
+2dfa4b5 test(WP-13): add tenant-context propagation tests — unverified first attempt
+ .../integration/test_wp13_rls_tenant_context.py    | 230 +++++++++++++++++++++
+ 1 file changed, 230 insertions(+)
+To https://github.com/vsenthil7/talkproof-backend.git
+   274e2e3..2dfa4b5  master -> master
+## master...origin/master
+2dfa4b5 (HEAD -> master, origin/master, origin/HEAD) test(WP-13): add tenant-context propagation tests — unverified first attempt
+274e2e3 fix(WP-02): start a fresh failure count after an expired lockout
+b604230 test(WP-02): add lockout/impersonation boundary tests — unverified first attempt
+Executing the WP-13 tests.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh /tmp/run.sh 'tests/integration/test_wp13_rls_tenant_context.py'\""
+}
+Response
+
+  /usr/local/lib/python3.11/site-packages/pydantic/_internal/_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
+11 passed, 3 warnings in 2.91s
+Verifying transaction hook behavior for nested database transactions.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh -c 'cd /app && flake8 tests/integration/test_wp13_rls_tenant_context.py && echo FLAKE8_OK; black --check tests/integration/test_wp13_rls_tenant_context.py 2>&1 | head -2'\""
+}
+Response
+
+FLAKE8_OK
+would reformat tests/integration/test_wp13_rls_tenant_context.py
+Formatting code and cleaning up leftover test cruft.
+Request
+
+{
+  "edits": [
+    {
+      "newText": "class TestMiddlewareBinding:\n    @pytest.mark.asyncio\n    async def test_binding_reset_after_request_even_when_handler_raises(\n        self, monkeypatch\n    ):\n        seen = {}\n        tid = uuid.uuid4()\n\n        class _Req:\n            headers = {\"Authorization\": \"Bearer x\", \"X-Request-ID\": \"req-1\"}\n            method = \"GET\"\n\n            def __init__(self):\n                self.state = type(\"State\", (), {})()\n                self.url = type(\"U\", (), {\"path\": \"/x\"})()\n\n        class _Tok:\n            tenant_id = tid\n            user_id = uuid.uuid4()\n            role = \"ops_agent\"\n\n        async def call_next(_request):\n            seen[\"during\"] = tenancy.request_tenant_id.get()\n            raise RuntimeError(\"handler failed\")\n\n        from app.core import middleware as mw_mod\n\n        monkeypatch.setattr(mw_mod, \"decode_access_token\", lambda token: _Tok())\n        with pytest.raises(RuntimeError, match=\"handler failed\"):\n            await TenantMiddleware(app=None).dispatch(_Req(), call_next)\n        assert seen[\"during\"] == str(tid)\n        assert tenancy.request_tenant_id.get() is None\n",
+      "oldText": "class TestMiddlewareBinding:\n    @pytest.mark.asyncio\n    async def test_binding_reset_after_request_even_when_handler_raises(self):\n        seen = {}\n        tid = uuid.uuid4()\n\n        class _State:\n            pass\n\n        class _Req:\n            headers = {\"X-Request-ID\": \"req-1\"}\n\n            def __init__(self):\n                self.state = _State()\n                self.url = type(\"U\", (), {\"path\": \"/x\"})()\n                self.method = \"GET\"\n\n        req = _Req()\n        # Pre-set what TenantMiddleware would decode from a JWT.\n        req.headers = {\"X-Request-ID\": \"req-1\"}\n\n        async def call_next(_request):\n            seen[\"during\"] = tenancy.request_tenant_id.get()\n            raise RuntimeError(\"handler failed\")\n\n        mw = TenantMiddleware(app=None)\n        # Drive dispatch with a token already decoded: patch decode via state.\n        from app.core import middleware as mw_mod\n\n        class _Tok:\n            tenant_id = tid\n            user_id = uuid.uuid4()\n            role = \"ops_agent\"\n\n        orig = mw_mod.decode_access_token\n        mw_mod.decode_access_token = lambda token: _Tok()\n        try:\n            req.headers = {\"Authorization\": \"Bearer x\", \"X-Request-ID\": \"req-1\"}\n            with pytest.raises(RuntimeError, match=\"handler failed\"):\n                await mw.dispatch(req, call_next)\n        finally:\n            mw_mod.decode_access_token = orig\n        assert seen[\"during\"] == str(tid)\n        assert tenancy.request_tenant_id.get() is None\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\tests\\integration\\test_wp13_rls_tenant_context.py"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\integration\test_wp13_rls_tenant_context.py
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\integration\test_wp13_rls_tenant_context.py	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\integration\test_wp13_rls_tenant_context.py	modified
+@@ -114,48 +114,36 @@
+ 
+ 
+ class TestMiddlewareBinding:
+     @pytest.mark.asyncio
+-    async def test_binding_reset_after_request_even_when_handler_raises(self):
++    async def test_binding_reset_after_request_even_when_handler_raises(
++        self, monkeypatch
++    ):
+         seen = {}
+         tid = uuid.uuid4()
+ 
+-        class _State:
+-            pass
+-
+         class _Req:
+-            headers = {"X-Request-ID": "req-1"}
++            headers = {"Authorization": "Bearer x", "X-Request-ID": "req-1"}
++            method = "GET"
+ 
+             def __init__(self):
+-                self.state = _State()
++                self.state = type("State", (), {})()
+                 self.url = type("U", (), {"path": "/x"})()
+-                self.method = "GET"
+ 
+-        req = _Req()
+-        # Pre-set what TenantMiddleware would decode from a JWT.
+-        req.headers = {"X-Request-ID": "req-1"}
++        class _Tok:
++            tenant_id = tid
++            user_id = uuid.uuid4()
++            role = "ops_agent"
+ 
+         async def call_next(_request):
+             seen["during"] = tenancy.request_tenant_id.get()
+             raise RuntimeError("handler failed")
+ 
+-        mw = TenantMiddleware(app=None)
+-        # Drive dispatch with a token already decoded: patch decode via state.
+         from app.core import middleware as mw_mod
+ 
+-        class _Tok:
+-            tenant_id = tid
+-            user_id = uuid.uuid4()
+-            role = "ops_agent"
+-
+-        orig = mw_mod.decode_access_token
+-        mw_mod.decode_access_token = lambda token: _Tok()
+-        try:
+-            req.headers = {"Authorization": "Bearer x", "X-Request-ID": "req-1"}
+-            with pytest.raises(RuntimeError, match="handler failed"):
+-                await mw.dispatch(req, call_next)
+-        finally:
+-            mw_mod.decode_access_token = orig
++        monkeypatch.setattr(mw_mod, "decode_access_token", lambda token: _Tok())
++        with pytest.raises(RuntimeError, match="handler failed"):
++            await TenantMiddleware(app=None).dispatch(_Req(), call_next)
+         assert seen["during"] == str(tid)
+         assert tenancy.request_tenant_id.get() is None
+ 
+ 
+```
+
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh -c 'cd /app && black -q tests/integration/test_wp13_rls_tenant_context.py && black --check -q tests/integration/test_wp13_rls_tenant_context.py && flake8 tests/integration/test_wp13_rls_tenant_context.py && echo LINT_OK'; docker exec talkproof_api sh /tmp/run.sh 'tests/integration/test_wp13_rls_tenant_context.py tests/unit/test_m01_tenancy_core.py tests/unit/test_coverage_gaps.py' | Select-Object -Last 1\""
+}
+Response
+
+LINT_OK
+53 passed, 4 warnings in 3.72s
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git status --short; git diff --stat; git diff | Select-Object -First 60\""
+}
+Response
+
+ M services/api/tests/integration/test_wp13_rls_tenant_context.py
+ .../integration/test_wp13_rls_tenant_context.py    | 42 +++++++++-------------
+ 1 file changed, 16 insertions(+), 26 deletions(-)
+diff --git a/services/api/tests/integration/test_wp13_rls_tenant_context.py b/services/api/tests/integration/test_wp13_rls_tenant_context.py
+index 7a04af3..34a9690 100644
+--- a/services/api/tests/integration/test_wp13_rls_tenant_context.py
++++ b/services/api/tests/integration/test_wp13_rls_tenant_context.py
+@@ -115,46 +115,34 @@ class TestTransactionScopedSetting:
+ 
+ class TestMiddlewareBinding:
+     @pytest.mark.asyncio
+-    async def test_binding_reset_after_request_even_when_handler_raises(self):
++    async def test_binding_reset_after_request_even_when_handler_raises(
++        self, monkeypatch
++    ):
+         seen = {}
+         tid = uuid.uuid4()
+ 
+-        class _State:
+-            pass
+-
+         class _Req:
+-            headers = {"X-Request-ID": "req-1"}
++            headers = {"Authorization": "Bearer x", "X-Request-ID": "req-1"}
++            method = "GET"
+ 
+             def __init__(self):
+-                self.state = _State()
++                self.state = type("State", (), {})()
+                 self.url = type("U", (), {"path": "/x"})()
+-                self.method = "GET"
+ 
+-        req = _Req()
+-        # Pre-set what TenantMiddleware would decode from a JWT.
+-        req.headers = {"X-Request-ID": "req-1"}
++        class _Tok:
++            tenant_id = tid
++            user_id = uuid.uuid4()
++            role = "ops_agent"
+ 
+         async def call_next(_request):
+             seen["during"] = tenancy.request_tenant_id.get()
+             raise RuntimeError("handler failed")
+ 
+-        mw = TenantMiddleware(app=None)
+-        # Drive dispatch with a token already decoded: patch decode via state.
+         from app.core import middleware as mw_mod
+ 
+-        class _Tok:
+-            tenant_id = tid
+-            user_id = uuid.uuid4()
+-            role = "ops_agent"
+-
+-        orig = mw_mod.decode_access_token
+-        mw_mod.decode_access_token = lambda token: _Tok()
+-        try:
+-            req.headers = {"Authorization": "Bearer x", "X-Request-ID": "req-1"}
+-            with pytest.raises(RuntimeError, match="handler failed"):
+-                await mw.dispatch(req, call_next)
+-        finally:
+-            mw_mod.decode_access_token = orig
++        monkeypatch.setattr(mw_mod, "decode_access_token", lambda token: _Tok())
++        with pytest.raises(RuntimeError, match="handler failed"):
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; 'INTENDED COMMIT: WP-13 | review-found test tidy (dead code, manual monkeypatch) + black'; git add services/api/tests/integration/test_wp13_rls_tenant_context.py; git diff --cached --stat; git commit -m 'test(WP-13): tidy middleware exception-cleanup test; black' -m 'Review finding (test quality, no behaviour change): removed dead _State class and duplicated header setup in the middleware test and replaced the manual decode_access_token swap with the monkeypatch fixture. black applied. Results after execution: 11/11 WP-13 tests passed; with tenancy-core + coverage-gaps neighbours 53 passed. RLS policy activation remains BLOCKED (architecture decision).' 2>&1 | % { \\\"$_\\\" }; git show --stat --oneline HEAD; git push origin master 2>&1 | % { \\\"$_\\\" }; git status -sb; git log -3 --oneline --decorate\""
+}
+Response
+
+INTENDED COMMIT: WP-13 | review-found test tidy (dead code, manual monkeypatch) + black
+ .../integration/test_wp13_rls_tenant_context.py    | 42 +++++++++-------------
+ 1 file changed, 16 insertions(+), 26 deletions(-)
+[master 8e1b13e] test(WP-13): tidy middleware exception-cleanup test; black
+ 1 file changed, 16 insertions(+), 26 deletions(-)
+8e1b13e test(WP-13): tidy middleware exception-cleanup test; black
+ .../integration/test_wp13_rls_tenant_context.py    | 42 +++++++++-------------
+ 1 file changed, 16 insertions(+), 26 deletions(-)
+To https://github.com/vsenthil7/talkproof-backend.git
+   2dfa4b5..8e1b13e  master -> master
+## master...origin/master
+8e1b13e (HEAD -> master, origin/master, origin/HEAD) test(WP-13): tidy middleware exception-cleanup test; black
+2dfa4b5 test(WP-13): add tenant-context propagation tests — unverified first attempt
+274e2e3 fix(WP-02): start a fresh failure count after an expired lockout
+Reviewing transaction handling edge cases in the test setup.
+Starting WP-03 audit-chain concurrency review after flagging WP-13 blocker
+Request
+
+{
+  "content": "Set-Location 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'\nSelect-String docs\\02_requirements\\FRD.md -Pattern '### FR-022' -Context 0,12 | ForEach-Object { $_.Line; $_.Context.PostContext | Where-Object { $_ -match 'Description|Processing|Business Rules|Outputs' } }\nSelect-String docs\\02_requirements\\NFRD.md -Pattern '### NFR-034' -Context 0,8 | ForEach-Object { $_.Line; $_.Context.PostContext | Where-Object { $_ -match 'Requirement|Measurement' } }\n\"=== audit_repo.py\"\n$l = Get-Content services\\api\\app\\repositories\\audit_repo.py; for ($i=0; $i -lt [Math]::Min(130,$l.Count); $i++) { \"{0,4}: {1}\" -f ($i+1), $l[$i] }\n\"=== audit_log model (hash columns)\"\nSelect-String services\\api\\app\\models\\config.py -Pattern 'class AuditLog|row_hash|prev_hash|__tablename__ = .audit_log|Index\\(|unique' | ForEach-Object { \"{0}: {1}\" -f $_.LineNumber, $_.Line.Trim() }\n\"=== existing tests\"\nGet-ChildItem services\\api\\tests -Recurse -Filter *.py | Select-String -Pattern 'verify_chain|prev_hash' | Group-Object Filename | ForEach-Object { \"   {0} ({1})\" -f $_.Name, $_.Count }\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\wp03_read.ps1"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\_wp22_analysis\wp03_read.ps1
+Request
+
+{
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\_wp22_analysis\\wp03_read.ps1\""
+}
+Response
+
+### FR-022 - Hash-Chained Audit Log
+| **Description** | Every domain mutation must write an append-only `audit_log` record forming a SHA-256 hash chain. |
+| **Processing** | Compute `row_hash = SHA256(prev_hash ? entity_type ? entity_id ? action ? delta_json ? timestamp)`. Write record. Table has no `UPDATE`/`DELETE` privileges for the application DB role. |
+| **Outputs** | `audit_log` row: `id`, `tenant_id`, `actor_id`, `entity_type`, `entity_id`, `action`, `prev_hash`, `row_hash`, `timestamp`, `actor_ip`, `delta_json` |
+| **Business Rules** | Append-only enforced at the PostgreSQL GRANT level. `verify_chain()` (FR-023) detects any gap or alteration. |
+### NFR-034 - Audit Log Immutability
+| **Requirement** | The `audit_log`, `access_trail`, and `auth_events` tables must be append-only at the database level. The PostgreSQL application role must have no `UPDATE` or `DELETE` privileges on these tables. `verify_chain()` must detect any tampered row within 24 hours via a scheduled job. |
+| **Measurement** | `psql` test: attempt `DELETE FROM audit_log` with the application role; must return permission denied. `verify_chain()` job tested by artificially mutating a row and confirming detection. |
+=== audit_repo.py
+   1: """
+   2: AuditRepository -- append-only, hash-chained audit_log writer (M04).
+   3: 
+   4: HARD RULE: audit_log is INSERT-ONLY. Never UPDATE. Never DELETE.
+   5: 
+   6: Every write links into a SHA-256 hash chain:
+   7:     row_hash = SHA256(prev_hash + canonical_payload)
+   8: so any later tampering is detectable via forensics.verify_chain().
+   9: """
+  10: 
+  11: from __future__ import annotations
+  12: 
+  13: from typing import Any, Optional
+  14: from uuid import UUID
+  15: 
+  16: from sqlalchemy import select
+  17: from sqlalchemy.orm import Session
+  18: 
+  19: from app.core.forensics import GENESIS_HASH, canonical_payload, compute_row_hash
+  20: from app.models.config import AuditLog
+  21: 
+  22: 
+  23: class AuditRepository:
+  24:     """Append-only, hash-chained writer for the audit_log table."""
+  25: 
+  26:     def __init__(self, db: Session) -> None:
+  27:         self._db = db
+  28: 
+  29:     def _last_row_hash(self) -> str:
+  30:         """Return the row_hash of the latest chained row, or the genesis hash."""
+  31:         stmt = (
+  32:             select(AuditLog.row_hash)
+  33:             .where(AuditLog.row_hash.is_not(None))
+  34:             .order_by(AuditLog.seq.desc())
+  35:             .limit(1)
+  36:         )
+  37:         last = self._db.execute(stmt).scalar_one_or_none()
+  38:         return last or GENESIS_HASH
+  39: 
+  40:     def write(
+  41:         self,
+  42:         *,
+  43:         action: str,
+  44:         entity_type: str,
+  45:         entity_id: Optional[UUID],
+  46:         user_id: Optional[UUID],
+  47:         tenant_id: Optional[UUID] = None,
+  48:         old_value: Optional[dict[str, Any]] = None,
+  49:         new_value: Optional[dict[str, Any]] = None,
+  50:         ip_address: Optional[str] = None,
+  51:     ) -> AuditLog:
+  52:         """Insert a hash-chained audit_log row.
+  53: 
+  54:         Args:
+  55:             action: Verb like 'create_tenant', 'update_user', 'impersonate_start'.
+  56:             entity_type: Domain name e.g. 'tenant', 'user', 'config'.
+  57:             entity_id: UUID of the affected entity (optional).
+  58:             user_id: Actor UUID (from JWT).
+  59:             tenant_id: Tenant context (None for platform-level actions).
+  60:             old_value: JSONB snapshot before change (None for creates).
+  61:             new_value: JSONB snapshot after change (None for deletes).
+  62:             ip_address: Source IP if available.
+  63: 
+  64:         Returns:
+  65:             The persisted AuditLog row (with prev_hash/row_hash set).
+  66:         """
+  67:         prev_hash = self._last_row_hash()
+  68:         payload = canonical_payload(
+  69:             action=action,
+  70:             entity_type=entity_type,
+  71:             entity_id=str(entity_id) if entity_id else None,
+  72:             user_id=str(user_id) if user_id else None,
+  73:             tenant_id=str(tenant_id) if tenant_id else None,
+  74:             old_value=old_value,
+  75:             new_value=new_value,
+  76:             ip_address=ip_address,
+  77:         )
+  78:         row_hash = compute_row_hash(prev_hash, payload)
+  79:         entry = AuditLog(
+  80:             action=action,
+  81:             entity_type=entity_type,
+  82:             entity_id=entity_id,
+  83:             user_id=user_id,
+  84:             tenant_id=tenant_id,
+  85:             old_value=old_value,
+  86:             new_value=new_value,
+  87:             ip_address=ip_address,
+  88:             prev_hash=prev_hash,
+  89:             row_hash=row_hash,
+  90:         )
+  91:         self._db.add(entry)
+  92:         self._db.flush()
+  93:         return entry
+  94: 
+  95:     def write_field_changes(
+  96:         self,
+  97:         *,
+  98:         entity_type: str,
+  99:         entity_id: UUID,
+ 100:         user_id: Optional[UUID],
+ 101:         tenant_id: Optional[UUID],
+ 102:         old: dict[str, Any],
+ 103:         new: dict[str, Any],
+ 104:         ip_address: Optional[str] = None,
+ 105:     ) -> list[AuditLog]:
+ 106:         """Write one chained audit row per changed field (M04-T05).
+ 107: 
+ 108:         Args:
+ 109:             entity_type: domain name.
+ 110:             entity_id: affected entity id.
+ 111:             user_id: actor.
+ 112:             tenant_id: tenant context.
+ 113:             old: snapshot before.
+ 114:             new: snapshot after.
+ 115:             ip_address: source IP.
+ 116: 
+ 117:         Returns:
+ 118:             The list of audit rows written (one per changed field).
+ 119:         """
+ 120:         rows: list[AuditLog] = []
+ 121:         for field in sorted(set(old) | set(new)):
+ 122:             before = old.get(field)
+ 123:             after = new.get(field)
+ 124:             if before == after:
+ 125:                 continue
+ 126:             rows.append(
+ 127:                 self.write(
+ 128:                     action="update_field",
+ 129:                     entity_type=entity_type,
+ 130:                     entity_id=entity_id,
+=== audit_log model (hash columns)
+25: String(100), nullable=False, unique=True, index=True
+61: __import__("sqlalchemy").UniqueConstraint(
+91: __import__("sqlalchemy").UniqueConstraint(
+121: __import__("sqlalchemy").UniqueConstraint(
+201: class AuditLog(Base):
+204: __tablename__ = "audit_log"
+225: # chain deterministically; row_hash = SHA256(prev_hash + canonical payload).
+230: unique=True,
+233: prev_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+234: row_hash: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+=== existing tests
+   test_m04_forensics.py (14)
+Fixing a race condition in concurrent chain writes.
+Scoping an advisory-lock fix for the chain tip race condition
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; Select-String app\\core\\forensics.py -Pattern 'def verify_chain|def compute_row_hash|GENESIS_HASH =' -Context 0,6 | % { $_.Line; $_.Context.PostContext }; Select-String app\\services\\forensics_service.py -Pattern 'def verify_chain' -Context 0,10 | % { $_.Line; $_.Context.PostContext }; Select-String app\\models\\config.py -Pattern 'seq' | % { $_.LineNumber.ToString() + ': ' + $_.Line.Trim() }\""
+}
+Response
+
+GENESIS_HASH = "0" * 64
+
+
+def canonical_payload(
+    *,
+    action: str,
+    entity_type: str,
+def compute_row_hash(prev_hash: str, payload: str) -> str:
+    """row_hash = SHA256(prev_hash + payload)."""
+    return hashlib.sha256((prev_hash + payload).encode("utf-8")).hexdigest()
+
+
+class ChainVerificationResult:
+    """Result of verify_chain()."""
+def verify_chain(rows: Iterable) -> ChainVerificationResult:
+    """Verify a hash chain over audit rows ordered by seq.
+
+    Each row must expose: seq, prev_hash, row_hash, and the audited payload
+    fields. Returns a ChainVerificationResult; on tamper, first_bad_seq names
+    the first row whose recomputed hash or prev linkage does not match.
+
+224: # seq is a per-table monotonically increasing position used to order the
+226: seq: Mapped[int | None] = mapped_column(
+Implementing the lock in audit_repo.py.
+
+Request
+
+{
+  "edits": [
+    {
+      "newText": "from sqlalchemy import select, text\nfrom sqlalchemy.orm import Session\n\nfrom app.core.forensics import GENESIS_HASH, canonical_payload, compute_row_hash\nfrom app.models.config import AuditLog\n\n# WP-03 / FR-022, NFR-034 (CD-07): the chain tip is read-then-extended, so\n# concurrent writers must be serialised or two rows end up with the same\n# prev_hash (a fork verify_chain() reports as a broken chain). A\n# transaction-scoped PostgreSQL advisory lock keyed on this constant is taken\n# before reading the tip; it is released automatically at commit/rollback.\n# The chain is global (not per tenant), so a single key is correct.\nAUDIT_CHAIN_LOCK_KEY = 7_303_120_019  # arbitrary stable bigint, unique to audit_log\n",
+      "oldText": "from sqlalchemy import select\nfrom sqlalchemy.orm import Session\n\nfrom app.core.forensics import GENESIS_HASH, canonical_payload, compute_row_hash\nfrom app.models.config import AuditLog\n"
+    },
+    {
+      "newText": "    def _lock_chain(self) -> None:\n        \"\"\"Serialise chain writers for the rest of this transaction.\"\"\"\n        self._db.execute(\n            text(\"SELECT pg_advisory_xact_lock(:key)\"), {\"key\": AUDIT_CHAIN_LOCK_KEY}\n        )\n\n    def _last_row_hash(self) -> str:\n        \"\"\"Return the row_hash of the latest chained row, or the genesis hash.\n\n        Takes the chain lock first so the tip cannot move between this read\n        and the insert that extends it.\n        \"\"\"\n        self._lock_chain()\n        stmt = (\n",
+      "oldText": "    def _last_row_hash(self) -> str:\n        \"\"\"Return the row_hash of the latest chained row, or the genesis hash.\"\"\"\n        stmt = (\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\app\\repositories\\audit_repo.py"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\repositories\audit_repo.py
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\repositories\audit_repo.py	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\app\repositories\audit_repo.py	modified
+@@ -12,23 +12,42 @@
+ 
+ from typing import Any, Optional
+ from uuid import UUID
+ 
+-from sqlalchemy import select
++from sqlalchemy import select, text
+ from sqlalchemy.orm import Session
+ 
+ from app.core.forensics import GENESIS_HASH, canonical_payload, compute_row_hash
+ from app.models.config import AuditLog
+ 
++# WP-03 / FR-022, NFR-034 (CD-07): the chain tip is read-then-extended, so
++# concurrent writers must be serialised or two rows end up with the same
++# prev_hash (a fork verify_chain() reports as a broken chain). A
++# transaction-scoped PostgreSQL advisory lock keyed on this constant is taken
++# before reading the tip; it is released automatically at commit/rollback.
++# The chain is global (not per tenant), so a single key is correct.
++AUDIT_CHAIN_LOCK_KEY = 7_303_120_019  # arbitrary stable bigint, unique to audit_log
+ 
++
+ class AuditRepository:
+     """Append-only, hash-chained writer for the audit_log table."""
+ 
+     def __init__(self, db: Session) -> None:
+         self._db = db
+ 
++    def _lock_chain(self) -> None:
++        """Serialise chain writers for the rest of this transaction."""
++        self._db.execute(
++            text("SELECT pg_advisory_xact_lock(:key)"), {"key": AUDIT_CHAIN_LOCK_KEY}
++        )
++
+     def _last_row_hash(self) -> str:
+-        """Return the row_hash of the latest chained row, or the genesis hash."""
++        """Return the row_hash of the latest chained row, or the genesis hash.
++
++        Takes the chain lock first so the tip cannot move between this read
++        and the insert that extends it.
++        """
++        self._lock_chain()
+         stmt = (
+             select(AuditLog.row_hash)
+             .where(AuditLog.row_hash.is_not(None))
+             .order_by(AuditLog.seq.desc())
+```
+
+Checking how mocked database tests affect lock behavior.
+Request
+
+{
+  "content": "\"\"\"WP-03 / FR-022, NFR-034 (CD-07) -- audit chain stays single and valid\nunder concurrent writers.\n\nConcurrent AuditRepository.write() calls from independent sessions/connections\nmust each extend the one global chain (distinct prev_hash values, each equal\nto the preceding row's row_hash) and verify_chain() must pass afterwards.\nThe writers commit real rows to the test database (dropped at session end by\nthe conftest create_test_tables fixture).\n\"\"\"\n\nfrom __future__ import annotations\n\nimport threading\nimport uuid\n\nfrom sqlalchemy import select\nfrom sqlalchemy.orm import Session\n\nfrom app.core.forensics import verify_chain\nfrom app.models.config import AuditLog\nfrom app.repositories.audit_repo import AUDIT_CHAIN_LOCK_KEY, AuditRepository\nfrom tests.conftest import test_engine\n\nN_WRITERS = 8\n\n\ndef _write_concurrently(marker: str) -> list[Exception]:\n    barrier = threading.Barrier(N_WRITERS)\n    errors: list[Exception] = []\n\n    def worker(i: int) -> None:\n        try:\n            with Session(test_engine) as s:\n                barrier.wait(timeout=10)\n                AuditRepository(s).write(\n                    action=marker,\n                    entity_type=\"wp03\",\n                    entity_id=uuid.uuid4(),\n                    user_id=None,\n                    tenant_id=None,\n                    new_value={\"writer\": i},\n                )\n                s.commit()\n        except Exception as exc:  # pragma: no cover - surfaced by the assertion\n            errors.append(exc)\n\n    threads = [threading.Thread(target=worker, args=(i,)) for i in range(N_WRITERS)]\n    for t in threads:\n        t.start()\n    for t in threads:\n        t.join(timeout=30)\n    return errors\n\n\nclass TestAuditChainConcurrency:\n    def test_lock_key_is_a_stable_bigint(self):\n        assert isinstance(AUDIT_CHAIN_LOCK_KEY, int)\n        assert 0 < AUDIT_CHAIN_LOCK_KEY < 2**63\n\n    def test_concurrent_writers_extend_one_chain(self):\n        marker = f\"wp03_concurrent_{uuid.uuid4().hex[:8]}\"\n        errors = _write_concurrently(marker)\n        assert errors == []\n\n        with Session(test_engine) as s:\n            all_rows = s.execute(select(AuditLog).order_by(AuditLog.seq)).scalars().all()\n            ours = [r for r in all_rows if r.action == marker]\n            assert len(ours) == N_WRITERS\n\n            # No fork: every writer saw a different tip.\n            assert len({r.prev_hash for r in ours}) == N_WRITERS\n            # Each of our rows links to the row immediately before it (by seq).\n            by_seq = {r.seq: r for r in all_rows}\n            seqs = sorted(by_seq)\n            for r in ours:\n                prev_seq = seqs[seqs.index(r.seq) - 1]\n                assert r.prev_hash == by_seq[prev_seq].row_hash\n\n            # And the global chain verifies end to end.\n            assert verify_chain(all_rows).ok is True\n            s.rollback()\n",
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\tests\\integration\\test_wp03_audit_chain_concurrency.py"
+}
+Response
+
+Successfully wrote to C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\integration\test_wp03_audit_chain_concurrency.py
+Removing a test-only coverage exemption to follow protocol.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; Select-String app\\core\\forensics.py -Pattern 'class ChainVerificationResult' -Context 0,14 | % { $_.Context.PostContext }; $p='tests\\integration\\test_wp03_audit_chain_concurrency.py'; $t=[IO.File]::ReadAllText($p); $t=$t.Replace('        except Exception as exc:  # pragma: no cover - surfaced by the assertion', '        except Exception as exc:'); [IO.File]::WriteAllText($p,$t,(New-Object Text.UTF8Encoding($false))); Select-String $p -Pattern 'pragma' | % { 'STILL: ' + $_.Line }\""
+}
+Response
+
+    """Result of verify_chain()."""
+
+    def __init__(
+        self,
+        chain_valid: bool,
+        checked: int,
+        first_bad_seq: Optional[int] = None,
+        reason: Optional[str] = None,
+    ) -> None:
+        self.chain_valid = chain_valid
+        self.checked = checked
+        self.first_bad_seq = first_bad_seq
+        self.reason = reason
+
+STILL:         except Exception as exc:  # pragma: no cover - surfaced by the assertion
+Request
+
+{
+  "edits": [
+    {
+      "newText": "        except Exception as exc:\n            errors.append(exc)\n",
+      "oldText": "        except Exception as exc:  # pragma: no cover - surfaced by the assertion\n            errors.append(exc)\n"
+    },
+    {
+      "newText": "            # And the global chain verifies end to end.\n            result = verify_chain(all_rows)\n            assert result.chain_valid is True, result.reason\n",
+      "oldText": "            # And the global chain verifies end to end.\n            assert verify_chain(all_rows).ok is True\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\tests\\integration\\test_wp03_audit_chain_concurrency.py"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\integration\test_wp03_audit_chain_concurrency.py
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\integration\test_wp03_audit_chain_concurrency.py	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\integration\test_wp03_audit_chain_concurrency.py	modified
+@@ -40,9 +40,9 @@
+                     tenant_id=None,
+                     new_value={"writer": i},
+                 )
+                 s.commit()
+-        except Exception as exc:  # pragma: no cover - surfaced by the assertion
++        except Exception as exc:
+             errors.append(exc)
+ 
+     threads = [threading.Thread(target=worker, args=(i,)) for i in range(N_WRITERS)]
+     for t in threads:
+@@ -76,6 +76,7 @@
+                 prev_seq = seqs[seqs.index(r.seq) - 1]
+                 assert r.prev_hash == by_seq[prev_seq].row_hash
+ 
+             # And the global chain verifies end to end.
+-            assert verify_chain(all_rows).ok is True
++            result = verify_chain(all_rows)
++            assert result.chain_valid is True, result.reason
+             s.rollback()
+```
+
+Snapshot (first attempt, unexecuted) — visible Git sequence.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git status --short; git diff --stat; git diff; 'INTENDED COMMIT: WP-03 | advisory-lock serialisation of audit chain writers + concurrency test — first attempt, unexecuted'; git add services/api/app/repositories/audit_repo.py services/api/tests/integration/test_wp03_audit_chain_concurrency.py; git status --short; git diff --cached --stat\""
+}
+Response
+
+ M services/api/app/repositories/audit_repo.py
+?? services/api/tests/integration/test_wp03_audit_chain_concurrency.py
+ services/api/app/repositories/audit_repo.py | 23 +++++++++++++++++++++--
+ 1 file changed, 21 insertions(+), 2 deletions(-)
+diff --git a/services/api/app/repositories/audit_repo.py b/services/api/app/repositories/audit_repo.py
+index a785d0c..e703347 100644
+--- a/services/api/app/repositories/audit_repo.py
++++ b/services/api/app/repositories/audit_repo.py
+@@ -13,12 +13,20 @@ from __future__ import annotations
+ from typing import Any, Optional
+ from uuid import UUID
+ 
+-from sqlalchemy import select
++from sqlalchemy import select, text
+ from sqlalchemy.orm import Session
+ 
+ from app.core.forensics import GENESIS_HASH, canonical_payload, compute_row_hash
+ from app.models.config import AuditLog
+ 
++# WP-03 / FR-022, NFR-034 (CD-07): the chain tip is read-then-extended, so
++# concurrent writers must be serialised or two rows end up with the same
++# prev_hash (a fork verify_chain() reports as a broken chain). A
++# transaction-scoped PostgreSQL advisory lock keyed on this constant is taken
++# before reading the tip; it is released automatically at commit/rollback.
++# The chain is global (not per tenant), so a single key is correct.
++AUDIT_CHAIN_LOCK_KEY = 7_303_120_019  # arbitrary stable bigint, unique to audit_log
++
+ 
+ class AuditRepository:
+     """Append-only, hash-chained writer for the audit_log table."""
+@@ -26,8 +34,19 @@ class AuditRepository:
+     def __init__(self, db: Session) -> None:
+         self._db = db
+ 
++    def _lock_chain(self) -> None:
++        """Serialise chain writers for the rest of this transaction."""
++        self._db.execute(
++            text("SELECT pg_advisory_xact_lock(:key)"), {"key": AUDIT_CHAIN_LOCK_KEY}
++        )
++
+     def _last_row_hash(self) -> str:
+-        """Return the row_hash of the latest chained row, or the genesis hash."""
++        """Return the row_hash of the latest chained row, or the genesis hash.
++
++        Takes the chain lock first so the tip cannot move between this read
++        and the insert that extends it.
++        """
++        self._lock_chain()
+         stmt = (
+             select(AuditLog.row_hash)
+             .where(AuditLog.row_hash.is_not(None))
+INTENDED COMMIT: WP-03 | advisory-lock serialisation of audit chain writers + concurrency test - first attempt, unexecuted
+M  services/api/app/repositories/audit_repo.py
+A  services/api/tests/integration/test_wp03_audit_chain_concurrency.py
+ services/api/app/repositories/audit_repo.py        | 23 +++++-
+ .../test_wp03_audit_chain_concurrency.py           | 82 ++++++++++++++++++++++
+ 2 files changed, 103 insertions(+), 2 deletions(-)
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git commit -m 'audit(WP-03): initial AI implementation — unverified' -m 'FR-022 / NFR-034 (CD-07): serialise audit-chain writers. AuditRepository._last_row_hash now takes a transaction-scoped PostgreSQL advisory lock (pg_advisory_xact_lock on AUDIT_CHAIN_LOCK_KEY) before reading the chain tip, so concurrent writers cannot read the same tip and fork the chain. Released at commit/rollback; no schema change; chain remains global.' -m 'Intended test: tests/integration/test_wp03_audit_chain_concurrency.py (8 threads, independent sessions, barrier-started; asserts distinct prev_hash per writer, each linking to the preceding row by seq, and verify_chain() valid). Snapshot taken BEFORE executing the new test. Full verification NOT RUN.' 2>&1 | % { \\\"$_\\\" }; git show --stat --oneline HEAD; git status --short; git push origin master 2>&1 | % { \\\"$_\\\" }; git status -sb; git log -3 --oneline --decorate\""
+}
+Response
+
+[master c8e47d2] audit(WP-03): initial AI implementation — unverified
+ 2 files changed, 103 insertions(+), 2 deletions(-)
+ create mode 100644 services/api/tests/integration/test_wp03_audit_chain_concurrency.py
+c8e47d2 audit(WP-03): initial AI implementation — unverified
+ services/api/app/repositories/audit_repo.py        | 23 +++++-
+ .../test_wp03_audit_chain_concurrency.py           | 82 ++++++++++++++++++++++
+ 2 files changed, 103 insertions(+), 2 deletions(-)
+To https://github.com/vsenthil7/talkproof-backend.git
+   8e1b13e..c8e47d2  master -> master
+## master...origin/master
+c8e47d2 (HEAD -> master, origin/master, origin/HEAD) audit(WP-03): initial AI implementation — unverified
+8e1b13e test(WP-13): tidy middleware exception-cleanup test; black
+2dfa4b5 test(WP-13): add tenant-context propagation tests — unverified first attempt
+Executing the WP-03 test plus the audit/forensics neighbours.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh /tmp/run.sh 'tests/integration/test_wp03_audit_chain_concurrency.py tests/unit/test_m04_forensics.py tests/unit/test_audit_repo.py tests/integration/test_m04_forensics.py'\""
+}
+Response
+
+ERROR: file or directory not found: tests/unit/test_audit_repo.py
+  /usr/local/lib/python3.11/site-packages/pydantic/_internal/_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh -c 'cd /app && ls tests/*/test_m04* tests/*/*audit* tests/*/*forensic* 2>/dev/null'; docker exec talkproof_api sh /tmp/run.sh 'tests/integration/test_wp03_audit_chain_concurrency.py $(cd /app && ls tests/*/test_m04* tests/*/*audit* tests/*/*forensic* 2>/dev/null | tr \\\"\\n\\\" \\\" \\\")'\""
+}
+Response
+
+tests/integration/test_m04_forensics.py
+tests/integration/test_m04_forensics.py
+tests/integration/test_wp03_audit_chain_concurrency.py
+tests/unit/test_m04_forensics.py
+tests/unit/test_m04_forensics.py
+ERROR: file or directory not found: $(cd
+  /usr/local/lib/python3.11/site-packages/pydantic/_internal/_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh /tmp/run.sh 'tests/integration/test_wp03_audit_chain_concurrency.py tests/unit/test_m04_forensics.py tests/integration/test_m04_forensics.py'\""
+}
+Response
+
+/app/tests/integration/test_wp03_audit_chain_concurrency.py:77: AssertionError: assert '000000000000...0000000000000' == '553117d6acc1...9ff5de5eff095'
+/app/tests/unit/test_m04_forensics.py:309: AssertionError: assert '553117d6acc1...9ff5de5eff095' == '000000000000...0000000000000'
+/app/tests/unit/test_m04_forensics.py:348: assert 13 == 5
+  /usr/local/lib/python3.11/site-packages/pydantic/_internal/_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
+FAILED tests/integration/test_wp03_audit_chain_concurrency.py::TestAuditChainConcurrency::test_concurrent_writers_extend_one_chain
+FAILED tests/unit/test_m04_forensics.py::TestAuditRepoChaining::test_first_row_links_to_genesis
+FAILED tests/unit/test_m04_forensics.py::TestAuditRepoChaining::test_list_chain_and_verify
+3 failed, 35 passed, 3 warnings in 5.40s
+Tracing a mismatched hash chain in a validation test.
+Fixing test defects causing chain-link and database pollution failures
+Request
+
+{
+  "edits": [
+    {
+      "newText": "from sqlalchemy import delete, select\nfrom sqlalchemy.orm import Session\n\nfrom app.core.forensics import GENESIS_HASH, verify_chain\n",
+      "oldText": "from sqlalchemy import select\nfrom sqlalchemy.orm import Session\n\nfrom app.core.forensics import verify_chain\n"
+    },
+    {
+      "newText": "    def test_concurrent_writers_extend_one_chain(self):\n        marker = f\"wp03_concurrent_{uuid.uuid4().hex[:8]}\"\n        try:\n            errors = _write_concurrently(marker)\n            assert errors == []\n\n            with Session(test_engine) as s:\n                all_rows = (\n                    s.execute(select(AuditLog).order_by(AuditLog.seq)).scalars().all()\n                )\n                ours = [r for r in all_rows if r.action == marker]\n                assert len(ours) == N_WRITERS\n\n                # No fork: every writer saw a different tip.\n                assert len({r.prev_hash for r in ours}) == N_WRITERS\n                # Each of our rows links to the row immediately before it (by\n                # seq); the very first chain row links to the genesis hash.\n                for idx, row in enumerate(all_rows):\n                    if row.action != marker:\n                        continue\n                    expected = GENESIS_HASH if idx == 0 else all_rows[idx - 1].row_hash\n                    assert row.prev_hash == expected\n\n                # And the global chain verifies end to end.\n                result = verify_chain(all_rows)\n                assert result.chain_valid is True, result.reason\n                s.rollback()\n        finally:\n            # Test-database-only cleanup: the writers had to COMMIT (separate\n            # connections), which would otherwise leak rows into other tests\n            # that assume an empty audit_log. Our rows are the chain tail, so\n            # removing them restores the previous tip. audit_log stays\n            # append-only in production (NFR-034: app role has no DELETE).\n            with Session(test_engine) as s:\n                s.execute(delete(AuditLog).where(AuditLog.action == marker))\n                s.commit()\n",
+      "oldText": "    def test_concurrent_writers_extend_one_chain(self):\n        marker = f\"wp03_concurrent_{uuid.uuid4().hex[:8]}\"\n        errors = _write_concurrently(marker)\n        assert errors == []\n\n        with Session(test_engine) as s:\n            all_rows = s.execute(select(AuditLog).order_by(AuditLog.seq)).scalars().all()\n            ours = [r for r in all_rows if r.action == marker]\n            assert len(ours) == N_WRITERS\n\n            # No fork: every writer saw a different tip.\n            assert len({r.prev_hash for r in ours}) == N_WRITERS\n            # Each of our rows links to the row immediately before it (by seq).\n            by_seq = {r.seq: r for r in all_rows}\n            seqs = sorted(by_seq)\n            for r in ours:\n                prev_seq = seqs[seqs.index(r.seq) - 1]\n                assert r.prev_hash == by_seq[prev_seq].row_hash\n\n            # And the global chain verifies end to end.\n            result = verify_chain(all_rows)\n            assert result.chain_valid is True, result.reason\n            s.rollback()\n"
+    }
+  ],
+  "path": "C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api\\tests\\integration\\test_wp03_audit_chain_concurrency.py"
+}
+Response
+
+```diff
+Index: C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\integration\test_wp03_audit_chain_concurrency.py
+===================================================================
+--- C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\integration\test_wp03_audit_chain_concurrency.py	original
++++ C:\Users\v_sen\Documents\Projects\AT_Projects\talkproof\talkproof-backend\services\api\tests\integration\test_wp03_audit_chain_concurrency.py	modified
+@@ -12,12 +12,12 @@
+ 
+ import threading
+ import uuid
+ 
+-from sqlalchemy import select
++from sqlalchemy import delete, select
+ from sqlalchemy.orm import Session
+ 
+-from app.core.forensics import verify_chain
++from app.core.forensics import GENESIS_HASH, verify_chain
+ from app.models.config import AuditLog
+ from app.repositories.audit_repo import AUDIT_CHAIN_LOCK_KEY, AuditRepository
+ from tests.conftest import test_engine
+ 
+@@ -58,25 +58,38 @@
+         assert 0 < AUDIT_CHAIN_LOCK_KEY < 2**63
+ 
+     def test_concurrent_writers_extend_one_chain(self):
+         marker = f"wp03_concurrent_{uuid.uuid4().hex[:8]}"
+-        errors = _write_concurrently(marker)
+-        assert errors == []
++        try:
++            errors = _write_concurrently(marker)
++            assert errors == []
+ 
+-        with Session(test_engine) as s:
+-            all_rows = s.execute(select(AuditLog).order_by(AuditLog.seq)).scalars().all()
+-            ours = [r for r in all_rows if r.action == marker]
+-            assert len(ours) == N_WRITERS
++            with Session(test_engine) as s:
++                all_rows = (
++                    s.execute(select(AuditLog).order_by(AuditLog.seq)).scalars().all()
++                )
++                ours = [r for r in all_rows if r.action == marker]
++                assert len(ours) == N_WRITERS
+ 
+-            # No fork: every writer saw a different tip.
+-            assert len({r.prev_hash for r in ours}) == N_WRITERS
+-            # Each of our rows links to the row immediately before it (by seq).
+-            by_seq = {r.seq: r for r in all_rows}
+-            seqs = sorted(by_seq)
+-            for r in ours:
+-                prev_seq = seqs[seqs.index(r.seq) - 1]
+-                assert r.prev_hash == by_seq[prev_seq].row_hash
++                # No fork: every writer saw a different tip.
++                assert len({r.prev_hash for r in ours}) == N_WRITERS
++                # Each of our rows links to the row immediately before it (by
++                # seq); the very first chain row links to the genesis hash.
++                for idx, row in enumerate(all_rows):
++                    if row.action != marker:
++                        continue
++                    expected = GENESIS_HASH if idx == 0 else all_rows[idx - 1].row_hash
++                    assert row.prev_hash == expected
+ 
+-            # And the global chain verifies end to end.
+-            result = verify_chain(all_rows)
+-            assert result.chain_valid is True, result.reason
+-            s.rollback()
++                # And the global chain verifies end to end.
++                result = verify_chain(all_rows)
++                assert result.chain_valid is True, result.reason
++                s.rollback()
++        finally:
++            # Test-database-only cleanup: the writers had to COMMIT (separate
++            # connections), which would otherwise leak rows into other tests
++            # that assume an empty audit_log. Our rows are the chain tail, so
++            # removing them restores the previous tip. audit_log stays
++            # append-only in production (NFR-034: app role has no DELETE).
++            with Session(test_engine) as s:
++                s.execute(delete(AuditLog).where(AuditLog.action == marker))
++                s.commit()
+```
+
+Investigating leftover test rows breaking repeated test runs.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"docker exec talkproof_api sh /tmp/run.sh 'tests/integration/test_wp03_audit_chain_concurrency.py tests/unit/test_m04_forensics.py tests/integration/test_m04_forensics.py'; docker exec talkproof_api sh /tmp/run.sh 'tests/unit/test_m04_forensics.py tests/integration/test_wp03_audit_chain_concurrency.py tests/integration/test_m04_forensics.py' | Select-Object -Last 1; docker exec talkproof_api sh -c 'cd /app && black -q tests/integration/test_wp03_audit_chain_concurrency.py; black --check -q tests/integration/test_wp03_audit_chain_concurrency.py app/repositories/audit_repo.py && flake8 tests/integration/test_wp03_audit_chain_concurrency.py app/repositories/audit_repo.py && echo LINT_OK'\""
+}
+Response
+
+  /usr/local/lib/python3.11/site-packages/pydantic/_internal/_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
+38 passed, 3 warnings in 5.41s
+38 passed, 3 warnings in 5.18s
+LINT_OK
+Green in both orders (38/38), lint clean. Fix commit (visible).
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git status --short; git diff --stat; git diff | Select-Object -First 80; 'INTENDED COMMIT: WP-03 | fix test defects (genesis first-row, committed-row pollution cleanup)'; git add services/api/tests/integration/test_wp03_audit_chain_concurrency.py; git diff --cached --stat\""
+}
+Response
+
+ M services/api/tests/integration/test_wp03_audit_chain_concurrency.py
+ .../test_wp03_audit_chain_concurrency.py           | 59 +++++++++++++---------
+ 1 file changed, 36 insertions(+), 23 deletions(-)
+diff --git a/services/api/tests/integration/test_wp03_audit_chain_concurrency.py b/services/api/tests/integration/test_wp03_audit_chain_concurrency.py
+index 3f9d3b7..2118d87 100644
+--- a/services/api/tests/integration/test_wp03_audit_chain_concurrency.py
++++ b/services/api/tests/integration/test_wp03_audit_chain_concurrency.py
+@@ -13,10 +13,10 @@ from __future__ import annotations
+ import threading
+ import uuid
+ 
+-from sqlalchemy import select
++from sqlalchemy import delete, select
+ from sqlalchemy.orm import Session
+ 
+-from app.core.forensics import verify_chain
++from app.core.forensics import GENESIS_HASH, verify_chain
+ from app.models.config import AuditLog
+ from app.repositories.audit_repo import AUDIT_CHAIN_LOCK_KEY, AuditRepository
+ from tests.conftest import test_engine
+@@ -59,24 +59,37 @@ class TestAuditChainConcurrency:
+ 
+     def test_concurrent_writers_extend_one_chain(self):
+         marker = f"wp03_concurrent_{uuid.uuid4().hex[:8]}"
+-        errors = _write_concurrently(marker)
+-        assert errors == []
+-
+-        with Session(test_engine) as s:
+-            all_rows = s.execute(select(AuditLog).order_by(AuditLog.seq)).scalars().all()
+-            ours = [r for r in all_rows if r.action == marker]
+-            assert len(ours) == N_WRITERS
+-
+-            # No fork: every writer saw a different tip.
+-            assert len({r.prev_hash for r in ours}) == N_WRITERS
+-            # Each of our rows links to the row immediately before it (by seq).
+-            by_seq = {r.seq: r for r in all_rows}
+-            seqs = sorted(by_seq)
+-            for r in ours:
+-                prev_seq = seqs[seqs.index(r.seq) - 1]
+-                assert r.prev_hash == by_seq[prev_seq].row_hash
+-
+-            # And the global chain verifies end to end.
+-            result = verify_chain(all_rows)
+-            assert result.chain_valid is True, result.reason
+-            s.rollback()
++        try:
++            errors = _write_concurrently(marker)
++            assert errors == []
++
++            with Session(test_engine) as s:
++                all_rows = (
++                    s.execute(select(AuditLog).order_by(AuditLog.seq)).scalars().all()
++                )
++                ours = [r for r in all_rows if r.action == marker]
++                assert len(ours) == N_WRITERS
++
++                # No fork: every writer saw a different tip.
++                assert len({r.prev_hash for r in ours}) == N_WRITERS
++                # Each of our rows links to the row immediately before it (by
++                # seq); the very first chain row links to the genesis hash.
++                for idx, row in enumerate(all_rows):
++                    if row.action != marker:
++                        continue
++                    expected = GENESIS_HASH if idx == 0 else all_rows[idx - 1].row_hash
++                    assert row.prev_hash == expected
++
++                # And the global chain verifies end to end.
++                result = verify_chain(all_rows)
++                assert result.chain_valid is True, result.reason
++                s.rollback()
++        finally:
++            # Test-database-only cleanup: the writers had to COMMIT (separate
++            # connections), which would otherwise leak rows into other tests
++            # that assume an empty audit_log. Our rows are the chain tail, so
++            # removing them restores the previous tip. audit_log stays
++            # append-only in production (NFR-034: app role has no DELETE).
++            with Session(test_engine) as s:
++                s.execute(delete(AuditLog).where(AuditLog.action == marker))
++                s.commit()
+INTENDED COMMIT: WP-03 | fix test defects (genesis first-row, committed-row pollution cleanup)
+ .../test_wp03_audit_chain_concurrency.py           | 59 +++++++++++++---------
+ 1 file changed, 36 insertions(+), 23 deletions(-)
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend'; git commit -m 'fix(WP-03): concurrency test — genesis first row and committed-row cleanup' -m 'TEST_DEFECT x2 found on first execution: (1) on an empty audit_log the first writer correctly links to the genesis hash, but the index arithmetic wrapped to the last row; (2) the writers must COMMIT on separate connections, and the leaked rows broke test_m04_forensics (first-row-genesis and row-count tests). The test now expects GENESIS_HASH for index 0 and removes its own marker rows in finally (test DB only; our rows are the chain tail so the previous tip is restored). The production advisory lock needed no change: 8 writers produced 8 distinct tips and a valid chain. Narrow: wp03 + unit/integration m04_forensics: 38 passed in both orders.' 2>&1 | % { \\\"$_\\\" }; git show --stat --oneline HEAD; git push origin master 2>&1 | % { \\\"$_\\\" }; git status -sb; git log -3 --oneline --decorate\""
+}
+Response
+
+[master cab5e4f] fix(WP-03): concurrency test — genesis first row and committed-row cleanup
+ 1 file changed, 36 insertions(+), 23 deletions(-)
+cab5e4f fix(WP-03): concurrency test — genesis first row and committed-row cleanup
+ .../test_wp03_audit_chain_concurrency.py           | 59 +++++++++++++---------
+ 1 file changed, 36 insertions(+), 23 deletions(-)
+To https://github.com/vsenthil7/talkproof-backend.git
+   c8e47d2..cab5e4f  master -> master
+## master...origin/master
+cab5e4f (HEAD -> master, origin/master, origin/HEAD) fix(WP-03): concurrency test — genesis first row and committed-row cleanup
+c8e47d2 audit(WP-03): initial AI implementation — unverified
+8e1b13e test(WP-13): tidy middleware exception-cleanup test; black
+Mapping out which components write to each audit chain.
+Request
+
+{
+  "command": "powershell -NoProfile -Command \"cd 'C:\\Users\\v_sen\\Documents\\Projects\\AT_Projects\\talkproof\\talkproof-backend\\services\\api'; Get-ChildItem app -Recurse -Filter *.py | Select-String -Pattern 'AuditLog\\(|insert\\(AuditLog|audit_log' | ? { $_.Path -notmatch 'models\\\\|audit_repo.py' } | % { $_.Path.Substring((Get-Location).Path.Length+1) + ':' + $_.LineNumber + ': ' + $_.Line.Trim() } | Select -First 12\""
+}
+Response
+
+app\api\v1\routes\config_admin.py:11: Mutating endpoints write to audit_log via ConfigAdminService.
+app\api\v1\routes\cost.py:9: PATCH writes to audit_log via CostService (idempotent; audits only on change).
+app\api\v1\routes\feature_flags.py:9: Mutating endpoint writes to audit_log via FeatureFlagService.
+app\api\v1\routes\forensics.py:1: """M04 forensics routes -- chain verify + audit/access query (audit_log:read)."""
+app\api\v1\routes\forensics.py:32: token_data: TokenData = Depends(require_permission("audit_log", "read")),
+app\api\v1\routes\forensics.py:34: """Verify the audit_log hash chain; reports the first tampered seq if any."""
+app\api\v1\routes\forensics.py:48: token_data: TokenData = Depends(require_permission("audit_log", "read")),
+app\api\v1\routes\forensics.py:74: token_data: TokenData = Depends(require_permission("audit_log", "read")),
+app\api\v1\routes\impersonate.py:8: Writes audit_log action=impersonate_start via ImpersonateService.
+app\api\v1\routes\rate_cards.py:10: Mutating endpoints write to audit_log via RateCardService.
+app\api\v1\routes\tenants.py:5: Mutating endpoints write to audit_log via TenantAdminService.
+app\api\v1\routes\users_admin.py:10: Mutating endpoints write to audit_log via UserAdminService.
+Tool limit reached — stopping here at a clean, pushed checkpoint and handing off per §16.
+
+Review outcome for WP-03 (last check): no code constructs AuditLog rows outside AuditRepository; all services route through it, so the lock covers every chain writer. Residual review note: the advisory lock is held until commit, so a transaction that takes the chain lock and then waits on a row lock held by another writer could deadlock (Postgres would detect and abort one side) — a known trade-off of tip-serialisation, not a defect; a regression test for that scenario was not added.
+
+Process fault to flag: three earlier WP-01 fix commits (4910841, d90fbe9, 0253317) carry a literal $(Get-Content …) subject because a helper script mis-passed the message. They are pushed and were not amended; the intended messages are attached as git notes (refs/notes/commits, pushed). After that I used only visible Git commands, as the protocol requires.
+
+Handoff
+WP	FIRST-ATTEMPT COMMIT	DEFECTS FOUND	FIX COMMITS	TESTS RUN	CURRENT STATE	BLOCKER
+WP-22	8abbed1	—	—	106 (py3.11) / 158 (py3.12) narrow	tests in place; 21/23 lines covered	Protocol ... lines decision; full regression/100% gate not run
+WP-13	42865e9 (impl), 2dfa4b5 (tests)	review: test tidy	8e1b13e	11/11 new + 53 with neighbours	application half verified (ContextVar + after_begin, no leakage, pool-safe, exception cleanup)	BLOCKED policy half — users in RLS_TABLES, tenant-less login, no platform bypass, dev role SUPERUSER/BYPASSRLS → design decision
+WP-01	ebed893	DEFECT (500 instead of fail-fast), ENVIRONMENT (HS256 everywhere), TEST-DEBT (vacuous HS256 tests)	4910841, d90fbe9, 0253317	300-wide auth/security set green	verified; local .env set to RS256; staging needs a real key pair	none
+WP-02	f1757e1 (impl), b604230 (tests)	PRE_EXISTING_DEFECT: stale counter re-locked indefinitely after expiry	274e2e3	56 narrow green	verified: 5 failures → 30-min lock, boundaries, 120 ok / 121 rejected	FR-011 15-minute window = REQUIREMENT_GAP (needs persisted timing)
+WP-03	c8e47d2	TEST_DEFECT ×2 (genesis first row; committed-row pollution)	cab5e4f	38 green in both orders	advisory-lock serialisation verified; review done	none
+WP-05 … WP-10	—	—	—	—	not started	—
+REMAINING WORK: WP-05 (vault read path/router result), WP-08, WP-09, WP-10; full regression + 100% gate on a toolchain that traces async correctly (Python 3.11 image artefact still DEFERRED); ops/backend.ps1 uses --cov-fail-under=99; test DB role is SUPERUSER (NFR-034 append-only can't be exercised there).
+
+NEXT EXACT ACTION: start WP-05 — read FR-028/FR-030, core/crypto.py (decrypt_secret has zero callers) and campaign_carrier/resolver.py:107-121 (router result discarded), implement the read path, snapshot audit(WP-05): initial AI implementation — unverified, push, then run its tests.
+
+Last observed Git state (before the limit): ## master...origin/master clean; cab5e4f (HEAD -> master, origin/master) fix(WP-03) … ← c8e47d2 audit(WP-03) ← 8e1b13e test(WP-13) ← 2dfa4b5 ← 274e2e3 fix(WP-02) ← b604230 ← 0253317 ← d90fbe9 ← 4910841 ← 8abbed1. S47-B stash untouched; TC-1..TC-12 and governance artifacts untouched.
+
+Claude reached its tool-use limit for this turn.

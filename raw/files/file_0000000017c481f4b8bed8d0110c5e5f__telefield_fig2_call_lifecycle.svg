@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 470" role="img" aria-label="The call state machine: a queued lead is claimed into leased, dialled into dialling, and ends connected or failed with a named kind, then wrapping and disposed. A lease that expires returns the lead to the queue with one more attempt. Retryable provider failures can be dialled again; a rejected number closes as wrong number."><title>Figure 2 — The call lifecycle</title>
+  <defs>
+    <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#1f2933"/>
+    </marker>
+    <marker id="a2r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#9a6b12"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1180" height="470" fill="#ffffff"/>
+
+  <!-- states row -->
+  <rect x="24"  y="150" width="132" height="58" rx="9" fill="#f2f4f8" stroke="#5a6572" stroke-width="1.5"/>
+  <text x="90"  y="176" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2933">queued</text>
+  <text x="90"  y="195" text-anchor="middle" font-size="11" fill="#5a6572">lead, not a call</text>
+
+  <rect x="224" y="150" width="132" height="58" rx="9" fill="#e6f4ee" stroke="#157f5b" stroke-width="1.5"/>
+  <text x="290" y="176" text-anchor="middle" font-size="13" font-weight="700" fill="#157f5b">leased</text>
+  <text x="290" y="195" text-anchor="middle" font-size="11" fill="#5a6572">held for this rep</text>
+
+  <rect x="424" y="150" width="132" height="58" rx="9" fill="#e6f4ee" stroke="#157f5b" stroke-width="1.5"/>
+  <text x="490" y="176" text-anchor="middle" font-size="13" font-weight="700" fill="#157f5b">dialling</text>
+  <text x="490" y="195" text-anchor="middle" font-size="11" fill="#5a6572">leg at the provider</text>
+
+  <rect x="624" y="80"  width="132" height="58" rx="9" fill="#e6f4ee" stroke="#157f5b" stroke-width="1.5"/>
+  <text x="690" y="106" text-anchor="middle" font-size="13" font-weight="700" fill="#157f5b">connected</text>
+
+  <rect x="624" y="220" width="132" height="58" rx="9" fill="#fdf1dc" stroke="#9a6b12" stroke-width="1.5"/>
+  <text x="690" y="246" text-anchor="middle" font-size="13" font-weight="700" fill="#9a6b12">failed(kind)</text>
+  <text x="690" y="265" text-anchor="middle" font-size="11" fill="#5a6572">one kind, one action</text>
+  <text x="690" y="298" text-anchor="middle" font-size="10.5" fill="#8a94a6">no_answer · busy · wrong_number · lease_expired</text>
+  <text x="690" y="313" text-anchor="middle" font-size="10.5" fill="#8a94a6">rejected · unavailable · timeout · unconfigured</text>
+
+  <rect x="824" y="150" width="132" height="58" rx="9" fill="#eaf0fa" stroke="#2b5cab" stroke-width="1.5"/>
+  <text x="890" y="176" text-anchor="middle" font-size="13" font-weight="700" fill="#2b5cab">wrapping</text>
+  <text x="890" y="195" text-anchor="middle" font-size="11" fill="#5a6572">rep picks disposition</text>
+
+  <rect x="1012" y="150" width="140" height="58" rx="9" fill="#e6f4ee" stroke="#157f5b" stroke-width="1.5"/>
+  <text x="1082" y="176" text-anchor="middle" font-size="13" font-weight="700" fill="#157f5b">disposed</text>
+  <text x="1082" y="195" text-anchor="middle" font-size="11" fill="#5a6572">CRM sync enqueued</text>
+
+  <!-- transitions -->
+  <path d="M156 179 L222 179" stroke="#1f2933" stroke-width="1.8" marker-end="url(#a2)" fill="none"/>
+  <text x="189" y="170" text-anchor="middle" font-size="11" fill="#5a6572">claim</text>
+  <text x="189" y="199" text-anchor="middle" font-size="10" fill="#8a94a6">idempotent</text>
+
+  <path d="M356 179 L422 179" stroke="#1f2933" stroke-width="1.8" marker-end="url(#a2)" fill="none"/>
+  <text x="389" y="170" text-anchor="middle" font-size="11" fill="#5a6572">dial</text>
+
+  <path d="M556 168 C 590 168, 595 112, 622 112" stroke="#1f2933" stroke-width="1.8" marker-end="url(#a2)" fill="none"/>
+  <text x="590" y="132" text-anchor="middle" font-size="11" fill="#5a6572">outcome</text>
+
+  <path d="M556 192 C 590 192, 595 246, 622 246" stroke="#1f2933" stroke-width="1.8" marker-end="url(#a2)" fill="none"/>
+  <text x="580" y="224" text-anchor="middle" font-size="11" fill="#5a6572">failure</text>
+
+  <path d="M756 112 C 790 112, 795 168, 822 168" stroke="#1f2933" stroke-width="1.8" marker-end="url(#a2)" fill="none"/>
+  <path d="M756 246 C 790 246, 795 192, 822 192" stroke="#1f2933" stroke-width="1.8" marker-end="url(#a2)" fill="none"/>
+
+  <path d="M956 179 L1010 179" stroke="#1f2933" stroke-width="1.8" marker-end="url(#a2)" fill="none"/>
+  <text x="983" y="170" text-anchor="middle" font-size="11" fill="#5a6572">dispose</text>
+
+  <!-- retry loop -->
+  <path d="M624 262 C 574 262, 548 240, 512 212" stroke="#9a6b12" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#a2r)" fill="none"/>
+  <text x="556" y="282" text-anchor="middle" font-size="10.5" fill="#9a6b12">retryable → dial again</text>
+
+  <!-- requeue -->
+  <path d="M690 278 C 690 344, 560 348, 400 348 L 140 348 C 104 348, 90 330, 90 212" stroke="#1f2933" stroke-width="1.6" marker-end="url(#a2)" fill="none"/>
+  <text x="412" y="333" text-anchor="middle" font-size="11" fill="#5a6572">lease expired, or the retry delay elapsed → back to the queue with one more attempt</text>
+
+  <!-- wrap-up -->
+  <path d="M1082 212 C 1082 380, 1020 418, 900 418 L 360 418 C 310 418, 290 392, 290 212" stroke="#2b5cab" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#a2)" fill="none"/>
+  <text x="640" y="410" text-anchor="middle" font-size="11" fill="#2b5cab">auto mode: the next lead is leased automatically once the wrap-up window closes (the rep can pause it)</text>
+
+  <!-- gate banner -->
+  <rect x="224" y="30" width="332" height="36" rx="8" fill="#e6f4ee" stroke="#157f5b" stroke-width="1.5"/>
+  <text x="390" y="53" text-anchor="middle" font-size="12" font-weight="700" fill="#157f5b">compliance verdict runs before both of these</text>
+  <path d="M290 66 L290 148" stroke="#157f5b" stroke-width="1.5" stroke-dasharray="4 3" fill="none"/>
+  <path d="M490 66 L490 148" stroke="#157f5b" stroke-width="1.5" stroke-dasharray="4 3" fill="none"/>
+</svg>

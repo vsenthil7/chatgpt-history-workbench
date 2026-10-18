@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 700" role="img" aria-label="A rep's dial travels from the Zoho CRM widget through identity, billing and five compliance checks, into the queue and the telephony seam. The manual provider path to the rep's own handset is built; the Exotel or Ozonetel adapter, the live DLT and NCPR register, the email and SMS sender, and the signed widget identity are all drawn dashed because they are not built and each needs an external account."><title>Figure 1 — One dial, end to end</title>
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#1f2933"/>
+    </marker>
+    <marker id="arg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#157f5b"/>
+    </marker>
+    <marker id="arm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#8a94a6"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1180" height="700" fill="#ffffff"/>
+
+  <!-- ---------- LEFT: the rep ---------- -->
+  <rect x="24" y="96" width="196" height="120" rx="9" fill="#eaf0fa" stroke="#2b5cab" stroke-width="1.5"/>
+  <text x="122" y="122" text-anchor="middle" font-size="13" font-weight="700" fill="#2b5cab">Zoho CRM tenant</text>
+  <text x="122" y="145" text-anchor="middle" font-size="12.5" fill="#1f2933">Rep opens the widget</text>
+  <text x="122" y="163" text-anchor="middle" font-size="12.5" fill="#1f2933">“Dial next lead”</text>
+  <text x="122" y="188" text-anchor="middle" font-size="11.5" fill="#5a6572">4 widgets · EN/HI/TA</text>
+  <text x="122" y="204" text-anchor="middle" font-size="11.5" fill="#5a6572">bundle built (v026/v028)</text>
+
+  <!-- unproven identity edge -->
+  <rect x="24" y="250" width="196" height="76" rx="9" fill="#fdf1dc" stroke="#9a6b12" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="122" y="273" text-anchor="middle" font-size="12.5" font-weight="700" fill="#9a6b12">Signed widget identity</text>
+  <text x="122" y="292" text-anchor="middle" font-size="11.5" fill="#5a6572">a browser can still claim</text>
+  <text x="122" y="308" text-anchor="middle" font-size="11.5" fill="#5a6572">an org id — PX07, dev org</text>
+  <path d="M122 250 L122 218" stroke="#9a6b12" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ar)" fill="none"/>
+
+  <path d="M220 152 L320 152" stroke="#1f2933" stroke-width="1.8" marker-end="url(#ar)" fill="none"/>
+  <text x="270" y="144" text-anchor="middle" font-size="11.5" fill="#5a6572">HTTPS</text>
+
+  <!-- ---------- CENTRE: the app ---------- -->
+  <rect x="320" y="60" width="420" height="500" rx="12" fill="#f7f9fb" stroke="#2b5cab" stroke-width="2"/>
+  <text x="530" y="84" text-anchor="middle" font-size="13.5" font-weight="700" fill="#2b5cab">TeleField (Node · Express · 53 modules)</text>
+
+  <!-- guard -->
+  <rect x="344" y="100" width="372" height="62" rx="8" fill="#e6f4ee" stroke="#157f5b" stroke-width="1.5"/>
+  <text x="530" y="121" text-anchor="middle" font-size="12.5" font-weight="700" fill="#157f5b">guarded() — one identity, resolved once</text>
+  <text x="530" y="139" text-anchor="middle" font-size="11.5" fill="#1f2933">signed session · role matrix · billing state</text>
+  <text x="530" y="154" text-anchor="middle" font-size="11" fill="#5a6572">PX01 removed 63 header reads · gate #6</text>
+
+  <path d="M530 162 L530 186" stroke="#1f2933" stroke-width="1.8" marker-end="url(#ar)" fill="none"/>
+
+  <!-- compliance -->
+  <rect x="344" y="188" width="372" height="148" rx="8" fill="#e6f4ee" stroke="#157f5b" stroke-width="1.5"/>
+  <text x="530" y="209" text-anchor="middle" font-size="12.5" font-weight="700" fill="#157f5b">Compliance verdict — one function, every path</text>
+  <text x="360" y="231" font-size="11.5" fill="#1f2933">1 · suppressed? (register · org DNC · provider · manual)</text>
+  <text x="360" y="249" font-size="11.5" fill="#1f2933">2 · scrubbed inside the freshness window?</text>
+  <text x="360" y="267" font-size="11.5" fill="#1f2933">3 · consent on record for this category?</text>
+  <text x="360" y="285" font-size="11.5" fill="#1f2933">4 · verified DLT header + content template?</text>
+  <text x="360" y="303" font-size="11.5" fill="#1f2933">5 · caller-id series legal? (140 promo · 1600 BFSI)</text>
+  <text x="530" y="325" text-anchor="middle" font-size="11" fill="#5a6572">PX03 · gate #8 proves every path calls it</text>
+
+  <path d="M530 336 L530 360" stroke="#1f2933" stroke-width="1.8" marker-end="url(#ar)" fill="none"/>
+
+  <!-- queue -->
+  <rect x="344" y="362" width="372" height="66" rx="8" fill="#e6f4ee" stroke="#157f5b" stroke-width="1.5"/>
+  <text x="530" y="383" text-anchor="middle" font-size="12.5" font-weight="700" fill="#157f5b">Queue → lease → call state machine</text>
+  <text x="530" y="401" text-anchor="middle" font-size="11.5" fill="#1f2933">priority/rules · idempotent claim · wrap-up pacing</text>
+  <text x="530" y="418" text-anchor="middle" font-size="11" fill="#5a6572">PX04 · held leads reported by reason code</text>
+
+  <path d="M530 428 L530 452" stroke="#1f2933" stroke-width="1.8" marker-end="url(#ar)" fill="none"/>
+
+  <!-- seam -->
+  <rect x="344" y="454" width="372" height="52" rx="8" fill="#eaf0fa" stroke="#2b5cab" stroke-width="1.5"/>
+  <text x="530" y="475" text-anchor="middle" font-size="12.5" font-weight="700" fill="#2b5cab">Telephony provider seam</text>
+  <text x="530" y="493" text-anchor="middle" font-size="11.5" fill="#1f2933">4-kind error taxonomy · one adapter registers in one line</text>
+
+  <!-- scheduler -->
+  <rect x="344" y="518" width="372" height="30" rx="7" fill="#f2f4f8" stroke="#8a94a6" stroke-width="1.2"/>
+  <text x="530" y="538" text-anchor="middle" font-size="11" fill="#1f2933">Scheduler — 8 unattended jobs (retention · dunning · SLA · backup)</text>
+
+  <!-- ---------- RIGHT: the outside world ---------- -->
+  <!-- register -->
+  <rect x="800" y="188" width="348" height="58" rx="9" fill="#f2f4f8" stroke="#8a94a6" stroke-width="1.6" stroke-dasharray="6 4"/>
+  <text x="974" y="211" text-anchor="middle" font-size="12.5" font-weight="700" fill="#5a6572">Live DLT / NCPR register — NOT BUILT</text>
+  <text x="974" y="230" text-anchor="middle" font-size="11.5" fill="#5a6572">needs a registered vendor account</text>
+  <path d="M716 216 L798 216" stroke="#8a94a6" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arm)" fill="none"/>
+
+  <rect x="800" y="262" width="348" height="58" rx="9" fill="#e6f4ee" stroke="#157f5b" stroke-width="1.5"/>
+  <text x="974" y="285" text-anchor="middle" font-size="12.5" font-weight="700" fill="#157f5b">Manual scrub — BUILT, and honest</text>
+  <text x="974" y="304" text-anchor="middle" font-size="11.5" fill="#1f2933">export batch → portal → upload response file</text>
+  <path d="M716 280 L798 280" stroke="#157f5b" stroke-width="1.8" marker-end="url(#arg)" fill="none"/>
+
+  <!-- manual provider -->
+  <rect x="800" y="440" width="348" height="58" rx="9" fill="#e6f4ee" stroke="#157f5b" stroke-width="1.5"/>
+  <text x="974" y="463" text-anchor="middle" font-size="12.5" font-weight="700" fill="#157f5b">ManualProvider — BUILT</text>
+  <text x="974" y="482" text-anchor="middle" font-size="11.5" fill="#1f2933">rep dials on their own handset; TeleField records</text>
+  <path d="M716 469 L798 469" stroke="#157f5b" stroke-width="1.8" marker-end="url(#arg)" fill="none"/>
+
+  <!-- provider adapters -->
+  <rect x="800" y="514" width="348" height="66" rx="9" fill="#fbeae9" stroke="#b3261e" stroke-width="1.8" stroke-dasharray="7 4"/>
+  <text x="974" y="537" text-anchor="middle" font-size="12.5" font-weight="700" fill="#b3261e">Exotel / Ozonetel adapter — NOT BUILT</text>
+  <text x="974" y="556" text-anchor="middle" font-size="11.5" fill="#5a6572">needs 2 sandbox accounts · PX08 · LAUNCH BLOCKER</text>
+  <text x="974" y="572" text-anchor="middle" font-size="11.5" fill="#5a6572">until then no leg can be placed and nothing is recorded</text>
+  <path d="M716 490 C 760 490, 762 545, 798 545" stroke="#b3261e" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#ar)" fill="none"/>
+
+  <!-- email -->
+  <rect x="800" y="606" width="348" height="58" rx="9" fill="#f2f4f8" stroke="#8a94a6" stroke-width="1.6" stroke-dasharray="6 4"/>
+  <text x="974" y="629" text-anchor="middle" font-size="12.5" font-weight="700" fill="#5a6572">Email / SMS sender — NOT BUILT</text>
+  <text x="974" y="648" text-anchor="middle" font-size="11.5" fill="#5a6572">noopEmailSender discards every notice · PX09</text>
+  <path d="M716 543 C 764 566, 760 635, 798 635" stroke="#8a94a6" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arm)" fill="none"/>
+
+  <!-- ---------- BOTTOM: postgres ---------- -->
+  <rect x="320" y="600" width="420" height="62" rx="9" fill="#e6f4ee" stroke="#157f5b" stroke-width="1.5"/>
+  <text x="530" y="623" text-anchor="middle" font-size="12.5" font-weight="700" fill="#157f5b">Postgres 16 — one transaction per request</text>
+  <text x="530" y="641" text-anchor="middle" font-size="11.5" fill="#1f2933">hydrate on boot · per-row versions detect a second writer</text>
+  <text x="530" y="656" text-anchor="middle" font-size="11" fill="#5a6572">PX05 first half · still single-writer: blue/green must drain</text>
+  <path d="M530 560 L530 598" stroke="#157f5b" stroke-width="1.8" marker-end="url(#arg)" fill="none"/>
+
+  <!-- CRM writeback -->
+  <rect x="24" y="440" width="196" height="76" rx="9" fill="#e6f4ee" stroke="#157f5b" stroke-width="1.5"/>
+  <text x="122" y="463" text-anchor="middle" font-size="12.5" font-weight="700" fill="#157f5b">CRM write-back</text>
+  <text x="122" y="482" text-anchor="middle" font-size="11.5" fill="#1f2933">outcomes → Calls, Tasks</text>
+  <text x="122" y="499" text-anchor="middle" font-size="11.5" fill="#5a6572">outbox · retry · dead-letter</text>
+  <path d="M342 480 L222 480" stroke="#157f5b" stroke-width="1.8" marker-end="url(#arg)" fill="none"/>
+</svg>

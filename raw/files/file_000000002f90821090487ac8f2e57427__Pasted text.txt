@@ -1,0 +1,1669 @@
+PS C:\platform-tools> date
+
+10 October 2026 17:00:22
+
+
+PS C:\platform-tools> $OUT = Get-ChildItem "$env:USERPROFILE\Desktop\S24_Shutdown_*" -Directory |
+>>        Sort-Object LastWriteTime -Descending |
+>>        Select-Object -First 1 -ExpandProperty FullName
+PS C:\platform-tools>
+PS C:\platform-tools> .\adb.exe shell dumpsys battery |
+>>     Select-String -Pattern "deterior|asoc|health|cycle|usage|FirstUse|capacity" -CaseSensitive:$false |
+>>     Tee-Object "$OUT\10_battery_health_focus.txt"
+
+  health: 2
+  Capacity level: -1
+SEC_FEATURE_BATTERY_FULL_CAPACITY: true
+  mFullCapacityEnable: false
+  FEATURE_SAVE_BATTERY_CYCLE: true
+  FEATURE_FULL_BATTERY_CYCLE: true
+  battery FirstUseDate: [20240322]
+  mSavedBatteryAsoc: [87]
+  mSavedBatteryUsage: [79207]
+10-10 16:39:46.425  Sending ACTION_POPUP_BATTERY_DETERIORATION : 1
+08-14 05:30:23.700  [SS][BattInfo]FirstUseDateData efsValue:20240322 ,authValue:20240322
+08-14 05:30:23.701  [SS][BattInfo]AsocData efsValue:87 ,authValue:87
+08-14 05:30:23.878  [SS][BattInfo]AsocData efsValue:87 ,authValue:87
+08-14 05:30:23.884  [SS][BattInfo]FullStatusUsageData efsValue:305771 ,authValue:305771
+08-14 05:30:24.051  Sending ACTION_BATTERY_CHANGED: level:89, status:3, health:2, remain:0, ac:false, usb:false,
+wireless:false, pogo:false, misc:0x10000, charge_type:0, charger_type:0, voltage:3908, temperature:295, online:1,
+charging_status:0, cycle_count:0, current_avg:-1552, ps:false, hvc:false, current_event:0x40000000, mcc:0, mcv:0,
+cc:3487815, present:true, scale:100, technology:Li-ion, protection:0
+10-10 16:40:10.830  Sending ACTION_BATTERY_CHANGED: level:88, status:3, health:2, remain:0, ac:false, usb:false,
+wireless:false, pogo:false, misc:0x10000, charge_type:0, charger_type:0, voltage:4007, temperature:337, online:1,
+charging_status:0, cycle_count:0, current_avg:-2287, ps:false, hvc:false, current_event:0x40000000, mcc:0, mcv:0,
+cc:3480021, present:true, scale:100, technology:Li-ion, protection:0
+10-10 16:41:26.337  Sending ACTION_BATTERY_CHANGED: level:87, status:3, health:2, remain:0, ac:false, usb:false,
+wireless:false, pogo:false, misc:0x10000, charge_type:0, charger_type:0, voltage:4126, temperature:333, online:1,
+charging_status:0, cycle_count:0, current_avg:-597, ps:false, hvc:false, current_event:0x40000000, mcc:0, mcv:0,
+cc:3429360, present:true, scale:100, technology:Li-ion, protection:0
+10-10 16:42:26.691  Sending ACTION_BATTERY_CHANGED: level:87, status:3, health:2, remain:0, ac:false, usb:false,
+wireless:false, pogo:false, misc:0x10000, charge_type:0, charger_type:0, voltage:4120, temperature:320, online:1,
+charging_status:0, cycle_count:0, current_avg:-290, ps:false, hvc:false, current_event:0x40000000, mcc:0, mcv:0,
+cc:3425463, present:true, scale:100, technology:Li-ion, protection:0
+10-10 16:44:27.530  Sending ACTION_BATTERY_CHANGED: level:87, status:3, health:2, remain:0, ac:false, usb:false,
+wireless:false, pogo:false, misc:0x10000, charge_type:0, charger_type:0, voltage:4162, temperature:308, online:1,
+charging_status:0, cycle_count:0, current_avg:-212, ps:false, hvc:false, current_event:0x40000000, mcc:0, mcv:0,
+cc:3417669, present:true, scale:100, technology:Li-ion, protection:0
+10-10 16:47:37.869  Sending ACTION_BATTERY_CHANGED: level:86, status:3, health:2, remain:0, ac:false, usb:false,
+wireless:false, pogo:false, misc:0x10000, charge_type:0, charger_type:0, voltage:4113, temperature:314, online:1,
+charging_status:0, cycle_count:0, current_avg:-321, ps:false, hvc:false, current_event:0x40000000, mcc:0, mcv:0,
+cc:3390390, present:true, scale:100, technology:Li-ion, protection:0
+10-10 16:48:06.930  Sending ACTION_BATTERY_CHANGED: level:86, status:2, health:2, remain:1664, ac:false, usb:true,
+wireless:false, pogo:false, misc:0x10000, charge_type:1, charger_type:0, voltage:4162, temperature:312, online:4,
+charging_status:0, cycle_count:0, current_avg:-220, ps:false, hvc:false, current_event:0x40000000, mcc:0, mcv:0,
+cc:3382596, present:true, scale:100, technology:Li-ion, protection:0
+10-10 16:48:07.594  Sending ACTION_BATTERY_CHANGED: level:86, status:2, health:2, remain:1664, ac:false, usb:true,
+wireless:false, pogo:false, misc:0x10010000, charge_type:1, charger_type:0, voltage:4163, temperature:312, online:4,
+charging_status:0, cycle_count:0, current_avg:-222, ps:false, hvc:false, current_event:0x8004, mcc:0, mcv:0,
+cc:3382596, present:true, scale:100, technology:Li-ion, protection:0
+10-10 16:48:17.630  Sending ACTION_BATTERY_CHANGED: level:86, status:2, health:2, remain:1745, ac:false, usb:true,
+wireless:false, pogo:false, misc:0x10010000, charge_type:1, charger_type:0, voltage:4262, temperature:312, online:4,
+charging_status:0, cycle_count:0, current_avg:545, ps:false, hvc:false, current_event:0x8004, mcc:0, mcv:0,
+cc:3382596, present:true, scale:100, technology:Li-ion, protection:0
+10-10 16:48:27.650  Sending ACTION_BATTERY_CHANGED: level:86, status:2, health:2, remain:1745, ac:false, usb:true,
+wireless:false, pogo:false, misc:0x10010000, charge_type:1, charger_type:0, voltage:4262, temperature:313, online:4,
+charging_status:0, cycle_count:0, current_avg:858, ps:false, hvc:false, current_event:0x8000, mcc:0, mcv:0,
+cc:3382596, present:true, scale:100, technology:Li-ion, protection:0
+10-10 16:49:18.612  Sending ACTION_BATTERY_CHANGED: level:86, status:2, health:2, remain:1745, ac:false, usb:true,
+wireless:false, pogo:false, misc:0x10010000, charge_type:1, charger_type:0, voltage:4271, temperature:327, online:4,
+charging_status:0, cycle_count:0, current_avg:513, ps:false, hvc:false, current_event:0x8000, mcc:0, mcv:0,
+cc:3382596, present:true, scale:100, technology:Li-ion, protection:0
+10-10 16:49:38.981  Sending ACTION_BATTERY_CHANGED: level:86, status:2, health:2, remain:1734, ac:false, usb:true,
+wireless:false, pogo:false, misc:0x10010000, charge_type:1, charger_type:0, voltage:4181, temperature:329, online:4,
+charging_status:0, cycle_count:0, current_avg:876, ps:false, hvc:false, current_event:0x8000, mcc:0, mcv:0,
+cc:3386493, present:true, scale:100, technology:Li-ion, protection:0
+10-10 16:49:49.203  Sending ACTION_BATTERY_CHANGED: level:86, status:2, health:2, remain:1734, ac:false, usb:true,
+wireless:false, pogo:false, misc:0x10010000, charge_type:1, charger_type:0, voltage:4295, temperature:327, online:4,
+charging_status:0, cycle_count:0, current_avg:1021, ps:false, hvc:false, current_event:0x8000, mcc:0, mcv:0,
+cc:3386493, present:true, scale:100, technology:Li-ion, protection:0
+10-10 16:50:50.499  Sending ACTION_BATTERY_CHANGED: level:87, status:2, health:2, remain:1724, ac:false, usb:true,
+wireless:false, pogo:false, misc:0x10010000, charge_type:1, charger_type:0, voltage:4254, temperature:319, online:4,
+charging_status:0, cycle_count:0, current_avg:1127, ps:false, hvc:false, current_event:0x8000, mcc:0, mcv:0,
+cc:3386493, present:true, scale:100, technology:Li-ion, protection:0
+10-10 16:51:00.907  Sending ACTION_BATTERY_CHANGED: level:87, status:2, health:2, remain:1724, ac:false, usb:true,
+wireless:false, pogo:false, misc:0x10010000, charge_type:1, charger_type:0, voltage:4325, temperature:320, online:4,
+charging_status:0, cycle_count:0, current_avg:1092, ps:false, hvc:false, current_event:0x8000, mcc:0, mcv:0,
+cc:3390390, present:true, scale:100, technology:Li-ion, protection:0
+10-10 16:55:04.781  Sending ACTION_BATTERY_CHANGED: level:88, status:2, health:2, remain:1655, ac:false, usb:true,
+wireless:false, pogo:false, misc:0x10010000, charge_type:1, charger_type:0, voltage:4375, temperature:316, online:4,
+charging_status:0, cycle_count:0, current_avg:939, ps:false, hvc:false, current_event:0x8000, mcc:0, mcv:0,
+cc:3425463, present:true, scale:100, technology:Li-ion, protection:0
+10-10 16:55:35.013  Sending ACTION_BATTERY_CHANGED: level:88, status:2, health:2, remain:1634, ac:false, usb:true,
+wireless:false, pogo:false, misc:0x10010000, charge_type:1, charger_type:0, voltage:4376, temperature:320, online:4,
+charging_status:0, cycle_count:0, current_avg:739, ps:false, hvc:false, current_event:0x8004, mcc:0, mcv:0,
+cc:3437154, present:true, scale:100, technology:Li-ion, protection:0
+10-10 16:55:55.116  Sending ACTION_BATTERY_CHANGED: level:88, status:2, health:2, remain:1598, ac:false, usb:true,
+wireless:false, pogo:false, misc:0x10010000, charge_type:1, charger_type:0, voltage:4384, temperature:321, online:4,
+charging_status:0, cycle_count:0, current_avg:953, ps:false, hvc:false, current_event:0x8000, mcc:0, mcv:0,
+cc:3444948, present:true, scale:100, technology:Li-ion, protection:0
+10-10 16:56:36.039  Sending ACTION_BATTERY_CHANGED: level:89, status:2, health:2, remain:1547, ac:false, usb:true,
+wireless:false, pogo:false, misc:0x10010000, charge_type:1, charger_type:0, voltage:4388, temperature:316, online:4,
+charging_status:0, cycle_count:0, current_avg:1011, ps:false, hvc:false, current_event:0x8000, mcc:0, mcv:0,
+cc:3464433, present:true, scale:100, technology:Li-ion, protection:0
+10-10 16:58:43.462  Sending ACTION_BATTERY_CHANGED: level:90, status:2, health:2, remain:1428, ac:false, usb:true,
+wireless:false, pogo:false, misc:0x10010000, charge_type:1, charger_type:0, voltage:4386, temperature:308, online:4,
+charging_status:0, cycle_count:0, current_avg:832, ps:false, hvc:false, current_event:0x8000, mcc:0, mcv:0,
+cc:3499506, present:true, scale:100, technology:Li-ion, protection:0
+
+
+PS C:\platform-tools>
+PS C:\platform-tools> .\adb.exe shell dumpsys dropbox --print |
+>>     Select-String -Pattern "SYSTEM_BOOT|SYSTEM_RESTART|SYSTEM_LAST_KMSG|SYSTEM_RECOVERY_LOG|watchdog|panic|fatal|shutdown|reboot|reset reason|boot reason|battery" -CaseSensitive:$false |
+>>     Tee-Object "$OUT\11_reset_crash_focus.txt"
+
+2026-10-09 14:38:39 SYSTEM_BOOT (text, 497 bytes)
+2026-10-09 14:38:39 SYSTEM_LAST_KMSG_0_20261009_143839_RP (compressed text, 18912 bytes)
+[0:    1.969688] [Watchdog] PMU setting complete - disable
+[0:    1.969698] [Watchdog] PMU setting complete - enable
+[0:    2.248576] [Watchdog] PMU setting complete - disable
+[0:    2.249368] sbl_check_reboot_mode: PINFORM = 12345600 ... sbl_check_reboot_mode: skip
+[0:    2.296420] [RERE] set_reset_reason: set_reset_reason: set RR_THIS as RP(7, REBOOT)
+[0:    2.296429] set_ddi_reboot_reason: Saving BLDP reboot_reason: [0x7] in DDI
+[0:    2.630933] disable watchdog
+[0:    2.630938] [Watchdog] PMU setting complete - disable
+[0:    2.736992] [Watchdog] PMU setting complete - disable
+[0:    2.737002] [Watchdog] PMU setting complete - enable
+[0:    2.816198] [Watchdog] PMU setting complete - disable
+[0:    3.738714] [BLDP] reboot_reason = 0x7
+[0:    3.741245] [DPRM] prepare_for_booting: reset reason(0), debug flag(1), final kmsg(0x55), dprm once(NULL)
+[0:    3.886714] [Watchdog] PMU setting complete - disable
+[0:    3.886818] [Watchdog] PMU setting complete - enable
+[0:    3.886922] kernel_watchdog_start: Start Watchdog 60 sec...
+Last boot reason: reboot,lpm
+2026-10-10 16:39:50 SYSTEM_BOOT (text, 497 bytes)
+2026-10-10 16:39:50 SYSTEM_LAST_KMSG_0_20261010_163950_NP (compressed text, 18690 bytes)
+[0:    1.631724] max77775_set_charger_watchdog: state(0), reg_data(0x4)
+[0:    1.701795] max77775_check_batt_type: battery id:0
+[0:    1.702207] max77775_init_fuel_gauge: Battery type : Battery0, capacity: 1559, status: 128, Jig: 0, ver: 3
+[0:    1.802938] max77775_init_fuel_gauge: Already initialized (0x0617, Battery0 type)
+[0:    1.967048] [Watchdog] PMU setting complete - disable
+[0:    1.967058] [Watchdog] PMU setting complete - enable
+[0:    2.245749] [Watchdog] PMU setting complete - disable
+[0:    2.246527] sbl_check_reboot_mode: PINFORM = 0 ... sbl_check_reboot_mode: skip
+[0:    2.295694] set_ddi_reboot_reason: Saving BLDP reboot_reason: [0x9] in DDI
+[0:    2.298129] [SECD] check_debug_flag:   - Restore DPRM ONCE and RESET REASON
+[0:    2.625527] disable watchdog
+[0:    2.625531] [Watchdog] PMU setting complete - disable
+[0:    2.644137] check_pm_status: Battery voltage(4166) is OK
+[0:    2.731540] [Watchdog] PMU setting complete - disable
+[0:    2.731550] [Watchdog] PMU setting complete - enable
+[0:    2.812355] [Watchdog] PMU setting complete - disable
+[0:    3.733313] [BLDP] reboot_reason = 0x9
+[0:    3.735836] [DPRM] prepare_for_booting: reset reason(0), debug flag(1), final kmsg(0x55), dprm once(NULL)
+[0:    3.889300] [Watchdog] PMU setting complete - disable
+[0:    3.889403] [Watchdog] PMU setting complete - enable
+[0:    3.889503] kernel_watchdog_start: Start Watchdog 60 sec...
+Last boot reason: reboot
+
+
+PS C:\platform-tools>
+PS C:\platform-tools> .\adb.exe shell logcat -b all -d |
+>>     Select-String -Pattern "BootReceiver|reset reason|bootreason|boot reason|shutdown|reboot|watchdog|kernel panic|battery deterioration|powerctl" -CaseSensitive:$false |
+>>     Tee-Object "$OUT\12_logcat_reboot_focus.txt"
+
+08-14 05:30:22.599  1269  1269 D SystemServerTiming:
+OnBootPhase_480_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle
+08-14 05:30:22.599  1269  1269 V SystemServerTiming:
+OnBootPhase_480_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle took to complete: 0ms
+08-14 05:30:22.618  1269  1379 D DisplayPowerController[0]: setBrightnessConfiguration: BrightnessConfiguration{[(0.0,
+121.25865), (1.0, 136.61789), (2.0, 145.0256), (3.0, 149.8818), (4.0, 152.11014), (5.0, 154.11327), (6.0, 155.82137),
+(7.0, 157.31082), (9.0, 159.41429), (10.0, 160.26498), (12.0, 161.89035), (15.0, 164.45312), (18.0, 166.36316), (21.0,
+169.54787), (26.0, 173.35826), (31.0, 176.6753), (37.0, 178.29686), (45.0, 180.08986), (53.0, 181.71347), (64.0,
+183.42766), (77.0, 185.12544), (92.0, 186.77531), (111.0, 188.53249), (133.0, 190.24118), (160.0, 192.00436), (192.0,
+193.76018), (230.0, 195.51547), (276.0, 197.3042), (331.0, 199.10356), (397.0, 200.92056), (477.0, 202.77223), (572.0,
+204.62112), (687.0, 206.50328), (824.0, 208.38872), (989.0, 214.75258), (1187.0, 245.99486), (1424.0, 290.70593),
+(1709.0, 343.96255), (2051.0, 409.95572), (2461.0, 489.13403), (2953.0, 500.0)], {},
+'sbs:0:mode_normal:reason_shutdown_or_schedule, shouldCollectColorSamples = false'} shouldResetShortTermModel: false
+(com.android.server.display.DisplayManagerService$$ExternalSyntheticLambda30.accept:73
+com.android.server.display.LogicalDisplayMapper.forEachLocked:28
+com.android.server.display.DisplayManagerService.-$$Nest$mloadBrightnessConfigurations:33
+com.android.server.display.DisplayManagerService$DisplayManagerHandler.handleMessage:323
+android.os.Handler.dispatchMessage:132 )
+08-14 05:30:22.821  1269  1269 D SystemServerTiming:
+OnBootPhase_500_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle
+08-14 05:30:22.821  1269  1269 V SystemServerTiming:
+OnBootPhase_500_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle took to complete: 0ms
+08-14 05:30:22.850  1269  1269 D PmBackupController: Reset reboot counts
+08-14 05:30:22.881  1269  1269 D SystemServerTiming:
+OnBootPhase_520_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle
+08-14 05:30:22.881  1269  1269 V SystemServerTiming:
+OnBootPhase_520_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle took to complete: 0ms
+08-14 05:30:22.976  1269  1531 I Watchdog: Interesting Java process com.android.phone started. Pid 2220
+08-14 05:30:23.094  1269  1269 D SystemServerTiming:
+OnBootPhase_550_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle
+08-14 05:30:23.094  1269  1269 V SystemServerTiming:
+OnBootPhase_550_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle took to complete: 0ms
+08-14 05:30:23.284  1269  1269 I Watchdog: Pausing HandlerChecker: main thread for reason: prepackageinstaller. Pause
+count: 1
+08-14 05:30:23.285  1269  1269 I Watchdog: Resuming HandlerChecker: main thread for reason: prepackageinstaller. Pause
+count: 0
+08-14 05:30:23.286  1269  1269 I PackageWatchdog: Syncing state, reason: health check state enabled
+08-14 05:30:23.286  1269  1269 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+08-14 05:30:23.286  1269  1482 I PackageWatchdog: Saving observer state to file
+08-14 05:30:23.417  1269  1269 D SystemServerTiming:
+OnBootPhase_600_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle
+08-14 05:30:23.417  1269  1269 V SystemServerTiming:
+OnBootPhase_600_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle took to complete: 0ms
+08-14 05:30:23.542  1269  1269 D SystemServerTimingAsync:
+ssm.onStartUser-0_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle
+08-14 05:30:23.542  1269  1269 V SystemServerTimingAsync:
+ssm.onStartUser-0_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle took to complete: 0ms
+08-14 05:30:23.608  1269  1269 D SystemServerTiming: starting
+com.android.server.scheduling.RebootReadinessManagerService$Lifecycle
+08-14 05:30:23.608  1269  1269 I SystemServiceManager: Starting
+com.android.server.scheduling.RebootReadinessManagerService$Lifecycle
+08-14 05:30:23.608  1269  1269 I SystemServiceManager: Not starting an already started service
+com.android.server.scheduling.RebootReadinessManagerService$Lifecycle
+08-14 05:30:23.608  1269  1269 V SystemServerTiming: starting
+com.android.server.scheduling.RebootReadinessManagerService$Lifecycle took to complete: 0ms
+08-14 05:30:23.608  1269  1269 D SystemServerTiming: UpdateWatchdogTimeout
+08-14 05:30:23.608  1269  1269 I Watchdog: Watchdog timeout updated to 60000 millis
+08-14 05:30:23.608  1269  1269 V SystemServerTiming: UpdateWatchdogTimeout took to complete: 0ms
+08-14 05:30:23.789  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+08-14 05:30:23.850  1269  1531 I ActivityManager: Start proc 2642:com.samsung.android.svcagent/1000 for broadcast
+{com.samsung.android.svcagent/com.samsung.android.service.svcagent.BootReceiver}
+10-10 16:39:36.052  1269  1379 I Watchdog: Pausing of HandlerChecker: monitor thread for reason: vold#commitChanges
+might be slow. Pause end time: 47015
+10-10 16:39:36.053  1269  1379 I Watchdog: Pausing of HandlerChecker: display thread for reason: vold#commitChanges
+might be slow. Pause end time: 47016
+10-10 16:39:36.226  1269  1800 I PackageWatchdog: Scheduling 10 polls to check and mitigate native crashes
+10-10 16:39:36.246  1269  1873 I Watchdog: Pausing of HandlerChecker: monitor thread for reason: #onReset might be
+slow. Pause end time: 47209
+10-10 16:39:36.247  1269  1882 I RebootEscrowManager: No reboot escrow data found for system user
+10-10 16:39:36.247  1269  1882 I RebootEscrowManager: No reboot escrow data found for users, skipping loading escrow
+data
+10-10 16:39:36.329  1269  1379 D ActivityManagerTiming:
+OnBootPhase_1000_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle
+10-10 16:39:36.329  1269  1379 V ActivityManagerTiming:
+OnBootPhase_1000_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle took to complete: 0ms
+10-10 16:39:36.341  1269  1379 D SystemServerInitThreadPool: Shutdown requested
+10-10 16:39:36.341  1269  1379 D SystemServerTiming: WaitInitThreadPoolShutdown
+10-10 16:39:36.345  1269  1379 D SystemServerInitThreadPool: Shutdown successful
+10-10 16:39:36.345  1269  1379 V SystemServerTiming: WaitInitThreadPoolShutdown took to complete: 5ms
+10-10 16:39:36.507  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:39:36.508  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:39:36.510  1269  2463 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:39:36.893  1269  3589 D BootReceiver: No dumpstate files found in /cache/log
+10-10 16:39:36.893  1269  3589 I BootReceiver: resetString = NPON
+10-10 16:39:36.910  1269  3589 I BootReceiver: trimdebug_history - Num of existing listOfdebug_history is 1
+10-10 16:39:36.910  1269  3589 I BootReceiver: trimdebug_history - Delete filedumpstate_debug_history.lst
+10-10 16:39:36.918  1269  3589 D BootReceiver: reset_reason = NPON
+10-10 16:39:36.918  1269  3589 I BootReceiver: send broadcast to HQM about reset reason :
+"REASON":"N|NP","TAG":"41c02f01-6a77-491d-bfa8-f4e9fd2c885d","CAUSE":"reboot","STACK":""
+10-10 16:39:37.054  2642  2642 W ContextImpl: Calling a method in the system process without a qualified user:
+android.app.ContextImpl.startService:2128 com.samsung.android.service.svcagent.BootReceiver.a:33
+com.samsung.android.service.svcagent.BootReceiver.b:231 H.c.handleMessage:151 android.os.Handler.dispatchMessage:132
+10-10 16:39:37.918  1269  3589 I BootReceiver: We waited make sys.boot.errp Done for 1s
+10-10 16:39:44.762  1269  1873 I Watchdog: Pausing of HandlerChecker: monitor thread for reason: #mount might be slow.
+Pause end time: 55725
+10-10 16:39:44.779  1269  1796 D UsageStatsService: User[0] DEVICE_SHUTDOWN, 2026-10-10 15:27:12, 2026-10-10 15:27:12
+10-10 16:39:44.787  1269  1531 I Watchdog: Interesting Java process com.google.android.providers.media.module started.
+Pid 4390
+10-10 16:39:44.828  1269  1527 D SystemServerTimingAsync:
+ssm.onUnlockingUser-0_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle
+10-10 16:39:44.828  1269  1527 V SystemServerTimingAsync:
+ssm.onUnlockingUser-0_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle took to complete: 0ms
+10-10 16:39:44.979  1269  1527 D SystemServerTimingAsync:
+ssm.onUnlockedUser-0_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle
+10-10 16:39:44.979  1269  1527 V SystemServerTimingAsync:
+ssm.onUnlockedUser-0_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle took to complete: 0ms
+10-10 16:39:50.001  1269  6611 D SystemServerTimingAsync:
+ssm.onCompletedEventUser-0_{|Unlocked|}_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle
+10-10 16:39:50.001  1269  6611 V SystemServerTimingAsync:
+ssm.onCompletedEventUser-0_{|Unlocked|}_com.android.server.scheduling.RebootReadinessManagerService$Lifecycle took to
+complete: 0ms
+10-10 16:39:50.483  1269  1269 E BootReceiver: Could not open /sys/kernel/tracing/instances/bootreceiver/trace_pipe
+10-10 16:39:50.483  1269  1269 E BootReceiver: android.system.ErrnoException: open failed: ENOENT (No such file or
+directory)
+10-10 16:39:50.483  1269  1269 E BootReceiver:  at libcore.io.Linux.open(Native Method)
+10-10 16:39:50.483  1269  1269 E BootReceiver:  at libcore.io.ForwardingOs.open(ForwardingOs.java:410)
+10-10 16:39:50.483  1269  1269 E BootReceiver:  at libcore.io.BlockGuardOs.open(BlockGuardOs.java:274)
+10-10 16:39:50.483  1269  1269 E BootReceiver:  at android.system.Os.open(Os.java:510)
+10-10 16:39:50.483  1269  1269 E BootReceiver:  at com.android.server.BootReceiver.onReceive(qb/113419284
+f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:45)
+10-10 16:39:50.483  1269  1269 E BootReceiver:  at android.app.ActivityThread.handleReceiver(ActivityThread.java:6032)
+10-10 16:39:50.483  1269  1269 E BootReceiver:  at
+android.app.ActivityThread.-$$Nest$mhandleReceiver(ActivityThread.java:0)
+10-10 16:39:50.483  1269  1269 E BootReceiver:  at android.app.ActivityThread$H.handleMessage(ActivityThread.java:3041)
+10-10 16:39:50.483  1269  1269 E BootReceiver:  at android.os.Handler.dispatchMessage(Handler.java:132)
+10-10 16:39:50.483  1269  1269 E BootReceiver:  at android.os.Looper.dispatchMessage(Looper.java:358)
+10-10 16:39:50.483  1269  1269 E BootReceiver:  at android.os.Looper.loopOnce(Looper.java:288)
+10-10 16:39:50.483  1269  1269 E BootReceiver:  at android.os.Looper.loop(Looper.java:392)
+10-10 16:39:50.483  1269  1269 E BootReceiver:  at com.android.server.SystemServer.main(qb/113419284
+f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c:898)
+10-10 16:39:50.483  1269  1269 E BootReceiver:  at java.lang.reflect.Method.invoke(Native Method)
+10-10 16:39:50.483  1269  1269 E BootReceiver:  at
+com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:638)
+10-10 16:39:50.483  1269  1269 E BootReceiver:  at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:950)
+10-10 16:39:50.533  1269  6872 I BootReceiver: prepare setting eRR.p
+10-10 16:39:50.552  1269  6872 I BootReceiver: Copying /proc/last_kmsg to DropBox
+(SYSTEM_LAST_KMSG_0_20261010_163950_NP)
+10-10 16:39:50.559  1269  6872 I BootReceiver: Copying audit failures to DropBox
+10-10 16:39:50.562  1269  6872 I BootReceiver: Copied 0 worth of audits to DropBox
+10-10 16:39:50.563  1269  6872 W BootReceiver: boot_fs_shutdown, string not found
+10-10 16:39:50.564  1269  6872 I BootReceiver: Checking for fsck errors
+10-10 16:39:50.565  1269  6872 I BootReceiver: fs_stat, partition:efs stat:0x1
+10-10 16:39:50.565  1269  6872 I BootReceiver: fs_stat, partition:cpefs stat:0x1
+10-10 16:39:50.565  1269  6872 I BootReceiver: fs_stat, partition:cache stat:0x1
+10-10 16:39:50.565  1269  6872 I BootReceiver: fs_stat, partition:userdata stat:0x0
+10-10 16:39:59.007  1269  1382 E Watchdog: !@Sync: 2 heap(MB): 143 / 148 FD: 1209 Threads: 486 [2026-10-10
+16:39:59.007]
+10-10 16:40:03.580  1269  1531 I am_proc_start:
+[0,10730,10283,com.azure.authenticator,broadcast,{com.azure.authenticator/com.azure.authenticator.BootReceiver}]
+10-10 16:40:03.580  1269  1531 I ActivityManager: Start proc 10730:com.azure.authenticator/u0a283 for broadcast
+{com.azure.authenticator/com.azure.authenticator.BootReceiver}
+10-10 16:40:06.442  1269  1531 I am_proc_start: [0,11699,10263,com.google.android.apps.tachyon,broadcast,{com.google.an
+droid.apps.tachyon/com.google.android.apps.tachyon.common.applifecycle.BootReceiver}]
+10-10 16:40:06.442  1269  1531 I ActivityManager: Start proc 11699:com.google.android.apps.tachyon/u0a263 for
+broadcast {com.google.android.apps.tachyon/com.google.android.apps.tachyon.common.applifecycle.BootReceiver}
+10-10 16:40:07.077  1269  1531 I am_proc_start: [0,11829,10258,com.google.android.apps.turbo,broadcast,{com.google.andr
+oid.apps.turbo/com.google.android.apps.turbo.deadline.library.BootReceiver}]
+10-10 16:40:07.077  1269  1531 I ActivityManager: Start proc 11829:com.google.android.apps.turbo/u0a258 for broadcast
+{com.google.android.apps.turbo/com.google.android.apps.turbo.deadline.library.BootReceiver}
+10-10 16:40:07.399  1269  1531 I am_proc_start: [0,11884,10258,com.google.android.apps.turbo:aab,broadcast,{com.google.
+android.apps.turbo/com.google.android.libraries.smartbattery.appusage.library.BootReceiver}]
+10-10 16:40:07.400  1269  1531 I ActivityManager: Start proc 11884:com.google.android.apps.turbo:aab/u0a258 for
+broadcast {com.google.android.apps.turbo/com.google.android.libraries.smartbattery.appusage.library.BootReceiver}
+10-10 16:40:07.481  1269  1531 I am_proc_start: [0,11901,10258,com.google.android.apps.turbo:ssb,broadcast,{com.google.
+android.apps.turbo/com.google.android.libraries.smartbattery.brightness.library.BootReceiver}]
+10-10 16:40:07.481  1269  1531 I ActivityManager: Start proc 11901:com.google.android.apps.turbo:ssb/u0a258 for
+broadcast {com.google.android.apps.turbo/com.google.android.libraries.smartbattery.brightness.library.BootReceiver}
+10-10 16:40:08.092  1269  4622 I power_partial_wake_state:
+[DIS,104969203,1001,tachyon:BootReceiver:com.google.android.apps.tachyon(enabled),10263,11699,null]
+10-10 16:40:08.092  1269  4622 I power_partial_wake_state:
+[REL,104969203,1001,tachyon:BootReceiver:com.google.android.apps.tachyon,10263,11699,null]
+10-10 16:40:08.597  1269  1531 I am_proc_start: [0,12167,10286,com.google.android.setupwizard,broadcast,{com.google.and
+roid.setupwizard/com.google.android.setupwizard.pairing.PairingBootReceiver}]
+10-10 16:40:08.597  1269  1531 I ActivityManager: Start proc 12167:com.google.android.setupwizard/u0a286 for broadcast
+{com.google.android.setupwizard/com.google.android.setupwizard.pairing.PairingBootReceiver}
+10-10 16:40:09.465  1269  1531 I am_proc_start: [0,12462,10281,com.google.android.youtube,broadcast,{com.google.android
+.youtube/com.google.android.libraries.youtube.mdx.background.MdxBackgroundScanBootReceiver}]
+10-10 16:40:09.465  1269  1531 I ActivityManager: Start proc 12462:com.google.android.youtube/u0a281 for broadcast
+{com.google.android.youtube/com.google.android.libraries.youtube.mdx.background.MdxBackgroundScanBootReceiver}
+10-10 16:40:10.746  1269  1531 I am_proc_start: [0,12877,10089,com.sec.android.app.samsungapps,broadcast,{com.sec.andro
+id.app.samsungapps/com.sec.android.app.samsungapps.bootup.GalaxyStoreBootUpReceiver}]
+10-10 16:40:10.747  1269  1531 I ActivityManager: Start proc 12877:com.sec.android.app.samsungapps/u0a89 for broadcast
+{com.sec.android.app.samsungapps/com.sec.android.app.samsungapps.bootup.GalaxyStoreBootUpReceiver}
+10-10 16:40:29.012  1269  1382 E Watchdog: !@Sync: 3 heap(MB): 138 / 150 FD: 1227 Threads: 491 [2026-10-10
+16:40:29.011]
+10-10 16:40:53.745  1269  1531 I am_proc_start: [0,18327,1000,com.samsung.android.app.omcagent,broadcast,{com.samsung.a
+ndroid.app.omcagent/com.samsung.android.app.omcagent.BootReceiver}]
+10-10 16:40:53.745  1269  1531 I ActivityManager: Start proc 18327:com.samsung.android.app.omcagent/1000 for broadcast
+{com.samsung.android.app.omcagent/com.samsung.android.app.omcagent.BootReceiver}
+10-10 16:40:53.894  1269  1531 I am_proc_start: [0,18352,10051,com.samsung.android.app.updatecenter,broadcast,{com.sams
+ung.android.app.updatecenter/com.samsung.android.app.updatecenter.BootReceiver}]
+10-10 16:40:53.894  1269  1531 I ActivityManager: Start proc 18352:com.samsung.android.app.updatecenter/u0a51 for
+broadcast {com.samsung.android.app.updatecenter/com.samsung.android.app.updatecenter.BootReceiver}
+10-10 16:40:55.834  1269  1531 I am_proc_start: [0,18800,10115,com.samsung.android.settingshelper,broadcast,{com.samsun
+g.android.settingshelper/com.samsung.android.settingshelper.receivers.BootReceiver}]
+10-10 16:40:55.834  1269  1531 I ActivityManager: Start proc 18800:com.samsung.android.settingshelper/u0a115 for
+broadcast {com.samsung.android.settingshelper/com.samsung.android.settingshelper.receivers.BootReceiver}
+10-10 16:40:56.956  1269  1531 I am_proc_start: [0,19005,10137,com.sec.android.app.safetyassurance,broadcast,{com.sec.a
+ndroid.app.safetyassurance/com.sec.android.app.safetyassurance.emergencyreporthelper.SafetyAssuranceBootReceiver}]
+10-10 16:40:56.957  1269  1531 I ActivityManager: Start proc 19005:com.sec.android.app.safetyassurance/u0a137 for
+broadcast {com.sec.android.app.safetyassurance/com.sec.android.app.safetyassurance.emergencyreporthelper.SafetyAssuranc
+eBootReceiver}
+10-10 16:40:59.221  1269  1382 E Watchdog: !@Sync: 4 heap(MB): 126 / 150 FD: 1231 Threads: 506 [2026-10-10
+16:40:59.220]
+10-10 16:41:08.770   661   681 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle
+-> terminating. Have a great day.
+10-10 16:41:19.842   661 19380 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle
+-> terminating. Have a great day.
+10-10 16:41:21.629  1269 17846 D PerProcessNandswap$NandswapHandler: nandswap start for non-activity watchdogd(pid
+604) action:15 adj:-1000 type:1
+10-10 16:41:21.630  1269 17846 D PerProcessNandswap$NandswapHandler: nandswap end for non-activity watchdogd(pid 604)
+ret:12700995584 adj:-1000
+10-10 16:41:21.631  1269 17846 I am_nandswap: [604,watchdogd,15,12700995584,-1000,-1,1ms,1,[0, 0, 0, 0, 0, 0, 0,
+0],38808128,9927676,[0, 0, 0, 0, 0, 0, 0, 0],38808128,9927676]
+10-10 16:41:29.235  1269  1382 E Watchdog: !@Sync: 5 heap(MB): 117 / 151 FD: 1197 Threads: 504 [2026-10-10
+16:41:29.234]
+10-10 16:41:48.406   661 19590 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle
+-> terminating. Have a great day.
+10-10 16:41:59.244  1269  1382 E Watchdog: !@Sync: 6 heap(MB): 141 / 151 FD: 1196 Threads: 503 [2026-10-10
+16:41:59.243]
+10-10 16:42:02.686   661 20057 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle
+-> terminating. Have a great day.
+10-10 16:42:27.043  1269  1559 I am_cpu  : [604,0,watchdogd,177635,0,10]
+10-10 16:42:29.251  1269  1382 E Watchdog: !@Sync: 7 heap(MB): 139 / 151 FD: 1213 Threads: 502 [2026-10-10
+16:42:29.251]
+10-10 16:42:36.629   661 20228 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle
+-> terminating. Have a great day.
+10-10 16:42:59.268  1269  1382 E Watchdog: !@Sync: 8 heap(MB): 110 / 151 FD: 1179 Threads: 502 [2026-10-10
+16:42:59.268]
+10-10 16:43:29.280  1269  1382 E Watchdog: !@Sync: 9 heap(MB): 126 / 151 FD: 1188 Threads: 502 [2026-10-10
+16:43:29.280]
+10-10 16:43:59.291  1269  1382 E Watchdog: !@Sync: 10 heap(MB): 143 / 151 FD: 1188 Threads: 502 [2026-10-10
+16:43:59.291]
+10-10 16:44:29.300  1269  1382 E Watchdog: !@Sync: 11 heap(MB): 125 / 151 FD: 1175 Threads: 502 [2026-10-10
+16:44:29.300]
+10-10 16:44:59.318  1269  1382 E Watchdog: !@Sync: 12 heap(MB): 143 / 151 FD: 1179 Threads: 503 [2026-10-10
+16:44:59.318]
+10-10 16:44:59.319  1269  1527 I dvm_lock_sample: [system_server,1,ActivityManager,16,qb/113419284
+f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c,35,void
+com.android.server.Watchdog$HandlerChecker.run(),Object.java,-2,void java.lang.Object.wait(long, int),3]
+10-10 16:45:24.695 21537 22088 I [CE_SDK_11.2.37000]_ExecutorUtil: shutdown - mIsStarted: true
+10-10 16:45:24.766 21537 21592 V WifiManager: SoftApCallbackProxy on mode 1, send InfoChanged, newInfo:
+SoftApInfo{bandwidth= 0, frequency= 0, wifiStandard= 0, mApInstanceIdentifier= null, mIdleShutdownTimeoutMillis= 0,
+mVendorData= []}
+10-10 16:45:29.336  1269  1382 E Watchdog: !@Sync: 13 heap(MB): 129 / 151 FD: 1229 Threads: 504 [2026-10-10
+16:45:29.335]
+10-10 16:45:33.018 15876 16722 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=11, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:45:33.019 15876 16722 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=7, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:45:33.019 15876 16722 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=3, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:45:33.041 15876 16722 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=11, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:45:33.145 15876 16722 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=7, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:45:33.175 15876 16722 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=11, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:45:33.288 15876 16722 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=7, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:45:33.708 22329 22497 I [CE_SDK_11.2.41000]_ExecutorUtil: shutdown - mIsStarted: true
+10-10 16:45:38.440  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:38.441  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[com.google.android.providers.media.module, android]
+10-10 16:45:38.441  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.441  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:38.441  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:38.441  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:38.450  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.456  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:38.456  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.458  1269  4839 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:38.527  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:38.527  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android]
+10-10 16:45:38.527  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:38.527  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:38.527  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:38.527  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.540  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.541  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:38.542  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.542  1269  4839 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:38.575  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:38.575  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.575  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android, com.android.settings]
+10-10 16:45:38.575  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:38.575  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:38.575  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:38.579  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.580  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:38.581  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.582  1269  2458 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:38.583  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:38.583  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android]
+10-10 16:45:38.583  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.584  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:38.584  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:38.584  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:38.588  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.588  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:38.588  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.589  1269  3132 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:38.599  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:38.600  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[com.google.android.cellbroadcastservice, android]
+10-10 16:45:38.600  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:38.600  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:38.600  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.600  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:38.608  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:38.609  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:38.609  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[com.google.android.permissioncontroller]
+10-10 16:45:38.609  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:38.609  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:38.609  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:38.611  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.612  1269  2458 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:38.642  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:38.642  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.642  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android]
+10-10 16:45:38.643  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:38.643  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:38.643  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:38.645  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.646  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:38.646  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.646  1269  2775 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:38.654  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:38.654  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android]
+10-10 16:45:38.654  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.654  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:38.654  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:38.654  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:38.658  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.658  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:38.658  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.659  1269  2775 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:38.683  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:38.683  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android]
+10-10 16:45:38.683  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:38.684  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:38.684  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.688  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.691  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:38.691  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.692  1269  4839 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:38.702  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:38.703  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android]
+10-10 16:45:38.703  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.703  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:38.703  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:38.703  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:38.707  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.716  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:38.716  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[com.android.settings.intelligence, com.sec.android.app.launcher, com.android.settings, com.android.systemui]
+10-10 16:45:38.716  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:38.716  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:38.716  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:38.725  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:38.725  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android]
+10-10 16:45:38.725  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:38.725  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:38.725  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:38.730  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:38.730  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:38.731  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android]
+10-10 16:45:38.731  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:38.731  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:38.731  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:38.735  1269  1269 I PackageWatchdog: Syncing health check requests for packages:
+{com.android.settings.intelligence}
+10-10 16:45:38.736  1269  3132 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:38.736  1269  3132 I PackageWatchdog: Updated health check state for package
+com.android.settings.intelligence: INACTIVE -> PASSED
+10-10 16:45:38.737  1269  3132 I PackageWatchdog: Syncing state, reason: updated health check supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:38.737  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:38.737  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.740  1269  2458 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:38.747  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:38.748  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.749  1269  2775 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:38.814  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:38.815  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[com.google.android.adservices.api, android]
+10-10 16:45:38.815  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:38.815  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:38.815  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:38.823  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.840  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:38.841  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.842  1269  2775 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:38.948  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:38.948  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android]
+10-10 16:45:38.948  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:38.948  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:38.949  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:38.949  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.952  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.952  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:38.952  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:38.953  1269  2458 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:39.002  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:39.002  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[com.google.android.federatedcompute, com.google.android.ondevicepersonalization.services]
+10-10 16:45:39.002  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:39.002  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:39.002  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:39.013  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.028  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:39.029  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.031  1269  4839 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:39.082  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:39.082  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[com.google.android.as, com.google.android.as.oss]
+10-10 16:45:39.082  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:39.082  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:39.082  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.086  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.087  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:39.087  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.088  1269  4839 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:39.142  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:39.142  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.142  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[com.google.android.providers.media.module, com.google.android.photopicker]
+10-10 16:45:39.142  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:39.143  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:39.147  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.147  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:39.147  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.148  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:39.148  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android]
+10-10 16:45:39.148  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:39.148  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:39.149  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:39.157  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.157  1269  2458 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:39.159  1269  2775 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:39.184  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:39.184  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android, com.android.phone]
+10-10 16:45:39.184  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:39.184  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:39.184  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.184  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:39.188  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.189  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:39.189  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.190  1269  4839 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:39.255  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:39.256  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.256  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android]
+10-10 16:45:39.256  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:39.256  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:39.256  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:39.261  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.263  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:39.263  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.263  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:39.264  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android]
+10-10 16:45:39.264  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:39.264  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:39.264  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:39.267  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.268  1269  4839 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:39.268  1269  4771 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:39.272  1269 23003 E SettingsToPropertiesMapper:
+key=persist.device_config.configuration.AdbWritableFlags__adb_writable_flags_list value=adservices/disable_sdk_sandbox,
+adservices/enforce_broadcast_receiver_restrictions,adservices/fledge_ad_selection_enforce_foreground_status_custom_audi
+ence,adservices/fledge_custom_audience_max_count,adservices/fledge_custom_audience_max_num_ads,adservices/fledge_custom
+_audience_max_owner_count,adservices/fledge_custom_audience_per_app_max_count,adservices/fledge_js_isolate_enforce_max_
+heap_size,adservices/fledge_js_isolate_max_heap_size_bytes,adservices/sdk_request_permits_per_second,adservices/sdksand
+box_customized_sdk_context_enabled,configuration/namespace_to_package_mapping,constrain_display_apis/always_constrain_d
+isplay_apis,constrain_display_apis/never_constrain_display_apis,constrain_display_apis/never_constrain_display_apis_all
+_packages,device_policy_manager/disable_resources_updatability,flipendo/default_savings_mode_launch,flipendo/essential_
+apps,flipendo/flipendo_enabled_launch,flipendo/grayscale_enabled_launch,flipendo/lever_ble_scanning_enabled_launch,flip
+endo/lever_hotspot_enabled_launch,flipendo/lever_work_profile_enabled_launch,flipendo/resuspend_delay_minutes,namespace
+/key,namespace1/key1,namespace1/key2,namespace2/key1,namespace2/key2,package_manager_service/incfs_default_timeouts,pac
+kage_manager_service/known_digesters_list,privacy/location_access_check_periodic_interval_millis,rollback/enable_rollba
+ck_timeout,rollback/watchdog_explicit_health_check_enabled,rollback/watchdog_request_timeout_millis,rollback/watchdog_t
+rigger_failure_count,rollback/watchdog_trigger_failure_duration_millis,rollback_boot/rollback_lifetime_in_millis,system
+ui/nas_generate_actions,systemui/nas_generate_replies,systemui/nas_max_messages_to_extract,systemui/nas_max_suggestions
+,testspace/another,testspace/flagname,textclassifier/config_updater_model_enabled,textclassifier/key,textclassifier/key
+2,textclassifier/manifest_url_annotator_en,textclassifier/manifest_url_annotator_ru,textclassifier/model_download_backo
+ff_delay_in_millis,textclassifier/model_download_manager_enabled,textclassifier/multi_language_support_enabled,textclas
+sifier/testing_locale_list_override,textclassifier/textclassifier_service_package_override,window_manager/enable_defaul
+t_rescind_bal_privileges_from_pending_intent_sender,wrong/nas_generate_replies, exceeds system property max length.
+10-10 16:45:39.278  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:39.278  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android, com.google.android.permissioncontroller, com.android.settings, com.samsung.android.svcagent,
+com.samsung.android.mcfserver, com.android.systemui]
+10-10 16:45:39.278  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:39.278  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:39.278  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:39.283  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.286  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.288  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:39.288  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.289  1269  2458 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:39.293  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:39.293  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[com.google.android.ext.services, android, com.android.systemui]
+10-10 16:45:39.293  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:39.293  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:39.294  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.294  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:39.302  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:39.302  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.302  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:39.302  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android]
+10-10 16:45:39.302  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:39.302  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:39.302  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:39.304  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.305  1269  4839 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:39.522  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:39.522  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android]
+10-10 16:45:39.522  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.522  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:39.522  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:39.522  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:39.529  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.532  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:39.533  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.534  1269  2735 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:39.553  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:39.554  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android]
+10-10 16:45:39.554  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:39.554  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:39.554  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:39.558  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.562  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:39.563  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.564  1269  4839 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:39.578  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:39.578  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android, com.android.settings, com.android.systemui]
+10-10 16:45:39.578  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:39.578  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:39.578  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.589  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.589  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:39.589  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.590  1269  2463 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:39.599  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:39.599  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android]
+10-10 16:45:39.599  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:39.599  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:39.599  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:39.604  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.608  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:39.608  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.610  1269  2463 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:39.658  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:39.658  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[com.android.bluetooth]
+10-10 16:45:39.659  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:39.659  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:39.659  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:39.659  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.669  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.670  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:39.670  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.672  1269  2358 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:39.684  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:39.685  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android]
+10-10 16:45:39.685  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:39.685  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:39.685  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.685  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:39.689  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.691  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:39.691  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:39.691  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android]
+10-10 16:45:39.692  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.692  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:39.692  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:39.692  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:39.695  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.695  1269  2463 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:39.696  1269  4626 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:39.702  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:39.702  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android]
+10-10 16:45:39.702  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:39.703  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:39.703  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.707  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.707  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:39.707  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.708  1269  3140 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:39.718  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:39.719  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[com.google.android.cellbroadcastservice, android]
+10-10 16:45:39.719  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:39.719  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:39.719  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:39.719  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.725  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.725  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:39.726  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.726  1269  2463 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:39.734  1269  1482 I PackageWatchdog: Syncing state, reason: observing new packages
+10-10 16:45:39.735  1269  1482 D PackageWatchdog: rescue-party-observer added the following packages to monitor
+[android]
+10-10 16:45:39.735  1269  1482 I PackageWatchdog: Syncing state, reason: updated observers
+10-10 16:45:39.735  1269  1482 I PackageWatchdog: Not pruning observers, elapsed time: 0ms
+10-10 16:45:39.735  1269  1482 I PackageWatchdog: Saving observer state to file
+10-10 16:45:39.735  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.738  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.739  1269  1269 I ExplicitHealthCheckController: Explicit health check service is connected
+ComponentInfo{com.google.android.ext.services/android.ext.services.watchdog.ExplicitHealthCheckServiceImpl}
+10-10 16:45:39.740  1269  1269 I PackageWatchdog: Syncing health check requests for packages: {}
+10-10 16:45:39.741  1269  4626 D PackageWatchdog: Received supported packages
+[PackageConfig{com.google.android.networkstack, 86400000}]
+10-10 16:45:41.700   661 20868 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle
+-> terminating. Have a great day.
+10-10 16:45:57.054   661 23128 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle
+-> terminating. Have a great day.
+10-10 16:45:59.358  1269  1382 E Watchdog: !@Sync: 14 heap(MB): 113 / 151 FD: 1187 Threads: 511 [2026-10-10
+16:45:59.357]
+10-10 16:46:10.881  2952 23345 E kcxj    :     Make sure to call shutdown()/shutdownNow()
+10-10 16:46:27.003   661 23433 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle
+-> terminating. Have a great day.
+10-10 16:46:29.377  1269  1382 E Watchdog: !@Sync: 15 heap(MB): 145 / 151 FD: 1292 Threads: 511 [2026-10-10
+16:46:29.376]
+10-10 16:46:38.066 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 2:AnalyticsInit,
+deps=[281]
+10-10 16:46:38.066 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+4:AnalyticsLoggerPostInitReplay, deps=[3]
+10-10 16:46:38.066 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 103:BloksInitializer,
+deps=[3]
+10-10 16:46:38.066 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+118:ClientCacheEdgeManagerInitializer, deps=[209, 281, 449]
+10-10 16:46:38.066 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+119:ClientCacheEdgeManagerInitializerUserScoped, deps=[209, 281, 449]
+10-10 16:46:38.066 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+121:ComposerSavedSessionStoreInitializer, deps=[165, 200, 209]
+10-10 16:46:38.066 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+127:DgwEarlySyncInitializer, deps=[209, 247, 279, 281, 284, 492]
+10-10 16:46:38.066 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+134:DownloadedFbResources, deps=[281, 284]
+10-10 16:46:38.066 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+158:ErrorReporterSecondaryInit, deps=[165, 200, 209]
+10-10 16:46:38.066 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+160:Fb4aReactEagerInitHotMCUnpacker, deps=[165, 209, 281]
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+162:FbMCPPluginInitializer, deps=[165, 247]
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+163:FbMsysImmediateInitializer, deps=[3, 162]
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+164:FbMsysPostBootstrapListenerRegistrarOnAppInit, deps=[209, 281, 284]
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+361:NotifyAppStateManagerOnCreateComplete, deps=[209, 281]
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+167:FbSharedUIQREnvironment, deps=[165, 361]
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+171:FixieActivityManagerHook, deps=null
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+172:FixieLimitNativeStackSize, deps=null
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 173:FixieNoSync,
+deps=[281]
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 197:InitAppChoreographer,
+deps=null
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+174:FixieScheduleIdleWork, deps=[197, 486]
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+189:HandleAppComponentsForPreTosBuild, deps=null
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+192:INeedInitForBroadcastReceiverRegister, deps=[450]
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+193:INeedInitForEventBusRegister, deps=null
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+195:INeedInitForSharedPrefsListenerRegister, deps=[279, 281, 284]
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 196:InitAndroidX,
+deps=[246]
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 211:InitFeedVpvSeenStore,
+deps=[165, 450]
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 212:InitFury, deps=[281]
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 213:InitHelium, deps=[281]
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 216:InitLacrimaLaterInit,
+deps=[209, 215]
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 217:InitLogging, deps=null
+10-10 16:46:38.067 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 218:InitMallocHooks,
+deps=null
+10-10 16:46:38.068 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+219:InitMemoryDumpHandler, deps=[281]
+10-10 16:46:38.068 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 227:InitPushabilityCheck,
+deps=[188, 228]
+10-10 16:46:38.068 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+493:ZeroLibraryInitializer, deps=[3, 139, 165, 450, 494]
+10-10 16:46:38.068 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 229:InitReliableMedia,
+deps=[430, 493]
+10-10 16:46:38.068 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 235:InitSurfaces,
+deps=[209]
+10-10 16:46:38.068 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 236:InitSystrace,
+deps=null
+10-10 16:46:38.068 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 238:InitTrafficNTS,
+deps=[139, 279, 281]
+10-10 16:46:38.068 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+242:LanguageSwitcherCommonExInit, deps=[167]
+10-10 16:46:38.068 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+251:LocationRequestDetector, deps=[281]
+10-10 16:46:38.068 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 252:LogController,
+deps=[165]
+10-10 16:46:38.068 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 261:MessageQueueDoctor,
+deps=[3]
+10-10 16:46:38.068 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+287:MprotectCodeLaterInit, deps=[286]
+10-10 16:46:38.068 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+289:MqttEarlySyncInitializerAfterAppCreate, deps=[130, 162]
+10-10 16:46:38.068 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+360:NewsFeedTabPrefetchNormal, deps=[281, 449]
+10-10 16:46:38.068 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+362:NpuSrRendererInitializer, deps=null
+10-10 16:46:38.068 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+363:ObjectCountJestE2EBridge, deps=null
+10-10 16:46:38.070 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+368:PendingStoryStoreInitializer, deps=[165, 209, 281]
+10-10 16:46:38.070 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 386:PreloadIconsInit,
+deps=[449, 450]
+10-10 16:46:38.070 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+391:PreloadNativeLibrariesVif, deps=[247, 279, 281]
+10-10 16:46:38.070 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+394:PreloadReelsCsrForReelsTabStarts, deps=[188, 450]
+10-10 16:46:38.070 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+405:PreloadVideoHomeDataController, deps=[449, 450]
+10-10 16:46:38.070 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+410:ProfiloBridgeFactoryImpl, deps=[259, 450]
+10-10 16:46:38.070 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 419:RasFileInitializer,
+deps=null
+10-10 16:46:38.070 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+420:RegisterMainLooperTracer, deps=null
+10-10 16:46:38.070 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+422:ReleaseDeferredBroadcastReceiver, deps=null
+10-10 16:46:38.070 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+423:ReliabilityExperiments, deps=null
+10-10 16:46:38.070 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+426:ReliabilityUserPerceptibleScopeToQPL, deps=[450]
+10-10 16:46:38.070 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+427:ReplayBroadcastReceivedDuringAppInit, deps=[486]
+10-10 16:46:38.070 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 432:ScheduleLowPriWork,
+deps=[486]
+10-10 16:46:38.070 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 441:SetupDynaBuilds,
+deps=null
+10-10 16:46:38.070 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 457:TabBadgeFetchAppInit,
+deps=[279, 281]
+10-10 16:46:38.070 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+488:WarmFacebookEmojiFont, deps=[165, 281]
+10-10 16:46:38.070 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+491:WhitehatOverlayInitializer, deps=[165]
+10-10 16:46:38.070 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 496:ZresWarmUp,
+deps=[209, 247]
+10-10 16:46:38.071 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+116:CacheScoreRefreshOnBackgroundStart, deps=[279]
+10-10 16:46:38.071 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+377:PreloadFeedDataLoader, deps=[449, 450]
+10-10 16:46:38.071 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+379:PreloadFeedFullCacheLoad, deps=[449, 450]
+10-10 16:46:38.071 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+141:EagerInitFeedDataLoader, deps=[377, 379]
+10-10 16:46:38.071 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+146:EarlyInitStoriesTrayForActivity, deps=[449, 450]
+10-10 16:46:38.071 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+147:EarlyInitStoriesTrayForActivityDeferred, deps=[146, 197]
+10-10 16:46:38.071 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 179:FriendlyFeedPrefetch,
+deps=[279]
+10-10 16:46:38.071 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+180:FriendlyFeedPrefetchOnFirstForegroundWarmStart, deps=[279]
+10-10 16:46:38.071 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+198:InitAppComponentFactoryStartupController, deps=[130]
+10-10 16:46:38.071 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+224:InitPeriodicThreadBooster, deps=[197, 281]
+10-10 16:46:38.071 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 241:KeepWarm, deps=[449,
+450]
+10-10 16:46:38.071 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+257:LongtailVoltronAppInit, deps=[209, 281]
+10-10 16:46:38.071 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 278:MetaCasper,
+deps=[449, 450]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+280:MobileConfigAdminIdLaterInit, deps=[135, 209]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+282:MobileConfigLaterInit, deps=[136]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+285:MobileConfigSessionlessLaterInit, deps=[137, 209]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+359:NewsFeedTabPrefetchLow, deps=[281, 449]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+367:PartialScrollOnFirstForegroundWarmStart, deps=[449, 450]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 380:PreloadFeedRequest,
+deps=[449, 450]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 370:PrefetchFeedNetwork,
+deps=[380]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+371:PrefetchReelsInitialDataForFeedStart, deps=[188, 370]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 372:PreloadClashManager,
+deps=[449, 450]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+375:PreloadCreatorsHomeToHUnit, deps=[279, 281]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 376:PreloadFeedConfig,
+deps=[449, 450]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+378:PreloadFeedFetchMetadata, deps=[449, 450]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+381:PreloadFeedRequestForAllStarts, deps=[449, 450]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+383:PreloadFreshFeedRanker, deps=[449, 450]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+384:PreloadFriendlyFeedFullCacheLoad, deps=[449, 450]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 385:PreloadHeroManager,
+deps=[449, 450]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+387:PreloadInlineComposerProfileImage, deps=[142, 165, 450]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+388:PreloadInlineComposerProfileImageDeferred, deps=[142, 197, 449, 450]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 389:PreloadLogDb,
+deps=[3, 449, 450]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 393:PreloadReactions,
+deps=[3, 165, 450]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 398:PreloadStoriesTray,
+deps=[141]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+399:PreloadStoriesTrayDeferred, deps=[197, 398]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+400:PreloadStoriesTrayFetchController, deps=[449, 450]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+401:PreloadStoriesTrayFetchControllerDeferred, deps=[197, 400]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+402:PreloadStoriesTrayQuery, deps=[165, 450]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+403:PreloadStoryAdsInStoriesTray, deps=[165, 450]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+404:PreloadTabPreloadablesBackgroundPrefetch, deps=[165, 450]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+406:PreloadVideoPrivateSharing, deps=[165, 450]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+418:RadlStartToBackgroundQPL, deps=[450]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 433:ScreenOnFeedPrefetch,
+deps=[279, 281]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+435:SecondaryDexPreloaderBg, deps=[143, 281]
+10-10 16:46:38.072 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+437:SecureHashDigestReuseInit, deps=null
+10-10 16:46:38.073 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+440:SetupBlockingBackgroundComponentReporting, deps=[450]
+10-10 16:46:38.073 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 451:StartupQPLReplayer,
+deps=[450]
+10-10 16:46:38.073 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+452:StartupQPLTransitToMatureStage, deps=[451]
+10-10 16:46:38.073 23816 23856 E AppInitScheduler|Schedule: Call to schedule after shutdown: 485:VideoMetaCasper,
+deps=[449, 450]
+10-10 16:46:45.087 23816 24067 I MediaCodec: Codec shutdown complete
+10-10 16:46:45.138 23816 24092 I MediaCodec: Codec shutdown complete
+10-10 16:46:45.207 23816 24106 I MediaCodec: Codec shutdown complete
+10-10 16:46:46.706 21537 22088 I [CE_SDK_11.2.37000]_ExecutorUtil: shutdown - mIsStarted: true
+10-10 16:46:49.333 21537 22088 I [CE_SDK_11.2.37000]_ExecutorUtil: shutdown - mIsStarted: true
+10-10 16:46:55.247   661 24018 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle
+-> terminating. Have a great day.
+10-10 16:46:59.399  1269  1382 E Watchdog: !@Sync: 16 heap(MB): 126 / 151 FD: 1206 Threads: 511 [2026-10-10
+16:46:59.399]
+10-10 16:47:13.495 21537 23060 W ProcStatsManager: No process com.google.android.ext.services/10293 for service
+android.ext.services.watchdog.ExplicitHealthCheckServiceImpl
+10-10 16:47:13.610 21537 21553 W ProcStatsManager: No process com.google.android.ext.services/10293 for service
+android.ext.services.watchdog.ExplicitHealthCheckServiceImpl
+10-10 16:47:14.183 21537 22088 I [CE_SDK_11.2.37000]_ExecutorUtil: shutdown - mIsStarted: true
+10-10 16:47:18.752 24971 25035 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+-2147483648:DeferredProduct_164_0quN, deps=[164]
+10-10 16:47:19.146 24971 25166 I MediaCodec: Codec shutdown complete
+10-10 16:47:19.164 24971 25181 I MediaCodec: Codec shutdown complete
+10-10 16:47:25.234 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+166:FbSharedPreferenceInitializerAsync, deps=null
+10-10 16:47:25.234 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+396:PreloadStartupLightSharedPreferenceUsagesAppInit, deps=null
+10-10 16:47:25.234 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 494:ZeroV2GateEarlyInit,
+deps=null
+10-10 16:47:25.234 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+143:EarliestPossibleColdStartClassPreloadStarter, deps=null
+10-10 16:47:25.234 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+358:NewsFeedTabPrefetchHigh, deps=[281, 449]
+10-10 16:47:25.234 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+382:PreloadFeedRequestHighPriority, deps=[449, 450]
+10-10 16:47:25.234 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 490:WarmVolumeCache,
+deps=[165, 279]
+10-10 16:47:25.234 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+1:AddProcessNameToErrorReport, deps=null
+10-10 16:47:25.235 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 2:AnalyticsInit,
+deps=[281]
+10-10 16:47:25.235 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+4:AnalyticsLoggerPostInitReplay, deps=[3]
+10-10 16:47:25.235 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 103:BloksInitializer,
+deps=[3]
+10-10 16:47:25.236 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+118:ClientCacheEdgeManagerInitializer, deps=[209, 281, 449]
+10-10 16:47:25.236 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+119:ClientCacheEdgeManagerInitializerUserScoped, deps=[209, 281, 449]
+10-10 16:47:25.236 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+121:ComposerSavedSessionStoreInitializer, deps=[165, 200, 209]
+10-10 16:47:25.236 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+127:DgwEarlySyncInitializer, deps=[209, 247, 279, 281, 284, 492]
+10-10 16:47:25.236 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+134:DownloadedFbResources, deps=[281, 284]
+10-10 16:47:25.236 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+158:ErrorReporterSecondaryInit, deps=[165, 200, 209]
+10-10 16:47:25.236 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+160:Fb4aReactEagerInitHotMCUnpacker, deps=[165, 209, 281]
+10-10 16:47:25.236 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+162:FbMCPPluginInitializer, deps=[165, 247]
+10-10 16:47:25.236 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+163:FbMsysImmediateInitializer, deps=[3, 162]
+10-10 16:47:25.236 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+164:FbMsysPostBootstrapListenerRegistrarOnAppInit, deps=[209, 281, 284]
+10-10 16:47:25.236 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+361:NotifyAppStateManagerOnCreateComplete, deps=[209, 281]
+10-10 16:47:25.236 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+167:FbSharedUIQREnvironment, deps=[165, 361]
+10-10 16:47:25.236 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+171:FixieActivityManagerHook, deps=null
+10-10 16:47:25.236 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+172:FixieLimitNativeStackSize, deps=null
+10-10 16:47:25.236 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 173:FixieNoSync,
+deps=[281]
+10-10 16:47:25.236 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 197:InitAppChoreographer,
+deps=null
+10-10 16:47:25.236 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+174:FixieScheduleIdleWork, deps=[197, 486]
+10-10 16:47:25.236 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+189:HandleAppComponentsForPreTosBuild, deps=null
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+192:INeedInitForBroadcastReceiverRegister, deps=[450]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+193:INeedInitForEventBusRegister, deps=null
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+195:INeedInitForSharedPrefsListenerRegister, deps=[279, 281, 284]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 196:InitAndroidX,
+deps=[246]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 211:InitFeedVpvSeenStore,
+deps=[165, 450]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 212:InitFury, deps=[281]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 213:InitHelium, deps=[281]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 216:InitLacrimaLaterInit,
+deps=[209, 215]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 217:InitLogging, deps=null
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 218:InitMallocHooks,
+deps=null
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+219:InitMemoryDumpHandler, deps=[281]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 227:InitPushabilityCheck,
+deps=[188, 228]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+493:ZeroLibraryInitializer, deps=[3, 139, 165, 450, 494]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 229:InitReliableMedia,
+deps=[430, 493]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 235:InitSurfaces,
+deps=[209]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 236:InitSystrace,
+deps=null
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 238:InitTrafficNTS,
+deps=[139, 279, 281]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+242:LanguageSwitcherCommonExInit, deps=[167]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+251:LocationRequestDetector, deps=[281]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 252:LogController,
+deps=[165]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 261:MessageQueueDoctor,
+deps=[3]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+287:MprotectCodeLaterInit, deps=[286]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+289:MqttEarlySyncInitializerAfterAppCreate, deps=[130, 162]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+360:NewsFeedTabPrefetchNormal, deps=[281, 449]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+362:NpuSrRendererInitializer, deps=null
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+363:ObjectCountJestE2EBridge, deps=null
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+368:PendingStoryStoreInitializer, deps=[165, 209, 281]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 386:PreloadIconsInit,
+deps=[449, 450]
+10-10 16:47:25.237 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+391:PreloadNativeLibrariesVif, deps=[247, 279, 281]
+10-10 16:47:25.238 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+394:PreloadReelsCsrForReelsTabStarts, deps=[188, 450]
+10-10 16:47:25.238 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+405:PreloadVideoHomeDataController, deps=[449, 450]
+10-10 16:47:25.238 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+410:ProfiloBridgeFactoryImpl, deps=[259, 450]
+10-10 16:47:25.238 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 419:RasFileInitializer,
+deps=null
+10-10 16:47:25.238 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+420:RegisterMainLooperTracer, deps=null
+10-10 16:47:25.238 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+422:ReleaseDeferredBroadcastReceiver, deps=null
+10-10 16:47:25.238 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+423:ReliabilityExperiments, deps=null
+10-10 16:47:25.238 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+426:ReliabilityUserPerceptibleScopeToQPL, deps=[450]
+10-10 16:47:25.238 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+427:ReplayBroadcastReceivedDuringAppInit, deps=[486]
+10-10 16:47:25.238 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 432:ScheduleLowPriWork,
+deps=[486]
+10-10 16:47:25.238 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 441:SetupDynaBuilds,
+deps=null
+10-10 16:47:25.239 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 457:TabBadgeFetchAppInit,
+deps=[279, 281]
+10-10 16:47:25.239 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+488:WarmFacebookEmojiFont, deps=[165, 281]
+10-10 16:47:25.239 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+491:WhitehatOverlayInitializer, deps=[165]
+10-10 16:47:25.239 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 496:ZresWarmUp,
+deps=[209, 247]
+10-10 16:47:25.239 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+116:CacheScoreRefreshOnBackgroundStart, deps=[279]
+10-10 16:47:25.239 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+377:PreloadFeedDataLoader, deps=[449, 450]
+10-10 16:47:25.239 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+379:PreloadFeedFullCacheLoad, deps=[449, 450]
+10-10 16:47:25.239 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+141:EagerInitFeedDataLoader, deps=[377, 379]
+10-10 16:47:25.239 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+146:EarlyInitStoriesTrayForActivity, deps=[449, 450]
+10-10 16:47:25.239 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+147:EarlyInitStoriesTrayForActivityDeferred, deps=[146, 197]
+10-10 16:47:25.239 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 179:FriendlyFeedPrefetch,
+deps=[279]
+10-10 16:47:25.239 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+180:FriendlyFeedPrefetchOnFirstForegroundWarmStart, deps=[279]
+10-10 16:47:25.240 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+198:InitAppComponentFactoryStartupController, deps=[130]
+10-10 16:47:25.240 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+224:InitPeriodicThreadBooster, deps=[197, 281]
+10-10 16:47:25.241 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 241:KeepWarm, deps=[449,
+450]
+10-10 16:47:25.241 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+257:LongtailVoltronAppInit, deps=[209, 281]
+10-10 16:47:25.241 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 278:MetaCasper,
+deps=[449, 450]
+10-10 16:47:25.241 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+280:MobileConfigAdminIdLaterInit, deps=[135, 209]
+10-10 16:47:25.241 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+282:MobileConfigLaterInit, deps=[136]
+10-10 16:47:25.241 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+285:MobileConfigSessionlessLaterInit, deps=[137, 209]
+10-10 16:47:25.241 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+359:NewsFeedTabPrefetchLow, deps=[281, 449]
+10-10 16:47:25.241 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+367:PartialScrollOnFirstForegroundWarmStart, deps=[449, 450]
+10-10 16:47:25.241 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 380:PreloadFeedRequest,
+deps=[449, 450]
+10-10 16:47:25.241 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 370:PrefetchFeedNetwork,
+deps=[380]
+10-10 16:47:25.241 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+371:PrefetchReelsInitialDataForFeedStart, deps=[188, 370]
+10-10 16:47:25.241 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 372:PreloadClashManager,
+deps=[449, 450]
+10-10 16:47:25.241 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+375:PreloadCreatorsHomeToHUnit, deps=[279, 281]
+10-10 16:47:25.241 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 376:PreloadFeedConfig,
+deps=[449, 450]
+10-10 16:47:25.242 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+378:PreloadFeedFetchMetadata, deps=[449, 450]
+10-10 16:47:25.242 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+381:PreloadFeedRequestForAllStarts, deps=[449, 450]
+10-10 16:47:25.242 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+383:PreloadFreshFeedRanker, deps=[449, 450]
+10-10 16:47:25.242 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+384:PreloadFriendlyFeedFullCacheLoad, deps=[449, 450]
+10-10 16:47:25.242 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 385:PreloadHeroManager,
+deps=[449, 450]
+10-10 16:47:25.242 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+387:PreloadInlineComposerProfileImage, deps=[142, 165, 450]
+10-10 16:47:25.242 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+388:PreloadInlineComposerProfileImageDeferred, deps=[142, 197, 449, 450]
+10-10 16:47:25.242 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 389:PreloadLogDb,
+deps=[3, 449, 450]
+10-10 16:47:25.242 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 393:PreloadReactions,
+deps=[3, 165, 450]
+10-10 16:47:25.242 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 398:PreloadStoriesTray,
+deps=[141]
+10-10 16:47:25.242 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+399:PreloadStoriesTrayDeferred, deps=[197, 398]
+10-10 16:47:25.242 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+400:PreloadStoriesTrayFetchController, deps=[449, 450]
+10-10 16:47:25.242 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+401:PreloadStoriesTrayFetchControllerDeferred, deps=[197, 400]
+10-10 16:47:25.243 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+402:PreloadStoriesTrayQuery, deps=[165, 450]
+10-10 16:47:25.243 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+403:PreloadStoryAdsInStoriesTray, deps=[165, 450]
+10-10 16:47:25.243 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+404:PreloadTabPreloadablesBackgroundPrefetch, deps=[165, 450]
+10-10 16:47:25.243 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+406:PreloadVideoPrivateSharing, deps=[165, 450]
+10-10 16:47:25.243 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+418:RadlStartToBackgroundQPL, deps=[450]
+10-10 16:47:25.243 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 433:ScreenOnFeedPrefetch,
+deps=[279, 281]
+10-10 16:47:25.243 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+435:SecondaryDexPreloaderBg, deps=[143, 281]
+10-10 16:47:25.243 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+437:SecureHashDigestReuseInit, deps=null
+10-10 16:47:25.243 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+440:SetupBlockingBackgroundComponentReporting, deps=[450]
+10-10 16:47:25.243 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 451:StartupQPLReplayer,
+deps=[450]
+10-10 16:47:25.243 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+452:StartupQPLTransitToMatureStage, deps=[451]
+10-10 16:47:25.244 25324 25378 E AppInitScheduler|Schedule: Call to schedule after shutdown: 485:VideoMetaCasper,
+deps=[449, 450]
+10-10 16:47:29.424  1269  1382 E Watchdog: !@Sync: 17 heap(MB): 137 / 151 FD: 1202 Threads: 511 [2026-10-10
+16:47:29.423]
+10-10 16:47:31.998 25324 25556 I MediaCodec: Codec shutdown complete
+10-10 16:47:32.032 25324 25569 I MediaCodec: Codec shutdown complete
+10-10 16:47:32.064 25324 25582 I MediaCodec: Codec shutdown complete
+10-10 16:47:37.932  1269  1559 I am_cpu  : [604,0,watchdogd,310901,0,10]
+10-10 16:47:42.289   661 25054 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle
+-> terminating. Have a great day.
+10-10 16:47:52.205  2364 25791 I MediaCodec: Codec shutdown complete
+10-10 16:47:52.375  2364 25814 I MediaCodec: Codec shutdown complete
+10-10 16:47:52.488  2364 25848 I MediaCodec: Codec shutdown complete
+10-10 16:47:54.585 21537 21590 W ProcStatsManager: No process com.google.android.ext.services/10293 for service
+android.ext.services.watchdog.ExplicitHealthCheckServiceImpl
+10-10 16:47:54.664  2364 25981 I MediaCodec: Codec shutdown complete
+10-10 16:47:54.746 21537 22899 W ProcStatsManager: No process com.google.android.ext.services/10293 for service
+android.ext.services.watchdog.ExplicitHealthCheckServiceImpl
+10-10 16:47:57.876 26087 26087 I adbd    : persist.adb.watchdog set to ''
+10-10 16:47:57.879 26087 26087 I adbd    : adb watchdog timeout set to 600 seconds
+10-10 16:47:59.436  1269  1382 E Watchdog: !@Sync: 18 heap(MB): 122 / 151 FD: 1200 Threads: 511 [2026-10-10
+16:47:59.436]
+10-10 16:48:05.272   661 26026 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle
+-> terminating. Have a great day.
+10-10 16:48:08.913  1151 26230 V NuPlayer: [audio] flushDecoder needShutdown=1
+10-10 16:48:08.915  1151 26241 I NuPlayerRenderer: flush audio, notifyComplete 1, shutdown Yes
+10-10 16:48:08.918  1151 26230 V NuPlayer: initiating audio decoder shutdown
+10-10 16:48:08.920  1151 26230 V NuPlayer: audio shutdown completed
+10-10 16:48:08.923  1151 26242 I MediaCodec: Codec shutdown complete
+10-10 16:48:29.450  1269  1382 E Watchdog: !@Sync: 19 heap(MB): 142 / 151 FD: 1204 Threads: 512 [2026-10-10
+16:48:29.449]
+10-10 16:48:59.537  1269  1382 E Watchdog: !@Sync: 20 heap(MB): 141 / 151 native(MB): 93 FD: 1226 WaitTime: 126 ms
+GCcnt: 0 FullGC: 0 [2026-10-10 16:48:59.453]
+10-10 16:49:18.113   661 27678 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle
+-> terminating. Have a great day.
+10-10 16:49:29.546  1269  1382 E Watchdog: !@Sync: 21 heap(MB): 154 / 155 FD: 1225 Threads: 515 [2026-10-10
+16:49:29.546]
+10-10 16:49:38.471 28730 28808 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+-2147483648:DeferredProduct_164_0quN, deps=[164]
+10-10 16:49:38.884 28730 28925 I MediaCodec: Codec shutdown complete
+10-10 16:49:38.919 28730 28937 I MediaCodec: Codec shutdown complete
+10-10 16:49:54.688   661 28508 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle
+-> terminating. Have a great day.
+10-10 16:49:59.553  1269  1382 E Watchdog: !@Sync: 22 heap(MB): 140 / 154 FD: 1222 Threads: 515 [2026-10-10
+16:49:59.553]
+10-10 16:50:29.562  1269  1382 E Watchdog: !@Sync: 23 heap(MB): 111 / 154 FD: 1210 Threads: 515 [2026-10-10
+16:50:29.562]
+10-10 16:50:36.530   661 29302 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle
+-> terminating. Have a great day.
+10-10 16:50:49.946  2364 29413 I MediaCodec: Codec shutdown complete
+10-10 16:50:50.074  2364 29440 I MediaCodec: Codec shutdown complete
+10-10 16:50:50.268  2364 29474 I MediaCodec: Codec shutdown complete
+10-10 16:50:54.819  1269  1269 I InactivityRestartService: Reboot alarm scheduled successfully - PendingIntent:
+`PendingIntent{6693846: PendingIntentRecord{9391c21 android broadcastIntent}}
+10-10 16:50:59.572  1269  1382 E Watchdog: !@Sync: 24 heap(MB): 149 / 154 FD: 1216 Threads: 515 [2026-10-10
+16:50:59.571]
+10-10 16:51:11.329   661 29816 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle
+-> terminating. Have a great day.
+10-10 16:51:26.725   661 29961 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle
+-> terminating. Have a great day.
+10-10 16:51:29.585  1269  1382 E Watchdog: !@Sync: 25 heap(MB): 123 / 154 FD: 1213 Threads: 515 [2026-10-10
+16:51:29.585]
+10-10 16:51:59.598  1269  1382 E Watchdog: !@Sync: 26 heap(MB): 130 / 154 FD: 1213 Threads: 515 [2026-10-10
+16:51:59.597]
+10-10 16:52:29.607  1269  1382 E Watchdog: !@Sync: 27 heap(MB): 138 / 154 FD: 1212 Threads: 515 [2026-10-10
+16:52:29.607]
+10-10 16:52:59.618  1269  1382 E Watchdog: !@Sync: 28 heap(MB): 144 / 154 FD: 1212 Threads: 515 [2026-10-10
+16:52:59.617]
+10-10 16:53:29.630  1269  1382 E Watchdog: !@Sync: 29 heap(MB): 115 / 154 FD: 1199 Threads: 515 [2026-10-10
+16:53:29.629]
+10-10 16:53:32.649  2364 30264 I MediaCodec: Codec shutdown complete
+10-10 16:53:38.767  1269  1269 I InactivityRestartService: cancel reboot
+10-10 16:53:38.881  2364 30336 I MediaCodec: Codec shutdown complete
+10-10 16:53:53.438   661 30449 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle
+-> terminating. Have a great day.
+10-10 16:53:59.660  1269  1382 E Watchdog: !@Sync: 30 heap(MB): 117 / 154 FD: 1211 Threads: 515 [2026-10-10
+16:53:59.659]
+10-10 16:53:59.660  1269  1375 I dvm_lock_sample: [system_server,0,watchdog.monitor,27,qb/113419284
+f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c,12,void
+com.android.server.Watchdog$HandlerChecker.run(),Object.java,-2,void java.lang.Object.wait(long, int),5]
+10-10 16:54:29.676  1269  1382 E Watchdog: !@Sync: 31 heap(MB): 140 / 154 FD: 1217 Threads: 515 [2026-10-10
+16:54:29.675]
+10-10 16:54:59.695  1269  1382 E Watchdog: !@Sync: 32 heap(MB): 136 / 154 FD: 1220 Threads: 515 [2026-10-10
+16:54:59.694]
+10-10 16:54:59.696  1269  1375 I dvm_lock_sample: [system_server,0,watchdog.monitor,15,qb/113419284
+f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c,12,void
+com.android.server.Watchdog$HandlerChecker.run(),Object.java,-2,void java.lang.Object.wait(long, int),3]
+10-10 16:55:17.264 21537 21553 W ProcStatsManager: No process com.google.android.ext.services/10293 for service
+android.ext.services.watchdog.ExplicitHealthCheckServiceImpl
+10-10 16:55:17.371 21537 22896 W ProcStatsManager: No process com.google.android.ext.services/10293 for service
+android.ext.services.watchdog.ExplicitHealthCheckServiceImpl
+10-10 16:55:23.987 26215 26267 E d.process.media: Mtp got error event at 0 and 1 total: Cannot send after transport
+endpoint shutdown
+10-10 16:55:25.970   661 31509 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle
+-> terminating. Have a great day.
+10-10 16:55:28.720 26215 31883 E d.process.media: Mtp got error event at 0 and 1 total: Cannot send after transport
+endpoint shutdown
+10-10 16:55:28.816 31922 31922 I adbd    : persist.adb.watchdog set to ''
+10-10 16:55:28.816 31922 31922 I adbd    : adb watchdog timeout set to 600 seconds
+10-10 16:55:29.715  1269  1382 E Watchdog: !@Sync: 33 heap(MB): 132 / 154 FD: 1222 Threads: 515 [2026-10-10
+16:55:29.714]
+10-10 16:55:32.608 21537 21550 W ProcStatsManager: No process com.google.android.ext.services/10293 for service
+android.ext.services.watchdog.ExplicitHealthCheckServiceImpl
+10-10 16:55:59.738  1269  1382 E Watchdog: !@Sync: 34 heap(MB): 122 / 154 FD: 1206 Threads: 515 [2026-10-10
+16:55:59.737]
+10-10 16:56:29.753  1269  1382 E Watchdog: !@Sync: 35 heap(MB): 128 / 154 FD: 1206 Threads: 515 [2026-10-10
+16:56:29.752]
+10-10 16:56:59.773  1269  1382 E Watchdog: !@Sync: 36 heap(MB): 136 / 154 FD: 1206 Threads: 515 [2026-10-10
+16:56:59.772]
+10-10 16:57:10.318  2364 32495 I MediaCodec: Codec shutdown complete
+10-10 16:57:10.459  2364 32521 I MediaCodec: Codec shutdown complete
+10-10 16:57:10.688  2364 32544 I MediaCodec: Codec shutdown complete
+10-10 16:57:15.257  1269  1269 I InactivityRestartService: Reboot alarm scheduled successfully - PendingIntent:
+`PendingIntent{ebf6a93: PendingIntentRecord{9391c21 android broadcastIntent}}
+10-10 16:57:29.784  1269  1382 E Watchdog: !@Sync: 37 heap(MB): 124 / 154 FD: 1199 Threads: 515 [2026-10-10
+16:57:29.784]
+10-10 16:57:31.821   661 32630 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle
+-> terminating. Have a great day.
+10-10 16:57:44.692 31922 31922 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color,raw:getprop
+ro.boot.bootreason'
+10-10 16:57:59.803  1269  1382 E Watchdog: !@Sync: 38 heap(MB): 130 / 154 FD: 1198 Threads: 515 [2026-10-10
+16:57:59.802]
+10-10 16:58:29.813  1269  1382 E Watchdog: !@Sync: 39 heap(MB): 146 / 154 FD: 1198 Threads: 515 [2026-10-10
+16:58:29.812]
+10-10 16:58:47.344   731   797 E AppInitScheduler|Schedule: Call to schedule after shutdown:
+-2147483648:DeferredProduct_164_0quN, deps=[164]
+10-10 16:58:47.648   731  1134 E msys    : E[N mns:DGWClient]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=11, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=2
+10-10 16:58:47.648   731  1134 E msys    : E[N mns:DGWClient]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=7, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=2
+10-10 16:58:47.648   731  1134 E msys    : E[N mns:DGWClient]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=3, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=2
+10-10 16:58:47.660   731  1264 I MediaCodec: Codec shutdown complete
+10-10 16:58:47.671   731  1134 E msys    : E[N mns:DGWClient]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=11, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=2
+10-10 16:58:47.680   731  1309 I MediaCodec: Codec shutdown complete
+10-10 16:58:47.685   731  1134 E msys    : E[N mns:DGWClient]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=7, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=2
+10-10 16:58:47.745   731  1134 E msys    : E[N mns:DGWClient]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=7, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=2
+10-10 16:58:47.785   731  1134 E msys    : E[N mns:DGWClient]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=11, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=4
+10-10 16:58:47.792   731  1134 E msys    : E[N mns:DGWClient]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=11, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=4
+10-10 16:58:47.795   731  1134 E msys    : E[N mns:DGWClient]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=7, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=4
+10-10 16:58:48.466   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=11, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=0
+10-10 16:58:48.467   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=7, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=0
+10-10 16:58:48.467   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=3, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=0
+10-10 16:58:48.624   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=11, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=0
+10-10 16:58:48.624   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=7, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=0
+10-10 16:58:48.624   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=3, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=0
+10-10 16:58:48.651   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=11, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=0
+10-10 16:58:48.651   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=7, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=0
+10-10 16:58:48.651   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=3, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=0
+10-10 16:58:52.608   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=11, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:58:52.750   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=7, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:58:52.751   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=7, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:58:53.656   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=11, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:58:53.793   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=7, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:58:59.992  1269  1382 E Watchdog: !@Sync: 40 heap(MB): 147 / 154 native(MB): 99 FD: 1199 WaitTime: 0 ms
+GCcnt: 0 FullGC: 0 [2026-10-10 16:58:59.847]
+10-10 16:59:02.539   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=11, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:59:02.539   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=7, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:59:02.539   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=3, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:59:02.560   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=11, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:59:02.864   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=7, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:59:04.319   661   328 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle
+-> terminating. Have a great day.
+10-10 16:59:30.002  1269  1382 E Watchdog: !@Sync: 41 heap(MB): 123 / 154 FD: 1198 Threads: 515 [2026-10-10
+16:59:30.001]
+10-10 16:59:30.003  1269  1375 I dvm_lock_sample: [system_server,0,watchdog.monitor,6,qb/113419284
+f8a0a3dc8f98d2966315d101cdca3fea31e19a6ada9e5cd59b144ec993ae6c6c,12,void
+com.android.server.Watchdog$HandlerChecker.run(),Object.java,-2,void java.lang.Object.wait(long, int),1]
+10-10 16:59:48.686   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=11, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:59:48.686   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=7, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:59:48.686   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=3, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:59:48.709   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=11, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 16:59:48.844   731   920 E msys    : E[N mns:TigonMNS]findTransactionByStreamID(241)=>findTransactionByStreamID
+null for streamID=7, isClosedOrFailedOrShutdown=0, ongoingTransactionsCount=1
+10-10 17:00:00.010  1269  1382 E Watchdog: !@Sync: 42 heap(MB): 131 / 154 FD: 1199 Threads: 515 [2026-10-10
+17:00:00.009]
+10-10 17:00:30.018  1269  1382 E Watchdog: !@Sync: 43 heap(MB): 152 / 154 FD: 1199 Threads: 515 [2026-10-10
+17:00:30.018]
+
+
+PS C:\platform-tools>
+PS C:\platform-tools> Write-Host "`n=== SAMSUNG RESET FILES ACCESS CHECK ==="
+
+=== SAMSUNG RESET FILES ACCESS CHECK ===
+PS C:\platform-tools>
+PS C:\platform-tools> .\adb.exe shell "ls -la /proc/reset_reason 2>&1"
+ls: /proc/reset_reason: Permission denied
+PS C:\platform-tools> .\adb.exe shell "ls -la /sys/class/sec/sec_debug 2>&1"
+ls: /sys/class/sec/sec_debug: No such file or directory
+PS C:\platform-tools> .\adb.exe shell "ls -la /data/log 2>&1"
+total 13932
+drwxrwxr-x 25 system    log          8192 2026-10-10 16:39 .
+drwxrwx--x 76 system    system       4096 2026-10-10 16:39 ..
+-rw-r-----  1 system    log         14946 2026-09-07 04:04 1stBootProfile.log
+-rw-------  1 system    system          1 2026-10-10 14:47 BC_Position
+-rw-------  1 system    system          0 2026-10-10 16:40 BixbyWakeupBNR.log
+-rw-------  1 system    system        391 2026-10-10 16:40 BixbyWakeupService.log
+-rw-------  1 system    system       1361 2026-10-10 16:40 BixbyWakeupSettings.log
+-rw-------  1 system    system     101387 2026-10-10 14:47 Brightness_Configurations_1
+-rw-------  1 system    system        157 2026-10-10 14:47 Brightness_Configurations_2
+-rw-------  1 system    system       6300 2026-09-07 04:05 Firstbootlog.txt
+drwxrwxrwx  2 u0_a324   u0_a324      3452 2026-03-15 10:00 GearLog
+-rw-r--r--  1 system    system       5196 2026-09-07 04:04 PreloadInstaller.txt
+drwxrwx--x  2 system    graphics     3452 2026-02-01 07:11 SF_Dump
+-rw-rw----  1 system    system     105218 2026-10-10 16:39 SVCAgent.lst
+-rw-------  1 system    system     241712 2026-10-10 16:41 SamsungOdaService.log
+-rw-------  1 system    system    1082576 2026-10-06 07:15 SamsungOdaService.log.bak
+-rw-------  1 system    system       5242 2026-10-10 16:41 ThemeCenter.log
+-rw-------  1 system    system     208162 2026-10-10 16:46 a11yProvider_log.txt
+drwxrwxr-x  2 system    log          3452 2026-06-05 13:26 acore
+drwx------  2 system    system       3452 2025-04-15 16:47 anomaly
+drwx------  2 system    system       3452 2026-07-10 02:04 battery_service
+drwxr-x---  2 system    log         20480 2026-10-10 16:26 batterystats
+drwxrwx---  2 bluetooth bluetooth    3452 2023-01-01 12:00 bt
+drwxrwxr-x  2 system    log          3452 2023-01-01 12:00 core
+-rw-------  1 system    system       2905 2026-08-14 05:30 dark_mode_log0.txt
+-rw-------  1 system    system          0 2026-08-31 03:36 dark_mode_log0.txt.lck
+-rw-------  1 system    log          2438 2023-01-01 12:00 ddar_log.txt
+-rw-r-----  1 system    log        105185 2026-10-10 16:39 dumpstate_debug_history.lst
+-rw-------  1 system    system         68 2026-10-09 13:11 eSOC.txt
+drwx------  2 system    system       3452 2026-03-15 10:00 epdgcr
+-rw-r-----  1 system    log           305 2026-09-02 20:39 erased_log_by_sos.txt
+drwxrwxr-x  2 radio     log          3452 2026-06-05 13:26 err
+drwxr-xr-x  2 system    system       8192 2026-10-10 16:59 ewlogd
+drwxrwxr-x  2 root      log          3452 2026-10-06 03:50 fsdbg
+-rwx------  1 system    system         23 2026-09-25 16:15 gyroOffset
+drwxr-x---  2 system    log          3452 2026-08-30 17:07 imscr
+-rw-------  1 system    system      66890 2026-10-10 16:40 knoxsdk.log.0
+-rw-------  1 system    system      55654 2026-10-10 16:55 knoxsdk.log.0.1
+-rw-------  1 system    system          0 2026-08-31 09:22 knoxsdk.log.0.1.lck
+-rw-------  1 system    system          0 2026-08-31 03:36 knoxsdk.log.0.lck
+drwxrwxrwx  3 system    log          3452 2026-08-31 03:57 locksettings
+drwx------  2 system    system       3452 2026-10-10 16:39 mars
+drwx------  2 system    system       3452 2026-06-05 13:26 netstats
+drwxrwxr-x  2 radio     log          3452 2026-10-10 16:39 omc
+-rwxrwxr--  1 system    system    1889007 2026-10-10 16:39 pm_debug_info.txt
+-rw-r-----  1 system    log          7581 2026-10-10 16:39 power_off_reset_reason.txt
+-rw-r-----  1 system    log         11478 2026-09-07 04:04 power_off_reset_reason_backup.txt
+-rw-r-----  1 system    log       4419900 2023-01-01 12:00 prev_dump.log
+-rw-r-----  1 system    log       1773918 2026-10-10 16:39 recovery.log
+-rw-r-----  1 system    log            36 2026-10-10 16:39 recovery_extra_history.log
+-rw-r-----  1 system    log          3510 2026-10-10 16:39 recovery_history.log
+-rw-r-----  1 system    log       2096999 2026-10-10 16:53 sdp_log
+drwxrwxr-x  2 system    log          3452 2026-06-05 13:26 search
+-rw-r--r--  1 root      root            0 2026-08-31 03:36 sem_cleanAPKs
+drwxrwxrwx  2 system    system       3452 2026-10-10 16:40 sepunion
+-rw-------  1 system    system     724975 2023-01-01 12:00 settingsprovider.txt
+-rw-------  1 system    system      43793 2026-10-10 16:40 setupwizard.txt
+-rw-r-----  1 system    log        430420 2026-10-09 14:16 sfslog.0.gz
+-rw-r-----  1 system    log         82225 2026-10-10 16:55 sfslog.1.gz
+-rw-r--r--  1 system    system       2685 2026-09-07 04:00 shutdown_profile.1.txt
+-rw-r--r--  1 system    system       4350 2026-09-17 18:39 shutdown_profile.2.txt
+-rw-r--r--  1 system    system       2846 2026-09-29 05:22 shutdown_profile.3.txt
+-rw-r--r--  1 system    system      16946 2026-10-04 14:50 shutdown_profile.4.txt
+-rw-r--r--  1 system    system       2094 2026-10-06 03:50 shutdown_profile.5.txt
+-rw-r--r--  1 system    system       2094 2026-10-06 03:50 shutdown_profile_latest.txt
+drwxrwxr-x  2 u0_a226   log         53248 2026-10-10 16:39 smartswitch
+-rw-r--r--  1 system    system      14399 2026-10-10 16:40 sse1
+drwxrwxrwx  2 system    system       3452 2026-01-29 22:29 traces
+drwxr-xr-x  2 root      log          3452 2023-01-01 12:00 update_engine_log
+-rw-------  1 system    system       6874 2026-08-31 02:04 vold-dump_00
+-rw-------  1 system    system      22874 2026-08-31 03:36 vold-dump_01
+-rw-------  1 system    system       5397 2026-08-31 03:46 vold-dump_02
+-rw-------  1 system    system      25778 2026-08-31 04:44 vold-dump_03
+-rw-------  1 system    system      40401 2026-08-31 08:57 vold-dump_04
+-rw-------  1 system    system      25250 2026-08-31 09:20 vold-dump_05
+-rw-------  1 system    system      26731 2026-09-07 04:00 vold-dump_06
+-rw-------  1 system    system      25867 2026-09-07 04:05 vold-dump_07
+-rw-------  1 system    system      40372 2026-09-17 18:39 vold-dump_08
+-rw-------  1 system    system      24216 2026-09-17 18:42 vold-dump_09
+-rw-------  1 system    system      40406 2026-09-29 05:22 vold-dump_10
+-rw-------  1 system    system      24217 2026-09-29 05:28 vold-dump_11
+-rw-------  1 system    system      40370 2026-10-04 14:50 vold-dump_12
+-rw-------  1 system    system      24278 2026-10-04 15:38 vold-dump_13
+-rw-------  1 system    system      40370 2026-10-06 03:50 vold-dump_14
+-rw-------  1 system    system      23155 2026-10-06 07:15 vold-dump_15
+-rw-------  1 system    system      23468 2026-10-09 14:38 vold-dump_16
+-rw-------  1 system    system      23156 2026-10-10 16:39 vold-dump_17
+-rw-------  1 system    graphics    10138 2026-10-10 16:57 vrrinfo.txt
+drwx------  3 system    system       3452 2023-12-28 05:42 wifi
+PS C:\platform-tools> date
+
+10 October 2026 17:00:36
+
+
+PS C:\platform-tools>

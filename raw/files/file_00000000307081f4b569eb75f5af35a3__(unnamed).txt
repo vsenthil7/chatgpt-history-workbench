@@ -1,0 +1,321 @@
+# AUMNITY CGWO SaaS — V011 Independent Deep Review
+
+**Review date:** 09/08/2026  
+**Submitted ZIP:** `AUMNITY-CGWO-SaaS_Claude_V011_20260809_1507(1).zip`  
+**Submitted ZIP SHA-256:** `3fac79fc4282bf08b8fd29cbd2a8fa1120b404cbda5a453e4f7bf81fc5920c75`  
+**Canonical package root:** `AUMNITY-CGWO-SaaS_Claude_V011_20260809_1507`  
+**Release identity:** V011 / core 0.6.4
+
+## Final disposition
+
+**V011 is REJECTED as a domain-baseline freeze candidate. A closure-only V012 is required.**
+
+The three findings V011 was built to close — F45, F46's exact `.evil/payload.py` case, and F47's per-entry byte-size check — are genuinely fixed. However, the broader release-integrity policy still has two independent bypass classes, and the authorization port has a fail-open runtime-contract defect. These are material blockers for freezing the baseline.
+
+### New findings
+
+| ID | Severity | Finding | Freeze impact |
+|---|---|---|---|
+| F48 | **P1 BLOCKER** | Explicit exclusion names still permit unmanifested payloads, including arbitrary nested `PACKAGE-MANIFEST.json`, `.coverage`, `.DS_Store`, and `.git/**`; the shipped baseline manifest itself is unbound | Blocks freeze |
+| F49 | **P1 BLOCKER** | Manifest validation follows symlinks and does not bind file kind; an expected source file can be replaced by a symlink to an excluded payload and validation still passes. The outer ZIP envelope is also not checked by any shipped executable gate | Blocks freeze |
+| F50 | **P1 BLOCKER** | `AuthorizationPort.is_entitled()` is not required to return an exact `bool`; a truthy non-boolean authorizes, while malformed ports/descriptors leak raw exceptions | Blocks freeze |
+| F51 | **P2** | Manifest top-level/entry schema metadata is not validated despite the release claiming the schema has no unvalidated fields | Must fix in V012 |
+| F52 | **P2** | Current governance documents are stale and internally contradictory while G10 is reported GREEN | Must fix in V012 |
+| F53 | **P2** | Wire-integer grammar permits leading zeros but the implementation rejects otherwise in-range values solely due to representation length | Must fix or explicitly narrow the grammar |
+
+---
+
+## Audit coverage and independent verification
+
+The archive contained **156 ZIP entries: 129 regular files and 27 directories**. All 129 original files were read and indexed; all were UTF-8 text. Active source, tests, scripts, current governance, ADRs and evidence were inspected in depth. Historical release records and the preserved baseline were included in integrity, version-leakage and consistency checks.
+
+### Archive-envelope checks on the actual attachment
+
+- ZIP CRC test: PASS
+- One top-level directory only: PASS
+- Unsafe absolute/`..` paths: none
+- ZIP symlink entries: none
+- Exact duplicate entries: none
+- case-fold/Unicode-normalisation path collisions: none
+- ZIP SHA-256 matches Claude's stated value: PASS
+
+The **actual attached V011 ZIP is clean**. F48/F49 concern what the shipped validators falsely permit in a tampered/future package, not a claim that this attachment already contains a hidden payload or symlink.
+
+### Independently rerun
+
+| Check | Independent result |
+|---|---|
+| `python3 scripts/validate_starter.py` | PASS |
+| `python3 scripts/validate_consistency.py` | PASS on the untouched package |
+| Full unit/domain/architecture suite | **438 passed** |
+| Independent coverage | **100% line and 100% branch**, 506 statements / 104 branches |
+| F45 targeted regressions | 5 targeted tests PASS |
+| F46/F47 targeted regressions | 4 targeted tests PASS |
+| Baseline nested manifest vs baseline files | 12/12 files present and hash-correct |
+
+The exact pinned ruff, mypy and mutmut versions could not be reinstalled from this review environment's restricted package mirror. I therefore did not claim a fresh independent run of those three tools. I did inspect their shipped raw/machine-readable evidence: ruff clean, mypy strict clean, and mutation summary `864/864` killed with zero survivors/anomalies and an empty acceptance list. The package's source/tests were independently rerun successfully as above.
+
+---
+
+## Accepted closures from V010
+
+### F45 — closed
+
+`src/cgwo_core/validation.py:141-168` now uses `issubclass(type(value), expected_cls)`, reads the real runtime type, preserves genuine subclass admission, and rejects a spoofed `__class__` impostor with controlled `WRONG_RUNTIME_TYPE`. The return value is consumed at all four protected sites. The targeted regressions pass.
+
+### F46 exact attack — closed, but policy root cause remains incomplete
+
+The exact `.evil/payload.py` attack is now managed and fails when absent from the manifest. The generic `part.startswith('.')` rule is gone. F48 below shows that the replacement exclusion policy still leaves attacker-chosen names ungoverned.
+
+### F47 per-entry byte check — closed
+
+`scripts/validate_consistency.py:156-171` checks each listed file's SHA-256 and actual byte size. F51 is a separate problem: other schema metadata remains unchecked despite broader claims.
+
+---
+
+# Detailed findings
+
+## F48 — P1 BLOCKER: excluded-name payload bypass remains
+
+### Evidence
+
+`scripts/manifest_policy.py:31-45` defines excluded directory names and basenames. `is_managed()` at lines 48-52 excludes a path whenever **any component** matches an excluded directory or whenever the **basename** is one of the excluded files.
+
+This means the attacker no longer chooses any dot-prefixed name, but can still choose one of the named exclusions:
+
+- `.evil/PACKAGE-MANIFEST.json`
+- `.evil/.coverage`
+- `.evil/.DS_Store`
+- `.git/hooks/post-checkout`
+
+All four were added **after manifest generation**. The untouched manifest was then checked with the shipped release-mode validator. Every case returned:
+
+```text
+CONSISTENCY: PASS
+```
+
+The currently shipped baseline manifest has the same problem. I replaced:
+
+```text
+10-baseline/AUMNITY-Capacity-Governed-Work-Orchestration-v0.1.0/PACKAGE-MANIFEST.json
+```
+
+with `{"tampered": true}` while leaving the outer manifest unchanged. The validator still returned `CONSISTENCY: PASS` because every file named exactly `PACKAGE-MANIFEST.json` is ignored anywhere in the tree.
+
+### Why this is material
+
+The release claims that the manifest is closed over shipped files and that the excluded universe cannot be selected by an attacker. That is not yet true. A release archive can carry executable or misleading unmanifested content under a permitted exclusion name and still pass the gate.
+
+### Required correction
+
+1. In **release mode**, do not silently ignore dev/cache/VCS artifacts. Reject them if present.
+2. Exclude the root manifest by **exact relative path** only: `Path('PACKAGE-MANIFEST.json')`.
+3. Either include the baseline manifest in the outer manifest or validate it explicitly and bind its exact path/hash.
+4. Separate `development-generation exclusions` from `release-validation policy`; release validation should be fail-closed over every regular shipped file except narrowly identified self-referential metadata.
+5. Add regressions for every currently named exclusion at root and nested locations.
+
+---
+
+## F49 — P1 BLOCKER: file-kind/symlink and outer-ZIP envelope are not bound
+
+### Evidence A — symlink substitution
+
+`managed_files()` uses `path.is_file()` (`scripts/manifest_policy.py:55-63`), which follows symlinks. The validator then uses `p.is_file()`, `p.read_bytes()` and `p.stat()` (`scripts/validate_consistency.py:160-171`), which also follow symlinks. Neither the manifest nor validator records/checks file kind.
+
+Independent reproduction:
+
+1. Copy the original bytes of `src/cgwo_core/__init__.py` to the excluded path `.git/objects/payload`.
+2. Replace `src/cgwo_core/__init__.py` with the symlink `../../.git/objects/payload`.
+3. Do not modify the manifest.
+4. Run the shipped consistency validator.
+
+Result:
+
+```text
+CONSISTENCY: PASS
+```
+
+The complete 438-test suite also remained green because imports followed the link. Thus a manifest entry that originally denoted a regular source file can become a symlink without detection.
+
+### Evidence B — outer ZIP sibling
+
+No shipped script validates the ZIP envelope itself. `scripts/run_gates.sh:8-19` validates only the extracted repository. I appended an unmanifested sibling entry outside the canonical root:
+
+```text
+UNMANIFESTED-SIBLING-PAYLOAD.py
+```
+
+After extraction, the canonical root's validator returned `CONSISTENCY: PASS`; it cannot see sibling archive entries. The narrative `evidence/package-verification.txt` says unsafe paths/symlinks were checked, but the procedure is not shipped as an executable/re-runnable gate.
+
+### Required correction
+
+1. Use `lstat()`/non-following traversal and reject **every symlink or non-regular file** in release mode before hashing.
+2. Record and verify file kind; optionally record executable/mode bits where relevant.
+3. Add `scripts/verify_release_zip.py <zip>` that enforces:
+   - exactly one canonical top-level root;
+   - no absolute paths, `..`, NUL, duplicate names, case-fold/Unicode collisions;
+   - no symlink/device/FIFO entries;
+   - no entries outside the root;
+   - archive regular-file set exactly matches the release manifest plus the narrowly allowed root manifest;
+   - extracted files revalidate without following links.
+4. Make the ZIP verifier part of the one-command release ladder and machine-generated evidence.
+
+---
+
+## F50 — P1 BLOCKER: authorization decision can fail open
+
+### Evidence
+
+`AuthorizationPort.is_entitled()` declares a `bool` return (`src/cgwo_core/authz.py:47-62`), but `assert_authorized()` at lines 121-142 does not enforce that runtime contract:
+
+```python
+if not authz.is_entitled(checked):
+    ... deny ...
+```
+
+Independent probes against the shipped code:
+
+| Port behaviour | Result |
+|---|---|
+| `is_entitled = True` as a non-callable attribute | `isinstance(..., AuthorizationPort)` is `True`; raw `TypeError: 'bool' object is not callable` |
+| method returns `object()` | **authorization succeeds** because the object is truthy |
+| method returns `[]` | controlled denial, but a non-bool is silently treated as policy |
+| method returns object whose `__bool__` raises | raw `RuntimeError` |
+| `is_entitled` property raises | raw `RuntimeError` during structural protocol check |
+| method raises | raw provider exception |
+
+### Why ADR-015 does not dispose of this finding
+
+This is not an attempt to prove the provider is genuine or hostile-proof. The provider may remain trusted. The defect is that the domain does not enforce the **declared return contract** of its trusted port and can turn an adapter bug such as returning `'false'`, a response object, or another truthy value into authorization. That contradicts the package's own exact-type stance and its guarantee that it enforces an allow/deny decision.
+
+### Required correction
+
+1. Call the supplied decision function once inside a controlled boundary.
+2. Require `type(decision) is bool` before branching.
+3. Treat non-boolean decisions as a controlled, fail-closed authorization-contract error; never coerce truthiness.
+4. Decide and document a controlled error for provider access/call failures.
+5. Add adversarial tests for non-callable member, truthy/falsey non-bools, hostile `__bool__`, raising descriptor and raising call.
+6. Ensure all protected operations receive the corrected behaviour through `assert_tenant_operation()`.
+
+---
+
+## F51 — P2: manifest schema contains unchecked metadata
+
+### Evidence
+
+The V011 test and release notes claim that the manifest schema carries no unverified/unvalidated fields:
+
+- `tests/test_manifest_closure.py:147-150`
+- `00-control/RELEASE-NOTES-V011.md:8`
+
+The validator checks file path/hash/bytes, duplicates, `file_count`, release/root matching and closed-set membership. It does **not** validate the exact value/type/schema of at least:
+
+- top-level `schema`;
+- top-level `project`;
+- `generated` timestamp format/type;
+- exact top-level key set;
+- exact per-entry key set and types.
+
+I independently changed each of `schema`, `project` and `generated` to false values; each modified package returned `CONSISTENCY: PASS`. Unknown top-level and per-entry assertion fields also passed.
+
+### Required correction
+
+Use a strict manifest schema or equivalent manual validation: exact required keys, exact primitive types, path grammar, SHA-256 grammar, non-negative integer byte count, exact schema/project constants, timestamp format and an explicit unknown-key policy. If some metadata is intentionally informational, narrow the documentation claim to the fields actually verified.
+
+---
+
+## F52 — P2: current governance surface is stale/contradictory
+
+### Confirmed contradictions
+
+1. `00-control/READING-MAP.md:11` says ADR-001..014, omitting accepted ADR-015.
+2. `READING-MAP.md:12` points readers to V007 gate status/release notes instead of V011.
+3. `READING-MAP.md:14` points to `CLAUDE-V007-HANDOFF.md` instead of V011.
+4. `06-traceability/RTM.md:1` is titled `V007`, although AI-001 identifies V011 and claims derived artefacts are checked against canonical identity.
+5. `07-planning/FIRST-BUILD-BACKLOG.md:1` says status updated in V002 and its cycle history ends at V007, omitting V008-V011.
+6. `08-ai/CLAUDE-V011-HANDOFF.md:7` says `require_aggregate` returns via an explicit `cast`; the final code at `src/cgwo_core/validation.py:160-168` explicitly states that `typing.cast` is **not** used and returns with a targeted `type: ignore`.
+
+G10 being labelled GREEN is therefore too broad even with its “structural only” qualifier: the current reading route, current RTM title, current backlog and current handoff contain readily machine-checkable drift.
+
+### Required correction
+
+Update all current documents and add deterministic checks that derive the current series/ADR range/current handoff/current gate/current notes from canonical identity and actual files. Add a regression that rejects the stale `cast` implementation claim.
+
+---
+
+## F53 — P2: wire-integer grammar and implementation disagree on leading zeros
+
+### Evidence
+
+`src/cgwo_core/contracts.py:47-65` defines the accepted wire grammar as `[0-9]+` and describes one semantic value bound shared by string and integer inputs. Lines 120-146 reject a string before decoding when its raw digit count exceeds the maximum value's digit count.
+
+Therefore:
+
+```text
+parse_wire_int(1)                 -> 1
+parse_wire_int('1')               -> 1
+parse_wire_int('00000000000001')  -> INTEGER_OUT_OF_RANGE
+```
+
+The last value matches the declared grammar and semantically equals 1, but is rejected solely because of leading-zero representation length.
+
+### Required correction
+
+Choose one explicit contract:
+
+- **Permit leading zeros:** strip leading zeros for the safe significant-digit check, then decode/bound by value; or
+- **Canonicalise the grammar:** change it to `(?:0|[1-9][0-9]*)`, document that leading zeros are invalid, and return `INVALID_WIRE_INT` rather than `INTEGER_OUT_OF_RANGE`.
+
+Add equivalence/property tests across exact-int and string representations.
+
+---
+
+# Positive observations
+
+- The actual archive is small, clean, single-rooted and free of unsafe entries/symlinks/collisions.
+- F45 is a sound root-cause correction and the mutation-aware removal of runtime `cast` is technically disciplined.
+- Domain primitive/value-object type guards are consistent and strongly tested.
+- The package is honest about the service-layer trust root, aggregate provenance gap, provider compatibility gap, aggregate capacity governance gap and missing CI/container.
+- Unit/domain/architecture tests and independent coverage are genuinely green.
+- The preserved baseline content and its nested manifest currently reconcile correctly.
+- Evidence files are internally coherent on test/coverage/mutation counts, apart from the broader claims identified above.
+
+# V012 acceptance criteria
+
+V012 should be **closure-only**. Do not start the service-layer vertical slice yet. Freeze only after all F48-F53 attacks are reproduced against V011, corrected, added as permanent regressions, and re-attacked against the final clean-extracted V012 ZIP.
+
+Minimum acceptance:
+
+1. Every F48 excluded-name attack fails release validation.
+2. Baseline manifest is cryptographically bound/validated.
+3. Symlink/non-regular substitution fails before hashing.
+4. A shipped ZIP verifier rejects extra siblings, unsafe paths, links and collisions.
+5. Authorization accepts only exact `True`/`False`; all malformed decisions fail closed with controlled errors.
+6. Manifest schema/metadata is strictly validated or claims are narrowed truthfully.
+7. Current docs are synchronised to V012 and the actual implementation.
+8. Wire-leading-zero behaviour matches the written grammar.
+9. Full tests, 100% line+branch, ruff, mypy strict and strict mutation gate rerun on the final tree.
+10. Final manifest generation occurs after all evidence/doc changes; final ZIP is clean-extract reverified.
+
+# Copy-paste prompt for Claude
+
+```text
+09/08/2026 — Build AUMNITY CGWO SaaS Claude V012 as a CLOSURE-ONLY release from the attached V011 ZIP and the ChatGPT V011 deep-review findings F48-F53. Do not begin the service-layer vertical slice and do not redesign accepted domain architecture.
+
+First, independently reproduce every finding against the packaged V011 before changing code, and retain exact red evidence:
+
+F48 P1 BLOCKER — release manifest exclusions remain attacker-selectable. Reproduce PASS for unmanifested .evil/PACKAGE-MANIFEST.json, .evil/.coverage, .evil/.DS_Store, .git/hooks/post-checkout, and tampering of the shipped 10-baseline/.../PACKAGE-MANIFEST.json. In release mode, dev/cache/VCS artifacts must be forbidden rather than silently ignored; exclude only the exact root manifest path, and bind/validate the baseline manifest.
+
+F49 P1 BLOCKER — file kind and ZIP envelope are unverified. Reproduce replacing src/cgwo_core/__init__.py with a symlink to an identical excluded payload while consistency still passes, and reproduce an extra sibling ZIP entry outside the canonical root while the extracted-root validator passes. Add non-following regular-file validation and a shipped verify_release_zip.py enforcing one root, safe paths, no links/devices/FIFOs, no duplicate/casefold/Unicode collisions, no siblings, and exact archive/manifest reconciliation. Wire it into final release evidence.
+
+F50 P1 BLOCKER — AuthorizationPort decision is fail-open. Reproduce non-callable is_entitled raw TypeError, truthy non-bool authorization success, falsey non-bool coercion, hostile __bool__, raising descriptor and raising call. Enforce type(decision) is bool and fail closed with stable controlled error identity; this validates the declared port contract without claiming provider genuineness.
+
+F51 P2 — strict manifest schema is missing. Reproduce false schema/project/generated and unknown top-level/per-entry fields passing. Validate exact keys/types/constants/path/hash/bytes/timestamp/unknown-key policy, or narrow all claims precisely.
+
+F52 P2 — repair current governance drift: READING-MAP ADR range and V012 links; RTM title/current-cycle identity; backlog cycles V008-V012; V011 handoff's false explicit-cast statement; add machine regressions for these current-doc facts.
+
+F53 P2 — resolve wire-int leading-zero inconsistency. Either support leading zeros safely by checking significant digits/value, or narrow grammar to canonical no-leading-zero form and return the correct error. Add int/string equivalence tests.
+
+Preserve 10-baseline content except only the governance/integrity treatment necessary to bind its manifest. Preserve all existing tests and accepted ADR semantics. Add finding-by-finding regressions and mutation-kill them with an empty acceptance list. Rerun from the FINAL tree: starter + consistency, strict manifest/ZIP verifier, ruff check+format, mypy strict, full pytest at 100% line+branch, strict complete mutation run, final manifest regeneration, actual ZIP creation, clean-extract rerun, and final attack reruns against the shipped ZIP. Update RELEASE-IDENTITY to V012, core version appropriately, RELEASE-NOTES-V012, GATE-STATUS-V012, CLAUDE-V012-HANDOFF, RTM, backlog and any amended ADRs. Return the final ZIP SHA-256 and exact machine-generated counts. Do not claim baseline freeze unless every F48-F53 final-package attack is green/fail-closed as required.
+```
+

@@ -1,0 +1,291 @@
+# 04/10/2026 19:28 — TalkProof Self-Aware Stack
+
+**Partly, partner. The latest recovery has captured the *strategic idea*, but it has NOT yet designed the full self-awareness/self-correction system you are describing now.**
+
+The attached point explicitly says the future competitor becomes **“AI builds + tests + observes + upgrades + repairs + secures software continuously”**, and it says TalkProof itself should use agents to keep adapters, tests, security, performance and documentation current. Pasted text Pasted text
+
+But the frozen V2 only brings that into **analysis/research territory**, not a designed operational subsystem. So **we have identified the direction; we have not yet specified the machinery.**
+
+## What I think you are actually proposing
+
+Not merely “self-healing.”
+
+You are describing a **TalkProof Product Intelligence / Self-Awareness Layer** sitting across the whole product:
+
+```text
+                    TALKPROOF
+                       │
+        ┌──────────────┼──────────────┐
+        ▼              ▼              ▼
+      CODE          RUNTIME        PRODUCT
+        │              │              │
+        ▼              ▼              ▼
+   tests/builds     logs/traces    requirements
+   dependencies     failures       FR/NFR
+   security         latency        architecture
+   coverage         costs          decisions
+   quality          providers      policies
+        │              │              │
+        └──────────────┼──────────────┘
+                       ▼
+              SELF-AWARENESS STACK
+                       │
+             "What am I right now?"
+                       │
+       ┌───────────────┼────────────────┐
+       ▼               ▼                ▼
+   EXPECTED         OBSERVED          HISTORY
+   behaviour        behaviour         behaviour
+       │               │                │
+       └───────────────┼────────────────┘
+                       ▼
+                  GAP DETECTOR
+                       │
+          ┌────────────┼────────────┐
+          ▼            ▼            ▼
+       Defect      Regression    Opportunity
+          │            │            │
+          └────────────┼────────────┘
+                       ▼
+               DIAGNOSIS / RCA
+                       │
+                       ▼
+                PROPOSE CORRECTION
+                       │
+                 risk assessment
+                       │
+              ┌────────┴────────┐
+              ▼                 ▼
+        Safe automatic       Human gate
+          correction
+              │                 │
+              └────────┬────────┘
+                       ▼
+                 BUILD / TEST
+                       ▼
+               SECURITY TEST
+                       ▼
+              PERFORMANCE TEST
+                       ▼
+               CANARY / DEPLOY
+                       ▼
+                  OBSERVE
+                       │
+                       └──────► LOOP
+```
+
+**That is considerably bigger than the current recovery.**
+
+And it fits the threat identified in your attached analysis: generating V1 becomes cheap; the harder problem is continuously owning API changes, vulnerabilities, provider outages, model regressions, platform changes and regulation changes. Pasted text
+
+---
+
+## Yes — it should create its own “content/performance stack”
+
+I would call it a **Product State & Intelligence Stack**, because “content” sounds too narrow.
+
+It should continuously construct a machine-readable representation of itself.
+
+| Stack | What TalkProof knows about itself |
+|---|---|
+| **Requirement state** | FR/NFR → capability → code → tests → evidence |
+| **Architecture state** | services, APIs, DB, queues, dependencies, providers |
+| **Code state** | modules, versions, ownership, complexity, coverage |
+| **Runtime state** | health, errors, traces, latency, throughput |
+| **Provider state** | Twilio/STT/LLM/etc health, cost, version, failures |
+| **AI state** | model/prompt/version, quality, drift, token cost |
+| **Security state** | vulnerabilities, secrets, attacks, dependency CVEs |
+| **Compliance state** | jurisdiction, policy version, consent rules |
+| **Evidence state** | hashes, provenance, certificates, TSA/anchor health |
+| **Performance state** | latency, success %, call quality, STT accuracy |
+| **Cost state** | £/call, £/tenant, £/provider, AI/storage/media costs |
+| **Customer state** | configuration and feature use—not covert employee surveillance |
+| **Change state** | what changed, why, who/AI changed it, tests, rollback |
+| **Incident state** | symptom → root cause → correction → outcome |
+| **Learning state** | previous failures and which corrections actually worked |
+
+This becomes TalkProof's **internal digital model of TalkProof**.
+
+And this is stronger than ordinary observability.
+
+Observability says:
+
+> “Twilio calls are failing.”
+
+The proposed system should eventually say:
+
+> “Twilio outbound success fell from 99.2% to 91.4% after provider/API change X. The failure affects capability FR-056 and 14 tenants. Telnyx is healthy. Switching is permitted for these 11 tenants. Here is the proposed configuration change, tests, predicted cost difference, rollback and evidence.”
+
+That's **operational self-awareness**.
+
+---
+
+# Do we need RAG?
+
+### **Yes — but RAG is only one component.**
+
+This is important.
+
+If we simply dump everything into a vector database and call it “TalkProof brain,” we'll create another unreliable AI layer.
+
+We need **three kinds of memory**:
+
+### 1. Structured truth — primary
+
+Databases/graphs should hold authoritative state:
+
+```text
+Requirement
+   ↓
+Capability
+   ↓
+Component
+   ↓
+Code
+   ↓
+Test
+   ↓
+Deployment
+   ↓
+Runtime metric
+   ↓
+Incident
+   ↓
+Correction
+```
+
+This should be queryable deterministically.
+
+For example:
+
+> FR-056 → telephony → carrier abstraction → TwilioAdapter → version → deployment → health → tests → incidents.
+
+**Don't use RAG when SQL/graph/querying can give the exact answer.**
+
+### 2. RAG — unstructured knowledge
+
+RAG becomes useful for:
+
+- PRD/FRD/NFRD
+- architecture documents
+- ADRs
+- provider documentation
+- API release notes
+- security advisories
+- regulations
+- incident reports
+- support history
+- test reports
+- previous root-cause analyses
+- implementation decisions
+- migration documents
+
+So an agent investigating a failure can retrieve:
+
+> “Why was this designed this way?”
+
+and not merely inspect today's code.
+
+### 3. Historical/episodic memory
+
+This is particularly valuable.
+
+```text
+Problem
+↓
+Diagnosis
+↓
+Attempted fix
+↓
+Tests
+↓
+Deployment
+↓
+Observed result
+↓
+Rollback/success
+↓
+Lesson
+```
+
+Otherwise an AI maintenance agent can repeatedly rediscover—and repeat—the same mistakes.
+
+---
+
+# There is another missing layer: **external awareness**
+
+TalkProof shouldn't only observe itself.
+
+The attached analysis lists exactly the external changes that make long-term maintenance difficult: provider APIs, WhatsApp rules, model deprecation/pricing, vulnerabilities, mobile/browser changes, Stripe versions, regulation, outages and model/prompt behaviour. Pasted text
+
+Eventually:
+
+```text
+                EXTERNAL WORLD
+                      │
+   ┌──────────────────┼───────────────────┐
+   ▼                  ▼                   ▼
+Providers          Security            Regulation
+APIs/models        CVEs/advisories     rules/policies
+prices/status
+   │                  │                   │
+   └──────────────────┼───────────────────┘
+                      ▼
+               CHANGE DETECTOR
+                      ▼
+             "Does this affect me?"
+                      ▼
+              IMPACT ANALYSIS
+                      ▼
+ Requirements → Code → Tenants → Evidence
+                      ▼
+                Action proposal
+```
+
+That is how TalkProof starts becoming **maintainable by AI rather than merely built by AI**.
+
+---
+
+## And I would go one step further
+
+The self-correction agent should **not initially have unrestricted authority to modify production**.
+
+The attached research itself notes that human oversight remains important for agent changes. Pasted text
+
+Use maturity levels:
+
+**Observe → Diagnose → Recommend → Generate fix → Test fix → Human approve → Controlled deploy → Verify → eventually limited autonomous remediation.**
+
+The autonomy can increase **per action**, based on risk.
+
+Restarting a failed worker may become automatic.
+
+Changing a prompt might require evaluation.
+
+Changing an STT provider might require contract tests/canary.
+
+Changing evidence hashing or certification logic should require a very high governance threshold.
+
+---
+
+# Is this already in our latest V2?
+
+**Not fully.**
+
+Some foundations exist—observability/resilience, AI ledger, provider configuration, traceability, provenance, AI supply-chain analysis, etc.—but V2 deliberately stops before turning new ideas into requirements.
+
+So I **would not reopen the frozen recovery**.
+
+Instead, this becomes a new post-recovery workstream:
+
+> **TalkProof Self-Awareness, Continuous Assurance & Self-Correction Architecture**
+
+And this actually strengthens the strategic answer in the attached document. The analysis says the future competitive question is why a customer should buy TalkProof when AI can build something similar. Pasted text
+
+One powerful answer becomes:
+
+> **You aren't buying static software that we happened to build. You're buying a governed system that understands its requirements, configuration, providers, evidence, health, security, cost and performance; continuously detects when reality diverges from intent; and can diagnose, test and safely correct that divergence.**
+
+That is much harder to reproduce than another call dashboard.
+
+**I would add this explicitly to the separate-page code/diagram review prompt as a third diagram: CURRENT BUILD → RECOVERY TARGET → SELF-AWARE/SELF-CORRECTING TARGET.**
