@@ -1,0 +1,25 @@
+**Sun 18 Oct 2026, 22:05 (London)**
+
+T004 is done. All 811 ChatGPT chats and the 9 data files are in Git. The verify script found 0 differences from the export, apart from the logged redactions.
+
+**What happened**
+- **811 chats** are in `raw/conversations/`, one file per chat. Each was read back and matches the export exactly.
+- **9 data files** (group chats, library, shared links, feedback and others) are in `raw/data/`. `user.json` (your email and birth year) and `chat.html` were kept out, as planned.
+- **Credentials:** the scan found keys and passwords in your chats. I replaced **98 values in 17 files**: 11 database URLs with passwords, 11 password/secret values, 9 OpenAI/Anthropic-style keys, 2 JWTs, 1 Google key and 1 AWS key. Each one is logged by file and type, never by value. After that the scan shows 0 blocking, both on the PC and on the copy pulled back from GitHub.
+- **Verify:** the zip hash matches, all 811 of 811 chats match, all 9 of 9 data files match, with 0 problems.
+
+**Git Evidence**
+- Repo: vsenthil7/chatgpt-history-workbench · main
+- Turn: T004 · Read at `edab27d` · Commit `bea80ff`
+- Batches: `1fa1473` · `b1f0be4` · `76d439e` · `8e68064` (PC) · `edab27d` (PC)
+- Verified: remote main matches local head, and the PC clone is synced to `bea80ff`
+- Usage: 51 calls · 1,564,779 effective units (MEASURED)
+- Gaps: attachments not in yet; memory export still missing; cause of the 2 `spawn EPERM` errors unknown (worked around by running the git steps directly)
+
+Eight failures and how each was fixed are written in the record. The main one: the scanner runs itself when another script loads it, so my first redaction pass did nothing. No files were harmed.
+
+Links: [T004 record](https://github.com/vsenthil7/chatgpt-history-workbench/blob/main/turns/2026/10/18/T004-2147-import-chats-data-redact-verify.md) · [redaction log](https://github.com/vsenthil7/chatgpt-history-workbench/blob/main/source/REDACTIONS.md) · [chats](https://github.com/vsenthil7/chatgpt-history-workbench/tree/main/raw/conversations)
+
+**For you:** check `source/REDACTIONS.md` and rotate any keys that were real. They sat in your ChatGPT history.
+
+**Next step (T005):** import the 1,679 attachments under their real names into `raw/files/`. The 3 files over 95 MB become Drive pointer rows. Then re-run redaction, scan and verify over the files. Say "go".

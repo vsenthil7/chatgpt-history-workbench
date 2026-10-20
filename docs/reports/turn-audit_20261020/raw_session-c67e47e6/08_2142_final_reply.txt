@@ -1,0 +1,30 @@
+**Sun 18 Oct 2026, 23:05 (London)**
+
+T006 is done, and with it the whole import plan. Your ChatGPT history is fully in Git and verified.
+
+**What's new**
+- **811 readable chats**, one `.md` per chat, in the same layout as the Claude workbench. Text, thinking and voice transcripts are verbatim, and images and attachments link to their files.
+- **Indexes:** all chats (`conversations.csv`), 142 ChatGPT Projects, and a **manifest**. Start with `index/manifest.md`.
+- **Export compare:** a baseline is saved. Your next export gets diffed against it: new, changed and gone chats, and any missing file that comes back.
+- **827 files** your chats refer to are **not in the export** at all; 382 of them have names. They're listed, so a later export can be checked for them.
+
+**Security gap found and fixed**
+
+The readable chats showed **9 secrets the raw scan had missed**, hidden by JSON escaping (3 OpenAI-style keys and 6 passwords, in 6 chats). The redactor now checks every decoded value. After the fix, every scan is 0 blocking and verify shows **0 problems**. Those 9 values are still in this private repo's earlier commits, so rotating them is the real fix.
+
+**Bigger issue in the Claude workbench**
+
+The same scan on `claude-history-workbench` finds **1,539 blocking lines**, because it only ever redacted 2 key types. That includes **42 GitHub-token lines, 11 Stripe live keys and 18 private keys**. I didn't change that repo. The report and per-file list (no values) are in this repo.
+
+**Git Evidence**
+- Repo: vsenthil7/chatgpt-history-workbench · main
+- Turn: T006 · Read at `bd00223` · Commit `d2503ec`
+- Batches: `84d033f` (security fix) · `8ab356c` (readable + indexes) · `bd00223` (byte-exact readable)
+- Verified: remote main matches local head, and the PC clone is at `d2503ec` with nothing uncommitted
+- Usage: 38 calls · 1,763,839 effective units (MEASURED)
+
+Links: [manifest](https://github.com/vsenthil7/chatgpt-history-workbench/blob/main/index/manifest.md) · [T006 record](https://github.com/vsenthil7/chatgpt-history-workbench/blob/main/turns/2026/10/18/T006-2242-readable-indexes-compare-json-redaction-fix.md) · [Claude-workbench finding](https://github.com/vsenthil7/chatgpt-history-workbench/blob/main/docs/reports/chatgpt-history_claude_finding_claude-history-secret-scan_20261018_2300.md)
+
+**For you:** rotate your GitHub tokens and Stripe live keys first, then the keys in both redaction logs.
+
+**Next step:** clean up `claude-history-workbench` with this repo's redactor (all key types plus JSON values plus inside zips), verify against its export, and push. Say "go" and I'll start there.

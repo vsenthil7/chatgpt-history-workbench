@@ -1,0 +1,30 @@
+**Sun 18 Oct 2026, 22:36 (London)**
+
+T005 is done. The attachments are in Git, and the scans and verify are clean.
+
+**Result**
+- **1,634 attachments in Git** (518 MB), stored as `raw/files/<id>__<real name>`. The 159 unnamed files got a file type from their first bytes.
+- **45 Drive-only** (pointer row plus SHA-256 in Git, file left inside your Drive zip):
+  - 3 files over 95 MB: 2 screen recordings and 1 WhatsApp export.
+  - `chat.html`.
+  - **42 zips/xlsx with keys inside.**
+- **Redaction:** 27 more values in 8 text files, so 125 in total across the two runs. Both runs are in the log.
+- **Verify:** all 811 chats, 9 data files and 1,634 attachments match, and all 45 Drive-only hashes match, with 0 problems.
+
+**Gap found and closed**
+
+The normal scan can't see inside zip files. A new container scan found **330 keys and passwords inside 42 of your product source zips**. Examples: `staging.env` in talkproof-backend, `secrets.tf` in docmerge, a private key in a flowcast test, and many test passwords. I held those 42 back from Git without changing them. After that, the container scan finds 0 hits and the normal scan finds 0 blocking, both on the PC and again on the copy pulled back from GitHub.
+
+**Git Evidence**
+- Repo: vsenthil7/chatgpt-history-workbench · main
+- Turn: T005 · Read at `7791b85` · Commit `d16b3e6`
+- Batches: `e529710` · `eb68fa2` · `0482622` · `2d0b2ee` (PC) · `d33629d` (PC) · `7791b85` (PC)
+- Verified: remote main matches local head; the PC clone is at `d16b3e6` with nothing uncommitted
+- Usage: 60 calls · 2,168,576 effective units (MEASURED)
+- Gaps: readable chats and indexes not done yet; memory export still missing
+
+Links: [T005 record](https://github.com/vsenthil7/chatgpt-history-workbench/blob/main/turns/2026/10/18/T005-2205-attachments-held-back-verify.md) · [held-back list](https://github.com/vsenthil7/chatgpt-history-workbench/blob/main/index/held_back_files.csv) · [keys inside zips (no values)](https://github.com/vsenthil7/chatgpt-history-workbench/blob/main/source/CONTAINER_SECRET_HITS_20261014.csv)
+
+**For you:** rotate any real keys, especially the talkproof `staging.env` database URL and the docmerge `secrets.tf` values. The same zips may be on your PC or in other repos.
+
+**Next step (T006):** build the readable chats (one `.md` per chat), `index/conversations.csv`, the manifest, and the export-compare script for your next export. These only need what's already in Git, so they run in the cloud and leave your PC alone. Say "go".

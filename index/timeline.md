@@ -9,8 +9,10 @@
 - 22:05 — 1,634 attachments in Git, 42 key-bearing zips held back Drive-only, verify 0 problems. T005. [claude, T005]
 - 22:42 — 811 readable chats + indexes + compare baseline; JSON-escape redaction fix (9 values); verify 0 problems. T006. [claude, T006]
 - 23:03 — claude-history-workbench secret clean-up (home record there, T016); redactor legacy pass + newline keeping. T007. [claude, T007]
+- 21:36 (recorded 2026-10-20) — stop-hook "1 unpushed commit" check, interruption recovered (written in T010). RETRO-T011. [claude, RETRO-T011]
 
 ## 2026-10-20
 - 05:50 — GTP audit of T001–T007 + this page; missing 18 Oct 07:13 turn recorded late as T008; next-page prompt v002 (immutable). T009. [claude, T009]
+- 05:53 — GTP audit from page c67e47e6: T002-T006 + T016 replies repaired, stop-hook turn recovered as RETRO-T011, latest-handover created. T010. [claude, T010]
 
 Navigation only. Use turn and plan files for detail.

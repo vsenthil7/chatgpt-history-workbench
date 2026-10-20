@@ -35,3 +35,11 @@ One ChatGPT data export imported so far: **20261014** (`Chatgpt-export-20261014.
 
 ## Next export
 Follow the import order in `AGENTS.md`, then `python3 -I scripts/compare_exports.py . <NEW> 20261014`.
+
+## Added 2026-10-20 [claude, T010]
+| what | where | note |
+|---|---|---|
+| repair notes | `repairs/` | additive corrections to pushed turns (records never edited) |
+| turn audit | `docs/reports/turn-audit_20261020/` | audit outputs + session-log extracts (input + final reply per turn, byte copies) |
+| audit scripts | `scripts/turn_audit/` | `audit_turns.py` (copy of master) · `final_replies.py` (reply extractor) |
+| handover | `context/latest-handover.md`, `handover/…next-page-prompt_v00N_…md` | append-only handover; immutable next-page prompts |
